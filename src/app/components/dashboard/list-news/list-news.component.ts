@@ -1,0 +1,404 @@
+import {
+  Component,
+  inject,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  TableComponent,
+  Column,
+  TableAction,
+  RowAction,
+} from '../../../shared/components/app-table/app.table.component';
+import { ButtonModule } from 'primeng/button';
+import { buttonVariants } from '../../../core/constants/button-variant.constant';
+import {
+  ModalService,
+  ModalConfig,
+} from '../../../shared/services/system/modal.service';
+import { NotificationService } from '../../../shared/services/system/notification.service';
+import { icons } from '../../../core/constants/icons.constant';
+import { NewsService } from '../../../shared/services/features/news.service';
+import { HomeData } from '../../../shared/interfaces/home.interface';
+import { UpdateNewsComponent } from '../update-news/update-news.component';
+import { CreateNewsComponent } from '../create-news/create-news.component';
+import { ConfirmDialogService } from '../../../shared/services/system/confirm-dialog.service';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { combineLatest, Subscription, take } from 'rxjs';
+
+@Component({
+  selector: 'app-list-news',
+  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  templateUrl: './list-news.component.html',
+  standalone: true,
+  providers: [],
+})
+export class ListNewsComponent implements OnInit {
+  private transloco = inject(TranslocoService);
+  private subscriptions: Subscription[] = [];
+  data: HomeData[] = [];
+  image: any;
+  loading = false;
+  imageUrls: { [key: number]: string } = {};
+  videoUrls: { [key: number]: string } = {};
+
+  @ViewChild('imageTemplate', { static: true })
+  imageTemplate!: TemplateRef<any>;
+  customTemplates: { [key: string]: TemplateRef<any> } = {};
+
+  columns: Column[] = [];
+
+  // Definimos las acciones del encabezado
+  headerActions: TableAction[] = [];
+
+  // Definimos las acciones de fila
+  rowActions: RowAction[] = [];
+
+  constructor(
+    private modalSrv: ModalService,
+    private notificationSrv: NotificationService,
+    private srv: NewsService,
+    private confirmDialogService: ConfirmDialogService
+  ) {}
+
+  ngOnInit() {
+    this.setupTranslations();
+    this.loadData();
+  }
+
+  private setupTranslations() {
+    const headerActionsSubscription = this.transloco
+      .selectTranslate('table.buttons.create')
+      .subscribe((createTranslation) => {
+        this.headerActions = [
+          {
+            label: createTranslation,
+            icon: icons['add'],
+            onClick: () => this.create(),
+            class: 'p-button-primary',
+          },
+        ];
+      });
+    // Suscribirse a los cambios de idioma para actualizar las columnas
+    const columnsTranslation$ = combineLatest([
+      this.transloco.selectTranslate('components.news.list.table.name'),
+      this.transloco.selectTranslate('components.news.list.table.description'),
+      this.transloco.selectTranslate('components.news.list.table.date'),
+      this.transloco.selectTranslate('components.news.list.table.status'),
+      this.transloco.selectTranslate('components.news.list.table.image'),
+    ]);
+
+    const columnsSubscription = columnsTranslation$.subscribe(
+      ([
+        nameTranslation,
+        descriptionTranslation,
+        dateTranslation,
+        statusTranslation,
+        imageTranslation,
+      ]) => {
+        this.columns = [
+          {
+            field: 'title',
+            header: nameTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'description',
+            header: descriptionTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'fecha',
+            header: dateTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'statusToShow',
+            header: statusTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'image',
+            header: imageTranslation,
+            width: '240px',
+          },
+        ];
+      }
+    );
+
+    const rowsTranslation$ = combineLatest([
+      this.transloco.selectTranslate('table.buttons.edit'),
+      this.transloco.selectTranslate('table.buttons.delete'),
+      this.transloco.selectTranslate('table.buttons.disable'),
+      this.transloco.selectTranslate('table.buttons.enable'),
+    ]);
+
+    // Suscribirse a los cambios de idioma para las acciones de fila
+    const rowActionsSubscription = rowsTranslation$.subscribe(
+      ([
+        editTranslation,
+        deleteTranslation,
+        disableTranslation,
+        enableTranslation,
+      ]) => {
+        this.rowActions = [
+          {
+            label: editTranslation,
+            icon: icons['edit'],
+            onClick: (data) => this.edit(data),
+            class: buttonVariants.outline.green,
+          },
+          {
+            label: deleteTranslation,
+            icon: icons['delete'],
+            onClick: (data) => this.delete(data),
+            class: buttonVariants.outline.red,
+          },
+          {
+            label: (data) =>
+              data.status ? disableTranslation : enableTranslation,
+            icon: (data) =>
+              data.status ? icons['activate'] : icons['deactivate'],
+            onClick: (data) => this.toggleStatus(data),
+            class: (data) =>
+              data.status
+                ? buttonVariants.outline.gray
+                : buttonVariants.outline.neutral,
+          },
+        ];
+      }
+    );
+
+    this.subscriptions.push(
+      headerActionsSubscription,
+      columnsSubscription,
+      rowActionsSubscription
+    );
+  }
+
+  ngAfterViewInit() {
+    // Asignar el template personalizado para el campo 'image'
+    this.customTemplates['image'] = this.imageTemplate;
+  }
+
+  loadData() {
+    this.loading = true;
+    this.srv.get().subscribe({
+      next: (data: HomeData[]) => {
+        this.data = data.map((item: any) => ({
+          ...item,
+          statusToShow: item.status ? 'Activado' : 'Desactivado',
+        }));
+        this.loading = false;
+
+        data.forEach((item) => {
+          if (item.photo) {
+            const isVideo = item.photo.toLowerCase().endsWith('.mp4');
+            this.srv.getImage(item.photo).subscribe({
+              next: (fileBlob) => {
+                if (isVideo) {
+                  this.videoUrls[item.id] = URL.createObjectURL(fileBlob);
+                } else {
+                  this.imageUrls[item.id] = URL.createObjectURL(fileBlob);
+                }
+              },
+              error: (error) => {
+                this.notificationSrv.addNotification(
+                  'Error al cargar el archivo multimedia',
+                  'error'
+                );
+              },
+            });
+          }
+        });
+      },
+      error: (error) => {
+        this.notificationSrv.addNotification(
+          'Error al cargar la información.',
+          'error'
+        );
+        this.loading = false;
+      },
+    });
+  }
+
+  onRefresh() {
+    // Limpiar URLs de imágenes
+    Object.values(this.imageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    // Limpiar URLs de videos
+    Object.values(this.videoUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    this.imageUrls = {};
+    this.videoUrls = {};
+    this.loadData();
+  }
+
+  getVideoUrl(rowData: HomeData): string {
+    return this.videoUrls[rowData.id] || '';
+  }
+
+  create() {
+    this.transloco
+      .selectTranslate('components.news.create.title')
+      .pipe(take(1))
+      .subscribe((translatedTitle) => {
+        const modalConfig: ModalConfig = {
+          title: translatedTitle,
+          component: CreateNewsComponent,
+          data: {
+            initialData: {
+              onSave: () => {
+                this.loadData();
+              },
+            },
+          },
+        };
+        this.modalSrv.open(modalConfig);
+      });
+  }
+
+  edit(data: any) {
+    this.transloco
+      .selectTranslate('components.news.edit.title')
+      .pipe(take(1))
+      .subscribe((translatedTitle) => {
+        const modalConfig: ModalConfig = {
+          title: translatedTitle,
+          component: UpdateNewsComponent,
+          data: {
+            initialData: {
+              ...data,
+              onSave: () => {
+                this.loadData();
+              },
+            },
+          },
+        };
+        this.modalSrv.open(modalConfig);
+      });
+  }
+
+  getImageUrl(rowData: HomeData): string {
+    return this.imageUrls[rowData.id] || '';
+  }
+
+  onImageError(event: any): void {
+    event.target.style.display = 'none';
+  }
+
+  ngOnDestroy() {
+    // Limpiar URLs de imágenes
+    Object.values(this.imageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    // Limpiar URLs de videos
+    Object.values(this.videoUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+  }
+
+  toggleStatus(data: any) {
+    const newStatus = !data.status;
+    const formData = new FormData();
+    formData.append('id', data.id);
+    formData.append('status', String(newStatus));
+    this.srv.patch(formData, data.id).subscribe({
+      next: () => {
+        data.status = newStatus;
+        this.notificationSrv.addNotification(
+          `Estado actualizado a ${newStatus ? 'Activo' : 'Inactivo'}`,
+          'success'
+        );
+      },
+      error: (error) => {
+        if (error?.error?.message && error.error?.statusCode === 400) {
+          this.notificationSrv.addNotification(
+            error.error.message + '.',
+            'error'
+          );
+        } else {
+          this.notificationSrv.addNotification(
+            'Error al actualizar el estado.',
+            'error'
+          );
+        }
+      },
+    });
+  }
+
+  async delete(data: any) {
+    const deleteTranslation$ = combineLatest([
+      this.transloco.selectTranslate('components.news.delete.title'),
+      this.transloco.selectTranslate('components.news.delete.message'),
+      this.transloco.selectTranslate('components.news.delete.confirm'),
+      this.transloco.selectTranslate('components.news.delete.cancel'),
+    ]).pipe(take(1));
+
+    const deleteActionsSubscription = deleteTranslation$.subscribe(
+      async ([
+        titleTranslation,
+        messageTranslation,
+        confirmTranslation,
+        cancelTranslation,
+      ]) => {
+        const confirmed = await this.confirmDialogService.confirm({
+          title: titleTranslation,
+          message: messageTranslation,
+          confirmLabel: confirmTranslation,
+          cancelLabel: cancelTranslation,
+        });
+
+        if (confirmed) {
+          this.loading = true;
+          this.srv.delete(data.id).subscribe({
+            next: () => {
+              this.loadData();
+              this.notificationSrv.addNotification(
+                'Novedad eliminada satisfactoriamente.',
+                'success'
+              );
+            },
+            error: (error) => {
+              if (
+                error.error.statusCode === 400 &&
+                error.error.message.includes('No se puede eliminar el producto')
+              ) {
+                this.notificationSrv.addNotification(
+                  error.error.message,
+                  'error'
+                );
+              } else {
+                this.notificationSrv.addNotification(
+                  'Error al eliminar el producto.',
+                  'error'
+                );
+              }
+              this.loading = false;
+            },
+          });
+        }
+      }
+    );
+    this.subscriptions.push(deleteActionsSubscription);
+  }
+}

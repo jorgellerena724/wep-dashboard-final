@@ -1,0 +1,175 @@
+<!-- update-header.component.html -->
+<form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
+  <div class="mb-4 grid grid-cols-2 gap-4">
+    <app-text-field
+      id="title"
+      label="{{ 'components.products.create.fields.name.title' | transloco }}"
+      [control]="form.get('title')"
+      [errorMessages]="{
+        required: ( 'components.products.create.fields.name.required' | transloco ),
+        minlength: ( 'components.products.create.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.products.create.fields.name.maxlength' | transloco ),
+      }"
+    ></app-text-field>
+    <app-text-field
+      id="price"
+      label="{{ 'components.products.create.fields.price.title' | transloco }}"
+      [control]="form.get('price')"
+      [allowDecimals]="true"
+      [numbersOnly]="true"
+    ></app-text-field>
+  </div>
+  <app-select
+    [placeholder]="
+      'components.products.create.fields.category.title' | transloco
+    "
+    [options]="categories"
+    formControlName="category"
+    [control]="form.get('category')"
+    [errorMessages]="{
+        required: ( 'components.products.create.fields.category.required' | transloco ),
+      }"
+  ></app-select>
+  <hr class="border-gray-500 my-1 border-opacity-10" />
+  <app-text-field
+    id="description"
+    label="{{
+      'components.products.create.fields.description.title' | transloco
+    }}"
+    [control]="form.get('description')"
+    [isTextArea]="true"
+    textAreaHeight="h-56"
+    [errorMessages]="{
+        required: ( 'components.products.create.fields.description.required' | transloco ),
+        minlength: ( 'components.products.create.fields.description.minlength' | transloco ),
+      }"
+  ></app-text-field>
+  <hr class="border-gray-500 my-1 border-opacity-10" />
+  <div class="field">
+    <!-- File Upload -->
+    <app-file-upload
+      #fileUpload
+      label="{{ 'components.news.create.fields.image.title' | transloco }}"
+      accept="image/*,video/mp4,video/quicktime"
+      [maxFileSize]="1024 * 1024 * 20"
+      fileUploadText="{{ 'image.select' | transloco }}"
+      fileRecommendation="{{
+        'components.news.create.fields.image.recommendation' | transloco
+      }}"
+      (fileSelected)="onFileUploaded($event)"
+      (fileRemoved)="removeFile()"
+      (fileError)="onFileError($event)"
+    ></app-file-upload>
+    <!-- Contenedor de altura fija para la previsualización -->
+    <div class="mt-4 relative h-[240px]">
+      <!-- Vista previa para imagen o video -->
+      <div
+        *ngIf="(imageUrl || videoUrl) && !loadingImage"
+        class="absolute inset-0 flex flex-col"
+      >
+        <div class="flex-1 flex items-center justify-center">
+          <div class="relative inline-block">
+            <!-- Imagen -->
+            <div
+              *ngIf="imageUrl"
+              class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+            >
+              <img
+                [src]="imageUrl"
+                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2"
+                alt="{{ 'image.alt' | transloco }}"
+              />
+            </div>
+
+            <!-- Video -->
+            <div
+              *ngIf="videoUrl"
+              class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+            >
+              <video
+                controls
+                [src]="videoUrl"
+                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2"
+                #videoPlayer
+                (loadedmetadata)="videoPlayer.muted = true"
+              >
+                <div
+                  class="absolute inset-0 flex items-center justify-center bg-black text-white p-4"
+                >
+                  <p>
+                    {{ "video.unsupported" | transloco }}
+                  </p>
+                </div>
+              </video>
+            </div>
+
+            <!-- Botón de eliminar -->
+            <button
+              type="button"
+              (click)="removeFile()"
+              class="absolute top-0 right-2 text-red-500 bg-transparent hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 p-1 rounded-full"
+              tooltipPosition="top"
+            >
+              <i class="pi pi-trash text-lg"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mensaje informativo -->
+        <div class="mt-auto pt-3">
+          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+            <i class="pi pi-info-circle mr-1"></i>
+            {{
+              isVideo ? ("video.info" | transloco) : ("image.info" | transloco)
+            }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Estado cuando no hay archivo -->
+      <div
+        *ngIf="!imageUrl && !videoUrl && !loadingImage"
+        class="absolute inset-0 flex items-center justify-center"
+      >
+        <div
+          [class.border-red-500]="
+            form.get('image')?.invalid && form.get('image')?.touched
+          "
+          [class.border-gray-500]="
+            !(form.get('image')?.invalid && form.get('image')?.touched)
+          "
+          class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+        >
+          <i
+            class="pi pi-image text-4xl text-gray-400 dark:text-gray-500 mb-3"
+          ></i>
+          <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+            <span class="block font-medium">{{
+              "image.nodata.title" | transloco
+            }}</span>
+            <span class="block text-xs mt-1 opacity-75">
+              {{ "image.nodata.subtitle" | transloco }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="form.get('image')?.invalid && form.get('image')?.touched"
+      class="text-red-500 text-sm mt-2 mb-2"
+    >
+      {{ "image.required" | transloco }}
+    </div>
+  </div>
+</form>
+<style>
+  /* Estilos para override de PrimeNG */
+  :host ::ng-deep .p-fileupload-content {
+    display: none !important;
+  }
+  :host ::ng-deep app-file-upload label {
+    font-weight: bold !important;
+    color: black !important;
+    font-size: 14px;
+  }
+</style>

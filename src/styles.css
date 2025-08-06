@@ -1,0 +1,80 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeicons/primeicons.css";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+@layer tailwind-base, primeng, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+/* Estilos globales para garantizar que el footer se mantenga en la parte inferior */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Altura mínima del viewport */
+}
+
+/* Esto asegura que el contenedor principal ocupe al menos toda la altura de la pantalla */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Clase para el contenedor principal con flexbox */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.rotate-on-hover:hover {
+  animation: rotate 0.5s linear;
+}
+
+/* La clase que hace que el footer se mantenga en la parte inferior */
+.mt-auto {
+  margin-top: auto;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+  .p-dialog-title {
+     color: rgb(55, 65, 81) !important;
+    font-weight: bold !important;
+    margin-left: 20px;
+  }
+  .p-dialog .p-dialog-header {
+  padding: 4px;
+  } 
+
+    .p-button-icon-only.p-button-rounded:hover {
+    background: #e9e0e0 ;
+}

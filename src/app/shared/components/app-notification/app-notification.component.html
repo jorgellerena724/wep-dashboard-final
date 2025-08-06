@@ -1,0 +1,114 @@
+<div
+  class="fixed top-4 right-4 z-[9999] space-y-4 sm:space-y-6 sm:top-6 sm:right-6 lg:top-8 lg:right-8"
+>
+  <div
+    *ngFor="let notification of notifications"
+    [ngClass]="{
+      'bg-green-50/80 border-green-400 text-green-800':
+        notification.type === 'success',
+      'bg-red-50/80 border-red-400 text-red-800': notification.type === 'error',
+      'bg-blue-50/80 border-blue-400 text-blue-800':
+        notification.type === 'info',
+      'bg-yellow-50/80 border-yellow-400 text-yellow-800':
+        notification.type === 'warning'
+    }"
+    class="flex items-center w-full max-w-xs sm:max-w-sm lg:max-w-md p-4 mb-4 border-l-4 rounded-lg shadow-lg backdrop-blur-sm  transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+    role="alert"
+  >
+    <!-- Icon Container -->
+    <div
+      [ngClass]="{
+        'text-green-600': notification.type === 'success',
+        'text-red-600': notification.type === 'error',
+        'text-blue-600': notification.type === 'info',
+        'text-yellow-600': notification.type === 'warning'
+      }"
+      class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-opacity-10"
+    >
+      <!-- SVG Icons -->
+      <ng-container [ngSwitch]="notification.type">
+        <!-- Success Icon -->
+        <svg
+          *ngSwitchCase="'success'"
+          class="w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+          />
+        </svg>
+        <!-- Error Icon -->
+        <svg
+          *ngSwitchCase="'error'"
+          class="w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
+          />
+        </svg>
+        <!-- Info Icon -->
+        <svg
+          *ngSwitchCase="'info'"
+          class="w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
+          />
+        </svg>
+        <!-- Warning Icon -->
+        <svg
+          *ngSwitchCase="'warning'"
+          class="w-6 h-6"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
+          />
+        </svg>
+      </ng-container>
+    </div>
+
+    <!-- Message -->
+    <div class="ms-4 flex-1 text-sm font-medium break-words">
+      {{ notification.message }}
+    </div>
+
+    <button
+      type="button"
+      (click)="removeNotification(notification)"
+      [ngClass]="{
+        'text-green-600 hover:text-green-800': notification.type === 'success',
+        'text-red-600 hover:text-red-800': notification.type === 'error',
+        'text-blue-600 hover:text-blue-800': notification.type === 'info',
+        'text-yellow-600 hover:text-yellow-800': notification.type === 'warning'
+      }"
+      class="mx-2 -my-1.5 bg-transparent focus:outline-none"
+      aria-label="Close"
+    >
+      <svg
+        class="w-4 h-4"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 14 14"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M1 1l12 12M13 1L1 13"
+        />
+      </svg>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+<form [formGroup]="form">
+  <div class="grid grid-cols-2 gap-4 w-[750px]">
+    <app-text-field
+      id="full_name"
+      label="{{ 'components.users.create.fields.name.title' | transloco }}"
+      [control]="form.get('full_name')"
+      [errorMessages]="{
+        required: ( 'components.users.create.fields.name.required' | transloco ),
+        minlength: ( 'components.users.create.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.users.create.fields.name.maxlength' | transloco ),
+      }"
+    ></app-text-field>
+    <app-text-field
+      id="email"
+      label="{{ 'components.users.create.fields.email.title' | transloco }}"
+      [control]="form.get('email')"
+      [errorMessages]="{
+        required: ( 'components.users.create.fields.email.required' | transloco ),
+        email: ( 'components.users.create.fields.email.email' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
+  <div class="grid grid-cols-2 gap-4">
+    <app-text-field
+      id="password"
+      label="{{ 'components.users.create.fields.password.title' | transloco }}"
+      [control]="form.get('password')"
+      [type]="'password'"
+      [errorMessages]="{
+        required: ( 'components.users.create.fields.password.required' | transloco ),
+        minlength: ( 'components.users.create.fields.password.minlength' | transloco ),
+        maxlength: ( 'components.users.create.fields.password.maxlength' | transloco ),
+        noLowerCase: ( 'components.users.create.fields.password.noLowerCase' | transloco ),
+        noUpperCase: ( 'components.users.create.fields.password.noUpperCase' | transloco ),
+        noNumber: ( 'components.users.create.fields.password.noNumber' | transloco ),
+        noSpecialChar:
+          ( 'components.users.create.fields.password.noSpecialChar' | transloco ),
+      }"
+    ></app-text-field>
+    <app-text-field
+      id="client"
+      label="{{ 'components.users.create.fields.client.title' | transloco }}"
+      [control]="form.get('client')"
+      [errorMessages]="{
+        required: ( 'components.users.create.fields.name.required' | transloco ),
+        minlength: ( 'components.users.create.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.users.create.fields.name.maxlength' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
+</form>

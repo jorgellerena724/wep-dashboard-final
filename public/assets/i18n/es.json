@@ -1,0 +1,694 @@
+{
+  "login": {
+    "email": {
+      "title": "Correo",
+      "placeholder": "Escriba su correo aquí",
+      "required": "El correo es obligatorio."
+    },
+    "password": {
+      "title": "Contraseña",
+      "placeholder": "Escriba su contraseña aquí",
+      "required": "La contraseña es obligatoria."
+    },
+    "loading": "Accediendo...",
+    "load": "Iniciar Sesión →"
+  },
+  "navbar": {
+    "title": "Web Empresarial Profesional",
+    "logout": "Cerrar Sesión",
+    "mobile": {
+      "admin": "Administración",
+      "header": "Encabezado",
+      "home": "Inicio",
+      "carousel": "Carrusel",
+      "news": "Novedades",
+      "about": "Quiénes Somos",
+      "company": "Empresa",
+      "manager": "Directivos",
+      "review": "Reseñas",
+      "products": "Productos",
+      "category": "Categorías",
+      "offers": "Ofertas",
+      "contact": "Contáctenos",
+      "info": "Información",
+      "users": "Usuarios"
+    }
+  },
+  "sidebar": {
+    "admin": "Administración",
+    "header": "Encabezado",
+    "home": "Inicio",
+    "carousel": "Carrusel",
+    "news": "Novedades",
+    "about": "Quiénes Somos",
+    "company": "Empresa",
+    "manager": "Directivos",
+    "review": "Reseñas",
+    "products": "Productos",
+    "category": "Categorías",
+    "offers": "Ofertas",
+    "contact": "Contáctenos",
+    "info": "Información",
+    "users": "Usuarios"
+  },
+  "admin": {
+    "header": {
+      "title": "Panel de Administración",
+      "subtitle": "Personalice la apariencia de su sitio web empresarial"
+    },
+    "body": {
+      "title": "Bienvenido a su Centro de Control",
+      "subtitle": "Como administrador, tiene acceso completo para personalizar el formato y la apariencia de su página web empresarial según las necesidades específicas de su marca.",
+      "left": {
+        "first": {
+          "title": "Plantilla 100% Personalizable",
+          "text": "Modifique completamente nuestra plantilla profesional adaptándola a sus necesidades exactas. Ajuste cada elemento según su visión de marca para crear una presencia web única que destaque frente a su competencia."
+        },
+        "second": {
+          "title": "Estructura de Contenido",
+          "text": "Configure las secciones de su sitio web para destacar sus productos, servicios y valores diferenciales de manera estratégica."
+        }
+      },
+      "right": {
+        "first": {
+          "title": "Selección de Idiomas",
+          "text": "Ofrezca una experiencia multilingüe en su sitio web. Seleccione entre una variedad de idiomas para satisfacer las necesidades de su audiencia global y mejorar la accesibilidad."
+        },
+        "second": {
+          "title": "Diseño Responsivo",
+          "text": "Su sitio web se adapta automáticamente a cualquier tamaño de pantalla, garantizando una experiencia óptima en dispositivos móviles, tablets y escritorio con tecnología responsive de última generación."
+        }
+      }
+    },
+    "footer": "Cambios en tiempo real sin conocimientos técnicos"
+  },
+  "components": {
+    "header": {
+      "list": {
+        "title": "Encabezado",
+        "table": {
+          "name": "Nombre",
+          "image": "Imagen"
+        }
+      },
+      "edit": {
+        "title": "Modificar encabezado",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "image": {
+            "title": "Logo de la empresa",
+            "recommendation": "Formato recomendado: ICO, tamaño máximo 500kb"
+          }
+        }
+      }
+    },
+    "carousel": {
+      "list": {
+        "title": "Carrusel",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "image": "Imagen"
+        },
+        "errors": {
+          "min_active": "Deben quedar al menos 2 elementos activos para el carrusel"
+        }
+      },
+      "edit": {
+        "title": "Modificar carrusel",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Imagen del carrusel",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      }
+    },
+    "news": {
+      "list": {
+        "title": "Novedades",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "date": "Fecha",
+          "status": "Estado",
+          "image": "Imagen"
+        }
+      },
+      "create": {
+        "title": "Registrar novedad",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "_date": {
+            "title": "Fecha",
+            "required": "La fecha es requerida"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Archivo de la novedad",
+            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar novedad",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "_date": {
+            "title": "Fecha",
+            "required": "La fecha es requerida"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Archivo de la novedad",
+            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "company": {
+      "list": {
+        "title": "Datos de la empresa",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "date": "Fecha",
+          "status": "Estado",
+          "image": "Imagen"
+        }
+      },
+      "edit": {
+        "title": "Modificar dato de la empresa",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Imagen de la empresa",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      }
+    },
+    "managers": {
+      "list": {
+        "title": "Directivos",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "charge": "Cargo",
+          "image": "Imagen"
+        }
+      },
+      "create": {
+        "title": "Registrar directivo",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "charge": {
+            "title": "Cargo",
+            "required": "El cargo es requerido",
+            "minlength": "El cargo debe tener al menos 3 caracteres",
+            "maxlength": "El cargo debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Imagen del directivo",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar directivo",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "charge": {
+            "title": "Cargo",
+            "required": "El cargo es requerido",
+            "minlength": "El cargo debe tener al menos 3 caracteres",
+            "maxlength": "El cargo debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Imagen del directivo",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "reviews": {
+      "list": {
+        "title": "Reseñas",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "image": "Imagen"
+        }
+      },
+      "create": {
+        "title": "Registrar reseña",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Logo del cliente",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar reseña",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "image": {
+            "title": "Logo del cliente",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "category": {
+      "list": {
+        "title": "Categorías",
+        "table": {
+          "name": "Nombre"
+        }
+      },
+      "create": {
+        "title": "Registrar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "products": {
+      "list": {
+        "title": "Productos y servicios",
+        "table": {
+          "name": "Nombre",
+          "price": "Precio",
+          "description": "Descripción",
+          "category": "Categoría",
+          "image": "Imagen"
+        }
+      },
+      "create": {
+        "title": "Registrar producto o servicio",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "price": {
+            "title": "Precio"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "category": {
+            "title": "Categoría",
+            "required": "La categoría es requerida"
+          },
+          "image": {
+            "title": "Imagen del producto o servicio",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar producto o servicio",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "price": {
+            "title": "Precio"
+          },
+          "description": {
+            "title": "Descripción",
+            "required": "La descripción es requerida",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "category": {
+            "title": "Categoría",
+            "required": "La categoría es requerida"
+          },
+          "image": {
+            "title": "Imagen del producto o servicio",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "contact": {
+      "list": {
+        "title": "Contacto",
+        "table": {
+          "email": "Correo Electrónico",
+          "phone": "Teléfono",
+          "address": "Dirección"
+        }
+      },
+      "edit": {
+        "title": "Modificar contacto",
+        "fields": {
+          "email": {
+            "title": "Correo",
+            "required": "El correo es requerido",
+            "minlength": "El correo debe tener al menos 3 caracteres",
+            "maxlength": "El correo debe tener hasta 20 caracteres"
+          },
+          "phone": {
+            "title": "Teléfono",
+            "required": "El teléfono es requerido",
+            "minlength": "El teléfono debe tener al menos 6 caracteres",
+            "maxlength": "El teléfono debe tener hasta 20 caracteres"
+          },
+          "address": {
+            "title": "Dirección",
+            "required": "La dirección es requerida",
+            "minlength": "La dirección debe tener al menos 3 caracteres"
+          }
+        }
+      }
+    },
+    "users": {
+      "list": {
+        "title": "Users",
+        "table": {
+          "name": "Name",
+          "email": "Email",
+          "client": "Cliente",
+          "role": "Role"
+        }
+      },
+      "create": {
+        "title": "Registrar usuario",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "password": {
+            "title": "Contraseña",
+            "required": "El campo es requerido",
+            "minlength": "Mínimo 8 caracteres",
+            "maxlength": "Máximo 96 caracteres",
+            "noLowerCase": "Debe incluir al menos una letra minúscula",
+            "noUpperCase": "Debe incluir al menos una letra mayúscula",
+            "noNumber": "Debe incluir al menos un número",
+            "noSpecialChar": "Debe incluir al menos un carácter especial ([/@$|><()[]{}_,.`~!%^*#-+=?&])"
+          },
+          "email": {
+            "title": "Correo",
+            "required": "El correo es requerido",
+            "email": "El correo electrónico no es válido"
+          },
+          "client": {
+            "title": "Cliente",
+            "placeholder": "Selecciona los roles",
+            "required": "El rol es requerido"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar Usuario",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "email": {
+            "title": "Correo",
+            "required": "El correo es requerido",
+            "email": "El correo electrónico no es válido"
+          },
+          "client": {
+            "title": "Cliente",
+            "placeholder": "Selecciona los roles",
+            "required": "El rol es requerido"
+          }
+        }
+      },
+      "password": {
+        "title": "Cambiar Contraseña",
+        "email": "Correo",
+        "fields": {
+          "new": {
+            "title": "Nueva Contraseña",
+            "required": "El campo es requerido",
+            "minlength": "Mínimo 8 caracteres",
+            "maxlength": "Máximo 96 caracteres",
+            "noLowerCase": "Debe incluir al menos una letra minúscula",
+            "noUpperCase": "Debe incluir al menos una letra mayúscula",
+            "noNumber": "Debe incluir al menos un número",
+            "noSpecialChar": "Debe incluir al menos un carácter especial ([/@$|><()[]{}_,.`~!%^*#-+=?&])"
+          },
+          "confirm": {
+            "title": "Confirmar Contraseña",
+            "required": "Es necesario confirmar la contraseña",
+            "passwordMismatch": "Las contraseñas no coinciden"
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete element?",
+        "message": "Are you sure you want to delete this element? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "table": {
+    "actions": "Acciones",
+    "buttons": {
+      "create": "Registrar",
+      "edit": "Editar",
+      "changePassword": "Cambiar contraseña",
+      "delete": "Eliminar",
+      "disable": "Desactivar Estado",
+      "enable": "Activar Estado"
+    },
+    "search": "Buscar...",
+    "nodata": "No se encontraron registros.",
+    "pagination": {
+      "first": "Mostrando",
+      "second": "a",
+      "third": "de",
+      "fourth": "registros"
+    }
+  },
+  "modal": {
+    "buttons": {
+      "acept": "Aceptar",
+      "cancel": "Cancelar"
+    }
+  },
+  "image": {
+    "loading": "Cargando archivo actual...",
+    "select": "Seleccionar archivo",
+    "alt": "Previsualización",
+    "info": "Puede cambiar el archivo seleccionando por uno nuevo.",
+    "required": "• El archivo es requerido",
+    "nodata": {
+      "title": "No hay archivo seleccionado",
+      "subtitle": "Seleccione un archivo para ver la previsualización"
+    }
+  },
+  "video": {
+    "info": "Vista previa del video. Formatos permitidos: MP4, MOV",
+    "unsupported": "Formato de video no compatible. Intente con MP4 o MOV.",
+    "converting": "Convirtiendo video a formato compatible..."
+  }
+}

@@ -1,0 +1,36 @@
+<form [formGroup]="form">
+  <!-- Primera fila: Nombre y Cargo -->
+  <div class="grid grid-cols-2 gap-4">
+    <app-text-field
+      id="full_name"
+      label="{{ 'components.users.edit.fields.name.title' | transloco }}"
+      [control]="form.get('full_name')"
+      [errorMessages]="{
+        required: ( 'components.users.edit.fields.name.required' | transloco ),
+        minlength: ( 'components.users.edit.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.users.edit.fields.name.maxlength' | transloco ),
+      }"
+    ></app-text-field>
+    <app-text-field
+      id="client"
+      label="{{ 'components.users.edit.fields.client.title' | transloco }}"
+      [control]="form.get('client')"
+      [errorMessages]="{
+        required: ( 'components.users.edit.fields.name.required' | transloco ),
+        minlength: ( 'components.users.edit.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.users.edit.fields.name.maxlength' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
+  <div class="mb-4">
+    <app-text-field
+      id="email"
+      label="{{ 'components.users.edit.fields.email.title' | transloco }}"
+      [control]="form.get('email')"
+      [errorMessages]="{
+        required: ( 'components.users.edit.fields.email.required' | transloco ),
+        email: ( 'components.users.edit.fields.email.email' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
+</form>
