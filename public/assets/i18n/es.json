@@ -473,6 +473,20 @@
             "title": "Categoría",
             "required": "La categoría es requerida"
           },
+          "variants": {
+            "title": "Variantes",
+            "description": {
+              "title": "Descripción",
+              "required": "El campo es requerido"
+            },
+            "price": {
+              "title": "Precio",
+              "required": "El campo es requerido"
+            },
+            "add": "Agregar",
+            "empty": "Sin variantes",
+            "info": "Puede agregar mas variantes en el botón de +"
+          },
           "image": {
             "title": "Imagen del producto o servicio",
             "select": "Seleccionar imagen",

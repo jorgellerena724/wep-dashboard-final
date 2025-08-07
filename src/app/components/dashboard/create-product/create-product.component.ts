@@ -11,6 +11,8 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormArray,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -23,6 +25,12 @@ import { SelectComponent } from '../../../shared/components/app-select/app-selec
 import { ProductService } from '../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
+// Interfaces para las variantes
+interface ProductVariant {
+  description: string;
+  price: number;
+}
 
 @Component({
   selector: 'app-create-product',
@@ -52,6 +60,10 @@ export class CreateProductComponent implements DynamicComponent {
   isVideo: boolean = false;
   videoUrl: SafeResourceUrl | null = null;
 
+  // Propiedades para las variantes
+  variants: ProductVariant[] = [];
+  variantsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
+
   constructor(
     private fb: FormBuilder,
     private srv: ProductService,
@@ -66,6 +78,7 @@ export class CreateProductComponent implements DynamicComponent {
       description: ['', [Validators.required, Validators.minLength(3)]],
       image: ['', Validators.required],
       price: [''],
+      variants: this.variantsFormArray,
     });
 
     this.id = 0;
@@ -78,11 +91,104 @@ export class CreateProductComponent implements DynamicComponent {
   async ngOnInit(): Promise<void> {
     if (this.initialData) {
       this.form.patchValue(this.initialData);
+
+      // Si hay variants en initialData, cargarlas
+      if (
+        this.initialData.variants &&
+        typeof this.initialData.variants === 'object'
+      ) {
+        this.loadVariantsFromData(this.initialData.variants);
+      }
     }
 
     const initTasks = [this.fetchCategories()];
-
     await Promise.all(initTasks);
+  }
+
+  // Métodos para manejar las variantes
+  addVariant(): void {
+    const variantGroup = this.fb.group({
+      description: ['', Validators.required],
+      price: ['', [Validators.required, Validators.min(0)]],
+    });
+
+    this.variantsFormArray.push(variantGroup);
+    this.variants.push({ description: '', price: 0 });
+    this.cdr.detectChanges();
+  }
+
+  removeVariant(index: number): void {
+    this.variantsFormArray.removeAt(index);
+    this.variants.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  getVariantControl(index: number, field: string): FormControl {
+    const variantGroup = this.variantsFormArray.at(index) as FormGroup;
+    return variantGroup.get(field) as FormControl;
+  }
+
+  private loadVariantsFromData(variantsData: any): void {
+    // Si variantsData es un array directo de variantes
+    if (Array.isArray(variantsData)) {
+      this.variants = [];
+      this.variantsFormArray.clear();
+
+      variantsData.forEach((variant: any) => {
+        const variantGroup = this.fb.group({
+          description: [variant.description || '', Validators.required],
+          price: [variant.price || 0, [Validators.required, Validators.min(0)]],
+        });
+
+        this.variantsFormArray.push(variantGroup);
+        this.variants.push({
+          description: variant.description || '',
+          price: variant.price || 0,
+        });
+      });
+    }
+    // Si variantsData es un objeto con estructura (para compatibilidad)
+    else if (variantsData && typeof variantsData === 'object') {
+      // Si tiene la estructura antigua con type y variants
+      const variantsArray = variantsData.variants || [];
+      if (Array.isArray(variantsArray)) {
+        this.variants = [];
+        this.variantsFormArray.clear();
+
+        variantsArray.forEach((variant: any) => {
+          const variantGroup = this.fb.group({
+            description: [
+              variant.value || variant.description || '',
+              Validators.required,
+            ],
+            price: [
+              variant.price || 0,
+              [Validators.required, Validators.min(0)],
+            ],
+          });
+
+          this.variantsFormArray.push(variantGroup);
+          this.variants.push({
+            description: variant.value || variant.description || '',
+            price: variant.price || 0,
+          });
+        });
+      }
+    }
+  }
+
+  private getVariantsData(): ProductVariant[] {
+    const variantsData: ProductVariant[] = [];
+
+    for (let i = 0; i < this.variantsFormArray.length; i++) {
+      const variantGroup = this.variantsFormArray.at(i) as FormGroup;
+      variantsData.push({
+        description: variantGroup.get('description')?.value,
+        price: parseFloat(variantGroup.get('price')?.value),
+      });
+    }
+
+    return variantsData;
   }
 
   onFileSelected(file: File) {
@@ -165,12 +271,13 @@ export class CreateProductComponent implements DynamicComponent {
 
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
-
     formData.append('description', this.form.get('description')?.value);
-
     formData.append('category_id', this.form.get('category')?.value);
-
     formData.append('price', this.form.get('price')?.value);
+
+    // Agregar variants como JSON
+    const variantsData = this.getVariantsData();
+    formData.append('variants', JSON.stringify(variantsData));
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
@@ -200,6 +307,8 @@ export class CreateProductComponent implements DynamicComponent {
           this.form.reset();
           this.selectedFile = null;
           this.imageUrl = null;
+          this.variants = [];
+          this.variantsFormArray.clear();
         }
       },
       error: (error) => {
