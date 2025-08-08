@@ -11,6 +11,8 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormArray,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -23,6 +25,11 @@ import { SelectComponent } from '../../../shared/components/app-select/app-selec
 import { ProductService } from '../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
+interface ProductVariant {
+  description: string;
+  price: number;
+}
 
 @Component({
   selector: 'app-update-product',
@@ -51,6 +58,8 @@ export class UpdateProductComponent implements DynamicComponent {
   imageUrl: string | null = null;
   isVideo: boolean = false;
   videoUrl: SafeResourceUrl | null = null;
+  variants: ProductVariant[] = [];
+  variantsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -65,7 +74,7 @@ export class UpdateProductComponent implements DynamicComponent {
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(3)]],
       image: ['', Validators.required],
-      price: [''],
+      variants: this.variantsFormArray,
     });
 
     this.id = 0;
@@ -83,6 +92,11 @@ export class UpdateProductComponent implements DynamicComponent {
 
       this.id = this.initialData.id;
 
+      // Cargar variantes existentes
+      if (this.initialData.variants) {
+        this.loadVariantsFromData(this.initialData.variants);
+      }
+
       if (this.initialData.photo) {
         this.loadCurrentImage();
       }
@@ -91,6 +105,87 @@ export class UpdateProductComponent implements DynamicComponent {
     const initTasks = [this.fetchCategories()];
 
     await Promise.all(initTasks);
+  }
+
+  addVariant(): void {
+    const variantGroup = this.fb.group({
+      description: ['', Validators.required],
+      price: ['', [Validators.required, Validators.min(0)]],
+    });
+
+    this.variantsFormArray.push(variantGroup);
+    this.variants.push({ description: '', price: 0 });
+    this.cdr.detectChanges();
+  }
+
+  removeVariant(index: number): void {
+    this.variantsFormArray.removeAt(index);
+    this.variants.splice(index, 1);
+    this.cdr.detectChanges();
+  }
+
+  getVariantControl(index: number, field: string): FormControl {
+    const variantGroup = this.variantsFormArray.at(index) as FormGroup;
+    return variantGroup.get(field) as FormControl;
+  }
+
+  private loadVariantsFromData(variantsData: any): void {
+    if (Array.isArray(variantsData)) {
+      this.variants = [];
+      this.variantsFormArray.clear();
+
+      variantsData.forEach((variant: any) => {
+        const variantGroup = this.fb.group({
+          description: [variant.description || '', Validators.required],
+          price: [variant.price || 0, [Validators.required, Validators.min(0)]],
+        });
+
+        this.variantsFormArray.push(variantGroup);
+        this.variants.push({
+          description: variant.description || '',
+          price: variant.price || 0,
+        });
+      });
+    } else if (variantsData && typeof variantsData === 'object') {
+      const variantsArray = variantsData.variants || [];
+      if (Array.isArray(variantsArray)) {
+        this.variants = [];
+        this.variantsFormArray.clear();
+
+        variantsArray.forEach((variant: any) => {
+          const variantGroup = this.fb.group({
+            description: [
+              variant.value || variant.description || '',
+              Validators.required,
+            ],
+            price: [
+              variant.price || 0,
+              [Validators.required, Validators.min(0)],
+            ],
+          });
+
+          this.variantsFormArray.push(variantGroup);
+          this.variants.push({
+            description: variant.value || variant.description || '',
+            price: variant.price || 0,
+          });
+        });
+      }
+    }
+  }
+
+  private getVariantsData(): ProductVariant[] {
+    const variantsData: ProductVariant[] = [];
+
+    for (let i = 0; i < this.variantsFormArray.length; i++) {
+      const variantGroup = this.variantsFormArray.at(i) as FormGroup;
+      variantsData.push({
+        description: variantGroup.get('description')?.value,
+        price: parseFloat(variantGroup.get('price')?.value),
+      });
+    }
+
+    return variantsData;
   }
 
   private loadCurrentImage(): void {
@@ -247,7 +342,8 @@ export class UpdateProductComponent implements DynamicComponent {
 
     formData.append('category_id', this.form.get('category')?.value);
 
-    formData.append('price', this.form.get('price')?.value);
+    const variantsData = this.getVariantsData();
+    formData.append('variants', JSON.stringify(variantsData));
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
@@ -277,6 +373,8 @@ export class UpdateProductComponent implements DynamicComponent {
           this.form.reset();
           this.selectedFile = null;
           this.imageUrl = null;
+          this.variants = [];
+          this.variantsFormArray.clear();
         }
       },
       error: (error) => {

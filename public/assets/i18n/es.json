@@ -517,6 +517,20 @@
             "required": "La descripción es requerida",
             "minlength": "El nombre debe tener al menos 3 caracteres"
           },
+          "variants": {
+            "title": "Variantes",
+            "description": {
+              "title": "Descripción",
+              "required": "El campo es requerido"
+            },
+            "price": {
+              "title": "Precio",
+              "required": "El campo es requerido"
+            },
+            "add": "Agregar",
+            "empty": "Sin variantes",
+            "info": "Puede agregar mas variantes en el botón de +"
+          },
           "category": {
             "title": "Categoría",
             "required": "La categoría es requerida"

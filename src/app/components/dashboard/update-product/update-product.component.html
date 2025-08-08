@@ -11,23 +11,89 @@
         maxlength: ( 'components.products.edit.fields.name.maxlength' | transloco ),
       }"
     ></app-text-field>
-    <app-text-field
-      id="price"
-      label="{{ 'components.products.edit.fields.price.title' | transloco }}"
-      [control]="form.get('price')"
-      [allowDecimals]="true"
-      [numbersOnly]="true"
-    ></app-text-field>
-  </div>
-  <app-select
-    [placeholder]="'components.products.edit.fields.category.title' | transloco"
-    [options]="categories"
-    formControlName="category"
-    [control]="form.get('category')"
-    [errorMessages]="{
+    <app-select
+      [placeholder]="
+        'components.products.edit.fields.category.title' | transloco
+      "
+      [options]="categories"
+      formControlName="category"
+      [control]="form.get('category')"
+      [errorMessages]="{
         required: ( 'components.products.edit.fields.category.required' | transloco ),
       }"
-  ></app-select>
+    ></app-select>
+  </div>
+  <div class="mb-4">
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="font-medium text-gray-700 dark:text-gray-300">
+        {{ "components.products.edit.fields.variants.title" | transloco }}
+      </h3>
+      <button
+        type="button"
+        (click)="addVariant()"
+        class="flex items-center gap-2 px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        <i class="pi pi-plus mr-1"></i>
+        {{ "components.products.edit.fields.variants.add" | transloco }}
+      </button>
+    </div>
+
+    <div
+      *ngFor="let variant of variants; let i = index"
+      class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mb-2"
+    >
+      <div class="grid grid-cols-2 gap-3">
+        <app-text-field
+          [id]="'variant-description-' + i"
+          label="{{
+            'components.products.edit.fields.variants.description.title'
+              | transloco
+          }}"
+          [control]="getVariantControl(i, 'description')"
+          [errorMessages]="{
+              required: ( 'components.products.edit.fields.variants.description.required' | transloco ),
+            }"
+        ></app-text-field>
+        <app-text-field
+          [id]="'variant-price-' + i"
+          label="{{
+            'components.products.edit.fields.variants.price.title' | transloco
+          }}"
+          [control]="getVariantControl(i, 'price')"
+          [allowDecimals]="true"
+          [numbersOnly]="true"
+          [errorMessages]="{
+              required: ( 'components.products.edit.fields.variants.price.required' | transloco ),
+            }"
+        ></app-text-field>
+      </div>
+
+      <div class="mt-2 text-right">
+        <button
+          type="button"
+          (click)="removeVariant(i)"
+          class="text-red-500 hover:text-red-700 text-sm"
+        >
+          <i class="pi pi-trash mr-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <div
+      *ngIf="variants.length === 0"
+      class="text-center py-4 text-gray-500 dark:text-gray-400 italic"
+    >
+      {{ "components.products.edit.fields.variants.empty" | transloco }}
+    </div>
+    <!-- Mensaje informativo -->
+    <p
+      *ngIf="variants.length !== 0"
+      class="text-xs text-gray-500 dark:text-gray-400"
+    >
+      <i class="pi pi-info-circle mr-1"></i>
+      {{ "components.products.edit.fields.variants.info" | transloco }}
+    </p>
+  </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <app-text-field
     id="description"

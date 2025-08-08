@@ -11,25 +11,18 @@
         maxlength: ( 'components.products.create.fields.name.maxlength' | transloco ),
       }"
     ></app-text-field>
-    <app-text-field
-      id="price"
-      label="{{ 'components.products.create.fields.price.title' | transloco }}"
-      [control]="form.get('price')"
-      [allowDecimals]="true"
-      [numbersOnly]="true"
-    ></app-text-field>
-  </div>
-  <app-select
-    [placeholder]="
-      'components.products.create.fields.category.title' | transloco
-    "
-    [options]="categories"
-    formControlName="category"
-    [control]="form.get('category')"
-    [errorMessages]="{
+    <app-select
+      [placeholder]="
+        'components.products.create.fields.category.title' | transloco
+      "
+      [options]="categories"
+      formControlName="category"
+      [control]="form.get('category')"
+      [errorMessages]="{
         required: ( 'components.products.create.fields.category.required' | transloco ),
       }"
-  ></app-select>
+    ></app-select>
+  </div>
 
   <!-- Sección de Variantes -->
   <hr class="border-gray-500 my-1 border-opacity-10" />
