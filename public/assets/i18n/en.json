@@ -470,7 +470,11 @@
           "price": "Price",
           "description": "Description",
           "category": "Category",
-          "image": "Image"
+          "image": "Image",
+          "variants": {
+            "title": "Variants",
+            "novariants": "No variants"
+          }
         }
       },
       "create": {
@@ -493,6 +497,20 @@
           "category": {
             "title": "Category",
             "required": "Category is required"
+          },
+          "variants": {
+            "title": "Variants",
+            "description": {
+              "title": "Description",
+              "required": "This field is required"
+            },
+            "price": {
+              "title": "Price",
+              "required": "This field is required"
+            },
+            "add": "Add",
+            "empty": "No variants",
+            "info": "You can add more variants using the + button"
           },
           "image": {
             "title": "Product or service image",
@@ -527,6 +545,20 @@
           "category": {
             "title": "Category",
             "required": "Category is required"
+          },
+          "variants": {
+            "title": "Variants",
+            "description": {
+              "title": "Description",
+              "required": "This field is required"
+            },
+            "price": {
+              "title": "Price",
+              "required": "This field is required"
+            },
+            "add": "Add",
+            "empty": "No variants",
+            "info": "You can add more variants using the + button"
           },
           "image": {
             "title": "Product or service image",

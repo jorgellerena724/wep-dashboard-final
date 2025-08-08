@@ -48,6 +48,9 @@ export class ListProductComponent implements OnInit {
   imageTemplate!: TemplateRef<any>;
   customTemplates: { [key: string]: TemplateRef<any> } = {};
 
+  @ViewChild('variantsTemplate', { static: true })
+  variantsTemplate!: TemplateRef<any>;
+
   columns: Column[] = [];
 
   // Definimos las acciones del encabezado
@@ -84,7 +87,9 @@ export class ListProductComponent implements OnInit {
     // Suscribirse a los cambios de idioma para actualizar las columnas
     const columnsTranslation$ = combineLatest([
       this.transloco.selectTranslate('components.products.list.table.name'),
-      this.transloco.selectTranslate('components.products.list.table.price'),
+      this.transloco.selectTranslate(
+        'components.products.list.table.variants.title'
+      ),
       this.transloco.selectTranslate(
         'components.products.list.table.description'
       ),
@@ -95,7 +100,7 @@ export class ListProductComponent implements OnInit {
     const columnsSubscription = columnsTranslation$.subscribe(
       ([
         nameTranslation,
-        priceTranslation,
+        variantsTranslation,
         descriptionTranslation,
         categoryTranslation,
         imageTranslation,
@@ -108,8 +113,8 @@ export class ListProductComponent implements OnInit {
             filter: true,
           },
           {
-            field: 'price',
-            header: priceTranslation,
+            field: 'variants',
+            header: variantsTranslation,
             sortable: true,
             filter: true,
           },
@@ -168,16 +173,28 @@ export class ListProductComponent implements OnInit {
 
   ngAfterViewInit() {
     this.customTemplates['image'] = this.imageTemplate;
+    this.customTemplates['variants'] = this.variantsTemplate;
   }
 
   loadData() {
     this.loading = true;
     this.srv.get().subscribe({
       next: (data: HomeData[]) => {
-        this.data = data.map((item: any) => ({
-          ...item,
-          categoryName: item.category.title,
-        }));
+        this.data = data.map((item: any) => {
+          let variantsText = '';
+
+          if (item.variants && Array.isArray(item.variants)) {
+            variantsText = item.variants
+              .map((v: any) => `${v.description}: ${v.price}$`)
+              .join(', ');
+          }
+
+          return {
+            ...item,
+            categoryName: item.category.title,
+            variantsText, // Nuevo campo para mostrar
+          };
+        });
         this.loading = false;
 
         data.forEach((item) => {

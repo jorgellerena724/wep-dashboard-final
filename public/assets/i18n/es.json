@@ -449,7 +449,11 @@
           "price": "Precio",
           "description": "Descripción",
           "category": "Categoría",
-          "image": "Imagen"
+          "image": "Imagen",
+          "variants": {
+            "title": "Variantes",
+            "novariants": "Sin variantes"
+          }
         }
       },
       "create": {
