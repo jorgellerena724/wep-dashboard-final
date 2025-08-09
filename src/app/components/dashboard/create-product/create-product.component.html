@@ -147,7 +147,7 @@
         *ngIf="(imageUrl || videoUrl) && !loadingImage"
         class="absolute inset-0 flex flex-col"
       >
-        <div class="flex-1 flex items-center justify-center">
+        <div class="flex-1 flex items-center justify-center bg-white">
           <div class="relative inline-block">
             <!-- Imagen -->
             <div
@@ -218,7 +218,7 @@
           [class.border-gray-500]="
             !(form.get('image')?.invalid && form.get('image')?.touched)
           "
-          class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+          class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-white dark:bg-gray-800/50"
         >
           <i
             class="pi pi-image text-4xl text-gray-400 dark:text-gray-500 mb-3"
