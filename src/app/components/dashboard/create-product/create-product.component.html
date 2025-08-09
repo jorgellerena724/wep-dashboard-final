@@ -148,7 +148,7 @@
         class="absolute inset-0 flex flex-col"
       >
         
-<div class="flex-1 flex items-center justify-center bg-white">
+    <div class="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500">
           <div class="relative inline-block">
             <!-- Imagen -->
             <div
@@ -157,7 +157,7 @@
             >
               <img
                 [src]="imageUrl"
-                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2"
+                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2 rounded-lg"
                 alt="{{ 'image.alt' | transloco }}"
               />
             </div>
@@ -170,7 +170,7 @@
               <video
                 controls
                 [src]="videoUrl"
-                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2"
+                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2 rounded-lg"
                 #videoPlayer
                 (loadedmetadata)="videoPlayer.muted = true"
               >
