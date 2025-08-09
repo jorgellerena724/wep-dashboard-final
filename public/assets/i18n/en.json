@@ -16,6 +16,7 @@
   "navbar": {
     "title": "Professional Business Website",
     "logout": "Logout",
+    "changepass": "Change password",
     "mobile": {
       "admin": "Administration",
       "header": "Header",
