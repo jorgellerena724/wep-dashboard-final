@@ -2,8 +2,11 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  OnChanges,
+  SimpleChanges,
   HostListener,
   Inject,
+  Input,
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -31,27 +34,28 @@ import { TranslocoModule } from '@jsverse/transloco';
   ],
   templateUrl: './sidebar.component.html',
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() sessionClient?: string; 
+
   sidebarCollapsed = false;
   collapsedWidth: string;
   expandedWidth: string;
   isMobileView = false;
   showSidebar = true;
   currentRouteTitle = '';
-
-  // Estados de los submenús
   isHeaderSubmenuOpen = false;
   isHomeSubmenuOpen = false;
   isAboutSubmenuOpen = false;
   isProductsSubmenuOpen = false;
   isContactSubmenuOpen = false;
   isUsersSubmenuOpen = false;
+  showUsersMenu = true;
 
   private subscription: Subscription = new Subscription();
 
   constructor(
     private collapsedService: CollapsedService,
-    public router: Router, 
+    public router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.collapsedWidth = this.collapsedService.getCollapsedWidth();
@@ -91,6 +95,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
       this.updateRouteTitle();
+    }
+
+    this.initShowUsersMenu();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['sessionClient'] && !changes['sessionClient'].isFirstChange()) {
+      this.initShowUsersMenu();
     }
   }
 
@@ -156,9 +168,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-toggleContactSubmenu(): void {
-  this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
-}
+  toggleContactSubmenu(): void {
+    this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
+  }
   isContactRouteActive(): boolean {
     return this.router.url.includes('/contact');
   }
@@ -235,5 +247,59 @@ toggleContactSubmenu(): void {
         this.currentRouteTitle = '';
         break;
     }
+  }
+
+  private initShowUsersMenu(): void {
+    const clientFromInput = this.sessionClient;
+    if (clientFromInput !== undefined && clientFromInput !== null) {
+      this.showUsersMenu = this.isClientAllowed(clientFromInput);
+      return;
+    }
+
+    const clientFromStorage = this.getClientFromLocalStorage();
+    if (clientFromStorage !== null) {
+      this.showUsersMenu = this.isClientAllowed(clientFromStorage);
+      return;
+    }
+    this.showUsersMenu = true;
+  }
+
+  private isClientAllowed(clientValue: string | undefined | null): boolean {
+    if (!clientValue && clientValue !== '') {
+      return true;
+    }
+    return clientValue === 'shirkasoft';
+  }
+
+  private getClientFromLocalStorage(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const candidateKeys = [
+      'session',
+      'user',
+      'userSession',
+      'auth',
+      'currentUser',
+      'wep_session',
+    ];
+    for (const key of candidateKeys) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && 'client' in parsed) {
+          return parsed['client'];
+        }
+        if (typeof parsed === 'string') {
+          return parsed;
+        }
+      } catch (e) {
+        if (typeof raw === 'string' && raw.trim().length > 0) {
+          return raw;
+        }
+      }
+    }
+    const direct = localStorage.getItem('sessionClient');
+    if (direct) return direct;
+    return null;
   }
 }
