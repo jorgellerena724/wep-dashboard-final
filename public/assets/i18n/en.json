@@ -1,4 +1,7 @@
 {
+    "footer": {
+    "rights_reserved": "All rights reserved"
+  },
   "login": {
     "email": {
       "title": "Email",

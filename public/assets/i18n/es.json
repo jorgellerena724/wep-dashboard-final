@@ -1,4 +1,7 @@
 {
+    "footer": {
+    "rights_reserved": "Todos los derechos reservados"
+  },
   "login": {
     "email": {
       "title": "Correo",
@@ -83,6 +86,7 @@
       }
     },
     "footer": "Cambios en tiempo real sin conocimientos técnicos"
+    
   },
   "components": {
     "header": {
@@ -725,4 +729,5 @@
     "unsupported": "Formato de video no compatible. Intente con MP4 o MOV.",
     "converting": "Convirtiendo video a formato compatible..."
   }
+  
 }
