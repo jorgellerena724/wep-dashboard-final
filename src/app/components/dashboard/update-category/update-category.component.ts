@@ -101,7 +101,7 @@ export class UpdateCategoryComponent implements DynamicComponent {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al actualizar el directivo.',
+          'Error al actualizar la categoría.',
           'error'
         );
         console.error('Error:', error);
