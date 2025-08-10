@@ -65,20 +65,23 @@ export class NavbarComponent {
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }
+
   changePassword(): void {
-  this.userMenuOpen = false; // Cerrar el menú
-  const modalConfig: ModalConfig = {
-    title: 'Cambiar contraseña',
-    component: ChangeUserPasswordComponent,
-    data: {
-      initialData: {
-        id: this.userData?.id,
-        email: this.userData?.email,
+    this.userMenuOpen = false;    
+    const changePasswordTitle = this.transloco.translate('navbar.changepass');
+    
+    const modalConfig: ModalConfig = {
+      title: changePasswordTitle,
+      component: ChangeUserPasswordComponent,
+      data: {
+        initialData: {
+          id: this.userData?.id,
+          email: this.userData?.email,
+        },
       },
-    },
-  };
-  this.modalSrv.open(modalConfig);
-}
+    };
+    this.modalSrv.open(modalConfig);
+  }
 
   toggleHomeSubmenu() {
     this.isHomeSubmenuOpen = !this.isHomeSubmenuOpen;
@@ -100,7 +103,6 @@ export class NavbarComponent {
     this.userMenuOpen = !this.userMenuOpen;
   }
 
-  // Método para cargar los datos del usuario desde localStorage
   private loadUserData(): void {
     try {
       for (let i = 0; i < localStorage.length; i++) {
@@ -137,7 +139,6 @@ export class NavbarComponent {
     }
   }
 
-  // Método para obtener las iniciales del usuario
   getUserInitials(): string {
     if (this.userData && this.userData.full_name) {
       const initials = this.userData.full_name
@@ -177,7 +178,6 @@ export class NavbarComponent {
     this.authSrv.logout();
   }
 
-  // Método para alternar el menú de idiomas
   toggleLanguageMenu() {
     this.languageMenuOpen = !this.languageMenuOpen;
   }
@@ -187,7 +187,6 @@ export class NavbarComponent {
     this.updateLanguageDisplay(currentLang);
   }
 
-  // Actualizar la visualización del idioma
   private updateLanguageDisplay(lang: string) {
     this.currentLanguageCode = lang;
     if (lang === 'es') {
