@@ -194,7 +194,7 @@ export class UpdateCompanyComponent implements DynamicComponent {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           this.notificationSrv.addNotification(
-            'Error al actualizar datos.',
+            'Error al actualizar.',
             'error'
           );
         }
