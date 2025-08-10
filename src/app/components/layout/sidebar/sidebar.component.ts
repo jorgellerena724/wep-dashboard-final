@@ -156,12 +156,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  toggleContactSubmenu(): void {
-    if (!this.sidebarCollapsed || this.isMobileView) {
-      this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
-    }
-  }
-
+toggleContactSubmenu(): void {
+  this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
+}
   isContactRouteActive(): boolean {
     return this.router.url.includes('/contact');
   }
