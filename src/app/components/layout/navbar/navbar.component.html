@@ -2,8 +2,8 @@
 <nav
   class="bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.2),_0_0_40px_rgba(0,0,0,0.15),_0_0_60px_rgba(0,0,0,0.1),_0_0_80px_rgba(0,0,0,0.05)] fixed w-full top-0 z-30"
 >
-<div class="w-full px-4 sm:px-6 lg:px-8">
-<div class="flex justify-between h-20 items-center w-full">
+  <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center w-full">
       <!-- Botón del menú móvil para dashboard en pantallas pequeñas -->
       <div class="dashboard-mobile-menu-button md:hidden">
         <button
@@ -200,7 +200,9 @@
                   role="menuitem"
                 >
                   <div class="flex items-center justify-between">
-                    <span class="font-semibold mr-2">{{ "navbar.name" | transloco }}:</span>
+                    <span class="font-semibold mr-2">{{
+                      "navbar.name" | transloco
+                    }}:</span>
                     <span>{{ userData?.full_name }}</span>
                   </div>
                   <div class="flex items-center justify-between mt-1">
@@ -259,7 +261,6 @@
   class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
   (click)="toggleMobileMenu()"
 ></div>
-
 
 <div
   class="fixed top-0 left-0 h-full w-80 bg-gray-800 text-gray-300 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden flex flex-col"
@@ -332,39 +333,84 @@
         </a>
       </div>
 
-      <!-- Encabezado -->
-      <a
-        [routerLink]="['/header']"
-        routerLinkActive="bg-gray-700 text-white"
-        (click)="toggleMobileMenu()"
-        class="flex items-center p-2 mb-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white"
-      >
-        <div>
+      <!-- SECCIÓN MODIFICADA: Encabezado con Submenu -->
+      <div class="mb-2">
+        <div
+          (click)="toggleHeaderSubmenu()"
+          class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
+          [ngClass]="{'bg-gray-700 text-white': isHeaderSubmenuOpen || isHeaderRouteActive()}"
+        >
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="25"
+              height="24"
+              fill="currentColor"
+              class="bi bi-chevron-bar-up ml-1"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4"
+              />
+            </svg>
+          </div>
+          <span class="ml-2 whitespace-nowrap flex-1">
+            {{ "sidebar.header" | transloco }}
+          </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="25"
-            height="24"
-            fill="currentColor"
-            class="bi bi-chevron-bar-up ml-1"
-            viewBox="0 0 16 16"
+            class="h-4 w-4 transition-transform duration-300"
+            [ngClass]="{ 'rotate-180': isHeaderSubmenuOpen }"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
-              fill-rule="evenodd"
-              d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
             />
           </svg>
         </div>
-        <span class="ml-2 whitespace-nowrap">
-          {{ "sidebar.header" | transloco }}
-        </span>
-      </a>
+        <div
+          class="overflow-hidden transition-all duration-300 ease-in-out"
+          [ngClass]="{'max-h-0 opacity-0': !isHeaderSubmenuOpen, 'max-h-96 opacity-100': isHeaderSubmenuOpen}"
+        >
+          <div class="ml-6 mt-1">
+            <a
+              [routerLink]="['/header']"
+              routerLinkActive="bg-gray-600 text-white"
+              (click)="toggleMobileMenu()"
+              class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                class="bi bi-segmented-nav"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M0 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm6 3h4V5H6zm9-1V6a1 1 0 0 0-1-1h-3v4h3a1 1 0 0 0 1-1"
+                />
+              </svg>
+              <span class="ml-2">{{ "sidebar.header_info" | transloco }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
 
       <!-- Inicio con Submenu -->
       <div class="mb-2">
         <div
           (click)="toggleHomeSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
-          [ngClass]="{'bg-gray-700 text-white': isHomeSubmenuOpen || isHomeRouteActive()}"
+          [ngClass]="{
+            'bg-gray-700 text-white': isHomeSubmenuOpen || isHomeRouteActive()
+          }"
         >
           <div>
             <svg
@@ -403,7 +449,10 @@
         </div>
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
-          [ngClass]="{'max-h-0 opacity-0': !isHomeSubmenuOpen, 'max-h-96 opacity-100': isHomeSubmenuOpen}"
+          [ngClass]="{
+            'max-h-0 opacity-0': !isHomeSubmenuOpen,
+            'max-h-96 opacity-100': isHomeSubmenuOpen
+          }"
         >
           <div class="ml-6 mt-1">
             <a
@@ -459,7 +508,9 @@
         <div
           (click)="toggleAboutSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
-          [ngClass]="{'bg-gray-700 text-white': isAboutSubmenuOpen || isAboutRouteActive()}"
+          [ngClass]="{
+            'bg-gray-700 text-white': isAboutSubmenuOpen || isAboutRouteActive()
+          }"
         >
           <div>
             <svg
@@ -496,7 +547,10 @@
         </div>
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
-          [ngClass]="{'max-h-0 opacity-0': !isAboutSubmenuOpen, 'max-h-96 opacity-100': isAboutSubmenuOpen}"
+          [ngClass]="{
+            'max-h-0 opacity-0': !isAboutSubmenuOpen,
+            'max-h-96 opacity-100': isAboutSubmenuOpen
+          }"
         >
           <div class="ml-6 mt-1">
             <a
@@ -578,7 +632,10 @@
         <div
           (click)="toggleProductsSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
-          [ngClass]="{'bg-gray-700 text-white': isProductsSubmenuOpen || isProductsRouteActive()}"
+          [ngClass]="{
+            'bg-gray-700 text-white':
+              isProductsSubmenuOpen || isProductsRouteActive()
+          }"
         >
           <div>
             <svg
@@ -615,7 +672,10 @@
         </div>
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
-          [ngClass]="{'max-h-0 opacity-0': !isProductsSubmenuOpen, 'max-h-96 opacity-100': isProductsSubmenuOpen}"
+          [ngClass]="{
+            'max-h-0 opacity-0': !isProductsSubmenuOpen,
+            'max-h-96 opacity-100': isProductsSubmenuOpen
+          }"
         >
           <div class="ml-6 mt-1">
             <a
@@ -670,7 +730,10 @@
         <div
           (click)="toggleContactSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
-          [ngClass]="{'bg-gray-700 text-white': isContactSubmenuOpen || isContactRouteActive()}"
+          [ngClass]="{
+            'bg-gray-700 text-white':
+              isContactSubmenuOpen || isContactRouteActive()
+          }"
         >
           <div>
             <svg
@@ -707,7 +770,10 @@
         </div>
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
-          [ngClass]="{'max-h-0 opacity-0': !isContactSubmenuOpen, 'max-h-96 opacity-100': isContactSubmenuOpen}"
+          [ngClass]="{
+            'max-h-0 opacity-0': !isContactSubmenuOpen,
+            'max-h-96 opacity-100': isContactSubmenuOpen
+          }"
         >
           <div class="ml-6 mt-1">
             <a
@@ -737,38 +803,81 @@
         </div>
       </div>
 
-      <!-- Users -->
-      <a
-        [routerLink]="['/users']"
-        routerLinkActive="bg-gray-700 text-white"
-        (click)="toggleMobileMenu()"
-        class="flex border border-gray-600 items-center p-2 mb-2 rounded-lg hover:bg-gray-700 hover:text-white"
-      >
-        <div>
+      <!-- SECCIÓN MODIFICADA: Users con Submenu -->
+      <div class="mb-2">
+        <div
+          (click)="toggleUsersSubmenu()"
+          class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
+          [ngClass]="{'bg-gray-700 text-white': isUsersSubmenuOpen || isUsersRouteActive()}"
+        >
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              fill="currentColor"
+              class="bi bi-people ml-1"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+              />
+            </svg>
+          </div>
+          <span class="ml-2 whitespace-nowrap flex-1">
+            {{ "sidebar.users" | transloco }}
+          </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            fill="currentColor"
-            class="bi bi-people ml-1"
-            viewBox="0 0 16 16"
+            class="h-4 w-4 transition-transform duration-300"
+            [ngClass]="{ 'rotate-180': isUsersSubmenuOpen }"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
-              d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
             />
           </svg>
         </div>
-        <span class="ml-2 whitespace-nowrap">
-          {{ "sidebar.users" | transloco }}
-        </span>
-      </a>
+        <div
+          class="overflow-hidden transition-all duration-300 ease-in-out"
+          [ngClass]="{'max-h-0 opacity-0': !isUsersSubmenuOpen, 'max-h-96 opacity-100': isUsersSubmenuOpen}"
+        >
+          <div class="ml-6 mt-1">
+            <a
+              [routerLink]="['/users']"
+              routerLinkActive="bg-gray-600 text-white"
+              (click)="toggleMobileMenu()"
+              class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                class="bi bi-person-gear"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m.256 7a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1zm3.63-4.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.15a.64.64 0 0 0-.921-.38l-.136.074c-.561.305-1.175-.309-.87-.87l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382zM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"
+                />
+              </svg>
+              <span class="ml-2">{{
+                "sidebar.users_manage" | transloco
+              }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
     </nav>
   </div>
 </div>
 
-
 <style>
-
   .router-link-active,
   a.bg-gray-700.text-white {
     background-color: rgb(55 65 81) !important;

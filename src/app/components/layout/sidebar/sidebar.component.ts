@@ -38,21 +38,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
   isMobileView = false;
   showSidebar = true;
   currentRouteTitle = '';
+
+  // Estados de los submenús
+  isHeaderSubmenuOpen = false;
   isHomeSubmenuOpen = false;
   isAboutSubmenuOpen = false;
   isProductsSubmenuOpen = false;
   isContactSubmenuOpen = false;
+  isUsersSubmenuOpen = false;
+
   private subscription: Subscription = new Subscription();
 
   constructor(
     private collapsedService: CollapsedService,
-    private router: Router,
+    public router: Router, 
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.collapsedWidth = this.collapsedService.getCollapsedWidth();
     this.expandedWidth = this.collapsedService.getExpandedWidth();
 
-    // Solo ejecutar checkScreenSize en el navegador
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
     }
@@ -89,16 +93,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.updateRouteTitle();
     }
   }
-  toggleProductsSubmenu(): void {
-    this.isProductsSubmenuOpen = !this.isProductsSubmenuOpen;
-  }
 
-  isProductsRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return (
-      currentUrl.includes('/categories') || currentUrl.includes('/products')
-    );
-  }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -110,24 +105,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.collapsedService.toggleSidebar();
     }
   }
-  // Método para alternar el submenu de contacto
-  toggleContactSubmenu(): void {
-    if (!this.sidebarCollapsed || this.isMobileView) {
-      this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
     }
   }
 
-  // Método para verificar si alguna ruta de contacto está activa
-  isContactRouteActive(): boolean {
-    const contactRoutes = ['/contact'];
-    return contactRoutes.some((route) => this.router.url.includes(route));
-  }
-  toggleHomeSubmenu(): void {
-    this.isHomeSubmenuOpen = !this.isHomeSubmenuOpen;
+  // --- Métodos para Submenús ---
+
+  toggleHeaderSubmenu(): void {
+    this.isHeaderSubmenuOpen = !this.isHeaderSubmenuOpen;
   }
 
-  toggleAboutSubmenu(): void {
-    this.isAboutSubmenuOpen = !this.isAboutSubmenuOpen;
+  isHeaderRouteActive(): boolean {
+    return this.router.url.includes('/header');
+  }
+
+  toggleHomeSubmenu(): void {
+    this.isHomeSubmenuOpen = !this.isHomeSubmenuOpen;
   }
 
   isHomeRouteActive(): boolean {
@@ -135,16 +132,46 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return currentUrl.includes('/carousel') || currentUrl.includes('/news');
   }
 
-  isAboutRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return currentUrl.includes('/company') || currentUrl.includes('/managers');
+  toggleAboutSubmenu(): void {
+    this.isAboutSubmenuOpen = !this.isAboutSubmenuOpen;
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.checkScreenSize();
+  isAboutRouteActive(): boolean {
+    const currentUrl = this.router.url;
+    return (
+      currentUrl.includes('/company') ||
+      currentUrl.includes('/managers') ||
+      currentUrl.includes('/reviews')
+    );
+  }
+
+  toggleProductsSubmenu(): void {
+    this.isProductsSubmenuOpen = !this.isProductsSubmenuOpen;
+  }
+
+  isProductsRouteActive(): boolean {
+    const currentUrl = this.router.url;
+    return (
+      currentUrl.includes('/categories') || currentUrl.includes('/products')
+    );
+  }
+
+  toggleContactSubmenu(): void {
+    if (!this.sidebarCollapsed || this.isMobileView) {
+      this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
     }
+  }
+
+  isContactRouteActive(): boolean {
+    return this.router.url.includes('/contact');
+  }
+
+  toggleUsersSubmenu(): void {
+    this.isUsersSubmenuOpen = !this.isUsersSubmenuOpen;
+  }
+
+  isUsersRouteActive(): boolean {
+    return this.router.url.includes('/users');
   }
 
   private checkScreenSize(): void {
@@ -154,9 +181,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.sidebarCollapsed = true;
         this.collapsedService.setSidebarState(true);
         this.showSidebar = false;
-        // Cerrar submenu cuando se colapsa en móvil
+        this.isHeaderSubmenuOpen = false;
         this.isHomeSubmenuOpen = false;
         this.isAboutSubmenuOpen = false;
+        this.isProductsSubmenuOpen = false;
+        this.isContactSubmenuOpen = false;
+        this.isUsersSubmenuOpen = false;
       } else {
         this.showSidebar = true;
       }
@@ -166,26 +196,34 @@ export class SidebarComponent implements OnInit, OnDestroy {
   closeMobileSidebar(): void {
     if (this.isMobileView) {
       this.showSidebar = false;
-      // Cerrar submenu cuando se cierra el sidebar en móvil
-      this.isHomeSubmenuOpen = false;
-      this.isAboutSubmenuOpen = false;
     }
   }
 
   private updateRouteTitle(): void {
     const routePath = this.router.url;
+    this.isHeaderSubmenuOpen = routePath.includes('/header');
+    this.isHomeSubmenuOpen =
+      routePath.includes('/carousel') || routePath.includes('/news');
+    this.isAboutSubmenuOpen =
+      routePath.includes('/company') ||
+      routePath.includes('/managers') ||
+      routePath.includes('/reviews');
+    this.isProductsSubmenuOpen =
+      routePath.includes('/categories') || routePath.includes('/products');
+    this.isContactSubmenuOpen = routePath.includes('/contact');
+    this.isUsersSubmenuOpen = routePath.includes('/users');
     switch (true) {
       case routePath.includes('/admin'):
         this.currentRouteTitle = 'Administración';
+        break;
+      case routePath.includes('/header'):
+        this.currentRouteTitle = 'Encabezado';
         break;
       case routePath.includes('/carousel'):
         this.currentRouteTitle = 'Inicio - Carrusel';
         break;
       case routePath.includes('/news'):
         this.currentRouteTitle = 'Inicio - Novedades';
-        break;
-      case routePath.includes('/home'):
-        this.currentRouteTitle = 'Inicio';
         break;
       case routePath.includes('/users'):
         this.currentRouteTitle = 'Usuarios';
@@ -199,24 +237,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       default:
         this.currentRouteTitle = '';
         break;
-    }
-
-    // Auto-abrir el submenu de Inicio si estamos en una de sus rutas
-    if (routePath.includes('carousel') || routePath.includes('/news')) {
-      this.isHomeSubmenuOpen = true;
-    }
-
-    // Auto-abrir el submenu de Quiénes Somos si estamos en una de sus rutas
-    if (
-      routePath.includes('/company') ||
-      routePath.includes('/managers') ||
-      routePath.includes('/reviews')
-    ) {
-      this.isAboutSubmenuOpen = true; // Añadido
-    }
-    // Auto-abrir el submenu de Productos si estamos en una de sus rutas
-    if (routePath.includes('/categories') || routePath.includes('/products')) {
-      this.isProductsSubmenuOpen = true;
     }
   }
 }

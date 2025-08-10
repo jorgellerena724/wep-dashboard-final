@@ -37,6 +37,9 @@ export class NavbarComponent {
   isAboutSubmenuOpen = false;
   isProductsSubmenuOpen = false;
   isContactSubmenuOpen = false;
+  isHeaderSubmenuOpen = false; 
+  isUsersSubmenuOpen = false; 
+
   languageMenuOpen = false;
   userMenuOpen = false;
   currentRoute = '';
@@ -46,7 +49,11 @@ export class NavbarComponent {
   currentLanguageCode: string = 'es';
   userData: any = null;
 
-  constructor(private router: Router, private authSrv: AuthService, private modalSrv: ModalService) {
+  constructor(
+    private router: Router,
+    private authSrv: AuthService,
+    private modalSrv: ModalService
+  ) {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: any) => {
@@ -67,9 +74,9 @@ export class NavbarComponent {
   }
 
   changePassword(): void {
-    this.userMenuOpen = false;    
+    this.userMenuOpen = false;
     const changePasswordTitle = this.transloco.translate('navbar.changepass');
-    
+
     const modalConfig: ModalConfig = {
       title: changePasswordTitle,
       component: ChangeUserPasswordComponent,
@@ -97,6 +104,14 @@ export class NavbarComponent {
 
   toggleContactSubmenu(): void {
     this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
+  }
+
+  toggleHeaderSubmenu(): void {
+    this.isHeaderSubmenuOpen = !this.isHeaderSubmenuOpen;
+  }
+
+  toggleUsersSubmenu(): void {
+    this.isUsersSubmenuOpen = !this.isUsersSubmenuOpen;
   }
 
   toggleUserMenu(): void {
@@ -159,7 +174,11 @@ export class NavbarComponent {
 
   isAboutRouteActive(): boolean {
     const currentUrl = this.router.url;
-    return currentUrl.includes('/company') || currentUrl.includes('/managers');
+    return (
+      currentUrl.includes('/company') ||
+      currentUrl.includes('/managers') ||
+      currentUrl.includes('/reviews')
+    );
   }
 
   isProductsRouteActive(): boolean {
@@ -172,6 +191,14 @@ export class NavbarComponent {
   isContactRouteActive(): boolean {
     const currentUrl = this.router.url;
     return currentUrl.includes('/contact');
+  }
+
+  isHeaderRouteActive(): boolean {
+    return this.router.url.includes('/header');
+  }
+
+  isUsersRouteActive(): boolean {
+    return this.router.url.includes('/users');
   }
 
   logout() {
