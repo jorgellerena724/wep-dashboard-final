@@ -625,7 +625,7 @@
         "table": {
           "name": "Name",
           "email": "Email",
-          "client": "Cliente",
+          "client": "Client",
           "rol": "Rol"
         }
       },
