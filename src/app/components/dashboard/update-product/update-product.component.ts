@@ -413,7 +413,7 @@ export class UpdateProductComponent implements DynamicComponent {
         },
         error: (err) => {
           this.notificationSrv.addNotification(
-            'Error al obtener las Categorías',
+            'Error al obtener las categorías',
             'error'
           );
           reject(err);

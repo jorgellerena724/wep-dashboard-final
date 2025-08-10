@@ -305,7 +305,7 @@ export class UsersComponent implements OnInit {
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  'Error al eliminar el producto.',
+                  'Error al eliminar el usuario.',
                   'error'
                 );
               }
