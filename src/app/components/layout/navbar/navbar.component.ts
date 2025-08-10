@@ -1,19 +1,10 @@
 import { Component, inject } from '@angular/core';
-import {
-  RouterModule,
-  Router,
-  NavigationEnd,
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
+import { RouterModule, Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import {
-  ModalService,
-  ModalConfig,
-} from '../../../shared/services/system/modal.service';
+import { ModalService, ModalConfig } from '../../../shared/services/system/modal.service';
 import { ChangeUserPasswordComponent } from '../../users/change-user-password/change-user-password.component';
 
 @Component({
@@ -37,8 +28,8 @@ export class NavbarComponent {
   isAboutSubmenuOpen = false;
   isProductsSubmenuOpen = false;
   isContactSubmenuOpen = false;
-  isHeaderSubmenuOpen = false; 
-  isUsersSubmenuOpen = false; 
+  isHeaderSubmenuOpen = false;
+  isUsersSubmenuOpen = false;
 
   languageMenuOpen = false;
   userMenuOpen = false;
@@ -57,8 +48,6 @@ export class NavbarComponent {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        const url = event.urlAfterRedirects || this.router.url;
-        const segments = url.split('/');
         this.mobileMenuOpen = false;
       });
 
@@ -118,13 +107,26 @@ export class NavbarComponent {
     this.userMenuOpen = !this.userMenuOpen;
   }
 
+  private closeOtherSubmenus(except: string | null) {
+    if (except !== 'home') this.isHomeSubmenuOpen = false;
+    if (except !== 'about') this.isAboutSubmenuOpen = false;
+    if (except !== 'products') this.isProductsSubmenuOpen = false;
+    if (except !== 'contact') this.isContactSubmenuOpen = false;
+    if (except !== 'header') this.isHeaderSubmenuOpen = false;
+    if (except !== 'users') this.isUsersSubmenuOpen = false;
+  }
+
+  onNavItemClick(parent: string | null) {
+    if (parent) {
+      this.closeOtherSubmenus(parent);
+    } else {
+      this.closeOtherSubmenus(null);
+    }
+    this.mobileMenuOpen = false;
+  }
+
   private loadUserData(): void {
     try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key) {
-        }
-      }
       const possibleKeys = [
         'userData',
         'user',
@@ -133,13 +135,11 @@ export class NavbarComponent {
         'token',
         'authToken',
       ];
-      let userData = null;
-      let foundKey = '';
+      let userData: string | null = null;
       for (const key of possibleKeys) {
         const data = localStorage.getItem(key);
         if (data) {
           userData = data;
-          foundKey = key;
           break;
         }
       }
@@ -183,9 +183,7 @@ export class NavbarComponent {
 
   isProductsRouteActive(): boolean {
     const currentUrl = this.router.url;
-    return (
-      currentUrl.includes('/categories') || currentUrl.includes('/products')
-    );
+    return currentUrl.includes('/categories') || currentUrl.includes('/products');
   }
 
   isContactRouteActive(): boolean {
