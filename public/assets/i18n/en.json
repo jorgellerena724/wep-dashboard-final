@@ -21,6 +21,7 @@
     "logout": "Logout",
     "changepass": "Change password",
     "name": "Name",
+    "client": "Client",
     "mobile": {
       "admin": "Administration",
       "header": "Header",

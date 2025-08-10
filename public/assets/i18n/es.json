@@ -21,6 +21,7 @@
     "logout": "Cerrar Sesión",
     "changepass": "Cambiar contraseña",
     "name": "Nombre",
+     "client": "Cliente",
     "mobile": {
       "admin": "Administración",
       "header": "Encabezado",

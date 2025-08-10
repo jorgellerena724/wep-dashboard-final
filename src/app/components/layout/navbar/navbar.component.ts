@@ -163,36 +163,75 @@ export class NavbarComponent implements OnInit, OnChanges {
         'token',
         'authToken',
       ];
-      let userData: string | null = null;
+      let rawData: string | null = null;
       for (const key of possibleKeys) {
         const data = isPlatformBrowser(this.platformId) ? localStorage.getItem(key) : null;
         if (data) {
-          userData = data;
+          rawData = data;
           break;
         }
       }
+      if (!rawData && isPlatformBrowser(this.platformId)) {
+        const extras = ['session', 'userSession', 'wep_session', 'sessionClient'];
+        for (const k of extras) {
+          const d = localStorage.getItem(k);
+          if (d) {
+            rawData = d;
+            break;
+          }
+        }
+      }
 
-      if (userData) {
-        this.userData = JSON.parse(userData);
+      if (rawData) {
+        try {
+          const parsed = JSON.parse(rawData);
+          if (parsed && typeof parsed === 'object') {
+            if ('user' in parsed && parsed.user) {
+              this.userData = parsed.user;
+            } else {
+              this.userData = parsed;
+            }
+          } else {
+            this.userData = parsed;
+          }
+        } catch (e) {
+          this.userData = rawData;
+        }
       } else {
         this.userData = null;
+      }
+      if (this.userData && typeof this.userData === 'object') {
+        if (!('client' in this.userData)) {
+          const clientFromStorage = this.getClientFromLocalStorage();
+          if (clientFromStorage) {
+            try {
+              this.userData.client = clientFromStorage;
+            } catch (e) {
+            }
+          }
+        }
       }
     } catch (error) {
       this.userData = null;
     }
   }
 
-  getUserInitials(): string {
-    if (this.userData && this.userData.full_name) {
-      const initials = this.userData.full_name
-        .split(' ')
-        .map((word: string) => word.charAt(0))
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
-      return initials;
+  getUserClient(): string {
+    if (!this.userData) {
+      const clientStorage = this.getClientFromLocalStorage();
+      return clientStorage ?? '—';
     }
-    return 'U';
+    if (typeof this.userData === 'string') {
+      const clientStorage = this.getClientFromLocalStorage();
+      return clientStorage ?? this.userData ?? '—';
+    }
+
+    if (this.userData.client) return String(this.userData.client);
+    if (this.userData.session && this.userData.session.client) return String(this.userData.session.client);
+    if (this.userData.user && this.userData.user.client) return String(this.userData.user.client);
+    if (this.userData.client_name) return String(this.userData.client_name);
+    const clientFromStorage = this.getClientFromLocalStorage();
+    return clientFromStorage ?? '—';
   }
 
   isHomeRouteActive(): boolean {
@@ -298,26 +337,26 @@ export class NavbarComponent implements OnInit, OnChanges {
       'auth',
       'currentUser',
       'wep_session',
+      'sessionClient',
+      'client'
     ];
     for (const key of candidateKeys) {
       const raw = localStorage.getItem(key);
       if (!raw) continue;
       try {
         const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object' && 'client' in parsed) {
-          return parsed['client'];
+        if (parsed && typeof parsed === 'object') {
+          if ('client' in parsed && parsed.client) return parsed.client;
+          if ('session' in parsed && parsed.session && parsed.session.client) return parsed.session.client;
+          if ('user' in parsed && parsed.user && parsed.user.client) return parsed.user.client;
         }
-        if (typeof parsed === 'string') {
+        if (typeof parsed === 'string' && parsed.trim().length > 0) {
           return parsed;
         }
       } catch (e) {
-        if (typeof raw === 'string' && raw.trim().length > 0) {
-          return raw;
-        }
+        if (raw && raw.trim().length > 0) return raw;
       }
     }
-    const direct = localStorage.getItem('sessionClient');
-    if (direct) return direct;
     return null;
   }
 }
