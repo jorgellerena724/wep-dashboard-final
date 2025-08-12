@@ -41,6 +41,10 @@ export class ListCompanyComponent implements OnInit {
   loading = false;
   imageUrls: { [key: number]: string } = {};
 
+  // Propiedades para almacenar las traducciones de los estados
+  activeStatus = '';
+  inactiveStatus = '';
+
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
   customTemplates: { [key: string]: TemplateRef<any> } = {};
@@ -61,25 +65,39 @@ export class ListCompanyComponent implements OnInit {
 
   ngOnInit() {
     this.setupTranslations();
-    this.loadData();
   }
 
   private setupTranslations() {
-    // Suscribirse a los cambios de idioma para actualizar las columnas
-    const columnsTranslation$ = combineLatest([
+    // Suscribirse a los cambios de idioma para actualizar todo el texto dinámico
+    const setupSubscription$ = combineLatest([
       this.transloco.selectTranslate('components.news.list.table.name'),
       this.transloco.selectTranslate('components.news.list.table.description'),
       this.transloco.selectTranslate('components.news.list.table.status'),
       this.transloco.selectTranslate('components.news.list.table.image'),
+      this.transloco.selectTranslate('table.buttons.edit'),
+      this.transloco.selectTranslate('table.buttons.disable'),
+      this.transloco.selectTranslate('table.buttons.enable'),
+      this.transloco.selectTranslate('status.active'), // Añadido
+      this.transloco.selectTranslate('status.inactive'), // Añadido
     ]);
 
-    const columnsSubscription = columnsTranslation$.subscribe(
+    const setupSubscription = setupSubscription$.subscribe(
       ([
         nameTranslation,
         descriptionTranslation,
         statusTranslation,
         imageTranslation,
+        editTranslation,
+        disableTranslation,
+        enableTranslation,
+        activeStatusTranslation,
+        inactiveStatusTranslation,
       ]) => {
+        // Asignar traducciones de estado y limpiar espacios extra
+        this.activeStatus = activeStatusTranslation.trim();
+        this.inactiveStatus = inactiveStatusTranslation.trim();
+
+        // Asignar traducciones de columnas
         this.columns = [
           {
             field: 'title',
@@ -105,18 +123,8 @@ export class ListCompanyComponent implements OnInit {
             width: '240px',
           },
         ];
-      }
-    );
 
-    const rowsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('table.buttons.edit'),
-      this.transloco.selectTranslate('table.buttons.disable'),
-      this.transloco.selectTranslate('table.buttons.enable'),
-    ]);
-
-    // Suscribirse a los cambios de idioma para las acciones de fila
-    const rowActionsSubscription = rowsTranslation$.subscribe(
-      ([editTranslation, disableTranslation, enableTranslation]) => {
+        // Asignar traducciones de acciones de fila
         this.rowActions = [
           {
             label: editTranslation,
@@ -136,10 +144,13 @@ export class ListCompanyComponent implements OnInit {
                 : buttonVariants.outline.neutral,
           },
         ];
+
+        // Cargar los datos solo después de que las traducciones estén listas
+        this.loadData();
       }
     );
 
-    this.subscriptions.push(columnsSubscription, rowActionsSubscription);
+    this.subscriptions.push(setupSubscription);
   }
 
   ngAfterViewInit() {
@@ -153,7 +164,8 @@ export class ListCompanyComponent implements OnInit {
       next: (data: HomeData[]) => {
         this.data = data.map((item: any) => ({
           ...item,
-          statusToShow: item.status ? 'Activado' : 'Desactivado',
+          // Usar las propiedades con las traducciones de estado
+          statusToShow: item.status ? this.activeStatus : this.inactiveStatus,
         }));
         this.loading = false;
 
@@ -223,14 +235,6 @@ export class ListCompanyComponent implements OnInit {
     event.target.style.display = 'none';
   }
 
-  ngOnDestroy() {
-    Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-  }
-
   toggleStatus(data: any) {
     const newStatus = !data.status;
     const formData = new FormData();
@@ -239,10 +243,15 @@ export class ListCompanyComponent implements OnInit {
     this.srv.patch(formData, data.id).subscribe({
       next: () => {
         data.status = newStatus;
+        // Usar las propiedades con las traducciones para la notificación
         this.notificationSrv.addNotification(
-          `Estado actualizado a ${newStatus ? 'Activo' : 'Inactivo'}`,
+          `Estado actualizado a ${
+            newStatus ? this.activeStatus : this.inactiveStatus
+          }`,
           'success'
         );
+        // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
+        data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
       error: (error) => {
         if (error?.error?.message && error.error?.statusCode === 400) {
@@ -257,6 +266,17 @@ export class ListCompanyComponent implements OnInit {
           );
         }
       },
+    });
+  }
+
+  ngOnDestroy() {
+    // Cancelar todas las suscripciones para evitar fugas de memoria
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+
+    Object.values(this.imageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
     });
   }
 }

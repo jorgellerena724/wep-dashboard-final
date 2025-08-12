@@ -44,6 +44,10 @@ export class ListNewsComponent implements OnInit {
   imageUrls: { [key: number]: string } = {};
   videoUrls: { [key: number]: string } = {};
 
+  // Propiedades para almacenar las traducciones de los estados
+  activeStatus = '';
+  inactiveStatus = '';
+
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
   customTemplates: { [key: string]: TemplateRef<any> } = {};
@@ -65,13 +69,45 @@ export class ListNewsComponent implements OnInit {
 
   ngOnInit() {
     this.setupTranslations();
-    this.loadData();
   }
 
   private setupTranslations() {
-    const headerActionsSubscription = this.transloco
-      .selectTranslate('table.buttons.create')
-      .subscribe((createTranslation) => {
+    // Unificar todas las suscripciones de traducción en una sola
+    const allTranslations$ = combineLatest([
+      this.transloco.selectTranslate('table.buttons.create'),
+      this.transloco.selectTranslate('components.news.list.table.name'),
+      this.transloco.selectTranslate('components.news.list.table.description'),
+      this.transloco.selectTranslate('components.news.list.table.date'),
+      this.transloco.selectTranslate('components.news.list.table.status'),
+      this.transloco.selectTranslate('components.news.list.table.image'),
+      this.transloco.selectTranslate('table.buttons.edit'),
+      this.transloco.selectTranslate('table.buttons.delete'),
+      this.transloco.selectTranslate('table.buttons.disable'),
+      this.transloco.selectTranslate('table.buttons.enable'),
+      this.transloco.selectTranslate('status.active'),
+      this.transloco.selectTranslate('status.inactive'),
+    ]);
+
+    const setupSubscription = allTranslations$.subscribe(
+      ([
+        createTranslation,
+        nameTranslation,
+        descriptionTranslation,
+        dateTranslation,
+        statusTranslation,
+        imageTranslation,
+        editTranslation,
+        deleteTranslation,
+        disableTranslation,
+        enableTranslation,
+        activeStatusTranslation,
+        inactiveStatusTranslation,
+      ]) => {
+        // Asignar traducciones de estado y limpiar espacios
+        this.activeStatus = activeStatusTranslation.trim();
+        this.inactiveStatus = inactiveStatusTranslation.trim();
+
+        // Configurar acciones del encabezado
         this.headerActions = [
           {
             label: createTranslation,
@@ -80,73 +116,17 @@ export class ListNewsComponent implements OnInit {
             class: 'p-button-primary',
           },
         ];
-      });
-    // Suscribirse a los cambios de idioma para actualizar las columnas
-    const columnsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.news.list.table.name'),
-      this.transloco.selectTranslate('components.news.list.table.description'),
-      this.transloco.selectTranslate('components.news.list.table.date'),
-      this.transloco.selectTranslate('components.news.list.table.status'),
-      this.transloco.selectTranslate('components.news.list.table.image'),
-    ]);
 
-    const columnsSubscription = columnsTranslation$.subscribe(
-      ([
-        nameTranslation,
-        descriptionTranslation,
-        dateTranslation,
-        statusTranslation,
-        imageTranslation,
-      ]) => {
+        // Configurar columnas de la tabla
         this.columns = [
-          {
-            field: 'title',
-            header: nameTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'description',
-            header: descriptionTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'fecha',
-            header: dateTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'statusToShow',
-            header: statusTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'image',
-            header: imageTranslation,
-            width: '240px',
-          },
+          { field: 'title', header: nameTranslation, sortable: true, filter: true },
+          { field: 'description', header: descriptionTranslation, sortable: true, filter: true },
+          { field: 'fecha', header: dateTranslation, sortable: true, filter: true },
+          { field: 'statusToShow', header: statusTranslation, sortable: true, filter: true },
+          { field: 'image', header: imageTranslation, width: '240px' },
         ];
-      }
-    );
 
-    const rowsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('table.buttons.edit'),
-      this.transloco.selectTranslate('table.buttons.delete'),
-      this.transloco.selectTranslate('table.buttons.disable'),
-      this.transloco.selectTranslate('table.buttons.enable'),
-    ]);
-
-    // Suscribirse a los cambios de idioma para las acciones de fila
-    const rowActionsSubscription = rowsTranslation$.subscribe(
-      ([
-        editTranslation,
-        deleteTranslation,
-        disableTranslation,
-        enableTranslation,
-      ]) => {
+        // Configurar acciones de fila
         this.rowActions = [
           {
             label: editTranslation,
@@ -161,25 +141,19 @@ export class ListNewsComponent implements OnInit {
             class: buttonVariants.outline.red,
           },
           {
-            label: (data) =>
-              data.status ? disableTranslation : enableTranslation,
-            icon: (data) =>
-              data.status ? icons['activate'] : icons['deactivate'],
+            label: (data) => (data.status ? disableTranslation : enableTranslation),
+            icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
             onClick: (data) => this.toggleStatus(data),
-            class: (data) =>
-              data.status
-                ? buttonVariants.outline.gray
-                : buttonVariants.outline.neutral,
+            class: (data) => (data.status ? buttonVariants.outline.gray : buttonVariants.outline.neutral),
           },
         ];
+
+        // Cargar los datos después de que todas las traducciones estén listas
+        this.loadData();
       }
     );
 
-    this.subscriptions.push(
-      headerActionsSubscription,
-      columnsSubscription,
-      rowActionsSubscription
-    );
+    this.subscriptions.push(setupSubscription);
   }
 
   ngAfterViewInit() {
@@ -193,7 +167,8 @@ export class ListNewsComponent implements OnInit {
       next: (data: HomeData[]) => {
         this.data = data.map((item: any) => ({
           ...item,
-          statusToShow: item.status ? 'Activado' : 'Desactivado',
+          // Usar las propiedades con las traducciones de estado
+          statusToShow: item.status ? this.activeStatus : this.inactiveStatus,
         }));
         this.loading = false;
 
@@ -209,40 +184,21 @@ export class ListNewsComponent implements OnInit {
                 }
               },
               error: (error) => {
-                this.notificationSrv.addNotification(
-                  'Error al cargar el archivo multimedia',
-                  'error'
-                );
+                this.notificationSrv.addNotification('Error al cargar el archivo multimedia', 'error');
               },
             });
           }
         });
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información.',
-          'error'
-        );
+        this.notificationSrv.addNotification('Error al cargar la información.', 'error');
         this.loading = false;
       },
     });
   }
 
   onRefresh() {
-    // Limpiar URLs de imágenes
-    Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
-    // Limpiar URLs de videos
-    Object.values(this.videoUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
+    this.cleanupBlobUrls();
     this.imageUrls = {};
     this.videoUrls = {};
     this.loadData();
@@ -301,22 +257,6 @@ export class ListNewsComponent implements OnInit {
     event.target.style.display = 'none';
   }
 
-  ngOnDestroy() {
-    // Limpiar URLs de imágenes
-    Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
-    // Limpiar URLs de videos
-    Object.values(this.videoUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-  }
-
   toggleStatus(data: any) {
     const newStatus = !data.status;
     const formData = new FormData();
@@ -325,22 +265,19 @@ export class ListNewsComponent implements OnInit {
     this.srv.patch(formData, data.id).subscribe({
       next: () => {
         data.status = newStatus;
+        // Usar las propiedades con las traducciones para la notificación
         this.notificationSrv.addNotification(
-          `Estado actualizado a ${newStatus ? 'Activo' : 'Inactivo'}`,
+          `Estado actualizado a ${newStatus ? this.activeStatus : this.inactiveStatus}`,
           'success'
         );
+        // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
+        data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
       error: (error) => {
         if (error?.error?.message && error.error?.statusCode === 400) {
-          this.notificationSrv.addNotification(
-            error.error.message + '.',
-            'error'
-          );
+          this.notificationSrv.addNotification(error.error.message + '.', 'error');
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar el estado.',
-            'error'
-          );
+          this.notificationSrv.addNotification('Error al actualizar el estado.', 'error');
         }
       },
     });
@@ -373,25 +310,13 @@ export class ListNewsComponent implements OnInit {
           this.srv.delete(data.id).subscribe({
             next: () => {
               this.loadData();
-              this.notificationSrv.addNotification(
-                'Novedad eliminada satisfactoriamente.',
-                'success'
-              );
+              this.notificationSrv.addNotification('Novedad eliminada satisfactoriamente.', 'success');
             },
             error: (error) => {
-              if (
-                error.error.statusCode === 400 &&
-                error.error.message.includes('No se puede eliminar el producto')
-              ) {
-                this.notificationSrv.addNotification(
-                  error.error.message,
-                  'error'
-                );
+              if (error.error.statusCode === 400 && error.error.message.includes('No se puede eliminar el producto')) {
+                this.notificationSrv.addNotification(error.error.message, 'error');
               } else {
-                this.notificationSrv.addNotification(
-                  'Error al eliminar el producto.',
-                  'error'
-                );
+                this.notificationSrv.addNotification('Error al eliminar el producto.', 'error');
               }
               this.loading = false;
             },
@@ -400,5 +325,19 @@ export class ListNewsComponent implements OnInit {
       }
     );
     this.subscriptions.push(deleteActionsSubscription);
+  }
+
+  private cleanupBlobUrls() {
+    Object.values(this.imageUrls).forEach((url) => {
+      if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+    });
+    Object.values(this.videoUrls).forEach((url) => {
+      if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.cleanupBlobUrls();
   }
 }

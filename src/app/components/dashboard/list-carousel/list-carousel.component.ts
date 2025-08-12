@@ -41,6 +41,10 @@ export class ListCarouselComponent implements OnInit {
   loading = false;
   imageUrls: { [key: number]: string } = {};
 
+  // Propiedades para almacenar las traducciones de los estados
+  activeStatus = '';
+  inactiveStatus = '';
+
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
   customTemplates: { [key: string]: TemplateRef<any> } = {};
@@ -61,27 +65,35 @@ export class ListCarouselComponent implements OnInit {
 
   ngOnInit() {
     this.setupTranslations();
-    this.loadData();
   }
 
   private setupTranslations() {
-    // Suscribirse a los cambios de idioma para actualizar las columnas
-    const columnsTranslation$ = combineLatest([
+    // Suscribirse a los cambios de idioma para actualizar columnas y estados
+    const setupSubscription$ = combineLatest([
       this.transloco.selectTranslate('components.carousel.list.table.name'),
       this.transloco.selectTranslate(
         'components.carousel.list.table.description'
       ),
       this.transloco.selectTranslate('components.news.list.table.status'),
       this.transloco.selectTranslate('components.carousel.list.table.image'),
+      this.transloco.selectTranslate('status.active'), // Añadido
+      this.transloco.selectTranslate('status.inactive'), // Añadido
     ]);
 
-    const columnsSubscription = columnsTranslation$.subscribe(
+    const setupSubscription = setupSubscription$.subscribe(
       ([
         nameTranslation,
         descriptionTranslation,
         statusTranslation,
         imageTranslation,
+        activeStatusTranslation,
+        inactiveStatusTranslation,
       ]) => {
+        // Asignar traducciones de estado y limpiar espacios extra
+        this.activeStatus = activeStatusTranslation.trim();
+        this.inactiveStatus = inactiveStatusTranslation.trim();
+
+        // Asignar traducciones de columnas
         this.columns = [
           {
             field: 'title',
@@ -107,6 +119,9 @@ export class ListCarouselComponent implements OnInit {
             width: '240px',
           },
         ];
+
+        // Cargar los datos solo después de que las traducciones estén listas
+        this.loadData();
       }
     );
 
@@ -141,7 +156,7 @@ export class ListCarouselComponent implements OnInit {
       }
     );
 
-    this.subscriptions.push(columnsSubscription, rowActionsSubscription);
+    this.subscriptions.push(setupSubscription, rowActionsSubscription);
   }
 
   ngAfterViewInit() {
@@ -155,7 +170,8 @@ export class ListCarouselComponent implements OnInit {
       next: (data: HomeData[]) => {
         this.data = data.map((item: any) => ({
           ...item,
-          statusToShow: item.status ? 'Activado' : 'Desactivado',
+          // Usar las propiedades con las traducciones de estado
+          statusToShow: item.status ? this.activeStatus : this.inactiveStatus,
         }));
         this.loading = false;
 
@@ -226,12 +242,10 @@ export class ListCarouselComponent implements OnInit {
   }
 
   toggleStatus(data: any) {
-    // Calcular elementos activos actuales (excluyendo el elemento que estamos modificando)
     const activeItems = this.data.filter(
       (item) => item.status && item.id !== data.id
     ).length;
 
-    // Si intentamos desactivar un elemento activo y solo quedaría 1 activo
     if (data.status && activeItems < 2) {
       this.transloco
         .selectTranslate('components.carousel.list.errors.min_active')
@@ -248,10 +262,15 @@ export class ListCarouselComponent implements OnInit {
     this.srv.patch(formData, data.id).subscribe({
       next: () => {
         data.status = newStatus;
+        // Usar las propiedades con las traducciones para la notificación
         this.notificationSrv.addNotification(
-          `Estado actualizado a ${newStatus ? 'Activo' : 'Inactivo'}`,
+          `Estado actualizado a ${
+            newStatus ? this.activeStatus : this.inactiveStatus
+          }`,
           'success'
         );
+        // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
+        data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
       error: (error) => {
         if (error?.error?.message && error.error?.statusCode === 400) {
@@ -270,6 +289,9 @@ export class ListCarouselComponent implements OnInit {
   }
 
   ngOnDestroy() {
+    // Cancelar todas las suscripciones para evitar fugas de memoria
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    
     Object.values(this.imageUrls).forEach((url) => {
       if (url.startsWith('blob:')) {
         URL.revokeObjectURL(url);

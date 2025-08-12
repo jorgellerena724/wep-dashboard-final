@@ -1,4 +1,8 @@
 {
+    "status": {
+      "active": "Activado",
+      "inactive": " Desactivado "
+    },
     "footer": {
     "rights_reserved": "Todos los derechos reservados"
   },
