@@ -322,7 +322,7 @@ export class AuthService implements OnDestroy {
     this.warningTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
         this.notificationSrv.addNotification(
-          'Tu sesión expirará pronto por inactividad',
+          'Tu sesión expirará pronto por inactividad."Your session will expire soon due to inactivity."',
           'warning'
         );
       }
@@ -404,7 +404,7 @@ export class AuthService implements OnDestroy {
 
     // Mostrar notificación antes de limpiar
     this.notificationSrv.addNotification(
-      'Sesión cerrada satisfactoriamente',
+      'Sesión cerrada satisfactoriamente."Session closed successfully"',
       'success'
     );
 
