@@ -22,12 +22,14 @@ import { TranslocoModule } from '@jsverse/transloco';
 export class ModalComponent implements OnDestroy {
   @ViewChild('dynamicContent', { read: ViewContainerRef })
   container!: ViewContainerRef;
+  
   visible = false;
   title = '';
   isFormValid = false;
   componentRef: ComponentRef<any> | null = null;
   loading = false;
   currentConfig: ModalConfig | null = null;
+  isProcessing = false; // Nueva propiedad para controlar el estado de procesamiento
 
   constructor(
     private modalService: ModalService,
@@ -44,6 +46,7 @@ export class ModalComponent implements OnDestroy {
       this.currentConfig = config;
       this.loadComponent(config);
       this.visible = true;
+      this.isProcessing = false; // Resetear el estado al abrir un nuevo modal
     });
   }
 
@@ -53,7 +56,7 @@ export class ModalComponent implements OnDestroy {
     }
     this.container.clear();
     this.componentRef = this.container.createComponent(config.component);
-
+    
     if (config.data) {
       for (const key in config.data) {
         if (config.data.hasOwnProperty(key)) {
@@ -72,13 +75,25 @@ export class ModalComponent implements OnDestroy {
     // Escuchar el evento de éxito del formulario
     if (this.componentRef.instance.submitSuccess) {
       this.componentRef.instance.submitSuccess.subscribe(() => {
+        this.isProcessing = false; // Resetear el estado cuando termine exitosamente
         this.closeModal(); // Cerrar el modal solo si el envío fue exitoso
+      });
+    }
+
+    // Escuchar errores del formulario (opcional)
+    if (this.componentRef.instance.submitError) {
+      this.componentRef.instance.submitError.subscribe(() => {
+        this.isProcessing = false; // Resetear el estado en caso de error
+        this.loading = false;
       });
     }
   }
 
   closeModal() {
     this.visible = false;
+    this.isProcessing = false; // Resetear el estado al cerrar
+    this.loading = false;
+    
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null;
@@ -92,6 +107,11 @@ export class ModalComponent implements OnDestroy {
   }
 
   onAccept() {
+    // Prevenir múltiples clics
+    if (this.isProcessing) {
+      return;
+    }
+
     if (
       !this.componentRef ||
       !this.isDynamicComponent(this.componentRef.instance)
@@ -101,22 +121,29 @@ export class ModalComponent implements OnDestroy {
 
     // Marcar todos los campos como tocados
     this.componentRef.instance['form'].markAllAsTouched();
-
+    
     // Verificar si el formulario es válido
     if (!this.componentRef.instance['form'].valid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
+        'Compruebe los campos del formulario. / Check the form fields.',
         'warning'
       );
       return;
     }
 
+    // Activar estados de carga y procesamiento
+    this.isProcessing = true;
     this.loading = true;
 
-    // Llamar al método onSubmit del componente dinámico
-    this.componentRef.instance.onSubmit();
-
-    this.loading = false;
+    try {
+      // Llamar al método onSubmit del componente dinámico
+      this.componentRef.instance.onSubmit();
+    } catch (error) {
+      // En caso de error sincrónico, resetear los estados
+      this.isProcessing = false;
+      this.loading = false;
+      console.error('Error en onSubmit:', error);
+    }
   }
 
   private isDynamicComponent(instance: any): instance is DynamicComponent {
