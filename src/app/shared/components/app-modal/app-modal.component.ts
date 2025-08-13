@@ -105,7 +105,7 @@ export class ModalComponent implements OnDestroy {
     // Verificar si el formulario es válido
     if (!this.componentRef.instance['form'].valid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        'Compruebe los campos del formulario."Check the form fields."',
         'warning'
       );
       return;

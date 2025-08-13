@@ -51,7 +51,7 @@ export class LoginComponent {
         next: (success) => {
           if (success) {
             this.notificationSrv.addNotification(
-              'Autenticación Exitosa',
+              'Autenticación Exitosa."Authentication Successful"',
               'success'
             );
             this.router.navigate(['/admin']);
@@ -62,47 +62,47 @@ export class LoginComponent {
           this.isLoading = false; // ✅ Restablecer isLoading en caso de error
           const errorMessage =
             errorResponse?.error?.message ||
-            'Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde.';
+            'Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde."An unexpected error has occurred. Please try again later."';
           const statusCode = errorResponse?.status || 500;
 
           if (statusCode === 400) {
             this.notificationSrv.addNotification(
               errorMessage ||
-                'Solicitud incorrecta. Verifica los datos enviados.',
+                'Solicitud incorrecta. Verifica los datos enviados."Bad request. Check the submitted data."',
               'error'
             );
           } else if (statusCode === 401) {
             this.notificationSrv.addNotification(
               errorMessage ||
-                'Credenciales inválidas. Por favor, verifica tu correo y contraseña.',
+                'Credenciales inválidas. Por favor, verifica tu correo y contraseña."Invalid credentials. Please check your email and password."',
               'error'
             );
           } else if (statusCode === 500) {
             this.notificationSrv.addNotification(
-              'Error interno del servidor. Inténtelo nuevamente más tarde.',
+              'Error interno del servidor. Inténtelo nuevamente más tarde."Internal server error. Please try again later."',
               'error'
             );
           } else if (statusCode === 502) {
             this.notificationSrv.addNotification(
-              'No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde.',
+              'No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde."Could not connect to the server. Please check your connection and try again later."',
               'error'
             );
           } else if (statusCode === 0) {
             this.notificationSrv.addNotification(
-              'No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde.',
+              'No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde."Could not connect to the server. Please check your connection and try again later."',
               'error'
             );
           } else {
             this.notificationSrv.addNotification(
               errorMessage ||
-                'Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde.',
+                'Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde."An unexpected error has occurred. Please try again later."',
               'error'
             );
           }
         },
       });
     } else {
-      this.notificationSrv.addNotification('Formulario no válido', 'error');
+      this.notificationSrv.addNotification('Formulario no válido."Invalid form"', 'error');
       this.loginForm.markAllAsTouched();
     }
   }

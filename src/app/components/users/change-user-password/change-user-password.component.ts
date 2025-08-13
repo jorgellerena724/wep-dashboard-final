@@ -88,7 +88,7 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
   onSubmit(): void {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        'Compruebe los campos del formulario."Check the form fields."',
         'warning'
       );
       this.form.markAllAsTouched();

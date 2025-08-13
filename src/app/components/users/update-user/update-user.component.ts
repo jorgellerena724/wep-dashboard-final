@@ -76,7 +76,7 @@ export class UpdateUserComponent implements DynamicComponent {
     // Validar el formulario
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        'Compruebe los campos del formulario."Check the form fields."',
         'warning'
       );
       this.markAllFieldsAsTouched(); // Marcar todos los campos como tocados

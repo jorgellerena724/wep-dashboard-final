@@ -191,7 +191,7 @@ export class ListNewsComponent implements OnInit {
         });
       },
       error: (error) => {
-        this.notificationSrv.addNotification('Error al cargar la información.', 'error');
+        this.notificationSrv.addNotification('Error al cargar la información."Error loading information."', 'error');
         this.loading = false;
       },
     });

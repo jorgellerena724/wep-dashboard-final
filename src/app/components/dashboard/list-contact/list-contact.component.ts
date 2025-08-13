@@ -142,7 +142,7 @@ export class ListContactComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al cargar la información.',
+          'Error al cargar la información."Error loading information."',
           'error'
         );
         this.loading = false;

@@ -138,7 +138,7 @@ export class UpdateCarouselComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        'Compruebe los campos del formulario."Check the form fields."',
         'warning'
       );
       this.form.markAllAsTouched();
@@ -186,7 +186,7 @@ export class UpdateCarouselComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
           this.notificationSrv.addNotification(error.error.message, 'error');
@@ -218,7 +218,7 @@ export class UpdateCarouselComponent implements DynamicComponent {
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,

@@ -183,7 +183,7 @@ export class ListCarouselComponent implements OnInit {
               },
               error: (error) => {
                 this.notificationSrv.addNotification(
-                  'Error al cargar imagen',
+                  'Error al cargar imagen."Error loading image"',
                   'error'
                 );
               },
@@ -193,7 +193,7 @@ export class ListCarouselComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al cargar la información.',
+          'Error al cargar la información."Error loading information."',
           'error'
         );
         this.loading = false;
