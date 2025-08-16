@@ -75,10 +75,9 @@ export class CreateUserComponent implements DynamicComponent {
   onSubmit(): void {
     // Validar el formulario
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.users.error.formInvalid').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       this.markAllFieldsAsTouched();
       return;
     }
@@ -88,10 +87,9 @@ export class CreateUserComponent implements DynamicComponent {
 
     this.srv.post(formData).subscribe({
       next: (response) => {
-        this.notificationSrv.addNotification(
-          'Usuario creado satisfactoriamente.',
-          'success'
-        );
+        this.transloco.selectTranslate('notifications.users.success.created').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         this.submitSuccess.emit();
         this.form.reset();
         if (
@@ -106,12 +104,13 @@ export class CreateUserComponent implements DynamicComponent {
       },
       error: (error) => {
         if (error.error.message.includes('correo electrónico')) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          this.transloco.selectTranslate('notifications.users.error.emailExists').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         } else {
-          this.notificationSrv.addNotification(
-            'Error al crear el usuario.',
-            'error'
-          );
+          this.transloco.selectTranslate('notifications.users.error.create').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         }
       },
     });

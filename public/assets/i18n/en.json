@@ -26,6 +26,24 @@
         "duplicateImage": "The image you are trying to upload is already on the server.",
         "formInvalid": "Check the form fields."
       }
+    },
+    "users": {
+      "success": {
+        "created": "User created successfully.",
+        "updated": "User updated successfully.",
+        "passwordChanged": "Password updated successfully.",
+        "deleted": "User deleted successfully."
+      },
+      "error": {
+        "create": "Error creating user.",
+        "update": "Error updating user.",
+        "changePassword": "Error updating password.",
+        "delete": "Error deleting user.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields.",
+        "selfDelete": "You cannot delete your own user while authenticated.",
+        "emailExists": "The email already exists in the system."
+      }
     }
   },
   "language": {

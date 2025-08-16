@@ -174,10 +174,9 @@ export class UsersComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.users.error.load').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
         this.loading = false;
       },
     });
@@ -257,10 +256,9 @@ export class UsersComponent implements OnInit {
 
     // Verificar si el usuario a eliminar es el mismo que está autenticado
     if (data.id === currentUser.id) {
-      this.notificationSrv.addNotification(
-        'No puede eliminar su propio usuario mientras esté autenticado.',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.users.error.selfDelete').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       return;
     }
     const deleteTranslation$ = combineLatest([
@@ -289,10 +287,9 @@ export class UsersComponent implements OnInit {
           this.srv.delete(data.id).subscribe({
             next: () => {
               this.loadData();
-              this.notificationSrv.addNotification(
-                'Producto eliminado satisfactoriamente.',
-                'success'
-              );
+              this.transloco.selectTranslate('notifications.users.success.deleted').subscribe(message => {
+                this.notificationSrv.addNotification(message, 'success');
+              });
             },
             error: (error) => {
               if (
@@ -304,10 +301,9 @@ export class UsersComponent implements OnInit {
                   'error'
                 );
               } else {
-                this.notificationSrv.addNotification(
-                  'Error al eliminar el usuario.',
-                  'error'
-                );
+                this.transloco.selectTranslate('notifications.users.error.delete').subscribe(message => {
+                  this.notificationSrv.addNotification(message, 'error');
+                });
               }
               this.loading = false;
             },
