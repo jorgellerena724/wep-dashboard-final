@@ -1,30 +1,5 @@
 {
-  "language": {
-    "es": "Español",
-    "en": "Inglés"
-},
 
-    "status": {
-      "active": "Activado",
-      "inactive": " Desactivado "
-    },
-    "footer": {
-    "rights_reserved": "Todos los derechos reservados"
-  },
-  "login": {
-    "email": {
-      "title": "Correo",
-      "placeholder": "Escriba su correo aquí",
-      "required": "El correo es obligatorio."
-    },
-    "password": {
-      "title": "Contraseña",
-      "placeholder": "Escriba su contraseña aquí",
-      "required": "La contraseña es obligatoria."
-    },
-    "loading": "Accediendo...",
-    "load": "Iniciar Sesión →"
-  },
   "navbar": {
     "title": "Web Empresarial Profesional",
     "logout": "Cerrar Sesión",
@@ -49,6 +24,49 @@
       "users": "Usuarios"
     }
   },
+    "notifications": {
+    "login": {
+      "success": "Autenticación Exitosa.",
+      "error": {
+        "unexpected": "Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde.",
+        "badRequest": "Solicitud incorrecta. Verifica los datos enviados.",
+        "invalidCredentials": "Credenciales inválidas. Por favor, verifica tu correo y contraseña.",
+        "serverError": "Error interno del servidor. Inténtelo nuevamente más tarde.",
+        "connectionError": "No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde.",
+        "invalidForm": "Formulario no válido. Por favor, complete todos los campos requeridos."
+      }
+    },
+    "session": {
+      "inactivityWarning": "Tu sesión expirará pronto por inactividad.",
+      "logoutSuccess": "Sesión cerrada satisfactoriamente."
+    }
+  },
+  "language": {
+    "es": "Español",
+    "en": "Inglés"
+  },
+  "status": {
+      "active": "Activado",
+      "inactive": " Desactivado "
+  },
+  "footer": {
+    "rights_reserved": "Todos los derechos reservados"
+  },
+  "login": {
+    "email": {
+      "title": "Correo",
+      "placeholder": "Escriba su correo aquí",
+      "required": "El correo es obligatorio."
+    },
+    "password": {
+      "title": "Contraseña",
+      "placeholder": "Escriba su contraseña aquí",
+      "required": "La contraseña es obligatoria."
+    },
+    "loading": "Accediendo...",
+    "load": "Iniciar Sesión →"
+  },
+
   "sidebar": {
     "admin": "Administración",
     "header": "Encabezado",

@@ -1,18 +1,33 @@
 {
-  
-
-"language": {
+ "notifications": {
+    "login": {
+      "success": "Authentication Successful.",
+      "error": {
+        "unexpected": "An unexpected error has occurred. Please try again later.",
+        "badRequest": "Bad request. Check the submitted data.",
+        "invalidCredentials": "Invalid credentials. Please check your email and password.",
+        "serverError": "Internal server error. Please try again later.",
+        "connectionError": "Could not connect to the server. Please check your connection and try again later.",
+        "invalidForm": "Invalid form. Please complete all required fields."
+      }
+    },
+    "session": {
+      "inactivityWarning": "Your session will expire soon due to inactivity.",
+      "logoutSuccess": "Session closed successfully."
+    }
+  },
+  "language": {
     "es": "Spanish",
     "en": "English"
-},
-    "status": {
+  },
+  "status": {
       "active": "Activated",
       "inactive": "Deactivated"
-    },
-    "footer": {
+  },
+  "footer": {
     "rights_reserved": "All rights reserved"
   },
-  "login": {
+ "login": {
     "email": {
       "title": "Email",
       "placeholder": "Write your email here",

@@ -1,4 +1,4 @@
-import { Injectable, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID, OnDestroy, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, Subscription } from 'rxjs';
@@ -6,6 +6,7 @@ import { catchError, filter, map, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { isPlatformBrowser } from '@angular/common';
 import { NotificationService } from '../../shared/services/system/notification.service';
+import { TranslocoService } from '@jsverse/transloco'; // ---> AÑADIDO: Importar TranslocoService
 
 interface User {
   id: string;
@@ -26,8 +27,7 @@ interface LoginResponse {
 export class AuthService implements OnDestroy {
   private redirectExecuted = false;
   private initialNavigationChecked = new BehaviorSubject<boolean>(false);
-  public initialNavigationChecked$ =
-    this.initialNavigationChecked.asObservable();
+  public initialNavigationChecked$ = this.initialNavigationChecked.asObservable();
 
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private userSubject = new BehaviorSubject<User | null>(null);
@@ -43,6 +43,9 @@ export class AuthService implements OnDestroy {
 
   private readonly INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutos
   private readonly WARNING_BEFORE_TIMEOUT = 1 * 60 * 1000; // 1 minuto
+  
+  // ---> AÑADIDO: Inyección de TranslocoService usando 'inject'
+  private transloco = inject(TranslocoService);
 
   constructor(
     private http: HttpClient,
@@ -53,10 +56,10 @@ export class AuthService implements OnDestroy {
     this.loadInitialState();
     this.setupNavigationTracking();
   }
-
+  
+  // ... (el resto de los métodos hasta resetInactivityTimer se mantienen igual)
   private setupNavigationTracking(): void {
     if (isPlatformBrowser(this.platformId)) {
-      // Usar subscription para evitar memory leaks
       this.navigationSubscription = this.router.events
         .pipe(
           filter((event) => event instanceof NavigationEnd),
@@ -117,7 +120,6 @@ export class AuthService implements OnDestroy {
         'focus',
       ];
 
-      // Crear handler una sola vez y reutilizarlo con arrow function para mantener el contexto
       this.activityHandler = this.createDebouncedHandler();
 
       events.forEach((event) => {
@@ -147,13 +149,11 @@ export class AuthService implements OnDestroy {
   }
 
   private cleanup(): void {
-    // Limpiar subscription de navegación
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
       this.navigationSubscription = null;
     }
 
-    // Limpiar event listeners
     if (
       isPlatformBrowser(this.platformId) &&
       this.eventListenersAdded &&
@@ -208,21 +208,18 @@ export class AuthService implements OnDestroy {
         if (sessionToken && sessionUser) {
           const user = JSON.parse(sessionUser) as User;
 
-          // Verificar expiración del token
           if (user.exp && Date.now() >= user.exp) {
             this.logout();
             this.initialNavigationChecked.next(true);
             return;
           }
 
-          // Actualizar estado
           this.tokenSubject.next(sessionToken);
           this.userSubject.next(user);
           this.setupExpirationTimer(user.exp);
           this.setupActivityListeners();
           this.resetInactivityTimer();
 
-          // Redirigir si es necesario (solo en la carga inicial)
           if (!this.redirectExecuted) {
             this.redirectExecuted = true;
             this.redirectAfterLogin();
@@ -259,11 +256,8 @@ export class AuthService implements OnDestroy {
       const fullUser = JSON.parse(jsonPayload);
       const exp = fullUser.exp * 1000;
       const full_name = fullUser.full_name;
-      // Para FastAPI, el email viene en "sub"
       const email = fullUser.email;
       const client = fullUser.client;
-
-      // Valores por defecto para campos que no vienen en el token de FastAPI
       const id = fullUser.id || fullUser.user_id || fullUser._id || email;
 
       return { id, full_name, email, exp, client };
@@ -298,37 +292,25 @@ export class AuthService implements OnDestroy {
       }, timeUntilExpiration);
     }
   }
-
+  
   private resetInactivityTimer(): void {
-    // Evitar resetear timers si ya estamos cerrando sesión
     if (this.isLoggingOut) {
       return;
     }
-
-    // Limpiar timers existentes
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-      this.inactivityTimer = null;
-    }
-
-    if (this.warningTimer) {
-      clearTimeout(this.warningTimer);
-      this.warningTimer = null;
-    }
+    
+    if (this.inactivityTimer) clearTimeout(this.inactivityTimer);
+    if (this.warningTimer) clearTimeout(this.warningTimer);
 
     this.lastActivityTime = Date.now();
 
-    // Configurar timer de advertencia
     this.warningTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
-        this.notificationSrv.addNotification(
-          'Tu sesión expirará pronto por inactividad."Your session will expire soon due to inactivity."',
-          'warning'
-        );
+        // MODIFICADO: Usar la clave de traducción para la advertencia de inactividad
+        const warningMessage = this.transloco.translate('notifications.session.inactivityWarning');
+        this.notificationSrv.addNotification(warningMessage, 'warning');
       }
     }, this.INACTIVITY_TIMEOUT - this.WARNING_BEFORE_TIMEOUT);
 
-    // Configurar timer de inactividad
     this.inactivityTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
         this.logout();
@@ -342,8 +324,6 @@ export class AuthService implements OnDestroy {
 
   public login(email: string, password: string): Observable<boolean> {
     const trimmedEmail = email.trim();
-
-    // Crear FormData para enviar como form-data (requerido por FastAPI)
     const formData = new FormData();
     formData.append('email', trimmedEmail);
     formData.append('password', password);
@@ -377,46 +357,32 @@ export class AuthService implements OnDestroy {
   }
 
   public CloseInactivity(): void {
-    if (this.isLoggingOut) {
-      return;
-    }
-
+    if (this.isLoggingOut) return;
     this.isLoggingOut = true;
     this.clearAllTimers();
-
     this.tokenSubject.next(null);
     this.userSubject.next(null);
-
     this.cleanupAndRedirect();
   }
 
   public logout(): void {
-    if (this.isLoggingOut) {
-      return;
-    }
+    if (this.isLoggingOut) return;
 
     this.isLoggingOut = true;
     this.clearAllTimers();
-
-    // Limpiar estado de la aplicación
     this.tokenSubject.next(null);
     this.userSubject.next(null);
 
-    // Mostrar notificación antes de limpiar
-    this.notificationSrv.addNotification(
-      'Sesión cerrada satisfactoriamente."Session closed successfully"',
-      'success'
-    );
+    // MODIFICADO: Usar la clave de traducción para el cierre de sesión
+    const logoutMessage = this.transloco.translate('notifications.session.logoutSuccess');
+    this.notificationSrv.addNotification(logoutMessage, 'success');
 
-    // Con JWT no necesitamos llamar al servidor para logout
-    // El token simplemente expira o se elimina del cliente
     this.cleanupAndRedirect();
   }
 
   private cleanupAndRedirect(): void {
     if (isPlatformBrowser(this.platformId)) {
       try {
-        // Solo guardar lastPath si no estamos en login
         if (this.router.url !== '/login' && this.router.url !== '/') {
           localStorage.setItem('lastPath', this.router.url);
         }
@@ -427,7 +393,6 @@ export class AuthService implements OnDestroy {
       }
     }
 
-    // Usar setTimeout para evitar problemas de navegación
     setTimeout(() => {
       this.router.navigate(['/login'], { replaceUrl: true });
       this.isLoggingOut = false;
@@ -457,22 +422,15 @@ export class AuthService implements OnDestroy {
 
   public redirectAfterLogin(): void {
     if (isPlatformBrowser(this.platformId) && this.isLoggedIn()) {
-      // Usar setTimeout para evitar problemas de navegación
       setTimeout(() => {
         const lastPath = this.getLastPath();
-
-        if (
-          lastPath &&
-          lastPath !== '/login' &&
-          lastPath !== '/' &&
-          !lastPath.includes('login')
-        ) {
+        if (lastPath && lastPath !== '/login' && lastPath !== '/' && !lastPath.includes('login')) {
           this.router.navigateByUrl(lastPath, { replaceUrl: true });
         } else {
-          this.router.navigate(['/admin'], { replaceUrl: true }); // Cambiado a /admin según tus rutas
+          this.router.navigate(['/admin'], { replaceUrl: true });
         }
         this.initialNavigationChecked.next(true);
-      }, 100); // Pequeño delay para asegurar que la navegación funcione
+      }, 100);
     } else {
       this.initialNavigationChecked.next(true);
     }
@@ -480,7 +438,6 @@ export class AuthService implements OnDestroy {
 
   public getClient(): string | null {
     const userData = localStorage.getItem('user');
-
     if (userData) {
       try {
         const user = JSON.parse(userData);
@@ -490,7 +447,6 @@ export class AuthService implements OnDestroy {
         return null;
       }
     }
-
     return null;
   }
 }
