@@ -12,6 +12,71 @@
       class="border border-gray-500 px-8 py-10 text-left bg-gray-900 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.2),0_0_40px_rgba(0,0,0,0.15),0_0_60px_rgba(0,0,0,0.1),0_0_80px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
     >
       <div class="flex flex-col justify-center items-center h-full select-none">
+        
+        <!-- AÑADIDO: Selector de Idioma -->
+        <div class="w-full flex justify-end mb-4">
+          <div class="relative inline-block text-left">
+            <div>
+              <button
+                type="button"
+                (click)="toggleLanguageMenu()"
+                class="inline-flex items-center justify-center w-full rounded-lg border border-gray-600 bg-gray-800 px-2 py-1 text-sm font-semibold text-white hover:bg-gray-700 transition-all duration-300 ease-in-out"
+                id="language-menu-login"
+                [attr.aria-expanded]="languageMenuOpen"
+                aria-haspopup="true"
+              >
+                <img [src]="currentLanguageIcon" [alt]="currentLanguage" class="w-5 h-5" />
+                <svg
+                  class="h-6 w-6 transition-transform duration-200"
+                  [class.rotate-180]="languageMenuOpen"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              class="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700"
+              [class.hidden]="!languageMenuOpen"
+              [class.opacity-0]="!languageMenuOpen"
+              [class.scale-95]="!languageMenuOpen"
+              [class.opacity-100]="languageMenuOpen"
+              [class.scale-100]="languageMenuOpen"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="language-menu-login"
+            >
+              <div class="py-2" role="none">
+                <a
+                  (click)="selectLanguage('es')"
+                  class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  role="menuitem"
+                >
+                  <img src="assets/img/españa.ico" alt="España" class="mr-3 w-5 h-5" />
+                  {{ "language.es" | transloco }}
+                </a>
+                <a
+                  (click)="selectLanguage('en')"
+                  class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  role="menuitem"
+                >
+                  <img src="assets/img/eeuu.ico" alt="USA" class="mr-3 w-5 h-5" />
+                  {{ "language.en" | transloco }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- FIN: Selector de Idioma -->
+
         <div class="flex flex-col items-center justify-center gap-2 mb-2">
           <div>
             <img

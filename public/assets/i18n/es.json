@@ -1,4 +1,9 @@
 {
+  "language": {
+    "es": "Español",
+    "en": "Inglés"
+},
+
     "status": {
       "active": "Activado",
       "inactive": " Desactivado "

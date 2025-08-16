@@ -73,10 +73,10 @@
             >
               <div class="py-2" role="none">
                 <a (click)="selectLanguage('es')" class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-300 hover:text-gray-800 transition-colors duration-200" role="menuitem">
-                  <img src="assets/img/españa.ico" alt="España" class="mr-3 w-5 h-5" /> Español
+                  <img src="assets/img/españa.ico" alt="España" class="mr-3 w-5 h-5" /> {{ "language.es" | transloco }}
                 </a>
                 <a (click)="selectLanguage('en')" class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-300 hover:text-gray-800 transition-colors duration-200" role="menuitem">
-                  <img src="assets/img/eeuu.ico" alt="USA" class="mr-3 w-5 h-5" /> English
+                  <img src="assets/img/eeuu.ico" alt="USA" class="mr-3 w-5 h-5" /> {{ "language.en" | transloco }}
                 </a>
               </div>
             </div>
