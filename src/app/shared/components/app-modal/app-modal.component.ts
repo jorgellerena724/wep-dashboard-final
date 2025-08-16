@@ -4,6 +4,7 @@ import {
   ViewContainerRef,
   ComponentRef,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -11,7 +12,7 @@ import { ModalService, ModalConfig } from '../../services/system/modal.service';
 import { DynamicComponent } from '../../interfaces/dynamic.interface';
 import { NotificationService } from '../../services/system/notification.service';
 import { CommonModule } from '@angular/common';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-modal',
@@ -20,6 +21,8 @@ import { TranslocoModule } from '@jsverse/transloco';
   imports: [DialogModule, ButtonModule, CommonModule, TranslocoModule],
 })
 export class ModalComponent implements OnDestroy {
+  private transloco = inject(TranslocoService);
+  
   @ViewChild('dynamicContent', { read: ViewContainerRef })
   container!: ViewContainerRef;
   
@@ -125,7 +128,7 @@ export class ModalComponent implements OnDestroy {
     // Verificar si el formulario es válido
     if (!this.componentRef.instance['form'].valid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario. / Check the form fields.',
+        this.transloco.translate('notifications.products.error.formInvalid'),
         'warning'
       );
       return;
