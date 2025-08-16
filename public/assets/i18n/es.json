@@ -79,6 +79,20 @@
         "load": "Error al cargar la información.",
         "formInvalid": "Compruebe los campos del formulario."
       }
+    },
+    "carousel": {
+      "success": {
+        "updated": "Carrusel actualizado correctamente.",
+        "statusUpdated": "Estado actualizado a {status}"
+      },
+      "error": {
+        "update": "Error al actualizar el carrusel.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado."
+      }
     }
   },
   "language": {
