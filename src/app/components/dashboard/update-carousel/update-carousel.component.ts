@@ -138,9 +138,8 @@ export class UpdateCarouselComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.transloco.selectTranslate('notifications.carousel.error.formInvalid').subscribe(message => {
-        this.notificationSrv.addNotification(message, 'warning');
-      });
+      const message = this.transloco.translate('notifications.carousel.error.formInvalid');
+      this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
     }
@@ -164,9 +163,8 @@ export class UpdateCarouselComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.transloco.selectTranslate('notifications.carousel.success.updated').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
+        const message = this.transloco.translate('notifications.carousel.success.updated');
+        this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -188,13 +186,11 @@ export class UpdateCarouselComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.transloco.selectTranslate('notifications.carousel.error.duplicateImage').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          const message = this.transloco.translate('notifications.carousel.error.duplicateImage');
+          this.notificationSrv.addNotification(message, 'error');
         } else {
-          this.transloco.selectTranslate('notifications.carousel.error.update').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          const message = this.transloco.translate('notifications.carousel.error.update');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });

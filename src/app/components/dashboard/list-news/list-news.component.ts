@@ -272,7 +272,8 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
         
         // Notificación de éxito con traducción y parámetros
-        this.translateAndNotify('notifications.news.success.statusUpdated', 'success', { status: statusText });
+        const message = this.transloco.translate('notifications.news.success.statusUpdated', { status: statusText });
+        this.notificationSrv.addNotification(message, 'success');
 
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
         data.statusToShow = statusText;

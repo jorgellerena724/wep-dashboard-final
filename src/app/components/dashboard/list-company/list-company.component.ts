@@ -176,18 +176,16 @@ export class ListCompanyComponent implements OnInit {
                 this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
               },
               error: (error) => {
-                this.transloco.selectTranslate('notifications.company.error.loadImage').subscribe(message => {
-                  this.notificationSrv.addNotification(message, 'error');
-                });
+                const message = this.transloco.translate('notifications.company.error.loadImage');
+                this.notificationSrv.addNotification(message, 'error');
               },
             });
           }
         });
       },
       error: (error) => {
-        this.transloco.selectTranslate('notifications.company.error.load').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'error');
-        });
+        const message = this.transloco.translate('notifications.company.error.load');
+        this.notificationSrv.addNotification(message, 'error');
         this.loading = false;
       },
     });
@@ -243,9 +241,8 @@ export class ListCompanyComponent implements OnInit {
         data.status = newStatus;
         // Usar las propiedades con las traducciones para la notificación
         const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
-        this.transloco.selectTranslate('notifications.company.success.statusUpdated', { status: statusText }).subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
+        const message = this.transloco.translate('notifications.company.success.statusUpdated', { status: statusText });
+        this.notificationSrv.addNotification(message, 'success');
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
         data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
@@ -256,9 +253,8 @@ export class ListCompanyComponent implements OnInit {
             'error'
           );
         } else {
-          this.transloco.selectTranslate('notifications.company.error.statusUpdate').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          const message = this.transloco.translate('notifications.company.error.statusUpdate');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });

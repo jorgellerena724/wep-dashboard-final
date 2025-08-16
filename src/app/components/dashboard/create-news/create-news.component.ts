@@ -145,9 +145,8 @@ export class CreateNewsComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.transloco.selectTranslate('notifications.news.error.formInvalid').subscribe(message => {
-        this.notificationSrv.addNotification(message, 'warning');
-      });
+      const message = this.transloco.translate('notifications.news.error.formInvalid');
+      this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
     }
@@ -173,9 +172,8 @@ export class CreateNewsComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.transloco.selectTranslate('notifications.news.success.created').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
+        const message = this.transloco.translate('notifications.news.success.created');
+        this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -197,13 +195,11 @@ export class CreateNewsComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.transloco.selectTranslate('notifications.news.error.duplicateImage').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          const message = this.transloco.translate('notifications.news.error.duplicateImage');
+          this.notificationSrv.addNotification(message, 'error');
         } else {
-          this.transloco.selectTranslate('notifications.news.error.create').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          const message = this.transloco.translate('notifications.news.error.create');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });
