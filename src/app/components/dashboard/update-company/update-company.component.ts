@@ -139,10 +139,9 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.company.error.formInvalid').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       this.form.markAllAsTouched();
       return;
     }
@@ -166,10 +165,9 @@ export class UpdateCompanyComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.notificationSrv.addNotification(
-          'Dato de la empresa actualizado correctamente.',
-          'success'
-        );
+        this.transloco.selectTranslate('notifications.company.success.updated').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -191,12 +189,13 @@ export class UpdateCompanyComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          this.transloco.selectTranslate('notifications.company.error.duplicateImage').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar.',
-            'error'
-          );
+          this.transloco.selectTranslate('notifications.company.error.update').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         }
       },
     });

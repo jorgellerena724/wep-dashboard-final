@@ -87,6 +87,20 @@
         "statusUpdate": "Error updating status.",
         "cannotDelete": "Cannot delete the product"
       }
+    },
+    "company": {
+      "success": {
+        "updated": "Company data updated successfully.",
+        "statusUpdated": "Status updated to {status}"
+      },
+      "error": {
+        "update": "Error updating.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status."
+      }
     }
   },
   "language": {

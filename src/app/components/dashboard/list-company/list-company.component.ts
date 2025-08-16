@@ -176,20 +176,18 @@ export class ListCompanyComponent implements OnInit {
                 this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
               },
               error: (error) => {
-                this.notificationSrv.addNotification(
-                  'Error al cargar imagen."Error loading image"',
-                  'error'
-                );
+                this.transloco.selectTranslate('notifications.company.error.loadImage').subscribe(message => {
+                  this.notificationSrv.addNotification(message, 'error');
+                });
               },
             });
           }
         });
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.company.error.load').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
         this.loading = false;
       },
     });
@@ -244,12 +242,10 @@ export class ListCompanyComponent implements OnInit {
       next: () => {
         data.status = newStatus;
         // Usar las propiedades con las traducciones para la notificación
-        this.notificationSrv.addNotification(
-          `Estado actualizado a ${
-            newStatus ? this.activeStatus : this.inactiveStatus
-          }`,
-          'success'
-        );
+        const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
+        this.transloco.selectTranslate('notifications.company.success.statusUpdated', { status: statusText }).subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
         data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
@@ -260,10 +256,9 @@ export class ListCompanyComponent implements OnInit {
             'error'
           );
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar el estado.',
-            'error'
-          );
+          this.transloco.selectTranslate('notifications.company.error.statusUpdate').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         }
       },
     });
