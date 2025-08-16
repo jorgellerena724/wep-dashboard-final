@@ -13,8 +13,8 @@
     >
       <div class="flex flex-col justify-center items-center h-full select-none">
         
-        <!-- AÑADIDO: Selector de Idioma -->
-        <div class="w-full flex justify-end mb-4">
+        <!--  Selector de Idioma -->
+        <div class="w-full flex justify-end mb-4 relative z-50">
           <div class="relative inline-block text-left">
             <div>
               <button
@@ -44,7 +44,7 @@
             </div>
 
             <div
-              class="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700"
+              class="origin-top-right absolute right-0 mt-2 w-28 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700 z-50"
               [class.hidden]="!languageMenuOpen"
               [class.opacity-0]="!languageMenuOpen"
               [class.scale-95]="!languageMenuOpen"
@@ -57,18 +57,18 @@
               <div class="py-2" role="none">
                 <a
                   (click)="selectLanguage('es')"
-                  class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   role="menuitem"
                 >
-                  <img src="assets/img/españa.ico" alt="España" class="mr-3 w-5 h-5" />
+                  <img src="assets/img/españa.ico" alt="España" class="mr-2 w-4 h-4" />
                   {{ "language.es" | transloco }}
                 </a>
                 <a
                   (click)="selectLanguage('en')"
-                  class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
                   role="menuitem"
                 >
-                  <img src="assets/img/eeuu.ico" alt="USA" class="mr-3 w-5 h-5" />
+                  <img src="assets/img/eeuu.ico" alt="USA" class="mr-2 w-4 h-4" />
                   {{ "language.en" | transloco }}
                 </a>
               </div>
@@ -77,12 +77,12 @@
         </div>
         <!-- FIN: Selector de Idioma -->
 
-        <div class="flex flex-col items-center justify-center gap-2 mb-2">
+        <div class="flex flex-col items-center justify-center gap-2 mb-2 relative z-10">
           <div>
             <img
               src="/assets/img/logo-1.ico"
               alt="Photo"
-              class="h-20 w-auto"
+              class="h-21 w-auto transition-transform duration-300 ease-in-out hover:scale-110"
               title="Logo"
             />
           </div>
@@ -90,7 +90,7 @@
         <form
           [formGroup]="loginForm"
           (ngSubmit)="onSubmit()"
-          class="space-y-6 w-full"
+          class="space-y-6 w-full relative z-10"
         >
           <div class="w-full flex flex-col gap-2">
             <label class="font-semibold text-md text-gray-400">{{
