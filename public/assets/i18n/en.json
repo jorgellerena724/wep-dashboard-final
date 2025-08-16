@@ -68,6 +68,25 @@
         "duplicateImage": "The image you are trying to upload is already on the server.",
         "statusUpdate": "Error updating status."
       }
+    },
+    "news": {
+      "success": {
+        "created": "News registered successfully.",
+        "updated": "News updated successfully.",
+        "deleted": "News deleted successfully.",
+        "statusUpdated": "Status updated to {status}"
+      },
+      "error": {
+        "create": "Error registering news.",
+        "update": "Error updating news.",
+        "delete": "Error deleting news.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading multimedia file",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status.",
+        "cannotDelete": "Cannot delete the product"
+      }
     }
   },
   "language": {

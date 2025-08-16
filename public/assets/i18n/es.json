@@ -93,6 +93,25 @@
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
         "statusUpdate": "Error al actualizar el estado."
       }
+    },
+    "news": {
+      "success": {
+        "created": "Novedad registrada correctamente.",
+        "updated": "Novedad actualizada correctamente.",
+        "deleted": "Novedad eliminada satisfactoriamente.",
+        "statusUpdated": "Estado actualizado a {status}"
+      },
+      "error": {
+        "create": "Error al registrar la novedad.",
+        "update": "Error al actualizar la novedad.",
+        "delete": "Error al eliminar la novedad.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar el archivo multimedia",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado.",
+        "cannotDelete": "No se puede eliminar el producto"
+      }
     }
   },
   "language": {
