@@ -177,7 +177,7 @@ export class ListManagerComponent implements OnInit {
               },
               error: (error) => {
                 this.notificationSrv.addNotification(
-                  'Error al cargar imagen."Error loading image"',
+                  this.transloco.translate('notifications.managers.error.loadImage'),
                   'error'
                 );
               },
@@ -187,7 +187,7 @@ export class ListManagerComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
+          this.transloco.translate('notifications.managers.error.load'),
           'error'
         );
         this.loading = false;
@@ -291,7 +291,7 @@ export class ListManagerComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                'Directivo eliminado satisfactoriamente.',
+                this.transloco.translate('notifications.managers.success.deleted'),
                 'success'
               );
             },
@@ -308,7 +308,7 @@ export class ListManagerComponent implements OnInit {
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  'Error al eliminar el directivo.',
+                  this.transloco.translate('notifications.managers.error.delete'),
                   'error'
                 );
               }

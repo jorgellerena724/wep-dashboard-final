@@ -109,7 +109,7 @@ export class CreateManagerComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
+        this.transloco.translate('notifications.managers.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -138,7 +138,7 @@ export class CreateManagerComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          'Directivo actualizado correctamente.',
+          this.transloco.translate('notifications.managers.success.created'),
           'success'
         );
         this.submitSuccess.emit();
@@ -165,7 +165,7 @@ export class CreateManagerComponent implements DynamicComponent {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           this.notificationSrv.addNotification(
-            'Error al actualizar el directivo.',
+            this.transloco.translate('notifications.managers.error.create'),
             'error'
           );
         }
