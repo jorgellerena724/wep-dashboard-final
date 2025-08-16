@@ -127,20 +127,18 @@ export class ListHeaderComponent implements OnInit {
                 this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
               },
               error: (error) => {
-                this.notificationSrv.addNotification(
-                  'Error al cargar imagen."Error loading image".',
-                  'error'
-                );
+                this.transloco.selectTranslate('notifications.header.error.loadImage').subscribe(message => {
+                  this.notificationSrv.addNotification(message, 'error');
+                });
               },
             });
           }
         });
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.header.error.load').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
         this.loading = false;
       },
     });

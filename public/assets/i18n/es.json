@@ -39,6 +39,18 @@
     "session": {
       "inactivityWarning": "Tu sesión expirará pronto por inactividad.",
       "logoutSuccess": "Sesión cerrada satisfactoriamente."
+    },
+    "header": {
+      "success": {
+        "updated": "Encabezado actualizado correctamente."
+      },
+      "error": {
+        "update": "Error al actualizar el encabezado.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
     }
   },
   "language": {

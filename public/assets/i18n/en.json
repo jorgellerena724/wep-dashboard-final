@@ -14,6 +14,18 @@
     "session": {
       "inactivityWarning": "Your session will expire soon due to inactivity.",
       "logoutSuccess": "Session closed successfully."
+    },
+    "header": {
+      "success": {
+        "updated": "Header updated successfully."
+      },
+      "error": {
+        "update": "Error updating header.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "formInvalid": "Check the form fields."
+      }
     }
   },
   "language": {
