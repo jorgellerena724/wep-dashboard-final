@@ -164,7 +164,7 @@ export class ListReviewComponent implements OnInit {
               },
               error: (error) => {
                 this.notificationSrv.addNotification(
-                  'Error al cargar imagen."Error loading image"',
+                  this.transloco.translate('notifications.reviews.error.loadImage'),
                   'error'
                 );
               },
@@ -174,7 +174,7 @@ export class ListReviewComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
+          this.transloco.translate('notifications.reviews.error.load'),
           'error'
         );
         this.loading = false;
@@ -278,7 +278,7 @@ export class ListReviewComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                'Reseña eliminado satisfactoriamente.',
+                this.transloco.translate('notifications.reviews.success.deleted'),
                 'success'
               );
             },
@@ -293,7 +293,7 @@ export class ListReviewComponent implements OnInit {
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  'Error al eliminar la reseña.',
+                  this.transloco.translate('notifications.reviews.error.delete'),
                   'error'
                 );
               }

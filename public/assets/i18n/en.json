@@ -117,6 +117,22 @@
         "formInvalid": "Check the form fields.",
         "duplicateImage": "The image you are trying to upload is already on the server."
       }
+    },
+    "reviews": {
+      "success": {
+        "created": "Review registered successfully.",
+        "updated": "Review updated successfully.",
+        "deleted": "Review deleted successfully."
+      },
+      "error": {
+        "create": "Error registering review.",
+        "update": "Error updating review.",
+        "delete": "Error deleting review.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server."
+      }
     }
   },
   "language": {

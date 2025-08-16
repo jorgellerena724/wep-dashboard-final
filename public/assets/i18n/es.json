@@ -142,6 +142,22 @@
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
       }
+    },
+    "reviews": {
+      "success": {
+        "created": "Reseña registrada correctamente.",
+        "updated": "Reseña actualizada correctamente.",
+        "deleted": "Reseña eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la reseña.",
+        "update": "Error al actualizar la reseña.",
+        "delete": "Error al eliminar la reseña.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
+      }
     }
   },
   "language": {

@@ -94,7 +94,7 @@ export class CreateReviewComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
+        this.transloco.translate('notifications.reviews.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -121,7 +121,7 @@ export class CreateReviewComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          'Reseña registrada correctamente.',
+          this.transloco.translate('notifications.reviews.success.created'),
           'success'
         );
         this.submitSuccess.emit();
@@ -148,7 +148,7 @@ export class CreateReviewComponent implements DynamicComponent {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           this.notificationSrv.addNotification(
-            'Error al registrar la reseña.',
+            this.transloco.translate('notifications.reviews.error.create'),
             'error'
           );
         }
