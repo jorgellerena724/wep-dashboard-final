@@ -133,6 +133,20 @@
         "formInvalid": "Check the form fields.",
         "duplicateImage": "The image you are trying to upload is already on the server."
       }
+    },
+    "categories": {
+      "success": {
+        "created": "Category registered successfully.",
+        "updated": "Category updated successfully.",
+        "deleted": "Category deleted successfully."
+      },
+      "error": {
+        "create": "Error registering category.",
+        "update": "Error updating category.",
+        "delete": "Error deleting category.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields."
+      }
     }
   },
   "language": {

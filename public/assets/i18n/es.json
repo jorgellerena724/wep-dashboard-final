@@ -158,6 +158,20 @@
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
       }
+    },
+    "categories": {
+      "success": {
+        "created": "Categoría registrada correctamente.",
+        "updated": "Categoría actualizada correctamente.",
+        "deleted": "Categoría eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la categoría.",
+        "update": "Error al actualizar la categoría.",
+        "delete": "Error al eliminar la categoría.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
     }
   },
   "language": {
