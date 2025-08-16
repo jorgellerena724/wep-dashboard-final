@@ -83,7 +83,7 @@
     "carousel": {
       "success": {
         "updated": "Carrusel actualizado correctamente.",
-        "statusUpdated": "Estado actualizado a {status}"
+        "statusUpdated": "Estado actualizado"
       },
       "error": {
         "update": "Error al actualizar el carrusel.",
@@ -99,7 +99,7 @@
         "created": "Novedad registrada correctamente.",
         "updated": "Novedad actualizada correctamente.",
         "deleted": "Novedad eliminada satisfactoriamente.",
-        "statusUpdated": "Estado actualizado a {status}"
+        "statusUpdated": "Estado actualizado"
       },
       "error": {
         "create": "Error al registrar la novedad.",
@@ -116,7 +116,7 @@
     "company": {
       "success": {
         "updated": "Dato de la empresa actualizado correctamente.",
-        "statusUpdated": "Estado actualizado a {status}"
+        "statusUpdated": "Estado actualizado"
       },
       "error": {
         "update": "Error al actualizar.",
@@ -178,7 +178,7 @@
         "created": "Producto registrado correctamente.",
         "updated": "Producto actualizado correctamente.",
         "deleted": "Producto eliminado satisfactoriamente.",
-        "statusUpdated": "Estado actualizado a {status}"
+        "statusUpdated": "Estado actualizado"
       },
       "error": {
         "create": "Error al registrar el producto.",
@@ -199,7 +199,7 @@
   },
   "status": {
       "active": "Activado",
-      "inactive": " Desactivado "
+      "inactive": " Desactivado"
   },
   "footer": {
     "rights_reserved": "Todos los derechos reservados"

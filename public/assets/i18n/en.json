@@ -58,7 +58,7 @@
     "carousel": {
       "success": {
         "updated": "Carousel updated successfully.",
-        "statusUpdated": "Status updated to {status}"
+        "statusUpdated": "Status updated"
       },
       "error": {
         "update": "Error updating carousel.",
@@ -74,7 +74,7 @@
         "created": "News registered successfully.",
         "updated": "News updated successfully.",
         "deleted": "News deleted successfully.",
-        "statusUpdated": "Status updated to {status}"
+        "statusUpdated": "Status updated"
       },
       "error": {
         "create": "Error registering news.",
@@ -91,7 +91,7 @@
     "company": {
       "success": {
         "updated": "Company data updated successfully.",
-        "statusUpdated": "Status updated to {status}"
+        "statusUpdated": "Status updated"
       },
       "error": {
         "update": "Error updating.",
@@ -153,7 +153,7 @@
          "created": "Product registered successfully.",
          "updated": "Product updated successfully.",
          "deleted": "Product deleted successfully.",
-         "statusUpdated": "Status updated to {status}"
+         "statusUpdated": "Status updated"
        },
        "error": {
          "create": "Error registering product.",
