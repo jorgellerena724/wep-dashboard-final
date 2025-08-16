@@ -44,6 +44,16 @@
         "selfDelete": "You cannot delete your own user while authenticated.",
         "emailExists": "The email already exists in the system."
       }
+    },
+    "contact": {
+      "success": {
+        "updated": "Contact information updated successfully."
+      },
+      "error": {
+        "update": "Error updating contact.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields."
+      }
     }
   },
   "language": {

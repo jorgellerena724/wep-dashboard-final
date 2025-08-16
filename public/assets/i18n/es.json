@@ -69,6 +69,16 @@
         "selfDelete": "No puede eliminar su propio usuario mientras esté autenticado.",
         "emailExists": "El correo electrónico ya existe en el sistema."
       }
+    },
+    "contact": {
+      "success": {
+        "updated": "Información del contacto actualizada correctamente."
+      },
+      "error": {
+        "update": "Error al actualizar el contacto.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
     }
   },
   "language": {

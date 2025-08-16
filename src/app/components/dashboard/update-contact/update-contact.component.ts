@@ -59,10 +59,9 @@ export class UpdateContactComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.contact.error.formInvalid').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       this.form.markAllAsTouched();
       return;
     }
@@ -74,10 +73,9 @@ export class UpdateContactComponent implements DynamicComponent {
 
     this.srv.patch(formData, this.id).subscribe({
       next: (response) => {
-        this.notificationSrv.addNotification(
-          'Información del contacto actualizada correctamente.',
-          'success'
-        );
+        this.transloco.selectTranslate('notifications.contact.success.updated').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -89,10 +87,9 @@ export class UpdateContactComponent implements DynamicComponent {
         }
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al actualizar el contacto.',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.contact.error.update').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
         console.error('Error:', error);
       },
     });
