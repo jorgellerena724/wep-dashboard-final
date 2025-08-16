@@ -262,7 +262,7 @@ export class CreateProductComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario."Check the form fields."',
+        this.transloco.translate('notifications.products.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -294,7 +294,7 @@ export class CreateProductComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          'Producto registrado correctamente.',
+          this.transloco.translate('notifications.products.success.created'),
           'success'
         );
         this.submitSuccess.emit();
@@ -320,10 +320,13 @@ export class CreateProductComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          this.notificationSrv.addNotification(
+            this.transloco.translate('notifications.products.error.duplicateImage'),
+            'error'
+          );
         } else {
           this.notificationSrv.addNotification(
-            'Error al registrar el producto.',
+            this.transloco.translate('notifications.products.error.create'),
             'error'
           );
         }
@@ -347,7 +350,7 @@ export class CreateProductComponent implements DynamicComponent {
         },
         error: (err) => {
           this.notificationSrv.addNotification(
-            'Error al obtener las categorías',
+            this.transloco.translate('notifications.categories.error.load'),
             'error'
           );
           reject(err);

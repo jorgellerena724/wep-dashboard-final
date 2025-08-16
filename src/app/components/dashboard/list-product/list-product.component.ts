@@ -210,7 +210,7 @@ export class ListProductComponent implements OnInit {
               },
               error: (error) => {
                 this.notificationSrv.addNotification(
-                  'Error al cargar imagen."Error loading image"',
+                  this.transloco.translate('notifications.products.error.loadImage'),
                   'error'
                 );
               },
@@ -220,7 +220,7 @@ export class ListProductComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al cargar la información."Error loading information."',
+          this.transloco.translate('notifications.products.error.load'),
           'error'
         );
         this.loading = false;
@@ -345,7 +345,7 @@ export class ListProductComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                'Producto eliminado satisfactoriamente.',
+                this.transloco.translate('notifications.products.success.deleted'),
                 'success'
               );
             },
@@ -355,12 +355,12 @@ export class ListProductComponent implements OnInit {
                 error.error.message.includes('No se puede eliminar el producto')
               ) {
                 this.notificationSrv.addNotification(
-                  error.error.message,
+                  this.transloco.translate('notifications.products.error.cannotDelete'),
                   'error'
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  'Error al eliminar el producto.',
+                  this.transloco.translate('notifications.products.error.delete'),
                   'error'
                 );
               }

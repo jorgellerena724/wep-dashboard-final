@@ -134,20 +134,39 @@
         "duplicateImage": "The image you are trying to upload is already on the server."
       }
     },
-    "categories": {
-      "success": {
-        "created": "Category registered successfully.",
-        "updated": "Category updated successfully.",
-        "deleted": "Category deleted successfully."
-      },
-      "error": {
-        "create": "Error registering category.",
-        "update": "Error updating category.",
-        "delete": "Error deleting category.",
-        "load": "Error loading information.",
-        "formInvalid": "Check the form fields."
-      }
-    }
+         "categories": {
+       "success": {
+         "created": "Category registered successfully.",
+         "updated": "Category updated successfully.",
+         "deleted": "Category deleted successfully."
+       },
+       "error": {
+         "create": "Error registering category.",
+         "update": "Error updating category.",
+         "delete": "Error deleting category.",
+         "load": "Error loading information.",
+         "formInvalid": "Check the form fields."
+       }
+     },
+     "products": {
+       "success": {
+         "created": "Product registered successfully.",
+         "updated": "Product updated successfully.",
+         "deleted": "Product deleted successfully.",
+         "statusUpdated": "Status updated to {status}"
+       },
+       "error": {
+         "create": "Error registering product.",
+         "update": "Error updating product.",
+         "delete": "Error deleting product.",
+         "load": "Error loading information.",
+         "loadImage": "Error loading product image.",
+         "formInvalid": "Check the form fields.",
+         "duplicateImage": "The image you are trying to upload is already on the server.",
+         "statusUpdate": "Error updating status.",
+         "cannotDelete": "Cannot delete the product"
+       }
+     }
   },
   "language": {
     "es": "Spanish",
