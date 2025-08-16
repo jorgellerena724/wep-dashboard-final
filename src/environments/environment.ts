@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost:8000/api/';
+const apiUrl = 'http://localhost:3002/api/';
 const imgUrl = `https://api-minio.shirkasoft.net/wep/`;
 
 export const environment = {
