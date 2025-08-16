@@ -177,7 +177,10 @@
       "inactive": "Deactivated"
   },
   "footer": {
-    "rights_reserved": "All rights reserved"
+    "rights_reserved": "All rights reserved",
+    "whatsapp": "Contact us on WhatsApp",
+    "email": "Send us an email",
+    "website": "Visit our website"
   },
  "login": {
     "email": {

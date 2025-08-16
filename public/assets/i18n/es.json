@@ -202,7 +202,10 @@
       "inactive": " Desactivado"
   },
   "footer": {
-    "rights_reserved": "Todos los derechos reservados"
+    "rights_reserved": "Todos los derechos reservados",
+    "whatsapp": "Contáctanos por WhatsApp",
+    "email": "Envíanos un correo",
+    "website": "Visita nuestra web"
   },
   "login": {
     "email": {
