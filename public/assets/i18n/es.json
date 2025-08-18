@@ -786,8 +786,8 @@
       "list": {
         "title": "Usuarios",
         "table": {
-          "name": "Name",
-          "email": "Email",
+          "name": "Nombre",
+          "email": "Correo",
           "client": "Cliente",
           "role": "Rol"
         }

@@ -373,13 +373,13 @@
           },
           "image": {
             "title": "News file",
-            "select": "Select image",
+            "select": "Select file",
             "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
-            "info": "You can change the image by selecting a new one.",
-            "required": "• The image is required",
+            "info": "You can change the file by selecting a new one.",
+            "required": "• The file is required",
             "nodata": {
-              "title": "No image selected",
-              "subtitle": "Select an image to preview"
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
             }
           }
         }
@@ -404,13 +404,13 @@
           },
           "image": {
             "title": "News file",
-            "select": "Select image",
+            "select": "Select file",
             "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
-            "info": "You can change the image by selecting a new one.",
-            "required": "• The image is required",
+            "info": "You can change the file by selecting a new one.",
+            "required": "• The file is required",
             "nodata": {
-              "title": "No image selected",
-              "subtitle": "Select an image to preview"
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
             }
           }
         }
@@ -616,7 +616,7 @@
     },
     "category": {
       "list": {
-        "title": "Category",
+        "title": "Categories",
         "table": {
           "name": "Name"
         }
