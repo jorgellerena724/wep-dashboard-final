@@ -372,9 +372,9 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
+            "title": "News file",
             "select": "Select image",
-            "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
+            "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
             "info": "You can change the image by selecting a new one.",
             "required": "• The image is required",
             "nodata": {
@@ -403,9 +403,9 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
+            "title": "News file",
             "select": "Select image",
-            "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
+            "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
             "info": "You can change the image by selecting a new one.",
             "required": "• The image is required",
             "nodata": {
@@ -448,7 +448,7 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
+            "title": "Company image",
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
@@ -802,12 +802,12 @@
     },
     "users": {
       "list": {
-        "title": "Usuarios",
+        "title": "Users",
         "table": {
           "name": "Name",
           "email": "Email",
           "client": "Client",
-          "rol": "Rol"
+          "role": "Role"
         }
       },
       "create": {
@@ -912,7 +912,7 @@
   },
   "modal": {
     "buttons": {
-      "acept": "Acept",
+      "acept": "Accept",
       "cancel": "Cancel"
     }
   },
@@ -926,5 +926,10 @@
       "title": "No image selected",
       "subtitle": "Select an image to preview"
     }
+  },
+  "video": {
+    "info": "Video preview. Allowed formats: MP4, MOV",
+    "unsupported": "Unsupported video format. Try MP4 or MOV.",
+    "converting": "Converting video to a compatible format..."
   }
 }
