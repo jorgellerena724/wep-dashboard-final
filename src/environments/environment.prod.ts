@@ -1,4 +1,4 @@
-const apiUrl = 'https://wepbackend.shirkasoft.net/api/';
+const apiUrl = 'https://wep-backend.shirkasoft.net/api/';
 const imgUrl = `https://api-minio.shirkasoft.net/wep/`;
 
 export const environment = {
