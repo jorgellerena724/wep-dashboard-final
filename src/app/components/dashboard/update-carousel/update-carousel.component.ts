@@ -18,7 +18,7 @@ import { NotificationService } from '../../../shared/services/system/notificatio
 import { AppFileUploadComponent } from '../../../shared/components/app-file-upload/app-file-upload.component';
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { CarouselService } from '../../../shared/services/features/carousel.service';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-update-carousel',
@@ -47,7 +47,8 @@ export class UpdateCarouselComponent implements DynamicComponent {
     private fb: FormBuilder,
     private srv: CarouselService,
     private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService
   ) {
     this.form = this.fb.group({
       title: [
@@ -137,10 +138,8 @@ export class UpdateCarouselComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
-        'warning'
-      );
+      const message = this.transloco.translate('notifications.carousel.error.formInvalid');
+      this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
     }
@@ -164,10 +163,8 @@ export class UpdateCarouselComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.notificationSrv.addNotification(
-          'Carrusel actualizado correctamente.',
-          'success'
-        );
+        const message = this.transloco.translate('notifications.carousel.success.updated');
+        this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -186,15 +183,14 @@ export class UpdateCarouselComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          const message = this.transloco.translate('notifications.carousel.error.duplicateImage');
+          this.notificationSrv.addNotification(message, 'error');
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar el carrusel.',
-            'error'
-          );
+          const message = this.transloco.translate('notifications.carousel.error.update');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });
@@ -218,7 +214,7 @@ export class UpdateCarouselComponent implements DynamicComponent {
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,

@@ -87,10 +87,9 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
 
   onSubmit(): void {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.users.error.formInvalid').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       this.form.markAllAsTouched();
       return;
     }
@@ -102,10 +101,9 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
 
     this.userSrv.changePassword(formData).subscribe({
       next: (response) => {
-        this.notificationSrv.addNotification(
-          'Contraseña actualizada satisfactoriamente.',
-          'success'
-        );
+        this.transloco.selectTranslate('notifications.users.success.passwordChanged').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         this.submitSuccess.emit();
         this.form.reset();
 
@@ -121,10 +119,9 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
         }
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al actualizar la contraseña.',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.users.error.changePassword').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
       },
     });
   }

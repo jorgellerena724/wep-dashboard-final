@@ -132,13 +132,13 @@ export class ListCategoryComponent implements OnInit {
         this.data = data;
         this.loading = false;
       },
-      error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información.',
-          'error'
-        );
-        this.loading = false;
-      },
+              error: (error) => {
+          this.notificationSrv.addNotification(
+            this.transloco.translate('notifications.categories.error.load'),
+            'error'
+          );
+          this.loading = false;
+        },
     });
   }
 
@@ -215,7 +215,7 @@ export class ListCategoryComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                'Categoría eliminado satisfactoriamente.',
+                this.transloco.translate('notifications.categories.success.deleted'),
                 'success'
               );
             },
@@ -232,7 +232,7 @@ export class ListCategoryComponent implements OnInit {
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  'Error al eliminar la categoría.',
+                  this.transloco.translate('notifications.categories.error.delete'),
                   'error'
                 );
               }

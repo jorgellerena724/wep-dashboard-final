@@ -1,13 +1,188 @@
 {
-
-    "status": {
+ "notifications": {
+    "login": {
+      "success": "Authentication Successful.",
+      "error": {
+        "unexpected": "An unexpected error has occurred. Please try again later.",
+        "badRequest": "Bad request. Check the submitted data.",
+        "invalidCredentials": "Invalid credentials. Please check your email and password.",
+        "serverError": "Internal server error. Please try again later.",
+        "connectionError": "Could not connect to the server. Please check your connection and try again later.",
+        "invalidForm": "Invalid form. Please complete all required fields."
+      }
+    },
+    "session": {
+      "inactivityWarning": "Your session will expire soon due to inactivity.",
+      "logoutSuccess": "Session closed successfully."
+    },
+    "header": {
+      "success": {
+        "updated": "Header updated successfully."
+      },
+      "error": {
+        "update": "Error updating header.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "formInvalid": "Check the form fields."
+      }
+    },
+    "users": {
+      "success": {
+        "created": "User created successfully.",
+        "updated": "User updated successfully.",
+        "passwordChanged": "Password updated successfully.",
+        "deleted": "User deleted successfully."
+      },
+      "error": {
+        "create": "Error creating user.",
+        "update": "Error updating user.",
+        "changePassword": "Error updating password.",
+        "delete": "Error deleting user.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields.",
+        "selfDelete": "You cannot delete your own user while authenticated.",
+        "emailExists": "The email already exists in the system."
+      }
+    },
+    "contact": {
+      "success": {
+        "updated": "Contact information updated successfully."
+      },
+      "error": {
+        "update": "Error updating contact.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields."
+      }
+    },
+    "carousel": {
+      "success": {
+        "updated": "Carousel updated successfully.",
+        "statusUpdated": "Status updated"
+      },
+      "error": {
+        "update": "Error updating carousel.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status."
+      }
+    },
+    "news": {
+      "success": {
+        "created": "News registered successfully.",
+        "updated": "News updated successfully.",
+        "deleted": "News deleted successfully.",
+        "statusUpdated": "Status updated"
+      },
+      "error": {
+        "create": "Error registering news.",
+        "update": "Error updating news.",
+        "delete": "Error deleting news.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading multimedia file",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status.",
+        "cannotDelete": "Cannot delete the product"
+      }
+    },
+    "company": {
+      "success": {
+        "updated": "Company data updated successfully.",
+        "statusUpdated": "Status updated"
+      },
+      "error": {
+        "update": "Error updating.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status."
+      }
+    },
+    "managers": {
+      "success": {
+        "created": "Manager registered successfully.",
+        "updated": "Manager updated successfully.",
+        "deleted": "Manager deleted successfully."
+      },
+      "error": {
+        "create": "Error registering manager.",
+        "update": "Error updating manager.",
+        "delete": "Error deleting manager.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server."
+      }
+    },
+    "reviews": {
+      "success": {
+        "created": "Review registered successfully.",
+        "updated": "Review updated successfully.",
+        "deleted": "Review deleted successfully."
+      },
+      "error": {
+        "create": "Error registering review.",
+        "update": "Error updating review.",
+        "delete": "Error deleting review.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server."
+      }
+    },
+         "categories": {
+       "success": {
+         "created": "Category registered successfully.",
+         "updated": "Category updated successfully.",
+         "deleted": "Category deleted successfully."
+       },
+       "error": {
+         "create": "Error registering category.",
+         "update": "Error updating category.",
+         "delete": "Error deleting category.",
+         "load": "Error loading information.",
+         "formInvalid": "Check the form fields."
+       }
+     },
+     "products": {
+       "success": {
+         "created": "Product registered successfully.",
+         "updated": "Product updated successfully.",
+         "deleted": "Product deleted successfully.",
+         "statusUpdated": "Status updated"
+       },
+       "error": {
+         "create": "Error registering product.",
+         "update": "Error updating product.",
+         "delete": "Error deleting product.",
+         "load": "Error loading information.",
+         "loadImage": "Error loading product image.",
+         "formInvalid": "Check the form fields.",
+         "duplicateImage": "The image you are trying to upload is already on the server.",
+         "statusUpdate": "Error updating status.",
+         "cannotDelete": "Cannot delete the product"
+       }
+     }
+  },
+  "language": {
+    "es": "Spanish",
+    "en": "English"
+  },
+  "status": {
       "active": "Activated",
       "inactive": "Deactivated"
-    },
-    "footer": {
-    "rights_reserved": "All rights reserved"
   },
-  "login": {
+  "footer": {
+    "rights_reserved": "All rights reserved",
+    "whatsapp": "Contact us on WhatsApp",
+    "email": "Send us an email",
+    "website": "Visit our website"
+  },
+ "login": {
     "email": {
       "title": "Email",
       "placeholder": "Write your email here",
@@ -197,14 +372,14 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
-            "select": "Select image",
-            "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
-            "info": "You can change the image by selecting a new one.",
-            "required": "• The image is required",
+            "title": "News file",
+            "select": "Select file",
+            "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
+            "info": "You can change the file by selecting a new one.",
+            "required": "• The file is required",
             "nodata": {
-              "title": "No image selected",
-              "subtitle": "Select an image to preview"
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
             }
           }
         }
@@ -228,14 +403,14 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
-            "select": "Select image",
-            "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
-            "info": "You can change the image by selecting a new one.",
-            "required": "• The image is required",
+            "title": "News file",
+            "select": "Select file",
+            "recommendation": "Recommended formats: JPG, PNG, MP4, MOV. Maximum size 20Mb",
+            "info": "You can change the file by selecting a new one.",
+            "required": "• The file is required",
             "nodata": {
-              "title": "No image selected",
-              "subtitle": "Select an image to preview"
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
             }
           }
         }
@@ -273,7 +448,7 @@
             "minlength": "Description must be at least 3 characters"
           },
           "image": {
-            "title": "News image",
+            "title": "Company image",
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
@@ -441,7 +616,7 @@
     },
     "category": {
       "list": {
-        "title": "Category",
+        "title": "Categories",
         "table": {
           "name": "Name"
         }
@@ -627,12 +802,12 @@
     },
     "users": {
       "list": {
-        "title": "Usuarios",
+        "title": "Users",
         "table": {
           "name": "Name",
           "email": "Email",
           "client": "Client",
-          "rol": "Rol"
+          "role": "Role"
         }
       },
       "create": {
@@ -737,7 +912,7 @@
   },
   "modal": {
     "buttons": {
-      "acept": "Acept",
+      "acept": "Accept",
       "cancel": "Cancel"
     }
   },
@@ -751,5 +926,10 @@
       "title": "No image selected",
       "subtitle": "Select an image to preview"
     }
+  },
+  "video": {
+    "info": "Video preview. Allowed formats: MP4, MOV",
+    "unsupported": "Unsupported video format. Try MP4 or MOV.",
+    "converting": "Converting video to a compatible format..."
   }
 }

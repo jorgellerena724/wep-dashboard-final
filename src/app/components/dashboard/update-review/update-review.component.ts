@@ -134,7 +134,7 @@ export class UpdateReviewComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        this.transloco.translate('notifications.reviews.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -163,7 +163,7 @@ export class UpdateReviewComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          'Reseña actualizada correctamente.',
+          this.transloco.translate('notifications.reviews.success.updated'),
           'success'
         );
         this.submitSuccess.emit();
@@ -184,13 +184,13 @@ export class UpdateReviewComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           this.notificationSrv.addNotification(
-            'Error al actualizar la reseña.',
+            this.transloco.translate('notifications.reviews.error.update'),
             'error'
           );
         }
@@ -216,7 +216,7 @@ export class UpdateReviewComponent implements DynamicComponent {
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,

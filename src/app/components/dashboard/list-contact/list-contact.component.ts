@@ -141,10 +141,9 @@ export class ListContactComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información.',
-          'error'
-        );
+        this.transloco.selectTranslate('notifications.contact.error.load').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'error');
+        });
         this.loading = false;
       },
     });

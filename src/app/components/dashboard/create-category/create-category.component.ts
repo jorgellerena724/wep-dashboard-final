@@ -71,7 +71,7 @@ export class CreateCategoryComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
+        this.transloco.translate('notifications.categories.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -84,7 +84,7 @@ export class CreateCategoryComponent implements DynamicComponent {
     this.srv.post(formData).subscribe({
       next: (response) => {
         this.notificationSrv.addNotification(
-          'Categoría actualizada correctamente.',
+          this.transloco.translate('notifications.categories.success.created'),
           'success'
         );
         this.submitSuccess.emit();
@@ -99,7 +99,7 @@ export class CreateCategoryComponent implements DynamicComponent {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          'Error al actualizar la categoría.',
+          this.transloco.translate('notifications.categories.error.create'),
           'error'
         );
         console.error('Error:', error);

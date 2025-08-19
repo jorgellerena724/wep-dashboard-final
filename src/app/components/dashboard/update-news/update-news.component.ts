@@ -227,10 +227,8 @@ export class UpdateNewsComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
-        'warning'
-      );
+      const message = this.transloco.translate('notifications.news.error.formInvalid');
+      this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
     }
@@ -256,10 +254,8 @@ export class UpdateNewsComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.notificationSrv.addNotification(
-          'Novedad actualizada correctamente.',
-          'success'
-        );
+        const message = this.transloco.translate('notifications.news.success.updated');
+        this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -278,15 +274,14 @@ export class UpdateNewsComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          const message = this.transloco.translate('notifications.news.error.duplicateImage');
+          this.notificationSrv.addNotification(message, 'error');
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar la novedad.',
-            'error'
-          );
+          const message = this.transloco.translate('notifications.news.error.update');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });
@@ -299,7 +294,7 @@ export class UpdateNewsComponent implements DynamicComponent {
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,

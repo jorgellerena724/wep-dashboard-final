@@ -10,7 +10,6 @@
 >
   <!-- HR del encabezado -->
   <hr class="border-t border-gray-600 w-full dark:border-gray-300" />
-
   <div
     class="custom-scroll p-2 sm:p-4"
     style="max-height: 300px; overflow-y: auto"
@@ -19,10 +18,8 @@
       <ng-container #dynamicContent></ng-container>
     </div>
   </div>
-
   <!-- HR del final -->
   <hr class="border-t border-gray-600 w-full dark:border-gray-300 mt-4" />
-
   <!-- Footer con botones -->
   <ng-template
     pTemplate="footer"
@@ -36,13 +33,18 @@
         (click)="closeModal()"
         label="{{ 'modal.buttons.cancel' | transloco }}"
         class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-red-800 hover:bg-red-700 mb-2 border border-red-800 hover:border-red-700"
+        [disabled]="isProcessing"
       ></button>
       <button
         *ngIf="currentConfig?.showButtons ?? true"
         pButton
         (click)="onAccept()"
         label="{{ 'modal.buttons.acept' | transloco }}"
+        [loadingIcon]="'pi pi-spin pi-spinner text-white'"
+        [ngStyle]="{'--p-button-loading-icon-color': '#ffffff', 'color': '#ffffff'}"
         class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-green-800 hover:bg-green-700 mr-2 mb-2 border border-green-800 hover:border-green-700"
+        [disabled]="isProcessing"
+        [loading]="loading"
       ></button>
     </div>
   </ng-template>
@@ -76,6 +78,73 @@
     max-height: 90vh;
     overflow: hidden;
   }
+  
+  /* Estilos para botones deshabilitados */
+  .custom-modal .p-button:disabled,
+  .custom-modal .p-button.p-disabled,
+  button:disabled {
+    /* No usar opacidad para que el spinner y el texto no se vean grises */
+    opacity: 1 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+  }
+  
+  /* Forzar color blanco del spinner de carga en el botón (PrimeNG) */
+  .custom-modal .p-button .p-button-loading-icon,
+  .custom-modal .p-button .pi.pi-spinner {
+    color: #ffffff !important;
+  }
+  /* Versión global para overlays de Prime (el diálogo se monta fuera del host) */
+  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon,
+  :host ::ng-deep .custom-modal .p-button .pi.pi-spinner {
+    color: #ffffff !important;
+  }
+  /* Asegurar blanco cuando el botón esté en estado loading o deshabilitado */
+  .custom-modal .p-button.p-button-loading .p-button-loading-icon,
+  .custom-modal .p-button:disabled .p-button-loading-icon,
+  .custom-modal .p-button:disabled .p-button-icon,
+  .custom-modal .p-button:disabled .p-button-label {
+    color: #ffffff !important;
+  }
+  :host ::ng-deep .custom-modal .p-button.p-button-loading .p-button-loading-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-loading-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-label {
+    color: #ffffff !important;
+  }
+  /* Si el ícono es SVG con clase .p-icon */
+  .custom-modal .p-button .p-button-loading-icon .p-icon,
+  .custom-modal .p-button:disabled .p-button-loading-icon .p-icon {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon .p-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-loading-icon .p-icon {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+  /* Si Prime usa p-progress-spinner (SVG) dentro del botón */
+  .custom-modal .p-button .p-button-loading-icon .p-progress-spinner circle,
+  .custom-modal .p-button:disabled .p-button-loading-icon .p-progress-spinner circle {
+    stroke: #ffffff !important;
+  }
+  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon .p-progress-spinner circle,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-loading-icon .p-progress-spinner circle {
+    stroke: #ffffff !important;
+  }
+
+  /* Variable del tema (Prime) para el color del loading icon */
+  :host ::ng-deep .custom-modal .p-button {
+    --p-button-loading-icon-color: #ffffff;
+  }
+
+  /* Deshabilitado sin opacidad en overlay */
+  :host ::ng-deep .custom-modal .p-button:disabled,
+  :host ::ng-deep .custom-modal .p-button.p-disabled {
+    opacity: 1 !important;
+    pointer-events: none;
+  }
+  
   @media (max-width: 640px) {
     .custom-modal .p-dialog {
       width: 100vw !important;

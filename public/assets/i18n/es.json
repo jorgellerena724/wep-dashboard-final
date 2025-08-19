@@ -1,25 +1,5 @@
 {
-    "status": {
-      "active": "Activado",
-      "inactive": " Desactivado "
-    },
-    "footer": {
-    "rights_reserved": "Todos los derechos reservados"
-  },
-  "login": {
-    "email": {
-      "title": "Correo",
-      "placeholder": "Escriba su correo aquí",
-      "required": "El correo es obligatorio."
-    },
-    "password": {
-      "title": "Contraseña",
-      "placeholder": "Escriba su contraseña aquí",
-      "required": "La contraseña es obligatoria."
-    },
-    "loading": "Accediendo...",
-    "load": "Iniciar Sesión →"
-  },
+
   "navbar": {
     "title": "Web Empresarial Profesional",
     "logout": "Cerrar Sesión",
@@ -44,6 +24,204 @@
       "users": "Usuarios"
     }
   },
+    "notifications": {
+    "login": {
+      "success": "Autenticación Exitosa.",
+      "error": {
+        "unexpected": "Ha ocurrido un error inesperado. Inténtelo nuevamente más tarde.",
+        "badRequest": "Solicitud incorrecta. Verifica los datos enviados.",
+        "invalidCredentials": "Credenciales inválidas. Por favor, verifica tu correo y contraseña.",
+        "serverError": "Error interno del servidor. Inténtelo nuevamente más tarde.",
+        "connectionError": "No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde.",
+        "invalidForm": "Formulario no válido. Por favor, complete todos los campos requeridos."
+      }
+    },
+    "session": {
+      "inactivityWarning": "Tu sesión expirará pronto por inactividad.",
+      "logoutSuccess": "Sesión cerrada satisfactoriamente."
+    },
+    "header": {
+      "success": {
+        "updated": "Encabezado actualizado correctamente."
+      },
+      "error": {
+        "update": "Error al actualizar el encabezado.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
+    },
+    "users": {
+      "success": {
+        "created": "Usuario creado satisfactoriamente.",
+        "updated": "Usuario modificado satisfactoriamente.",
+        "passwordChanged": "Contraseña actualizada satisfactoriamente.",
+        "deleted": "Usuario eliminado satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al crear el usuario.",
+        "update": "Error al actualizar el usuario.",
+        "changePassword": "Error al actualizar la contraseña.",
+        "delete": "Error al eliminar el usuario.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "selfDelete": "No puede eliminar su propio usuario mientras esté autenticado.",
+        "emailExists": "El correo electrónico ya existe en el sistema."
+      }
+    },
+    "contact": {
+      "success": {
+        "updated": "Información del contacto actualizada correctamente."
+      },
+      "error": {
+        "update": "Error al actualizar el contacto.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
+    },
+    "carousel": {
+      "success": {
+        "updated": "Carrusel actualizado correctamente.",
+        "statusUpdated": "Estado actualizado"
+      },
+      "error": {
+        "update": "Error al actualizar el carrusel.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado."
+      }
+    },
+    "news": {
+      "success": {
+        "created": "Novedad registrada correctamente.",
+        "updated": "Novedad actualizada correctamente.",
+        "deleted": "Novedad eliminada satisfactoriamente.",
+        "statusUpdated": "Estado actualizado"
+      },
+      "error": {
+        "create": "Error al registrar la novedad.",
+        "update": "Error al actualizar la novedad.",
+        "delete": "Error al eliminar la novedad.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar el archivo multimedia",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado.",
+        "cannotDelete": "No se puede eliminar el producto"
+      }
+    },
+    "company": {
+      "success": {
+        "updated": "Dato de la empresa actualizado correctamente.",
+        "statusUpdated": "Estado actualizado"
+      },
+      "error": {
+        "update": "Error al actualizar.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado."
+      }
+    },
+    "managers": {
+      "success": {
+        "created": "Directivo registrado correctamente.",
+        "updated": "Directivo actualizado correctamente.",
+        "deleted": "Directivo eliminado satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar el directivo.",
+        "update": "Error al actualizar el directivo.",
+        "delete": "Error al eliminar el directivo.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
+      }
+    },
+    "reviews": {
+      "success": {
+        "created": "Reseña registrada correctamente.",
+        "updated": "Reseña actualizada correctamente.",
+        "deleted": "Reseña eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la reseña.",
+        "update": "Error al actualizar la reseña.",
+        "delete": "Error al eliminar la reseña.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
+      }
+    },
+    "categories": {
+      "success": {
+        "created": "Categoría registrada correctamente.",
+        "updated": "Categoría actualizada correctamente.",
+        "deleted": "Categoría eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la categoría.",
+        "update": "Error al actualizar la categoría.",
+        "delete": "Error al eliminar la categoría.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
+    },
+    "products": {
+      "success": {
+        "created": "Producto registrado correctamente.",
+        "updated": "Producto actualizado correctamente.",
+        "deleted": "Producto eliminado satisfactoriamente.",
+        "statusUpdated": "Estado actualizado"
+      },
+      "error": {
+        "create": "Error al registrar el producto.",
+        "update": "Error al actualizar el producto.",
+        "delete": "Error al eliminar el producto.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen del producto.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado.",
+        "cannotDelete": "No se puede eliminar el producto"
+      }
+    }
+  },
+  "language": {
+    "es": "Español",
+    "en": "Inglés"
+  },
+  "status": {
+      "active": "Activado",
+      "inactive": "Desactivado"
+  },
+  "footer": {
+    "rights_reserved": "Todos los derechos reservados",
+    "whatsapp": "Contáctanos por WhatsApp",
+    "email": "Envíanos un correo",
+    "website": "Visita nuestra web"
+  },
+  "login": {
+    "email": {
+      "title": "Correo",
+      "placeholder": "Escriba su correo aquí",
+      "required": "El correo es obligatorio."
+    },
+    "password": {
+      "title": "Contraseña",
+      "placeholder": "Escriba su contraseña aquí",
+      "required": "La contraseña es obligatoria."
+    },
+    "loading": "Accediendo...",
+    "load": "Iniciar Sesión →"
+  },
+
   "sidebar": {
     "admin": "Administración",
     "header": "Encabezado",
@@ -606,12 +784,12 @@
     },
     "users": {
       "list": {
-        "title": "Users",
+        "title": "Usuarios",
         "table": {
-          "name": "Name",
-          "email": "Email",
+          "name": "Nombre",
+          "email": "Correo",
           "client": "Cliente",
-          "role": "Role"
+          "role": "Rol"
         }
       },
       "create": {
@@ -688,10 +866,10 @@
         }
       },
       "delete": {
-        "title": "Delete element?",
-        "message": "Are you sure you want to delete this element? This action cannot be undone.",
-        "confirm": "Delete",
-        "cancel": "Cancel"
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
       }
     }
   },

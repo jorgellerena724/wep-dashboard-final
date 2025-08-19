@@ -182,20 +182,16 @@ export class ListCarouselComponent implements OnInit {
                 this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
               },
               error: (error) => {
-                this.notificationSrv.addNotification(
-                  'Error al cargar imagen',
-                  'error'
-                );
+                const message = this.transloco.translate('notifications.carousel.error.loadImage');
+                this.notificationSrv.addNotification(message, 'error');
               },
             });
           }
         });
       },
       error: (error) => {
-        this.notificationSrv.addNotification(
-          'Error al cargar la información.',
-          'error'
-        );
+        const message = this.transloco.translate('notifications.carousel.error.load');
+        this.notificationSrv.addNotification(message, 'error');
         this.loading = false;
       },
     });
@@ -263,12 +259,9 @@ export class ListCarouselComponent implements OnInit {
       next: () => {
         data.status = newStatus;
         // Usar las propiedades con las traducciones para la notificación
-        this.notificationSrv.addNotification(
-          `Estado actualizado a ${
-            newStatus ? this.activeStatus : this.inactiveStatus
-          }`,
-          'success'
-        );
+        const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
+        const message = this.transloco.translate('notifications.carousel.success.statusUpdated', { status: statusText });
+        this.notificationSrv.addNotification(message, 'success');
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
         data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
       },
@@ -279,10 +272,8 @@ export class ListCarouselComponent implements OnInit {
             'error'
           );
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar el estado.',
-            'error'
-          );
+          const message = this.transloco.translate('notifications.carousel.error.statusUpdate');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });

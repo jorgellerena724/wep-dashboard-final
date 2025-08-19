@@ -2,8 +2,10 @@ import {
   Component,
   inject,
   OnInit,
+  OnDestroy,
   TemplateRef,
   ViewChild,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -35,7 +37,7 @@ import { combineLatest, Subscription, take } from 'rxjs';
   standalone: true,
   providers: [],
 })
-export class ListNewsComponent implements OnInit {
+export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   private transloco = inject(TranslocoService);
   private subscriptions: Subscription[] = [];
   data: HomeData[] = [];
@@ -183,15 +185,17 @@ export class ListNewsComponent implements OnInit {
                   this.imageUrls[item.id] = URL.createObjectURL(fileBlob);
                 }
               },
-              error: (error) => {
-                this.notificationSrv.addNotification('Error al cargar el archivo multimedia', 'error');
+              error: () => {
+                // Notificación con traducción
+                this.translateAndNotify('notifications.news.error.loadImage', 'error');
               },
             });
           }
         });
       },
-      error: (error) => {
-        this.notificationSrv.addNotification('Error al cargar la información.', 'error');
+      error: () => {
+        // Notificación con traducción
+        this.translateAndNotify('notifications.news.error.load', 'error');
         this.loading = false;
       },
     });
@@ -219,7 +223,7 @@ export class ListNewsComponent implements OnInit {
           data: {
             initialData: {
               onSave: () => {
-                this.loadData();
+                this.onRefresh();
               },
             },
           },
@@ -240,7 +244,7 @@ export class ListNewsComponent implements OnInit {
             initialData: {
               ...data,
               onSave: () => {
-                this.loadData();
+                this.onRefresh();
               },
             },
           },
@@ -265,19 +269,21 @@ export class ListNewsComponent implements OnInit {
     this.srv.patch(formData, data.id).subscribe({
       next: () => {
         data.status = newStatus;
-        // Usar las propiedades con las traducciones para la notificación
-        this.notificationSrv.addNotification(
-          `Estado actualizado a ${newStatus ? this.activeStatus : this.inactiveStatus}`,
-          'success'
-        );
+        const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
+        
+        // Notificación de éxito con traducción y parámetros
+        const message = this.transloco.translate('notifications.news.success.statusUpdated', { status: statusText });
+        this.notificationSrv.addNotification(message, 'success');
+
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
-        data.statusToShow = newStatus ? this.activeStatus : this.inactiveStatus;
+        data.statusToShow = statusText;
       },
       error: (error) => {
         if (error?.error?.message && error.error?.statusCode === 400) {
-          this.notificationSrv.addNotification(error.error.message + '.', 'error');
+          this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
-          this.notificationSrv.addNotification('Error al actualizar el estado.', 'error');
+          // Notificación de error genérico con traducción
+          this.translateAndNotify('notifications.news.error.statusUpdate', 'error');
         }
       },
     });
@@ -309,14 +315,16 @@ export class ListNewsComponent implements OnInit {
           this.loading = true;
           this.srv.delete(data.id).subscribe({
             next: () => {
-              this.loadData();
-              this.notificationSrv.addNotification('Novedad eliminada satisfactoriamente.', 'success');
+              this.onRefresh();
+              // Notificación de éxito con traducción
+              this.translateAndNotify('notifications.news.success.deleted', 'success');
             },
             error: (error) => {
-              if (error.error.statusCode === 400 && error.error.message.includes('No se puede eliminar el producto')) {
-                this.notificationSrv.addNotification(error.error.message, 'error');
+              if (error?.error?.message && error.error?.statusCode === 400) {
+                 this.notificationSrv.addNotification(error.error.message, 'error');
               } else {
-                this.notificationSrv.addNotification('Error al eliminar el producto.', 'error');
+                // Notificación de error genérico con traducción
+                this.translateAndNotify('notifications.news.error.delete', 'error');
               }
               this.loading = false;
             },
@@ -325,6 +333,21 @@ export class ListNewsComponent implements OnInit {
       }
     );
     this.subscriptions.push(deleteActionsSubscription);
+  }
+
+  /**
+   * Método auxiliar para traducir una clave y mostrar una notificación.
+   * @param key - La clave de traducción del fichero JSON.
+   * @param severity - El tipo de notificación ('success', 'error', 'info', 'warn').
+   * @param params - Un objeto con parámetros para la traducción (opcional).
+   */
+  private translateAndNotify(key: string, severity: 'success' | 'error' | 'info' | 'warn', params?: object) {
+    this.transloco
+      .selectTranslate(key, params)
+      .pipe(take(1))
+      .subscribe((message) => {
+        this.notificationSrv.addNotification(message, severity);
+      });
   }
 
   private cleanupBlobUrls() {

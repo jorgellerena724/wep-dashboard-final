@@ -139,10 +139,8 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
-        'warning'
-      );
+      const message = this.transloco.translate('notifications.company.error.formInvalid');
+      this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
     }
@@ -166,10 +164,8 @@ export class UpdateCompanyComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.notificationSrv.addNotification(
-          'Dato de la empresa actualizado correctamente.',
-          'success'
-        );
+        const message = this.transloco.translate('notifications.company.success.updated');
+        this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -188,15 +184,14 @@ export class UpdateCompanyComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          const message = this.transloco.translate('notifications.company.error.duplicateImage');
+          this.notificationSrv.addNotification(message, 'error');
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar.',
-            'error'
-          );
+          const message = this.transloco.translate('notifications.company.error.update');
+          this.notificationSrv.addNotification(message, 'error');
         }
       },
     });
@@ -220,7 +215,7 @@ export class UpdateCompanyComponent implements DynamicComponent {
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,

@@ -18,7 +18,7 @@ import { TextFieldComponent } from '../../../shared/components/app-text-field/ap
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { AppFileUploadComponent } from '../../../shared/components/app-file-upload/app-file-upload.component';
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-update-header',
@@ -47,7 +47,8 @@ export class UpdateHeaderComponent implements DynamicComponent {
     private fb: FormBuilder,
     private srv: HeaderService,
     private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private transloco: TranslocoService
   ) {
     this.form = this.fb.group({
       name: [
@@ -136,10 +137,9 @@ export class UpdateHeaderComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        'Compruebe los campos del formulario.',
-        'warning'
-      );
+      this.transloco.selectTranslate('notifications.header.error.formInvalid').subscribe(message => {
+        this.notificationSrv.addNotification(message, 'warning');
+      });
       this.form.markAllAsTouched();
       return;
     }
@@ -161,10 +161,9 @@ export class UpdateHeaderComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.notificationSrv.addNotification(
-          'Encabezado actualizado correctamente.',
-          'success'
-        );
+        this.transloco.selectTranslate('notifications.header.success.updated').subscribe(message => {
+          this.notificationSrv.addNotification(message, 'success');
+        });
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -183,15 +182,16 @@ export class UpdateHeaderComponent implements DynamicComponent {
         if (
           error.status === 400 &&
           error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor'
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
+          this.transloco.selectTranslate('notifications.header.error.duplicateImage').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         } else {
-          this.notificationSrv.addNotification(
-            'Error al actualizar el encabezado.',
-            'error'
-          );
+          this.transloco.selectTranslate('notifications.header.error.update').subscribe(message => {
+            this.notificationSrv.addNotification(message, 'error');
+          });
         }
       },
     });
@@ -214,8 +214,7 @@ export class UpdateHeaderComponent implements DynamicComponent {
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
-    console.error('Error de validación de archivo:', {
+    console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
       fileName: error.file.name,
