@@ -1,30 +1,5 @@
 {
-
-  "navbar": {
-    "title": "Web Empresarial Profesional",
-    "logout": "Cerrar Sesión",
-    "changepass": "Cambiar contraseña",
-    "name": "Nombre",
-    "client": "Cliente",
-    "mobile": {
-      "admin": "Administración",
-      "header": "Encabezado",
-      "home": "Inicio",
-      "carousel": "Carrusel",
-      "news": "Novedades",
-      "about": "Quiénes Somos",
-      "company": "Empresa",
-      "manager": "Directivos",
-      "review": "Reseñas",
-      "products": "Productos",
-      "category": "Categorías",
-      "offers": "Ofertas",
-      "contact": "Contáctenos",
-      "info": "Información",
-      "users": "Usuarios"
-    }
-  },
-    "notifications": {
+  "notifications": {
     "login": {
       "success": "Autenticación Exitosa.",
       "error": {
@@ -198,8 +173,8 @@
     "en": "Inglés"
   },
   "status": {
-      "active": "Activado",
-      "inactive": "Desactivado"
+    "active": "Activado",
+    "inactive": "Desactivado"
   },
   "footer": {
     "rights_reserved": "Todos los derechos reservados",
@@ -221,7 +196,30 @@
     "loading": "Accediendo...",
     "load": "Iniciar Sesión →"
   },
-
+  "navbar": {
+    "title": "Web Empresarial Profesional",
+    "logout": "Cerrar Sesión",
+    "changepass": "Cambiar contraseña",
+    "name": "Nombre",
+    "client": "Cliente",
+    "mobile": {
+      "admin": "Administración",
+      "header": "Encabezado",
+      "home": "Inicio",
+      "carousel": "Carrusel",
+      "news": "Novedades",
+      "about": "Quiénes Somos",
+      "company": "Empresa",
+      "manager": "Directivos",
+      "review": "Reseñas",
+      "products": "Productos",
+      "category": "Categorías",
+      "offers": "Ofertas",
+      "contact": "Contáctenos",
+      "info": "Información",
+      "users": "Usuarios"
+    }
+  },
   "sidebar": {
     "admin": "Administración",
     "header": "Encabezado",
@@ -271,7 +269,6 @@
       }
     },
     "footer": "Cambios en tiempo real sin conocimientos técnicos"
-    
   },
   "components": {
     "header": {
@@ -653,7 +650,7 @@
           "name": {
             "title": "Nombre",
             "required": "El nombre es requerido",
-            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "minlength": "El nombre debe tener al menos 2 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           },
           "price": {
@@ -701,7 +698,7 @@
           "name": {
             "title": "Nombre",
             "required": "El nombre es requerido",
-            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "minlength": "El nombre debe tener al menos 2 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           },
           "price": {
@@ -914,5 +911,4 @@
     "unsupported": "Formato de video no compatible. Intente con MP4 o MOV.",
     "converting": "Convirtiendo video a formato compatible..."
   }
-  
 }

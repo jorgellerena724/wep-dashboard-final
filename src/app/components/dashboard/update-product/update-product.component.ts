@@ -70,7 +70,7 @@ export class UpdateProductComponent implements DynamicComponent {
     private sanitizer: DomSanitizer
   ) {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
+      title: ['', [Validators.required, Validators.minLength(2)]],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(3)]],
       image: ['', Validators.required],
@@ -387,7 +387,9 @@ export class UpdateProductComponent implements DynamicComponent {
           )
         ) {
           this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.products.error.duplicateImage'),
+            this.transloco.translate(
+              'notifications.products.error.duplicateImage'
+            ),
             'error'
           );
         } else {
