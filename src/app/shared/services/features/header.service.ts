@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { HeaderData } from '../../interfaces/headerData.interface';
@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class HeaderService {
   private apiUrl = environment.api;
   private imgUrl = environment.api_img;
+  private use_minio = environment.use_minio;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -23,9 +24,11 @@ export class HeaderService {
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = `${
+    const url = this.use_minio ? `${
       this.imgUrl
-    }${this.authService.getClient()}/${name}?no-cache=${timestamp}`;
+        }${this.authService.getClient()}/${name}?no-cache=${timestamp}` : `${
+      this.imgUrl
+        }${name}?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });
