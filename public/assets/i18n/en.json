@@ -705,6 +705,7 @@
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
+            "uploadInfo": "You can add one or more images. If you want, you can add a title to each image.",
             "required": "• The image is required",
             "nodata": {
               "title": "No image selected",
@@ -753,6 +754,7 @@
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
+            "uploadInfo": "You can add one or more images. If you want, you can add a title to each image.",
             "required": "• The image is required",
             "nodata": {
               "title": "No image selected",

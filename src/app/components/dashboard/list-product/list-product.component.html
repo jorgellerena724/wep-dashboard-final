@@ -111,7 +111,7 @@
           <!-- Badge que muestra la cantidad de archivos adicionales -->
           <div
             *ngIf="rowData.files && rowData.files.length > 1"
-            class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
+            class="absolute -top-2 -right-2 bg-gray-800 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
             [title]="'Total de archivos: ' + rowData.files.length"
           >
             +{{ rowData.files.length - 1 }}

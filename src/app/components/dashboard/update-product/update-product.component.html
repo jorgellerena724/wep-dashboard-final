@@ -136,6 +136,13 @@
       (fileError)="onFileError($event)"
     ></app-file-upload>
 
+    <!-- Información sobre carga de imágenes -->
+    <div class="text-md text-gray-500">
+      <small>{{
+        "components.products.edit.fields.image.uploadInfo" | transloco
+      }}</small>
+    </div>
+
     <!-- Mensaje de error cuando no hay archivos -->
     <div
       *ngIf="
