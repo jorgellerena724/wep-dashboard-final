@@ -22,6 +22,13 @@
       }"
     ></app-select>
   </div>
+  <div>
+    <app-text-field
+      id="cal_url"
+      label="{{ 'components.products.create.fields.calurl.title' | transloco }}"
+      [control]="form.get('cal_url')"
+    ></app-text-field>
+  </div>
 
   <!-- Sección de Variantes -->
   <hr class="border-gray-500 my-1 border-opacity-10" />

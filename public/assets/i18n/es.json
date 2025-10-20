@@ -653,6 +653,12 @@
             "minlength": "El nombre debe tener al menos 2 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           },
+          "calurl": {
+            "title": "Link para agendar citas",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 2 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
           "price": {
             "title": "Precio"
           },
@@ -700,6 +706,12 @@
         "fields": {
           "name": {
             "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 2 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "calurl": {
+            "title": "Link para agendar citas",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 2 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres"

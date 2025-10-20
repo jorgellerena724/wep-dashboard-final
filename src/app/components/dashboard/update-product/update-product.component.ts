@@ -83,6 +83,7 @@ export class UpdateProductComponent implements DynamicComponent {
   ) {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
+      cal_url: [''],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(3)]],
       files: this.filesFormArray,
@@ -441,6 +442,7 @@ export class UpdateProductComponent implements DynamicComponent {
 
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
+    formData.append('cal_url', this.form.get('cal_url')?.value);
     formData.append('description', this.form.get('description')?.value);
     formData.append('category_id', this.form.get('category')?.value);
 
