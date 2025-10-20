@@ -1,4 +1,3 @@
-<!-- create-product.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
@@ -28,13 +27,15 @@
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h4 class="text-black text-sm mb-1 dark:text-[rgb(209,213,219)] font-bold">
+      <h4
+        class="text-black text-sm mb-1 dark:text-[rgb(209,213,219)] font-bold"
+      >
         {{ "components.products.create.fields.variants.title" | transloco }}
       </h4>
       <button
         type="button"
         (click)="addVariant()"
-        class="flex items-center gap-2 px-3 py-2 text-sm  text-white rounded-lg  transition-colors bg-gray-800 hover:bg-gray-700"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
       >
         <i class="pi pi-plus"></i>
         <span>{{
@@ -79,15 +80,18 @@
         <button
           type="button"
           (click)="removeVariant(i)"
-          class="p-2 text-red-500  dark:hover:bg-red-900/20 rounded-full transition-colors"
+          class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
         >
           <i class="pi pi-trash"></i>
         </button>
       </div>
     </div>
 
-    <!-- Estado vacío - Ahora con el mismo estilo que las variantes -->
-    <div *ngIf="variants.length === 0" class="p-4 bg-white dark:bg-white rounded-lg border border-black">
+    <!-- Estado vacío para variantes -->
+    <div
+      *ngIf="variants.length === 0"
+      class="p-4 bg-white dark:bg-white rounded-lg border border-black"
+    >
       <div class="text-center py-8">
         <i
           class="pi pi-list text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
@@ -97,15 +101,6 @@
         </p>
       </div>
     </div>
-
-    <!-- Mensaje informativo -->
-    <p
-      *ngIf="variants.length !== 0"
-      class="text-xs text-gray-500 dark:text-gray-400"
-    >
-      <i class="pi pi-info-circle mr-1"></i>
-      {{ "components.products.create.fields.variants.info" | transloco }}
-    </p>
   </div>
 
   <hr class="border-gray-500 my-1 border-opacity-10" />
@@ -122,127 +117,143 @@
         minlength: ( 'components.products.create.fields.description.minlength' | transloco ),
       }"
   ></app-text-field>
+
   <hr class="border-gray-500 my-1 border-opacity-10" />
-  <div class="field">
-    <!-- File Upload -->
+
+  <!-- Sección de Archivos Múltiples -->
+  <div class="space-y-4">
+    <!-- File Upload - Ahora con múltiple -->
     <app-file-upload
       #fileUpload
-      label="{{ 'components.news.create.fields.image.title' | transloco }}"
+      label="{{ 'components.products.create.fields.image.title' | transloco }}"
       accept="image/*,video/mp4,video/quicktime"
       [maxFileSize]="1024 * 1024 * 20"
+      [multiple]="true"
       fileUploadText="{{ 'image.select' | transloco }}"
       fileRecommendation="{{
-        'components.news.create.fields.image.recommendation' | transloco
+        'components.products.create.fields.image.recommendation' | transloco
       }}"
       (fileSelected)="onFileUploaded($event)"
-      (fileRemoved)="removeFile()"
       (fileError)="onFileError($event)"
     ></app-file-upload>
-    <!-- Contenedor de altura fija para la previsualización -->
-    <div class="mt-4 relative h-[240px]">
-      <!-- Vista previa para imagen o video -->
+
+    <!-- Mensaje de error cuando no hay archivos -->
+    <div
+      *ngIf="
+        filesFormArray.invalid &&
+        filesFormArray.touched &&
+        productFiles.length === 0
+      "
+      class="text-red-500 text-sm mt-2 mb-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+    >
+      <i class="pi pi-exclamation-triangle mr-2"></i>
+      {{ "components.products.create.fields.image.required" | transloco }}
+    </div>
+
+    <!-- Lista de archivos cargados -->
+    <div *ngIf="productFiles.length > 0" class="space-y-4">
       <div
-        *ngIf="(imageUrl || videoUrl) && !loadingImage"
-        class="absolute inset-0 flex flex-col"
+        *ngFor="let productFile of productFiles; let i = index"
+        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
       >
-        
-    <div class="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500">
-          <div class="relative inline-block">
+        <!-- Preview -->
+        <div
+          class="flex-shrink-0 w-32 h-32 flex items-center justify-center bg-gray-100 rounded-lg border"
+        >
+          <div class="relative w-full h-full flex items-center justify-center">
             <!-- Imagen -->
             <div
-              *ngIf="imageUrl"
-              class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+              *ngIf="!productFile.isVideo && productFile.previewUrl"
+              class="w-full h-full flex items-center justify-center"
             >
               <img
-                [src]="imageUrl"
-                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2 rounded-lg"
-                alt="{{ 'image.alt' | transloco }}"
+                [src]="productFile.previewUrl"
+                class="max-w-full max-h-full object-contain rounded-lg"
+                alt="Preview"
               />
             </div>
 
-            <!-- Video -->
+            <!-- Video - Mejorado -->
             <div
-              *ngIf="videoUrl"
-              class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+              *ngIf="productFile.isVideo && productFile.videoUrl"
+              class="w-full h-full flex items-center justify-center bg-black rounded-lg"
             >
               <video
                 controls
-                [src]="videoUrl"
-                class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2 rounded-lg"
+                controlsList="nodownload"
+                [src]="productFile.videoUrl"
+                class="w-full h-full object-contain rounded-lg"
                 #videoPlayer
-                (loadedmetadata)="videoPlayer.muted = true"
+                (loadedmetadata)="onVideoLoaded($event, videoPlayer)"
+                poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
               >
                 <div
-                  class="absolute inset-0 flex items-center justify-center bg-black text-white p-4"
+                  class="absolute inset-0 flex items-center justify-center bg-black text-white p-2 text-xs"
                 >
-                  <p>
-                    {{ "video.unsupported" | transloco }}
-                  </p>
+                  <p>{{ "video.unsupported" | transloco }}</p>
                 </div>
               </video>
+              <div
+                class="absolute bottom-2 left-2 bg-black bg-opacity-70 rounded px-2 py-1"
+              >
+                <i class="pi pi-play text-white text-sm"></i>
+              </div>
             </div>
 
-            <!-- Botón de eliminar -->
-            <button
-              type="button"
-              (click)="removeFile()"
-              class="absolute top-0 right-2 text-red-500 bg-transparent  transition-all duration-200 p-1 rounded-full"
-              tooltipPosition="top"
+            <!-- Icono si no hay preview -->
+            <div
+              *ngIf="!productFile.previewUrl && !productFile.videoUrl"
+              class="text-gray-400"
             >
-              <i class="pi pi-trash text-lg"></i>
-            </button>
+              <i class="pi pi-image text-2xl"></i>
+            </div>
           </div>
         </div>
 
-        <!-- Mensaje informativo -->
-        <div class="mt-auto pt-3">
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-            <i class="pi pi-info-circle mr-1"></i>
-            {{
-              isVideo ? ("video.info" | transloco) : ("image.info" | transloco)
-            }}
-          </p>
+        <!-- Campo de título - Ahora completamente opcional -->
+        <div class="flex-1">
+          <app-text-field
+            [id]="'file-title-' + i"
+            label="{{
+              'components.products.create.fields.image.titleField' | transloco
+            }}"
+            [control]="getFileControl(i, 'title')"
+            placeholder="{{
+              'components.products.create.fields.image.titlePlaceholder'
+                | transloco
+            }}"
+          ></app-text-field>
         </div>
-      </div>
 
-      <!-- Estado cuando no hay archivo -->
-      <div
-        *ngIf="!imageUrl && !videoUrl && !loadingImage"
-        class="absolute inset-0 flex items-center justify-center"
-      >
-        <div
-          [class.border-red-500]="
-            form.get('image')?.invalid && form.get('image')?.touched
-          "
-          [class.border-gray-500]="
-            !(form.get('image')?.invalid && form.get('image')?.touched)
-          "
-          class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-white dark:bg-gray-800/50"
+        <!-- Botón eliminar -->
+        <button
+          type="button"
+          (click)="removeFile(i)"
+          class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors self-start mt-2"
         >
-          <i
-            class="pi pi-image text-4xl text-gray-400 dark:text-gray-500 mb-3"
-          ></i>
-          <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
-            <span class="block font-medium">{{
-              "image.nodata.title" | transloco
-            }}</span>
-            <span class="block text-xs mt-1 opacity-75">
-              {{ "image.nodata.subtitle" | transloco }}
-            </span>
-          </p>
-        </div>
+          <i class="pi pi-trash"></i>
+        </button>
       </div>
     </div>
+
+    <!-- Estado vacío para archivos -->
     <div
-      *ngIf="form.get('image')?.invalid && form.get('image')?.touched"
-      class="text-red-500 text-sm mt-2 mb-2"
+      *ngIf="productFiles.length === 0"
+      class="p-4 bg-white dark:bg-white rounded-lg border border-black"
     >
-      {{ "image.required" | transloco }}
+      <div class="text-center py-8">
+        <i
+          class="pi pi-image text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
+        ></i>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ "image.nodata.title" | transloco }}
+        </p>
+      </div>
     </div>
   </div>
 </form>
+
 <style>
-  /* Estilos para override de PrimeNG */
   :host ::ng-deep .p-fileupload-content {
     display: none !important;
   }
@@ -250,5 +261,19 @@
     font-weight: bold !important;
     color: black !important;
     font-size: 14px;
+  }
+
+  /* Mejoras para el reproductor de video */
+  :host ::ng-deep video {
+    border-radius: 0.5rem;
+  }
+
+  :host ::ng-deep video::-webkit-media-controls-panel {
+    background-image: linear-gradient(transparent, transparent) !important;
+  }
+
+  :host ::ng-deep video::-webkit-media-controls-play-button {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
   }
 </style>

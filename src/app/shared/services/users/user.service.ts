@@ -30,7 +30,7 @@ export class UserService {
   }
 
   changePassword(data: any): Observable<any> {
-    return this.http.patch<any[]>(this.apiUrl + 'password-admin/' + data.id, {
+    return this.http.patch<any[]>(this.apiUrl + data.id, {
       newPassword: data.newPassword,
     });
   }

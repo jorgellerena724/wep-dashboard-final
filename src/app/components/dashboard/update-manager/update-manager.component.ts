@@ -106,7 +106,8 @@ export class UpdateManagerComponent implements DynamicComponent {
     reader.readAsDataURL(file);
   }
 
-  onFileUploaded(file: File): void {
+  onFileUploaded(files: File[]): void {
+    const file = files[0]; // Only handle the first file since this component supports single file upload
     this.selectedFile = file;
     this.form.get('image')?.setValue(file);
     const reader = new FileReader();

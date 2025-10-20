@@ -85,7 +85,8 @@ export class CreateNewsComponent implements DynamicComponent {
     reader.readAsDataURL(file);
   }
 
-  onFileUploaded(file: File): void {
+  onFileUploaded(files: File[]): void {
+    const file = files[0]; // Only handle the first file since this component supports single file upload
     this.selectedFile = file;
     this.form.get('image')?.setValue(file);
 
@@ -145,7 +146,9 @@ export class CreateNewsComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      const message = this.transloco.translate('notifications.news.error.formInvalid');
+      const message = this.transloco.translate(
+        'notifications.news.error.formInvalid'
+      );
       this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
@@ -172,7 +175,9 @@ export class CreateNewsComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        const message = this.transloco.translate('notifications.news.success.created');
+        const message = this.transloco.translate(
+          'notifications.news.success.created'
+        );
         this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
@@ -195,10 +200,14 @@ export class CreateNewsComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          const message = this.transloco.translate('notifications.news.error.duplicateImage');
+          const message = this.transloco.translate(
+            'notifications.news.error.duplicateImage'
+          );
           this.notificationSrv.addNotification(message, 'error');
         } else {
-          const message = this.transloco.translate('notifications.news.error.create');
+          const message = this.transloco.translate(
+            'notifications.news.error.create'
+          );
           this.notificationSrv.addNotification(message, 'error');
         }
       },

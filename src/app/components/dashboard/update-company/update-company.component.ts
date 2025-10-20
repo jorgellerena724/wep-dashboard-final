@@ -112,7 +112,8 @@ export class UpdateCompanyComponent implements DynamicComponent {
     reader.readAsDataURL(file);
   }
 
-  onFileUploaded(file: File): void {
+  onFileUploaded(files: File[]): void {
+    const file = files[0]; // Only handle the first file since this component supports single file upload
     this.selectedFile = file;
     this.form.get('image')?.setValue(file);
     const reader = new FileReader();
@@ -139,7 +140,9 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      const message = this.transloco.translate('notifications.company.error.formInvalid');
+      const message = this.transloco.translate(
+        'notifications.company.error.formInvalid'
+      );
       this.notificationSrv.addNotification(message, 'warning');
       this.form.markAllAsTouched();
       return;
@@ -164,7 +167,9 @@ export class UpdateCompanyComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        const message = this.transloco.translate('notifications.company.success.updated');
+        const message = this.transloco.translate(
+          'notifications.company.success.updated'
+        );
         this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
 
@@ -187,10 +192,14 @@ export class UpdateCompanyComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
-          const message = this.transloco.translate('notifications.company.error.duplicateImage');
+          const message = this.transloco.translate(
+            'notifications.company.error.duplicateImage'
+          );
           this.notificationSrv.addNotification(message, 'error');
         } else {
-          const message = this.transloco.translate('notifications.company.error.update');
+          const message = this.transloco.translate(
+            'notifications.company.error.update'
+          );
           this.notificationSrv.addNotification(message, 'error');
         }
       },

@@ -26,10 +26,17 @@ import { ProductService } from '../../../shared/services/features/product.servic
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-// Interfaces para las variantes
 interface ProductVariant {
   description: string;
   price: number;
+}
+
+interface ProductFile {
+  file: File | null;
+  title: string;
+  previewUrl: string | null;
+  videoUrl: SafeResourceUrl | null;
+  isVideo: boolean;
 }
 
 @Component({
@@ -52,13 +59,12 @@ export class CreateProductComponent implements DynamicComponent {
   @Output() submitSuccess = new EventEmitter<void>();
   id: number;
   form: FormGroup;
-  selectedFile: File | null = null;
   categories: any[] = [];
   uploading = false;
-  loadingImage = false;
-  imageUrl: string | null = null;
-  isVideo: boolean = false;
-  videoUrl: SafeResourceUrl | null = null;
+
+  // Propiedades para archivos múltiples
+  productFiles: ProductFile[] = [];
+  filesFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
 
   // Propiedades para las variantes
   variants: ProductVariant[] = [];
@@ -76,8 +82,7 @@ export class CreateProductComponent implements DynamicComponent {
       title: ['', [Validators.required, Validators.minLength(2)]],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      image: ['', Validators.required],
-      price: [''],
+      files: this.filesFormArray,
       variants: this.variantsFormArray,
     });
 
@@ -92,7 +97,6 @@ export class CreateProductComponent implements DynamicComponent {
     if (this.initialData) {
       this.form.patchValue(this.initialData);
 
-      // Si hay variants en initialData, cargarlas
       if (
         this.initialData.variants &&
         typeof this.initialData.variants === 'object'
@@ -105,7 +109,95 @@ export class CreateProductComponent implements DynamicComponent {
     await Promise.all(initTasks);
   }
 
-  // Métodos para manejar las variantes
+  // Métodos para manejar archivos múltiples
+  onFileUploaded(files: FileList | File[]): void {
+    // Convertir FileList a Array si es necesario
+    const filesArray = files instanceof FileList ? Array.from(files) : files;
+
+    filesArray.forEach((file) => {
+      const supportedVideoTypes = [
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
+        'video/quicktime',
+      ];
+
+      const isVideo = supportedVideoTypes.includes(file.type);
+
+      if (isVideo) {
+        const videoObjectUrl = URL.createObjectURL(file);
+        const videoUrl =
+          this.sanitizer.bypassSecurityTrustResourceUrl(videoObjectUrl);
+
+        const productFile: ProductFile = {
+          file,
+          title: '', // Títulos completamente opcionales ahora
+          previewUrl: null,
+          videoUrl,
+          isVideo,
+        };
+
+        this.productFiles.push(productFile);
+        this.addFileToFormArray(productFile);
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const previewUrl = reader.result as string;
+
+          const productFile: ProductFile = {
+            file,
+            title: '', // Títulos completamente opcionales ahora
+            previewUrl,
+            videoUrl: null,
+            isVideo: false,
+          };
+
+          this.productFiles.push(productFile);
+          this.addFileToFormArray(productFile);
+          this.cdr.detectChanges();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  private addFileToFormArray(productFile: ProductFile): void {
+    // Títulos completamente opcionales - sin validadores
+    const fileGroup = this.fb.group({
+      title: [productFile.title], // Sin validadores
+      file: [productFile.file],
+    });
+    this.filesFormArray.push(fileGroup);
+  }
+
+  removeFile(index: number): void {
+    // Limpiar URLs
+    const fileToRemove = this.productFiles[index];
+    if (
+      fileToRemove.previewUrl &&
+      fileToRemove.previewUrl.startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(fileToRemove.previewUrl);
+    }
+    if (fileToRemove.videoUrl) {
+      const unsafeUrl = fileToRemove.videoUrl as any;
+      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+      }
+    }
+
+    // Remover de arrays
+    this.productFiles.splice(index, 1);
+    this.filesFormArray.removeAt(index);
+    this.cdr.detectChanges();
+  }
+
+  getFileControl(index: number, field: string): FormControl {
+    const fileGroup = this.filesFormArray.at(index) as FormGroup;
+    return fileGroup.get(field) as FormControl;
+  }
+
+  // Métodos para variantes (sin cambios)
   addVariant(): void {
     const variantGroup = this.fb.group({
       description: ['', Validators.required],
@@ -129,7 +221,6 @@ export class CreateProductComponent implements DynamicComponent {
   }
 
   private loadVariantsFromData(variantsData: any): void {
-    // Si variantsData es un array directo de variantes
     if (Array.isArray(variantsData)) {
       this.variants = [];
       this.variantsFormArray.clear();
@@ -147,39 +238,10 @@ export class CreateProductComponent implements DynamicComponent {
         });
       });
     }
-    // Si variantsData es un objeto con estructura (para compatibilidad)
-    else if (variantsData && typeof variantsData === 'object') {
-      // Si tiene la estructura antigua con type y variants
-      const variantsArray = variantsData.variants || [];
-      if (Array.isArray(variantsArray)) {
-        this.variants = [];
-        this.variantsFormArray.clear();
-
-        variantsArray.forEach((variant: any) => {
-          const variantGroup = this.fb.group({
-            description: [
-              variant.value || variant.description || '',
-              Validators.required,
-            ],
-            price: [
-              variant.price || 0,
-              [Validators.required, Validators.min(0)],
-            ],
-          });
-
-          this.variantsFormArray.push(variantGroup);
-          this.variants.push({
-            description: variant.value || variant.description || '',
-            price: variant.price || 0,
-          });
-        });
-      }
-    }
   }
 
   private getVariantsData(): ProductVariant[] {
     const variantsData: ProductVariant[] = [];
-
     for (let i = 0; i < this.variantsFormArray.length; i++) {
       const variantGroup = this.variantsFormArray.at(i) as FormGroup;
       variantsData.push({
@@ -187,85 +249,24 @@ export class CreateProductComponent implements DynamicComponent {
         price: parseFloat(variantGroup.get('price')?.value),
       });
     }
-
     return variantsData;
   }
 
-  onFileSelected(file: File) {
-    this.selectedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imageUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  onFileUploaded(file: File): void {
-    this.selectedFile = file;
-    this.form.get('image')?.setValue(file);
-
-    // Determinar si es video (incluyendo .mov)
-    const supportedVideoTypes = [
-      'video/mp4',
-      'video/webm',
-      'video/ogg',
-      'video/quicktime',
-    ];
-
-    this.isVideo = supportedVideoTypes.includes(file.type);
-
-    if (this.isVideo) {
-      // Crear URL segura para el video
-      const videoUrl = URL.createObjectURL(file);
-      this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
-      this.imageUrl = null;
-    } else {
-      // Para imágenes
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imageUrl = reader.result as string;
-        this.videoUrl = null;
-        this.cdr.detectChanges();
-      };
-      reader.readAsDataURL(file);
-    }
-    this.cdr.detectChanges();
-  }
-
-  removeFile(): void {
-    if (this.selectedFile) {
-      this.selectedFile = null;
-    }
-
-    // Revocar URLs de objetos
-    if (this.imageUrl && this.imageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(this.imageUrl);
-    }
-    if (this.videoUrl) {
-      // Para SafeResourceUrl, necesitamos acceder a la URL real
-      const unsafeUrl = this.videoUrl as any;
-      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
-        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
-      }
-    }
-
-    this.imageUrl = null;
-    this.videoUrl = null;
-    this.isVideo = false;
-    this.form.get('image')?.setValue(null);
-    this.form.markAllAsTouched();
-    this.form.patchValue({ image: null });
-    this.cdr.detectChanges();
-  }
-
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) {
+    // Verificar que haya al menos un archivo
+    if (this.form.invalid || this.productFiles.length === 0) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.products.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
+
+      // Marcar el FormArray de files como touched para mostrar el error
+      this.filesFormArray.setErrors(
+        this.productFiles.length === 0 ? { required: true } : null
+      );
+      this.filesFormArray.markAsTouched();
+
       return;
     }
 
@@ -273,26 +274,29 @@ export class CreateProductComponent implements DynamicComponent {
     formData.append('title', this.form.get('title')?.value);
     formData.append('description', this.form.get('description')?.value);
     formData.append('category_id', this.form.get('category')?.value);
-    formData.append('price', this.form.get('price')?.value);
 
     // Agregar variants como JSON
     const variantsData = this.getVariantsData();
     formData.append('variants', JSON.stringify(variantsData));
 
-    if (this.selectedFile) {
-      formData.append('photo', this.selectedFile, this.selectedFile.name);
-    }
+    // Agregar títulos (ahora completamente opcionales)
+    const fileTitles = this.filesFormArray.controls.map(
+      (control) => control.get('title')?.value || '' // Enviar string vacío si no hay título
+    );
+    formData.append('file_titles', JSON.stringify(fileTitles));
+
+    // Agregar archivos
+    this.productFiles.forEach((productFile) => {
+      if (productFile.file) {
+        formData.append('files', productFile.file, productFile.file.name);
+      }
+    });
 
     this.uploading = true;
 
     this.srv.post(formData).subscribe({
       next: (response) => {
         this.uploading = false;
-        // Actualizar la vista previa con la ruta del backend
-
-        this.imageUrl = null;
-        this.form.patchValue({ photo: '' });
-
         this.notificationSrv.addNotification(
           this.transloco.translate('notifications.products.success.created'),
           'success'
@@ -304,40 +308,23 @@ export class CreateProductComponent implements DynamicComponent {
         }
 
         if (!this.initialData?.closeOnSubmit) {
-          this.form.reset();
-          this.selectedFile = null;
-          this.imageUrl = null;
-          this.variants = [];
-          this.variantsFormArray.clear();
+          this.resetForm();
         }
       },
       error: (error) => {
         this.uploading = false;
-
-        if (
-          error.status === 400 &&
-          error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
-          )
-        ) {
-          this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.products.error.duplicateImage'
-            ),
-            'error'
-          );
-        } else {
-          this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.products.error.create'),
-            'error'
-          );
-        }
+        this.notificationSrv.addNotification(
+          this.transloco.translate('notifications.products.error.create'),
+          'error'
+        );
       },
     });
   }
 
   get isFormInvalid(): boolean {
-    return this.form.invalid || this.uploading;
+    return (
+      this.form.invalid || this.uploading || this.productFiles.length === 0
+    );
   }
 
   fetchCategories(): Promise<void> {
@@ -363,28 +350,51 @@ export class CreateProductComponent implements DynamicComponent {
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
-    console.error('Error de validación de archivo:"File validation error:"', {
-      type: error.type,
-      message: error.message,
-      fileName: error.file.name,
-      fileSize: error.file.size,
-      fileType: error.file.type,
-    });
-
-    this.selectedFile = null;
   }
 
   ngOnDestroy() {
-    // Limpiar URLs de objetos
-    if (this.imageUrl && this.imageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(this.imageUrl);
-    }
-    if (this.videoUrl) {
-      const unsafeUrl = this.videoUrl as any;
-      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
-        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+    // Limpiar todas las URLs de objetos
+    this.productFiles.forEach((file) => {
+      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(file.previewUrl);
       }
-    }
+      if (file.videoUrl) {
+        const unsafeUrl = file.videoUrl as any;
+        if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+          URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+        }
+      }
+    });
+  }
+
+  onVideoLoaded(event: Event, videoPlayer: HTMLVideoElement): void {
+    // Configurar el video para que se reproduzca mejor
+    videoPlayer.muted = true;
+    videoPlayer.playsInline = true;
+
+    // Intentar reproducir automáticamente (silenciado)
+    videoPlayer.play().catch(() => {
+      // Ignorar errores de autoplay
+    });
+  }
+
+  private resetForm(): void {
+    this.form.reset();
+    // Limpiar URLs
+    this.productFiles.forEach((file) => {
+      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(file.previewUrl);
+      }
+      if (file.videoUrl) {
+        const unsafeUrl = file.videoUrl as any;
+        if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+          URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+        }
+      }
+    });
+    this.productFiles = [];
+    this.filesFormArray.clear();
+    this.variants = [];
+    this.variantsFormArray.clear();
   }
 }

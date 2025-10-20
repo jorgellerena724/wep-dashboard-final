@@ -10,6 +10,7 @@
       [customUpload]="true"
       [showUploadButton]="false"
       [showCancelButton]="false"
+      [multiple]="multiple"
       (onSelect)="onFileSelect($event)"
       (onClear)="onClear($event)"
       (uploadHandler)="onFileSelect($event)"
@@ -22,6 +23,8 @@
     <small>{{ fileRecommendation }}</small>
   </div>
 </div>
+
+<!-- Los estilos se mantienen igual -->
 
 <style>
   /* BORDE ROJO PARA EL CONTENEDOR PRINCIPAL */
