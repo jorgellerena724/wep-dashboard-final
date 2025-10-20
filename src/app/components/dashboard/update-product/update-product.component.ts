@@ -31,6 +31,16 @@ interface ProductVariant {
   price: number;
 }
 
+interface ProductFile {
+  file: File | null;
+  title: string;
+  previewUrl: string | null;
+  videoUrl: SafeResourceUrl | null;
+  isVideo: boolean;
+  isExisting?: boolean; // Para identificar archivos existentes
+  existingPath?: string; // Ruta del archivo existente
+}
+
 @Component({
   selector: 'app-update-product',
   templateUrl: './update-product.component.html',
@@ -51,13 +61,15 @@ export class UpdateProductComponent implements DynamicComponent {
   @Output() submitSuccess = new EventEmitter<void>();
   id: number;
   form: FormGroup;
-  selectedFile: File | null = null;
   categories: any[] = [];
   uploading = false;
   loadingImage = false;
-  imageUrl: string | null = null;
-  isVideo: boolean = false;
-  videoUrl: SafeResourceUrl | null = null;
+
+  // Propiedades para archivos múltiples
+  productFiles: ProductFile[] = [];
+  filesFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
+
+  // Propiedades para las variantes
   variants: ProductVariant[] = [];
   variantsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
 
@@ -73,7 +85,7 @@ export class UpdateProductComponent implements DynamicComponent {
       title: ['', [Validators.required, Validators.minLength(2)]],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      image: ['', Validators.required],
+      files: this.filesFormArray,
       variants: this.variantsFormArray,
     });
 
@@ -87,9 +99,7 @@ export class UpdateProductComponent implements DynamicComponent {
   async ngOnInit(): Promise<void> {
     if (this.initialData) {
       this.form.patchValue(this.initialData);
-
       this.form.get('category')?.setValue(this.initialData.category.id);
-
       this.id = this.initialData.id;
 
       // Cargar variantes existentes
@@ -97,16 +107,192 @@ export class UpdateProductComponent implements DynamicComponent {
         this.loadVariantsFromData(this.initialData.variants);
       }
 
-      if (this.initialData.photo) {
-        this.loadCurrentImage();
+      // Cargar archivos existentes
+      if (this.initialData.files && Array.isArray(this.initialData.files)) {
+        this.loadExistingFiles(this.initialData.files);
       }
     }
 
     const initTasks = [this.fetchCategories()];
-
     await Promise.all(initTasks);
   }
 
+  // Cargar archivos existentes desde los datos del producto
+  private loadExistingFiles(filesData: any[]): void {
+    filesData.forEach((fileData, index) => {
+      const isVideo = this.isVideoFile(fileData.media);
+
+      const productFile: ProductFile = {
+        file: null,
+        title: fileData.title || '',
+        previewUrl: null,
+        videoUrl: null,
+        isVideo,
+        isExisting: true,
+        existingPath: fileData.media,
+      };
+
+      this.productFiles.push(productFile);
+      this.addFileToFormArray(productFile.title, null, index);
+
+      // Cargar preview del archivo existente
+      this.loadExistingFilePreview(productFile, index);
+    });
+  }
+
+  private loadExistingFilePreview(
+    productFile: ProductFile,
+    index: number
+  ): void {
+    if (productFile.existingPath) {
+      this.loadingImage = true;
+
+      this.srv.getImage(productFile.existingPath).subscribe({
+        next: (blob: Blob) => {
+          if (productFile.isVideo) {
+            this.createVideoPreview(
+              blob,
+              productFile.existingPath?.split('.').pop(),
+              index
+            );
+          } else {
+            this.createImagePreview(blob, index);
+          }
+          this.loadingImage = false;
+        },
+        error: () => {
+          // Fallback si no se puede cargar el blob
+          if (productFile.isVideo) {
+            this.setFallbackVideo(productFile.existingPath!, index);
+          } else {
+            this.setFallbackImage(productFile.existingPath!, index);
+          }
+          this.loadingImage = false;
+        },
+      });
+    }
+  }
+
+  private isVideoFile(filename: string): boolean {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return ['mp4', 'webm', 'mov'].includes(extension || '');
+  }
+
+  // Métodos para manejar archivos múltiples (igual que en create)
+  onFileUploaded(files: File[]): void {
+    files.forEach((file) => {
+      const supportedVideoTypes = [
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
+        'video/quicktime',
+      ];
+
+      const isVideo = supportedVideoTypes.includes(file.type);
+
+      if (isVideo) {
+        const videoObjectUrl = URL.createObjectURL(file);
+        const videoUrl =
+          this.sanitizer.bypassSecurityTrustResourceUrl(videoObjectUrl);
+
+        const productFile: ProductFile = {
+          file,
+          title: '',
+          previewUrl: null,
+          videoUrl,
+          isVideo,
+          isExisting: false,
+        };
+
+        this.productFiles.push(productFile);
+        this.addFileToFormArray(
+          productFile.title,
+          file,
+          this.productFiles.length - 1
+        );
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const previewUrl = reader.result as string;
+
+          const productFile: ProductFile = {
+            file,
+            title: '',
+            previewUrl,
+            videoUrl: null,
+            isVideo: false,
+            isExisting: false,
+          };
+
+          this.productFiles.push(productFile);
+          this.addFileToFormArray(
+            productFile.title,
+            file,
+            this.productFiles.length - 1
+          );
+          this.cdr.detectChanges();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  private addFileToFormArray(
+    title: string,
+    file: File | null,
+    index: number
+  ): void {
+    // Solo el primer archivo es requerido, los demás son opcionales
+    const isFirstFile = index === 0;
+    const validators = isFirstFile ? [Validators.required] : [];
+
+    const fileGroup = this.fb.group({
+      title: [title, validators],
+      file: [file],
+    });
+    this.filesFormArray.push(fileGroup);
+  }
+
+  removeFile(index: number): void {
+    // Limpiar URLs
+    const fileToRemove = this.productFiles[index];
+    if (
+      fileToRemove.previewUrl &&
+      fileToRemove.previewUrl.startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(fileToRemove.previewUrl);
+    }
+    if (fileToRemove.videoUrl) {
+      const unsafeUrl = fileToRemove.videoUrl as any;
+      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+      }
+    }
+
+    // Remover de arrays
+    this.productFiles.splice(index, 1);
+    this.filesFormArray.removeAt(index);
+
+    // Si removimos el primer archivo, actualizar validadores del nuevo primer archivo
+    if (this.productFiles.length > 0 && index === 0) {
+      const newFirstFileGroup = this.filesFormArray.at(0) as FormGroup;
+      newFirstFileGroup.get('title')?.setValidators([Validators.required]);
+      newFirstFileGroup.get('title')?.updateValueAndValidity();
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  getFileControl(index: number, field: string): FormControl {
+    const fileGroup = this.filesFormArray.at(index) as FormGroup;
+    return fileGroup.get(field) as FormControl;
+  }
+
+  isTitleRequired(index: number): boolean {
+    return index === 0;
+  }
+
+  // Métodos para variantes (sin cambios)
   addVariant(): void {
     const variantGroup = this.fb.group({
       description: ['', Validators.required],
@@ -176,7 +362,6 @@ export class UpdateProductComponent implements DynamicComponent {
 
   private getVariantsData(): ProductVariant[] {
     const variantsData: ProductVariant[] = [];
-
     for (let i = 0; i < this.variantsFormArray.length; i++) {
       const variantGroup = this.variantsFormArray.at(i) as FormGroup;
       variantsData.push({
@@ -184,181 +369,106 @@ export class UpdateProductComponent implements DynamicComponent {
         price: parseFloat(variantGroup.get('price')?.value),
       });
     }
-
     return variantsData;
   }
 
-  private loadCurrentImage(): void {
-    if (this.initialData?.photo) {
-      this.loadingImage = true;
-
-      // Determinar si es video por la extensión
-      const extension = this.initialData.photo.split('.').pop()?.toLowerCase();
-      this.isVideo = ['mp4', 'webm', 'mov'].includes(extension || '');
-
-      this.srv.getImage(this.initialData.photo).subscribe({
-        next: (blob: Blob) => {
-          if (this.isVideo) {
-            this.createVideoPreview(blob, extension);
-          } else {
-            this.createImagePreview(blob);
-          }
-          this.form.get('image')?.setValue('existing-image');
-          this.loadingImage = false;
-        },
-        error: () => {
-          if (this.isVideo) {
-            this.setFallbackVideo();
-          } else {
-            this.setFallbackImage();
-          }
-          this.form.get('image')?.setValue('existing-image');
-          this.loadingImage = false;
-        },
-      });
-    }
-  }
-
-  onFileSelected(file: File) {
-    this.selectedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imageUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  private createVideoPreview(blob: Blob, extension: string | undefined): void {
-    // Determinar el tipo MIME basado en la extensión
+  // Métodos para preview de archivos existentes
+  private createVideoPreview(
+    blob: Blob,
+    extension: string | undefined,
+    index: number
+  ): void {
     let mimeType = 'video/mp4';
     if (extension === 'mov') mimeType = 'video/quicktime';
     if (extension === 'webm') mimeType = 'video/webm';
     if (extension === 'ogg') mimeType = 'video/ogg';
 
-    // Crear URL segura para el video
     const videoBlob = new Blob([blob], { type: mimeType });
-    this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      URL.createObjectURL(videoBlob)
-    );
+    this.productFiles[index].videoUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(
+        URL.createObjectURL(videoBlob)
+      );
     this.cdr.detectChanges();
   }
 
-  // Añadir método para fallback de video
-  private setFallbackVideo(): void {
-    // Usar sanitizer para URL externa
-    this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      this.initialData.photo
-    );
+  private setFallbackVideo(videoPath: string, index: number): void {
+    this.productFiles[index].videoUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(videoPath);
     this.cdr.detectChanges();
   }
 
-  onFileUploaded(file: File): void {
-    this.selectedFile = file;
-    this.form.get('image')?.setValue(file);
-
-    // Determinar si es video (incluyendo .mov)
-    const supportedVideoTypes = [
-      'video/mp4',
-      'video/webm',
-      'video/ogg',
-      'video/quicktime',
-    ];
-
-    this.isVideo = supportedVideoTypes.includes(file.type);
-
-    if (this.isVideo) {
-      // Crear URL segura para el video
-      const videoUrl = URL.createObjectURL(file);
-      this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
-      this.imageUrl = null;
-    } else {
-      // Para imágenes
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imageUrl = reader.result as string;
-        this.videoUrl = null;
-        this.cdr.detectChanges();
-      };
-      reader.readAsDataURL(file);
-    }
-    this.cdr.detectChanges();
-  }
-
-  removeFile(): void {
-    if (this.selectedFile) {
-      this.selectedFile = null;
-    }
-
-    // Revocar URLs de objetos
-    if (this.imageUrl && this.imageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(this.imageUrl);
-    }
-    if (this.videoUrl) {
-      // Para SafeResourceUrl, necesitamos acceder a la URL real
-      const unsafeUrl = this.videoUrl as any;
-      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
-        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
-      }
-    }
-
-    this.imageUrl = null;
-    this.videoUrl = null;
-    this.isVideo = false;
-    this.form.get('image')?.setValue(null);
-    this.form.markAllAsTouched();
-    this.form.patchValue({ image: null });
-    this.cdr.detectChanges();
-  }
-
-  private createImagePreview(blob: Blob): void {
+  private createImagePreview(blob: Blob, index: number): void {
     const reader = new FileReader();
     reader.onloadend = () => {
-      this.imageUrl = reader.result as string;
+      this.productFiles[index].previewUrl = reader.result as string;
       this.cdr.detectChanges();
     };
     reader.readAsDataURL(new Blob([blob]));
   }
 
-  private setFallbackImage(): void {
-    this.imageUrl = this.initialData.photo;
+  private setFallbackImage(imagePath: string, index: number): void {
+    this.productFiles[index].previewUrl = imagePath;
     this.cdr.detectChanges();
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) {
+    // Verificar que haya al menos un archivo
+    if (this.form.invalid || this.productFiles.length === 0) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.products.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
+
+      this.filesFormArray.setErrors(
+        this.productFiles.length === 0 ? { required: true } : null
+      );
+      this.filesFormArray.markAsTouched();
+
+      return;
+    }
+
+    // Verificar que el primer archivo tenga título
+    const firstFileTitle = this.getFileControl(0, 'title')?.value;
+    if (!firstFileTitle?.trim()) {
+      this.notificationSrv.addNotification(
+        this.transloco.translate('notifications.products.error.formInvalid'),
+        'warning'
+      );
+      this.getFileControl(0, 'title')?.markAsTouched();
       return;
     }
 
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
-
     formData.append('description', this.form.get('description')?.value);
-
     formData.append('category_id', this.form.get('category')?.value);
 
+    // Agregar variants como JSON
     const variantsData = this.getVariantsData();
     formData.append('variants', JSON.stringify(variantsData));
 
-    if (this.selectedFile) {
-      formData.append('photo', this.selectedFile, this.selectedFile.name);
-    }
+    // Agregar títulos de archivos (todos los archivos, existentes y nuevos)
+    const fileTitles = this.filesFormArray.controls.map(
+      (control) => control.get('title')?.value
+    );
+    formData.append('file_titles', JSON.stringify(fileTitles));
+
+    // Agregar SOLO archivos nuevos (no los existentes)
+    const newFiles = this.productFiles.filter(
+      (file) => !file.isExisting && file.file
+    );
+    newFiles.forEach((productFile) => {
+      if (productFile.file) {
+        formData.append('files', productFile.file, productFile.file.name);
+      }
+    });
 
     this.uploading = true;
 
     this.srv.patch(formData, this.id).subscribe({
       next: (response) => {
         this.uploading = false;
-        // Actualizar la vista previa con la ruta del backend
-
-        this.imageUrl = null;
-        this.form.patchValue({ photo: '' });
-
         this.notificationSrv.addNotification(
           this.transloco.translate('notifications.products.success.updated'),
           'success'
@@ -370,21 +480,17 @@ export class UpdateProductComponent implements DynamicComponent {
         }
 
         if (!this.initialData?.closeOnSubmit) {
-          this.form.reset();
-          this.selectedFile = null;
-          this.imageUrl = null;
-          this.variants = [];
-          this.variantsFormArray.clear();
+          this.resetForm();
         }
       },
       error: (error) => {
         this.uploading = false;
 
+        // Manejar error de imagen duplicada
         if (
           error.status === 400 &&
-          error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
-          )
+          error.error.message?.includes('imagen') &&
+          error.error.message?.includes('servidor')
         ) {
           this.notificationSrv.addNotification(
             this.transloco.translate(
@@ -403,7 +509,9 @@ export class UpdateProductComponent implements DynamicComponent {
   }
 
   get isFormInvalid(): boolean {
-    return this.form.invalid || this.uploading;
+    return (
+      this.form.invalid || this.uploading || this.productFiles.length === 0
+    );
   }
 
   fetchCategories(): Promise<void> {
@@ -429,28 +537,51 @@ export class UpdateProductComponent implements DynamicComponent {
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
-    console.error('Error de validación de archivo:"File validation error:"', {
-      type: error.type,
-      message: error.message,
-      fileName: error.file.name,
-      fileSize: error.file.size,
-      fileType: error.file.type,
-    });
-
-    this.selectedFile = null;
   }
 
   ngOnDestroy() {
-    // Limpiar URLs de objetos
-    if (this.imageUrl && this.imageUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(this.imageUrl);
-    }
-    if (this.videoUrl) {
-      const unsafeUrl = this.videoUrl as any;
-      if (unsafeUrl.changingThisBreaksApplicationSecurity) {
-        URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+    // Limpiar todas las URLs de objetos
+    this.productFiles.forEach((file) => {
+      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(file.previewUrl);
       }
-    }
+      if (file.videoUrl) {
+        const unsafeUrl = file.videoUrl as any;
+        if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+          URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+        }
+      }
+    });
+  }
+
+  private resetForm(): void {
+    // En update, no reseteamos completamente el formulario
+    // Solo limpiamos los archivos nuevos y mantenemos los datos cargados
+    const newFiles = this.productFiles.filter((file) => !file.isExisting);
+
+    // Limpiar URLs de archivos nuevos
+    newFiles.forEach((file) => {
+      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(file.previewUrl);
+      }
+      if (file.videoUrl) {
+        const unsafeUrl = file.videoUrl as any;
+        if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+          URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+        }
+      }
+    });
+
+    // Mantener solo los archivos existentes
+    this.productFiles = this.productFiles.filter((file) => file.isExisting);
+
+    // Reconstruir el FormArray con solo archivos existentes
+    this.filesFormArray.clear();
+    this.productFiles.forEach((file, index) => {
+      this.addFileToFormArray(file.title, null, index);
+    });
+
+    this.variants = [];
+    this.variantsFormArray.clear();
   }
 }

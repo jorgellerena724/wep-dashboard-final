@@ -680,10 +680,12 @@
             "info": "Puede agregar mas variantes en el botón de +"
           },
           "image": {
-            "title": "Imagen del producto o servicio",
+            "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
             "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "titlePlaceholder": "Título",
+            "titleRequired": "El título de la imagen es requerido",
             "required": "• La imagen es requerida",
             "nodata": {
               "title": "No hay imagen seleccionada",
@@ -728,10 +730,12 @@
             "required": "La categoría es requerida"
           },
           "image": {
-            "title": "Imagen del producto o servicio",
+            "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
             "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "titlePlaceholder": "Título",
+            "titleRequired": "El título de la imagen es requerido",
             "required": "• La imagen es requerida",
             "nodata": {
               "title": "No hay imagen seleccionada",

@@ -110,7 +110,8 @@ export class UpdateHeaderComponent implements DynamicComponent {
     reader.readAsDataURL(file);
   }
 
-  onFileUploaded(file: File): void {
+  onFileUploaded(files: File[]): void {
+    const file = files[0]; // Only handle the first file since this component supports single file upload
     this.selectedFile = file;
     this.form.get('image')?.setValue(file);
     const reader = new FileReader();
@@ -137,9 +138,11 @@ export class UpdateHeaderComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.transloco.selectTranslate('notifications.header.error.formInvalid').subscribe(message => {
-        this.notificationSrv.addNotification(message, 'warning');
-      });
+      this.transloco
+        .selectTranslate('notifications.header.error.formInvalid')
+        .subscribe((message) => {
+          this.notificationSrv.addNotification(message, 'warning');
+        });
       this.form.markAllAsTouched();
       return;
     }
@@ -161,9 +164,11 @@ export class UpdateHeaderComponent implements DynamicComponent {
         this.imageUrl = null;
         this.form.patchValue({ route: '' });
 
-        this.transloco.selectTranslate('notifications.header.success.updated').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
+        this.transloco
+          .selectTranslate('notifications.header.success.updated')
+          .subscribe((message) => {
+            this.notificationSrv.addNotification(message, 'success');
+          });
         this.submitSuccess.emit();
 
         if (this.initialData?.onSave) {
@@ -185,13 +190,17 @@ export class UpdateHeaderComponent implements DynamicComponent {
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."."The image you are trying to upload is already on the server."'
           )
         ) {
-          this.transloco.selectTranslate('notifications.header.error.duplicateImage').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          this.transloco
+            .selectTranslate('notifications.header.error.duplicateImage')
+            .subscribe((message) => {
+              this.notificationSrv.addNotification(message, 'error');
+            });
         } else {
-          this.transloco.selectTranslate('notifications.header.error.update').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          this.transloco
+            .selectTranslate('notifications.header.error.update')
+            .subscribe((message) => {
+              this.notificationSrv.addNotification(message, 'error');
+            });
         }
       },
     });

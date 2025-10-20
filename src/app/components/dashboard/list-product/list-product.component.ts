@@ -131,7 +131,7 @@ export class ListProductComponent implements OnInit {
             filter: true,
           },
           {
-            field: 'image',
+            field: 'firstImage',
             header: imageTranslation,
             width: '240px',
           },
@@ -172,7 +172,7 @@ export class ListProductComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.customTemplates['image'] = this.imageTemplate;
+    this.customTemplates['firstImage'] = this.imageTemplate;
     this.customTemplates['variants'] = this.variantsTemplate;
   }
 
@@ -189,34 +189,27 @@ export class ListProductComponent implements OnInit {
               .join(', ');
           }
 
+          // Obtener la primera imagen del array files
+          const firstFile =
+            item.files && item.files.length > 0 ? item.files[0] : null;
+          const firstImagePath = firstFile ? firstFile.media : null;
+          const isVideo = firstImagePath
+            ? this.isVideoFile(firstImagePath)
+            : false;
+
           return {
             ...item,
             categoryName: item.category.title,
-            variantsText, // Nuevo campo para mostrar
+            variantsText,
+            firstImagePath,
+            isVideo,
+            firstFileTitle: firstFile ? firstFile.title : '',
           };
         });
         this.loading = false;
 
-        data.forEach((item) => {
-          if (item.photo) {
-            const isVideo = item.photo.toLowerCase().endsWith('.mp4');
-            this.srv.getImage(item.photo).subscribe({
-              next: (fileBlob) => {
-                if (isVideo) {
-                  this.videoUrls[item.id] = URL.createObjectURL(fileBlob);
-                } else {
-                  this.imageUrls[item.id] = URL.createObjectURL(fileBlob);
-                }
-              },
-              error: (error) => {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate('notifications.products.error.loadImage'),
-                  'error'
-                );
-              },
-            });
-          }
-        });
+        // Cargar las imágenes/videos de los productos
+        this.loadProductMedia();
       },
       error: (error) => {
         this.notificationSrv.addNotification(
@@ -226,6 +219,31 @@ export class ListProductComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  private loadProductMedia(): void {
+    this.data.forEach((item) => {
+      if (item.firstImagePath) {
+        this.srv.getImage(item.firstImagePath).subscribe({
+          next: (fileBlob) => {
+            if (item.isVideo) {
+              this.videoUrls[item.id] = URL.createObjectURL(fileBlob);
+            } else {
+              this.imageUrls[item.id] = URL.createObjectURL(fileBlob);
+            }
+          },
+          error: (error) => {
+            console.error(`Error loading media for product ${item.id}:`, error);
+            // No mostrar notificación para evitar spam
+          },
+        });
+      }
+    });
+  }
+
+  private isVideoFile(filename: string): boolean {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(extension || '');
   }
 
   onRefresh() {
@@ -248,8 +266,12 @@ export class ListProductComponent implements OnInit {
     this.loadData();
   }
 
-  getVideoUrl(rowData: HomeData): string {
+  getVideoUrl(rowData: any): string {
     return this.videoUrls[rowData.id] || '';
+  }
+
+  getImageUrl(rowData: any): string {
+    return this.imageUrls[rowData.id] || '';
   }
 
   create() {
@@ -293,10 +315,6 @@ export class ListProductComponent implements OnInit {
       });
   }
 
-  getImageUrl(rowData: HomeData): string {
-    return this.imageUrls[rowData.id] || '';
-  }
-
   onImageError(event: any): void {
     event.target.style.display = 'none';
   }
@@ -315,6 +333,9 @@ export class ListProductComponent implements OnInit {
         URL.revokeObjectURL(url);
       }
     });
+
+    // Limpiar suscripciones
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   async delete(data: any) {
@@ -345,7 +366,9 @@ export class ListProductComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                this.transloco.translate('notifications.products.success.deleted'),
+                this.transloco.translate(
+                  'notifications.products.success.deleted'
+                ),
                 'success'
               );
             },
@@ -355,12 +378,16 @@ export class ListProductComponent implements OnInit {
                 error.error.message.includes('No se puede eliminar el producto')
               ) {
                 this.notificationSrv.addNotification(
-                  this.transloco.translate('notifications.products.error.cannotDelete'),
+                  this.transloco.translate(
+                    'notifications.products.error.cannotDelete'
+                  ),
                   'error'
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  this.transloco.translate('notifications.products.error.delete'),
+                  this.transloco.translate(
+                    'notifications.products.error.delete'
+                  ),
                   'error'
                 );
               }

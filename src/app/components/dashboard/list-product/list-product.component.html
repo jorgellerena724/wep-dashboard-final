@@ -23,6 +23,7 @@
       >
       </app-table>
     </div>
+
     <ng-template #variantsTemplate let-rowData>
       <div class="text-sm text-gray-700 dark:text-gray-300">
         {{
@@ -31,21 +32,23 @@
         }}
       </div>
     </ng-template>
+
     <ng-template #imageTemplate let-rowData let-field="field">
       <div class="flex justify-center items-center">
         <div class="relative">
           <!-- Mostrar imagen si es archivo de imagen -->
-          <div *ngIf="!rowData.photo?.toLowerCase().endsWith('.mp4')">
+          <div *ngIf="!rowData.isVideo">
             <img
               *ngIf="getImageUrl(rowData)"
               [src]="getImageUrl(rowData)"
-              [alt]="rowData.name || 'Imagen'"
+              [alt]="rowData.firstFileTitle || 'Imagen del producto'"
               class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
               (error)="onImageError($event)"
               loading="lazy"
+              [title]="rowData.firstFileTitle || ''"
             />
             <div
-              *ngIf="!getImageUrl(rowData)"
+              *ngIf="!getImageUrl(rowData) && rowData.firstImagePath"
               class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
             >
               <svg
@@ -60,10 +63,18 @@
                 ></path>
               </svg>
             </div>
+            <div
+              *ngIf="!rowData.firstImagePath"
+              class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
+            >
+              <i
+                class="pi pi-image text-gray-400 dark:text-gray-500 text-xl"
+              ></i>
+            </div>
           </div>
 
           <!-- Mostrar miniatura de video si es archivo de video -->
-          <div *ngIf="rowData.photo?.toLowerCase().endsWith('.mp4')">
+          <div *ngIf="rowData.isVideo">
             <div *ngIf="getVideoUrl(rowData)" class="relative">
               <video
                 [src]="getVideoUrl(rowData)"
@@ -71,6 +82,7 @@
                 muted
                 playsinline
                 disablePictureInPicture
+                [title]="rowData.firstFileTitle || ''"
               ></video>
               <div
                 class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
@@ -79,13 +91,30 @@
               </div>
             </div>
             <div
-              *ngIf="!getVideoUrl(rowData)"
+              *ngIf="!getVideoUrl(rowData) && rowData.firstImagePath"
               class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
             >
               <i
                 class="pi pi-video text-gray-400 dark:text-gray-500 text-xl"
               ></i>
             </div>
+            <div
+              *ngIf="!rowData.firstImagePath"
+              class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
+            >
+              <i
+                class="pi pi-video text-gray-400 dark:text-gray-500 text-xl"
+              ></i>
+            </div>
+          </div>
+
+          <!-- Badge que muestra la cantidad de archivos adicionales -->
+          <div
+            *ngIf="rowData.files && rowData.files.length > 1"
+            class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
+            [title]="'Total de archivos: ' + rowData.files.length"
+          >
+            +{{ rowData.files.length - 1 }}
           </div>
         </div>
       </div>

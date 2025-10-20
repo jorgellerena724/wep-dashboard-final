@@ -32,12 +32,13 @@ export class AppFileUploadComponent implements OnChanges {
   @Input() fileUploadText: string = 'Seleccionar archivo';
   @Input() fileRecommendation: string =
     'Formato recomendado: PNG o JPG, tamaño máximo 2MB';
+  @Input() multiple: boolean = false; // Nueva propiedad para múltiples archivos
 
-  @Output() fileSelected = new EventEmitter<File>();
+  @Output() fileSelected = new EventEmitter<File[]>(); // Ahora emite un array de archivos
   @Output() fileRemoved = new EventEmitter<void>();
   @Output() fileError = new EventEmitter<FileUploadError>();
 
-  selectedFile: File | null = null;
+  selectedFiles: File[] = []; // Cambiamos a array para soportar múltiples
 
   private readonly mimeTypeToExtensions: { [key: string]: string[] } = {
     'image/*': ['.jpg', '.jpeg', '.png', '.ico', '.webp'],
@@ -59,46 +60,49 @@ export class AppFileUploadComponent implements OnChanges {
   }
 
   ngOnChanges(changes: any) {
-    this.selectedFile = null;
+    this.selectedFiles = [];
   }
 
   // ✅ Cambiar de uploadHandler a onSelect
   onFileSelect(event: any): void {
     if (event.files && event.files.length > 0) {
-      const file = event.files[0];
+      const files: File[] = event.files;
 
-      if (file.size > this.maxFileSize) {
-        const formattedMaxSize = this.formatFileSize(this.maxFileSize);
-        const formattedFileSize = this.formatFileSize(file.size);
+      // Validar cada archivo
+      for (const file of files) {
+        if (file.size > this.maxFileSize) {
+          const formattedMaxSize = this.formatFileSize(this.maxFileSize);
+          const formattedFileSize = this.formatFileSize(file.size);
 
-        const error: FileUploadError = {
-          type: 'size',
-          message: `El archivo es demasiado grande (${formattedFileSize}). Tamaño máximo: ${formattedMaxSize}`,
-          file: file,
-        };
+          const error: FileUploadError = {
+            type: 'size',
+            message: `El archivo es demasiado grande (${formattedFileSize}). Tamaño máximo: ${formattedMaxSize}`,
+            file: file,
+          };
 
-        this.fileError.emit(error);
-        event.files = [];
-        return;
+          this.fileError.emit(error);
+          event.files = [];
+          return;
+        }
+
+        if (!this.isFileTypeValid(file)) {
+          const allowedExtensions = this.getAllowedExtensions();
+          const error: FileUploadError = {
+            type: 'type',
+            message: `Tipo de archivo no válido. Extensiones permitidas: ${allowedExtensions.join(
+              ', '
+            )}`,
+            file: file,
+          };
+
+          this.fileError.emit(error);
+          event.files = [];
+          return;
+        }
       }
 
-      if (!this.isFileTypeValid(file)) {
-        const allowedExtensions = this.getAllowedExtensions();
-        const error: FileUploadError = {
-          type: 'type',
-          message: `Tipo de archivo no válido. Extensiones permitidas: ${allowedExtensions.join(
-            ', '
-          )}`,
-          file: file,
-        };
-
-        this.fileError.emit(error);
-        event.files = [];
-        return;
-      }
-
-      this.selectedFile = file;
-      this.fileSelected.emit(file);
+      this.selectedFiles = files;
+      this.fileSelected.emit(files);
     }
   }
 
@@ -157,7 +161,7 @@ export class AppFileUploadComponent implements OnChanges {
   }
 
   removeFile(): void {
-    this.selectedFile = null;
+    this.selectedFiles = [];
     this.fileRemoved.emit();
   }
 
@@ -168,6 +172,6 @@ export class AppFileUploadComponent implements OnChanges {
   // ✅ Método adicional para limpiar archivos si es necesario
   onClear(event: any): void {
     console.log('Archivos limpiados:', event);
-    this.selectedFile = null;
+    this.selectedFiles = [];
   }
 }
