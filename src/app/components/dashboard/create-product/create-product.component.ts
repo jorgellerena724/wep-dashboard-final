@@ -273,7 +273,11 @@ export class CreateProductComponent implements DynamicComponent {
 
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
-    formData.append('cal_url', this.form.get('cal_url')?.value);
+    const calUrlValue = this.form.get('cal_url')?.value;
+    formData.append(
+      'cal_url',
+      calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
+    );
     formData.append('description', this.form.get('description')?.value);
     formData.append('category_id', this.form.get('category')?.value);
 
