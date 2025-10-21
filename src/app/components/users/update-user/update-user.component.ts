@@ -40,6 +40,7 @@ export class UpdateUserComponent implements DynamicComponent {
   ) {
     this.form = this.fb.group({
       id: [''],
+      client: ['', Validators.required],
       full_name: [
         '',
         [
@@ -75,9 +76,11 @@ export class UpdateUserComponent implements DynamicComponent {
   onSubmit(): void {
     // Validar el formulario
     if (this.form.invalid) {
-      this.transloco.selectTranslate('notifications.users.error.formInvalid').subscribe(message => {
-        this.notificationSrv.addNotification(message, 'warning');
-      });
+      this.transloco
+        .selectTranslate('notifications.users.error.formInvalid')
+        .subscribe((message) => {
+          this.notificationSrv.addNotification(message, 'warning');
+        });
       this.markAllFieldsAsTouched(); // Marcar todos los campos como tocados
       return;
     }
@@ -88,9 +91,11 @@ export class UpdateUserComponent implements DynamicComponent {
 
     this.srv.patch(formData).subscribe({
       next: (response) => {
-        this.transloco.selectTranslate('notifications.users.success.updated').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
+        this.transloco
+          .selectTranslate('notifications.users.success.updated')
+          .subscribe((message) => {
+            this.notificationSrv.addNotification(message, 'success');
+          });
         this.submitSuccess.emit();
         this.form.reset();
         if (
@@ -105,13 +110,17 @@ export class UpdateUserComponent implements DynamicComponent {
       },
       error: (error) => {
         if (error.error.message.includes('correo electrónico')) {
-          this.transloco.selectTranslate('notifications.users.error.emailExists').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          this.transloco
+            .selectTranslate('notifications.users.error.emailExists')
+            .subscribe((message) => {
+              this.notificationSrv.addNotification(message, 'error');
+            });
         } else {
-          this.transloco.selectTranslate('notifications.users.error.update').subscribe(message => {
-            this.notificationSrv.addNotification(message, 'error');
-          });
+          this.transloco
+            .selectTranslate('notifications.users.error.update')
+            .subscribe((message) => {
+              this.notificationSrv.addNotification(message, 'error');
+            });
         }
       },
     });
