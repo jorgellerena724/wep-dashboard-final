@@ -5,6 +5,8 @@ import {
   inject,
   Input,
   Output,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -14,7 +16,7 @@ import {
   FormArray,
   FormControl,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -64,6 +66,7 @@ export class UpdateProductComponent implements DynamicComponent {
   categories: any[] = [];
   uploading = false;
   loadingImage = false;
+  showCalUrlField = false;
 
   // Propiedades para archivos múltiples
   productFiles: ProductFile[] = [];
@@ -79,7 +82,8 @@ export class UpdateProductComponent implements DynamicComponent {
     private notificationSrv: NotificationService,
     private cdr: ChangeDetectorRef,
     private categorySrv: CategoryService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
@@ -98,6 +102,9 @@ export class UpdateProductComponent implements DynamicComponent {
   }
 
   async ngOnInit(): Promise<void> {
+    // Inicializar la visibilidad del campo cal_url
+    this.initShowCalUrlField();
+
     if (this.initialData) {
       this.form.patchValue(this.initialData);
       this.form.get('category')?.setValue(this.initialData.category.id);
@@ -585,5 +592,55 @@ export class UpdateProductComponent implements DynamicComponent {
 
     this.variants = [];
     this.variantsFormArray.clear();
+  }
+
+  private initShowCalUrlField(): void {
+    const clientFromStorage = this.getClientFromLocalStorage();
+    if (clientFromStorage !== null) {
+      this.showCalUrlField = this.isClientAllowedForCalUrl(clientFromStorage);
+      return;
+    }
+    this.showCalUrlField = false;
+  }
+
+  private isClientAllowedForCalUrl(
+    clientValue: string | undefined | null
+  ): boolean {
+    if (!clientValue && clientValue !== '') {
+      return false;
+    }
+    return clientValue === 'shirkasoft' || clientValue === 'breeze';
+  }
+
+  private getClientFromLocalStorage(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const candidateKeys = [
+      'session',
+      'user',
+      'userSession',
+      'auth',
+      'currentUser',
+      'wep_session',
+    ];
+    for (const key of candidateKeys) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && 'client' in parsed) {
+          return parsed['client'];
+        }
+        if (typeof parsed === 'string') {
+          return parsed;
+        }
+      } catch (e) {
+        if (typeof raw === 'string' && raw.trim().length > 0) {
+          return raw;
+        }
+      }
+    }
+    const direct = localStorage.getItem('sessionClient');
+    if (direct) return direct;
+    return null;
   }
 }

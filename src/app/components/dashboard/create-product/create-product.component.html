@@ -22,7 +22,7 @@
       }"
     ></app-select>
   </div>
-  <div>
+  <div *ngIf="showCalUrlField">
     <app-text-field
       id="cal_url"
       label="{{ 'components.products.create.fields.calurl.title' | transloco }}"
