@@ -85,6 +85,22 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'publication-category',
+    loadComponent: () =>
+      import(
+        './components/dashboard/list-publication-category/list-publication-category.component'
+      ).then((m) => m.ListPublicationCategoryComponent),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'publications',
+    loadComponent: () =>
+      import(
+        './components/dashboard/list-publications/list-publications.component'
+      ).then((m) => m.ListPublicationComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'contact',
     loadComponent: () =>
       import('./components/dashboard/list-contact/list-contact.component').then(
