@@ -234,6 +234,7 @@
       "products": "Productos",
       "category": "Categorías",
       "publications": "Publicaciones",
+      "publications-category": "Categorías",
       "offers": "Ofertas",
       "contact": "Contáctenos",
       "info": "Información",
@@ -847,7 +848,7 @@
             "required": "La categoría es requerida"
           },
           "document": {
-            "title": "Arcchivo",
+            "title": "Archivo",
             "recommendation": "Formato recomendado: PDF, ZIP",
             "select": "Seleccionar archivo",
             "nodata": {
@@ -882,8 +883,10 @@
             "required": "La categoría es requerida"
           },
           "document": {
-            "title": "Arcchivo",
+            "title": "Archivo",
             "recommendation": "Formato recomendado: PDF, ZIP",
+            "info": "Puede cambiar el archivo seleccionando por uno nuevo.",
+            "loading": "Cargando archivo actual...",
             "select": "Seleccionar archivo",
             "nodata": {
               "title": "No hay archivo seleccionado",

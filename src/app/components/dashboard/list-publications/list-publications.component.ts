@@ -42,7 +42,6 @@ export class ListPublicationComponent implements OnInit {
   image: any;
   loading = false;
   imageUrls: { [key: number]: string } = {};
-  videoUrls: { [key: number]: string } = {};
 
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
@@ -159,8 +158,23 @@ export class ListPublicationComponent implements OnInit {
 
         this.loading = false;
 
-        // Cargar las imágenes/videos de los productos
-        this.loadProductMedia();
+        data.forEach((item) => {
+          if (item.photo) {
+            this.srv.getImage(item.photo).subscribe({
+              next: (imageBlob) => {
+                this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
+              },
+              error: (error) => {
+                this.notificationSrv.addNotification(
+                  this.transloco.translate(
+                    'notifications.managers.error.loadImage'
+                  ),
+                  'error'
+                );
+              },
+            });
+          }
+        });
       },
       error: (error) => {
         this.notificationSrv.addNotification(
@@ -172,26 +186,6 @@ export class ListPublicationComponent implements OnInit {
     });
   }
 
-  private loadProductMedia(): void {
-    this.data.forEach((item) => {
-      if (item.firstImagePath) {
-        this.srv.getImage(item.firstImagePath).subscribe({
-          next: (fileBlob) => {
-            if (item.isVideo) {
-              this.videoUrls[item.id] = URL.createObjectURL(fileBlob);
-            } else {
-              this.imageUrls[item.id] = URL.createObjectURL(fileBlob);
-            }
-          },
-          error: (error) => {
-            console.error(`Error loading media for product ${item.id}:`, error);
-            // No mostrar notificación para evitar spam
-          },
-        });
-      }
-    });
-  }
-
   onRefresh() {
     // Limpiar URLs de imágenes
     Object.values(this.imageUrls).forEach((url) => {
@@ -200,20 +194,8 @@ export class ListPublicationComponent implements OnInit {
       }
     });
 
-    // Limpiar URLs de videos
-    Object.values(this.videoUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
     this.imageUrls = {};
-    this.videoUrls = {};
     this.loadData();
-  }
-
-  getVideoUrl(rowData: any): string {
-    return this.videoUrls[rowData.id] || '';
   }
 
   getImageUrl(rowData: any): string {
@@ -268,13 +250,6 @@ export class ListPublicationComponent implements OnInit {
   ngOnDestroy() {
     // Limpiar URLs de imágenes
     Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-
-    // Limpiar URLs de videos
-    Object.values(this.videoUrls).forEach((url) => {
       if (url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
       }

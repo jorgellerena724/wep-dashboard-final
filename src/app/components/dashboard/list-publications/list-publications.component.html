@@ -27,41 +27,30 @@
     <ng-template #imageTemplate let-rowData let-field="field">
       <div class="flex justify-center items-center">
         <div class="relative">
-          <!-- Mostrar imagen si es archivo de imagen -->
-          <div *ngIf="!rowData.isVideo">
-            <img
-              *ngIf="getImageUrl(rowData)"
-              [src]="getImageUrl(rowData)"
-              [alt]="rowData.firstFileTitle || 'Imagen de la publicación'"
-              class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
-              (error)="onImageError($event)"
-              loading="lazy"
-              [title]="rowData.firstFileTitle || ''"
-            />
-            <div
-              *ngIf="!getImageUrl(rowData) && rowData.firstImagePath"
-              class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+          <img
+            *ngIf="getImageUrl(rowData)"
+            [src]="getImageUrl(rowData)"
+            [alt]="rowData.name || 'Imagen'"
+            class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
+            (error)="onImageError($event)"
+            loading="lazy"
+          />
+          <!-- Placeholder cuando no hay imagen o está cargando -->
+          <div
+            *ngIf="!getImageUrl(rowData)"
+            class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+          >
+            <svg
+              class="w-8 h-8 text-gray-400 dark:text-gray-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
             >
-              <svg
-                class="w-8 h-8 text-gray-400 dark:text-gray-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-            </div>
-            <div
-              *ngIf="!rowData.firstImagePath"
-              class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
-            >
-              <i
-                class="pi pi-image text-gray-400 dark:text-gray-500 text-xl"
-              ></i>
-            </div>
+              <path
+                fill-rule="evenodd"
+                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
           </div>
         </div>
       </div>

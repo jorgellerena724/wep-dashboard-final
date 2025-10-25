@@ -49,8 +49,10 @@ export class UpdatePublicationComponent implements DynamicComponent {
   selectedDocument: File | null = null;
   uploading = false;
   loadingImage = false;
+  loadingDocument = false;
   imageUrl: string | null = null;
   documentUrl: string | null = null;
+  isDocument: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -76,35 +78,55 @@ export class UpdatePublicationComponent implements DynamicComponent {
 
   async ngOnInit(): Promise<void> {
     if (this.initialData) {
+      console.log(this.initialData);
       this.form.patchValue(this.initialData);
       this.form
         .get('publication_category')
-        ?.setValue(this.initialData.category.id);
+        ?.setValue(this.initialData.publication_category.id);
       this.id = this.initialData.id;
+
+      // Load existing files if they exist
+      if (this.initialData.photo) {
+        this.loadCurrentImage();
+      }
+      if (this.initialData.file) {
+        this.loadCurrentDocument();
+      }
     }
 
     const initTasks = [this.fetchCategories()];
     await Promise.all(initTasks);
   }
   async onSubmit(): Promise<void> {
-    // Verificar que haya al menos un archivo
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.products.error.formInvalid'),
+        this.transloco.translate(
+          'notifications.publications.error.formInvalid'
+        ),
         'warning'
       );
       this.form.markAllAsTouched();
-
       return;
     }
 
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
-    formData.append('description', this.form.get('description')?.value);
     formData.append(
       'publication_category_id',
       this.form.get('publication_category')?.value
     );
+
+    if (this.selectedFile) {
+      formData.append('photo', this.selectedFile, this.selectedFile.name);
+    }
+
+    if (this.selectedDocument) {
+      formData.append(
+        'file',
+        this.selectedDocument,
+        this.selectedDocument.name
+      );
+    }
 
     this.uploading = true;
 
@@ -112,7 +134,9 @@ export class UpdatePublicationComponent implements DynamicComponent {
       next: (response) => {
         this.uploading = false;
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.products.success.updated'),
+          this.transloco.translate(
+            'notifications.publications.success.updated'
+          ),
           'success'
         );
         this.submitSuccess.emit();
@@ -124,21 +148,16 @@ export class UpdatePublicationComponent implements DynamicComponent {
       error: (error) => {
         this.uploading = false;
 
-        // Manejar error de imagen duplicada
         if (
           error.status === 400 &&
-          error.error.message?.includes('imagen') &&
-          error.error.message?.includes('servidor')
+          error.error.message.includes(
+            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
+          )
         ) {
-          this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.products.error.duplicateImage'
-            ),
-            'error'
-          );
+          this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.products.error.update'),
+            this.transloco.translate('notifications.publications.error.update'),
             'error'
           );
         }
@@ -213,6 +232,20 @@ export class UpdatePublicationComponent implements DynamicComponent {
     this.cdr.detectChanges();
   }
 
+  private createImagePreview(blob: Blob): void {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      this.imageUrl = reader.result as string;
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(new Blob([blob]));
+  }
+
+  private setFallbackImage(): void {
+    this.imageUrl = this.initialData.photo;
+    this.cdr.detectChanges();
+  }
+
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
 
@@ -242,6 +275,49 @@ export class UpdatePublicationComponent implements DynamicComponent {
     );
 
     this.selectedDocument = null;
+  }
+
+  private loadCurrentImage(): void {
+    if (this.initialData?.photo) {
+      this.loadingImage = true;
+
+      this.srv.getImage(this.initialData.photo).subscribe({
+        next: (blob: Blob) => {
+          this.createImagePreview(blob);
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage = false;
+        },
+        error: () => {
+          this.setFallbackImage();
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage = false;
+        },
+      });
+    }
+  }
+
+  private loadCurrentDocument(): void {
+    if (this.initialData?.file) {
+      this.loadingDocument = true;
+
+      // For documents, we don't need to fetch the blob, just set the preview
+      this.setFallbackDocument();
+      this.form.get('file')?.setValue('existing-document');
+      this.loadingDocument = false;
+    }
+  }
+
+  private createDocumentPreview(blob: Blob): void {
+    // For documents, we just set a flag to show the preview
+    this.isDocument = true;
+    this.documentUrl = this.initialData.file; // Store the URL for display
+    this.cdr.detectChanges();
+  }
+
+  private setFallbackDocument(): void {
+    this.isDocument = true;
+    this.documentUrl = this.initialData.file;
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy() {

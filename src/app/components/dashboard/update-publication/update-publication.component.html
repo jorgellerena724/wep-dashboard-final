@@ -46,29 +46,63 @@
     ></app-file-upload>
     <!-- Document Preview Section -->
     <div class="mt-4 relative h-[100px]">
+      <!-- Loading state -->
       <div
-        *ngIf="selectedDocument"
-        class="absolute inset-0 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500"
+        *ngIf="loadingDocument"
+        class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg"
       >
         <div class="text-center">
-          <i
-            class="pi pi-file text-2xl text-gray-400 dark:text-gray-500 mb-2"
-          ></i>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ selectedDocument.name }}
+          <div
+            class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"
+          ></div>
+          <span class="text-gray-600 dark:text-gray-300 text-sm">{{
+            "components.publications.edit.fields.document.loading" | transloco
+          }}</span>
+        </div>
+      </div>
+      <!-- Document Preview Section -->
+      <div
+        *ngIf="documentUrl && !loadingDocument"
+        class="absolute inset-0 flex flex-col"
+      >
+        <!-- Preview Container -->
+        <div
+          class="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500"
+        >
+          <div class="relative inline-block">
+            <!-- Document Container -->
+            <div
+              class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+            >
+              <div class="flex items-center justify-center p-4">
+                <i
+                  class="pi pi-file text-4xl text-gray-400 dark:text-gray-500"
+                ></i>
+              </div>
+            </div>
+            <!-- Delete Button -->
+            <button
+              type="button"
+              (click)="removeDocument()"
+              class="absolute top-0 right-2 text-red-500 bg-transparent transition-all duration-200 p-1 rounded-full"
+            >
+              <i class="pi pi-trash text-lg"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Info Message -->
+        <div class="mt-auto pt-3">
+          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+            <i class="pi pi-info-circle mr-1"></i>
+            {{
+              "components.publications.edit.fields.document.info" | transloco
+            }}
           </p>
-          <button
-            type="button"
-            (click)="removeDocument()"
-            class="absolute top-2 right-2 text-red-500 bg-transparent transition-all duration-200 p-1 rounded-full"
-          >
-            <i class="pi pi-trash text-lg"></i>
-          </button>
         </div>
       </div>
       <!-- Estado cuando no hay documento -->
       <div
-        *ngIf="!selectedDocument"
+        *ngIf="!documentUrl && !loadingDocument"
         class="absolute inset-0 flex items-center justify-center"
       >
         <div
@@ -186,10 +220,10 @@
       >
         <div
           [class.border-red-500]="
-            form.get('image')?.invalid && form.get('image')?.touched
+            form.get('photo')?.invalid && form.get('photo')?.touched
           "
           [class.border-gray-500]="
-            !(form.get('image')?.invalid && form.get('image')?.touched)
+            !(form.get('photo')?.invalid && form.get('photo')?.touched)
           "
           class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-white dark:bg-gray-800/50"
         >
@@ -208,7 +242,7 @@
       </div>
     </div>
     <div
-      *ngIf="form.get('image')?.invalid && form.get('image')?.touched"
+      *ngIf="form.get('photo')?.invalid && form.get('photo')?.touched"
       class="text-red-500 text-sm mt-2 mb-2"
     >
       {{ "image.required" | transloco }}
