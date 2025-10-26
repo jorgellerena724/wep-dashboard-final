@@ -26,6 +26,8 @@
     <button
       (click)="refreshData()"
       class="p-2 text-gray-800 dark:text-gray-300 transition-colors rotate-on-hover"
+      pTooltip="{{ 'table.tooltips.refresh' | transloco }}"
+      tooltipPosition="top"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -76,11 +78,15 @@
                 *ngIf="col.sortable"
                 [field]="col.field"
                 class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                pTooltip="{{ 'table.tooltips.sort' | transloco }}"
+                tooltipPosition="top"
               ></p-sortIcon>
               <button
                 *ngIf="col.filter"
                 type="button"
                 (click)="$event.stopPropagation(); toggleFilter(col.field)"
+                pTooltip="{{ 'table.tooltips.filter' | transloco }}"
+                tooltipPosition="top"
               >
                 <i
                   class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"

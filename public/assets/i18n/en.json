@@ -1071,6 +1071,11 @@
       "second": "to",
       "third": "of",
       "fourth": "records"
+    },
+    "tooltips": {
+      "refresh": "Refresh data",
+      "filter": "Filter column",
+      "sort": "Sort column"
     }
   },
   "modal": {

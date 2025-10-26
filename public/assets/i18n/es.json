@@ -1066,6 +1066,11 @@
       "second": "a",
       "third": "de",
       "fourth": "registros"
+    },
+    "tooltips": {
+      "refresh": "Refrescar datos",
+      "filter": "Filtrar columna",
+      "sort": "Ordenar columna"
     }
   },
   "modal": {
