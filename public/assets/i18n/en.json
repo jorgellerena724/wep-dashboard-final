@@ -812,8 +812,7 @@
         "title": "Publications",
         "table": {
           "name": "Name",
-          "description": "Description",
-          "charge": "Position",
+          "category": "Category",
           "image": "Image"
         }
       },
