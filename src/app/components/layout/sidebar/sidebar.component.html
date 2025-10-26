@@ -35,7 +35,8 @@
     <!-- Scrollable Sidebar content -->
     <div class="flex-1 overflow-y-auto custom-scrollbar border-blue-50">
       <div class="p-4">
-        <div class="flex items-center mb-4">
+        <!-- Menu items -->
+        <nav>
           <app-sidebar-menu-item
             [item]="menuItems[0]"
             [sidebarCollapsed]="sidebarCollapsed"
@@ -43,10 +44,6 @@
             [router]="router"
             (closeMobileSidebar)="closeMobileSidebar()"
           ></app-sidebar-menu-item>
-        </div>
-
-        <!-- Menu items -->
-        <nav>
           <app-sidebar-menu-item
             [item]="menuItems[1]"
             [sidebarCollapsed]="sidebarCollapsed"
