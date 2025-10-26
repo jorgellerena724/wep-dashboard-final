@@ -214,6 +214,68 @@ export class UpdatePublicationComponent implements DynamicComponent {
     this.cdr.detectChanges();
   }
 
+  getDocumentIcon(): string {
+    // Si hay un documento seleccionado (nuevo archivo)
+    if (this.selectedDocument) {
+      const fileName = this.selectedDocument.name.toLowerCase();
+      if (fileName.endsWith('.pdf')) {
+        return 'pi-file-pdf';
+      } else if (fileName.endsWith('.zip')) {
+        return 'zip';
+      }
+      return 'pi-file';
+    }
+    
+    // Si hay un documento existente (desde initialData)
+    if (this.documentUrl) {
+      const fileName = this.documentUrl.toLowerCase();
+      if (fileName.endsWith('.pdf')) {
+        return 'pi-file-pdf';
+      } else if (fileName.endsWith('.zip')) {
+        return 'zip';
+      }
+      return 'pi-file';
+    }
+    
+    return 'pi-file';
+  }
+
+  getDocumentIconColor(): string {
+    // Si hay un documento seleccionado (nuevo archivo)
+    if (this.selectedDocument) {
+      const fileName = this.selectedDocument.name.toLowerCase();
+      if (fileName.endsWith('.pdf')) {
+        return 'text-red-500';
+      } else if (fileName.endsWith('.zip')) {
+        return 'text-green-500';
+      }
+      return 'text-gray-400 dark:text-gray-500';
+    }
+    
+    // Si hay un documento existente (desde initialData)
+    if (this.documentUrl) {
+      const fileName = this.documentUrl.toLowerCase();
+      if (fileName.endsWith('.pdf')) {
+        return 'text-red-500';
+      } else if (fileName.endsWith('.zip')) {
+        return 'text-green-500';
+      }
+      return 'text-gray-400 dark:text-gray-500';
+    }
+    
+    return 'text-gray-400 dark:text-gray-500';
+  }
+
+  isZipFile(): boolean {
+    if (this.selectedDocument) {
+      return this.selectedDocument.name.toLowerCase().endsWith('.zip');
+    }
+    if (this.documentUrl) {
+      return this.documentUrl.toLowerCase().endsWith('.zip');
+    }
+    return false;
+  }
+
   removeFile(): void {
     if (this.selectedFile) {
       this.selectedFile = null;

@@ -111,6 +111,40 @@ export class CreatePublicationComponent implements DynamicComponent {
     this.cdr.detectChanges();
   }
 
+  getDocumentIcon(): string {
+    if (!this.selectedDocument) {
+      return 'pi-file';
+    }
+    
+    const fileName = this.selectedDocument.name.toLowerCase();
+    if (fileName.endsWith('.pdf')) {
+      return 'pi-file-pdf';
+    } else if (fileName.endsWith('.zip')) {
+      return 'zip';
+    }
+    
+    return 'pi-file';
+  }
+
+  getDocumentIconColor(): string {
+    if (!this.selectedDocument) {
+      return 'text-gray-400 dark:text-gray-500';
+    }
+    
+    const fileName = this.selectedDocument.name.toLowerCase();
+    if (fileName.endsWith('.pdf')) {
+      return 'text-red-500';
+    } else if (fileName.endsWith('.zip')) {
+      return 'text-green-500';
+    }
+    
+    return 'text-gray-400 dark:text-gray-500';
+  }
+
+  isZipFile(): boolean {
+    return this.selectedDocument?.name.toLowerCase().endsWith('.zip') || false;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
