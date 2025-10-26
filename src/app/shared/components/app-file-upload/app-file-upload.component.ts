@@ -33,6 +33,7 @@ export class AppFileUploadComponent implements OnChanges {
   @Input() fileRecommendation: string =
     'Formato recomendado: PNG o JPG, tamaño máximo 2MB';
   @Input() multiple: boolean = false; // Nueva propiedad para múltiples archivos
+  @Input() allowedExtensions?: string[]; // Nueva propiedad para extensiones permitidas personalizadas
 
   @Output() fileSelected = new EventEmitter<File[]>(); // Ahora emite un array de archivos
   @Output() fileRemoved = new EventEmitter<void>();
@@ -119,6 +120,12 @@ export class AppFileUploadComponent implements OnChanges {
   }
 
   private isFileTypeValid(file: File): boolean {
+    // Si se especifican extensiones personalizadas, validar solo contra ellas
+    if (this.allowedExtensions && this.allowedExtensions.length > 0) {
+      const fileExtension = this.getFileExtension(file.name).toLowerCase();
+      return this.allowedExtensions.includes(`.${fileExtension}`);
+    }
+
     const acceptTypes = this.accept.split(',').map((t) => t.trim());
     const fileExtension = this.getFileExtension(file.name).toLowerCase();
 
@@ -147,6 +154,11 @@ export class AppFileUploadComponent implements OnChanges {
   }
 
   private getAllowedExtensions(): string[] {
+    // Si se especifican extensiones personalizadas, usarlas
+    if (this.allowedExtensions && this.allowedExtensions.length > 0) {
+      return this.allowedExtensions;
+    }
+
     const acceptTypes = this.accept.split(',').map((t) => t.trim());
     const extensions: string[] = [];
 

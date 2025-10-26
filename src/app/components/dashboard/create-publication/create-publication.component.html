@@ -3,49 +3,125 @@
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
       id="title"
-      label="{{ 'components.managers.edit.fields.name.title' | transloco }}"
+      label="{{
+        'components.publications.create.fields.name.title' | transloco
+      }}"
       [control]="form.get('title')"
       [errorMessages]="{
-        required: ( 'components.managers.edit.fields.name.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.name.minlength' | transloco ),
-        maxlength: ( 'components.managers.edit.fields.name.maxlength' | transloco ),
+        required: ( 'components.publications.create.fields.name.required' | transloco ),
+        minlength: ( 'components.publications.create.fields.name.minlength' | transloco ),
+        maxlength: ( 'components.publications.create.fields.name.maxlength' | transloco ),
       }"
     ></app-text-field>
-    <app-text-field
-      id="charge"
-      label="{{ 'components.managers.edit.fields.charge.title' | transloco }}"
-      [control]="form.get('charge')"
+    <app-select
+      [placeholder]="
+        'components.publications.create.fields.category.title' | transloco
+      "
+      [options]="categories"
+      formControlName="publication_category"
+      [control]="form.get('publication_category')"
       [errorMessages]="{
-        required: ( 'components.managers.edit.fields.charge.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.charge.minlength' | transloco ),
+        required: ( 'components.publications.create.fields.category.required' | transloco ),
       }"
-    ></app-text-field>
+    ></app-select>
   </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
-  <app-text-field
-    id="description"
-    label="{{
-      'components.managers.edit.fields.description.title' | transloco
-    }}"
-    [control]="form.get('description')"
-    [isTextArea]="true"
-    textAreaHeight="h-56"
-    [errorMessages]="{
-        required: ( 'components.managers.edit.fields.description.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.description.minlength' | transloco ),
-      }"
-  ></app-text-field>
+  <div class="field">
+    <!-- Document File Upload -->
+    <app-file-upload
+      label="{{
+        'components.publications.create.fields.document.title' | transloco
+      }}"
+      accept=".pdf,.zip"
+      [allowedExtensions]="['.pdf', '.zip']"
+      [maxFileSize]="10 * 1024 * 1024"
+      fileUploadText="{{
+        'components.publications.create.fields.document.select' | transloco
+      }}"
+      fileRecommendation="{{
+        'components.publications.create.fields.document.recommendation'
+          | transloco
+      }}"
+      (fileSelected)="onDocumentUploaded($event)"
+      (fileRemoved)="removeDocument()"
+      (fileError)="onDocumentError($event)"
+    ></app-file-upload>
+    <!-- Document Preview Section -->
+    <div class="mt-4 relative h-[100px]">
+      <div
+        *ngIf="selectedDocument"
+        class="absolute inset-0 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500"
+      >
+        <div class="text-center">
+          <i
+            class="pi pi-file text-2xl text-gray-400 dark:text-gray-500 mb-2"
+          ></i>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            {{ selectedDocument.name }}
+          </p>
+          <button
+            type="button"
+            (click)="removeDocument()"
+            class="absolute top-2 right-2 text-red-500 bg-transparent transition-all duration-200 p-1 rounded-full"
+          >
+            <i class="pi pi-trash text-lg"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Estado cuando no hay documento -->
+      <div
+        *ngIf="!selectedDocument"
+        class="absolute inset-0 flex items-center justify-center"
+      >
+        <div
+          [class.border-red-500]="
+            form.get('file')?.invalid && form.get('file')?.touched
+          "
+          [class.border-gray-500]="
+            !(form.get('file')?.invalid && form.get('file')?.touched)
+          "
+          class="w-full h-full flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg bg-white dark:bg-gray-800/50"
+        >
+          <i
+            class="pi pi-file text-2xl text-gray-400 dark:text-gray-500 mb-2"
+          ></i>
+          <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+            <span class="block font-medium">{{
+              "components.publications.create.fields.document.nodata.title"
+                | transloco
+            }}</span>
+            <span class="block text-xs mt-1 opacity-75">
+              {{
+                "components.publications.create.fields.document.nodata.subtitle"
+                  | transloco
+              }}
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      *ngIf="form.get('file')?.invalid && form.get('file')?.touched"
+      class="text-red-500 text-sm mt-2 mb-2"
+    >
+      {{
+        "components.publications.create.fields.document.required" | transloco
+      }}
+    </div>
+  </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <div class="field">
     <!-- File Upload -->
     <app-file-upload
       #fileUpload
-      label="{{ 'components.managers.edit.fields.image.title' | transloco }}"
+      label="{{
+        'components.publications.create.fields.image.title' | transloco
+      }}"
       accept="image/*"
       [maxFileSize]="1024 * 1024"
       fileUploadText="{{ 'image.select' | transloco }}"
       fileRecommendation="{{
-        'components.managers.edit.fields.image.recommendation' | transloco
+        'components.publications.create.fields.image.recommendation' | transloco
       }}"
       (fileSelected)="onFileUploaded($event)"
       (fileRemoved)="removeFile()"

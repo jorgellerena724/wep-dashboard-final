@@ -166,6 +166,25 @@
         "statusUpdate": "Error al actualizar el estado.",
         "cannotDelete": "No se puede eliminar el producto"
       }
+    },
+    "publications": {
+      "success": {
+        "created": "Producto registrado correctamente.",
+        "updated": "Producto actualizado correctamente.",
+        "deleted": "Producto eliminado satisfactoriamente.",
+        "statusUpdated": "Estado actualizado"
+      },
+      "error": {
+        "create": "Error al registrar el producto.",
+        "update": "Error al actualizar el producto.",
+        "delete": "Error al eliminar el producto.",
+        "load": "Error al cargar la información.",
+        "loadImage": "Error al cargar imagen del producto.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "statusUpdate": "Error al actualizar el estado.",
+        "cannotDelete": "No se puede eliminar el producto"
+      }
     }
   },
   "language": {
@@ -214,6 +233,8 @@
       "review": "Reseñas",
       "products": "Productos",
       "category": "Categorías",
+      "publications": "Publicaciones",
+      "publications-category": "Categorías",
       "offers": "Ofertas",
       "contact": "Contáctenos",
       "info": "Información",
@@ -232,6 +253,8 @@
     "manager": "Directivos",
     "review": "Reseñas",
     "products": "Productos",
+    "publications": "Publicaciones",
+    "publications-category": "Categorías",
     "category": "Categorías",
     "offers": "Ofertas",
     "contact": "Contáctenos",
@@ -750,6 +773,131 @@
             "uploadInfo": "Puede agregar una o más imágenes. Si lo desea, puede agregar un título a cada imagen.",
             "titlePlaceholder": "Título",
             "titleRequired": "El título de la imagen es requerido",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "publication-category": {
+      "list": {
+        "title": "Categorías de publicaciones",
+        "table": {
+          "name": "Nombre"
+        }
+      },
+      "create": {
+        "title": "Registrar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "publications": {
+      "list": {
+        "title": "Publicaciones",
+        "table": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "charge": "Cargo",
+          "image": "Imagen"
+        }
+      },
+      "create": {
+        "title": "Registrar publicación",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "category": {
+            "title": "Categoría",
+            "required": "La categoría es requerida"
+          },
+          "document": {
+            "title": "Archivo",
+            "recommendation": "Formato recomendado: PDF, ZIP",
+            "select": "Seleccionar archivo",
+            "nodata": {
+              "title": "No hay archivo seleccionado",
+              "subtitle": "Seleccione una archivo para ver la previsualización"
+            }
+          },
+          "image": {
+            "title": "Imagen de la publicación",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
+            "required": "• La imagen es requerida",
+            "nodata": {
+              "title": "No hay imagen seleccionada",
+              "subtitle": "Seleccione una imagen para ver la previsualización"
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar publicación",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          },
+          "category": {
+            "title": "Categoría",
+            "required": "La categoría es requerida"
+          },
+          "document": {
+            "title": "Archivo",
+            "recommendation": "Formato recomendado: PDF, ZIP",
+            "info": "Puede cambiar el archivo seleccionando por uno nuevo.",
+            "loading": "Cargando archivo actual...",
+            "select": "Seleccionar archivo",
+            "nodata": {
+              "title": "No hay archivo seleccionado",
+              "subtitle": "Seleccione una archivo para ver la previsualización"
+            }
+          },
+          "image": {
+            "title": "Imagen de la publicación",
+            "select": "Seleccionar imagen",
+            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
               "title": "No hay imagen seleccionada",

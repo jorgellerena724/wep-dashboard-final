@@ -250,12 +250,9 @@ export class UpdateProductComponent implements DynamicComponent {
     file: File | null,
     index: number
   ): void {
-    // Solo el primer archivo es requerido, los demás son opcionales
-    const isFirstFile = index === 0;
-    const validators = isFirstFile ? [Validators.required] : [];
-
+    // Títulos completamente opcionales ahora
     const fileGroup = this.fb.group({
-      title: [title, validators],
+      title: [title], // Sin validadores
       file: [file],
     });
     this.filesFormArray.push(fileGroup);
@@ -280,24 +277,12 @@ export class UpdateProductComponent implements DynamicComponent {
     // Remover de arrays
     this.productFiles.splice(index, 1);
     this.filesFormArray.removeAt(index);
-
-    // Si removimos el primer archivo, actualizar validadores del nuevo primer archivo
-    if (this.productFiles.length > 0 && index === 0) {
-      const newFirstFileGroup = this.filesFormArray.at(0) as FormGroup;
-      newFirstFileGroup.get('title')?.setValidators([Validators.required]);
-      newFirstFileGroup.get('title')?.updateValueAndValidity();
-    }
-
     this.cdr.detectChanges();
   }
 
   getFileControl(index: number, field: string): FormControl {
     const fileGroup = this.filesFormArray.at(index) as FormGroup;
     return fileGroup.get(field) as FormControl;
-  }
-
-  isTitleRequired(index: number): boolean {
-    return index === 0;
   }
 
   // Métodos para variantes (sin cambios)
@@ -436,20 +421,13 @@ export class UpdateProductComponent implements DynamicComponent {
       return;
     }
 
-    // Verificar que el primer archivo tenga título
-    const firstFileTitle = this.getFileControl(0, 'title')?.value;
-    if (!firstFileTitle?.trim()) {
-      this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.products.error.formInvalid'),
-        'warning'
-      );
-      this.getFileControl(0, 'title')?.markAsTouched();
-      return;
-    }
-
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
-    formData.append('cal_url', this.form.get('cal_url')?.value);
+    const calUrlValue = this.form.get('cal_url')?.value;
+    formData.append(
+      'cal_url',
+      calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
+    );
     formData.append('description', this.form.get('description')?.value);
     formData.append('category_id', this.form.get('category')?.value);
 

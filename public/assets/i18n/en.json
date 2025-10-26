@@ -214,6 +214,8 @@
       "review": "Reviews",
       "products": "Products",
       "category": "Categories",
+      "publications": "Publications",
+      "publications-category": "Categories",
       "offers": "Offers",
       "contact": "Contact Us",
       "info": "Information",
@@ -232,6 +234,8 @@
     "manager": "Managers",
     "review": "Reviews",
     "products": "Products",
+    "publications": "Publications",
+    "publications-category": "Categories",
     "category": "Categories",
     "offers": "Offers",
     "contact": "Contact Us",
@@ -766,6 +770,95 @@
       "delete": {
         "title": "Delete element?",
         "message": "Are you sure you want to delete this element? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "publications": {
+      "list": {
+        "title": "Publications",
+        "table": {
+          "name": "Name",
+          "description": "Description",
+          "charge": "Position",
+          "image": "Image"
+        }
+      },
+      "create": {
+        "title": "Register publication",
+        "fields": {
+          "name": {
+            "title": "Name",
+            "required": "Name is required",
+            "minlength": "Name must be at least 3 characters",
+            "maxlength": "Name must be up to 20 characters"
+          },
+          "category": {
+            "title": "Category",
+            "required": "Category is required"
+          },
+          "document": {
+            "title": "File",
+            "recommendation": "Recommended format: PDF, ZIP",
+            "select": "Select file",
+            "nodata": {
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
+            }
+          },
+          "image": {
+            "title": "Post image",
+            "select": "Select image",
+            "recommendation": "Recommended format: JPG, PNG. Maximum size 1MB",
+            "info": "You can change the image by selecting a new one.",
+            "required": "• The image is required",
+            "nodata": {
+              "title": "No image selected",
+              "subtitle": "Select an image to preview"
+            }
+          }
+        }
+      },
+      "edit": {
+        "title": "Edit Post",
+        "fields": {
+          "name": {
+            "title": "Name",
+            "required": "Name is required",
+            "minlength": "Name must be at least 3 characters",
+            "maxlength": "Name must be up to 20 characters"
+          },
+          "category": {
+            "title": "Category",
+            "required": "Category is required"
+          },
+          "document": {
+            "title": "File",
+            "recommendation": "Recommended format: PDF, ZIP",
+            "info": "You can change the file by selecting a new one.",
+            "loading": "Uploading current file...",
+            "select": "Select file",
+            "nodata": {
+              "title": "No file selected",
+              "subtitle": "Select a file to preview"
+            }
+          },
+          "image": {
+            "title": "Post image",
+            "select": "Select image",
+            "recommendation": "Recommended format: JPG, PNG. Maximum size 1MB",
+            "info": "You can change the image by selecting a new one.",
+            "required": "• The image is required",
+            "nodata": {
+              "title": "No image selected",
+              "subtitle": "Select an image to preview"
+            }
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete item?",
+        "message": "Are you sure you want to delete this item? This action cannot be undone.",
         "confirm": "Delete",
         "cancel": "Cancel"
       }
