@@ -148,18 +148,22 @@ export class UpdatePublicationComponent implements DynamicComponent {
       error: (error) => {
         this.uploading = false;
 
+        // Verificar si existe el mensaje de error y si contiene el texto específico
         if (
           error.status === 400 &&
+          error.error?.message &&
           error.error.message.includes(
             'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
           )
         ) {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
-          this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.publications.error.update'),
-            'error'
-          );
+          // Mostrar el mensaje de error del backend si existe, sino mostrar el mensaje genérico
+          const errorMessage = error.error?.message || 
+            error.error?.detail || 
+            this.transloco.translate('notifications.publications.error.update');
+          
+          this.notificationSrv.addNotification(errorMessage, 'error');
         }
       },
     });
