@@ -73,7 +73,7 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.categories.error.formInvalid'),
+        this.transloco.translate('notifications.publication-category.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -86,7 +86,7 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
     this.srv.patch(formData, this.id).subscribe({
       next: (response) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.categories.success.updated'),
+          this.transloco.translate('notifications.publication-category.success.updated'),
           'success'
         );
         this.submitSuccess.emit();
@@ -101,7 +101,7 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.categories.error.update'),
+          this.transloco.translate('notifications.publication-category.error.update'),
           'error'
         );
         console.error('Error:', error);

@@ -77,7 +77,7 @@ export class ListPublicationCategoryComponent implements OnInit {
       });
     // Suscribirse a los cambios de idioma para actualizar las columnas
     const columnsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.category.list.table.name'),
+      this.transloco.selectTranslate('components.publication-category.list.table.name'),
     ]);
 
     const columnsSubscription = columnsTranslation$.subscribe(
@@ -134,7 +134,7 @@ export class ListPublicationCategoryComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.categories.error.load'),
+          this.transloco.translate('notifications.publication-category.error.load'),
           'error'
         );
         this.loading = false;
@@ -148,7 +148,7 @@ export class ListPublicationCategoryComponent implements OnInit {
 
   create() {
     this.transloco
-      .selectTranslate('components.category.create.title')
+      .selectTranslate('components.publication-category.create.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
@@ -168,7 +168,7 @@ export class ListPublicationCategoryComponent implements OnInit {
 
   edit(data: any) {
     this.transloco
-      .selectTranslate('components.category.edit.title')
+      .selectTranslate('components.publication-category.edit.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
@@ -189,10 +189,10 @@ export class ListPublicationCategoryComponent implements OnInit {
 
   async delete(data: any) {
     const deleteTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.category.delete.title'),
-      this.transloco.selectTranslate('components.category.delete.message'),
-      this.transloco.selectTranslate('components.category.delete.confirm'),
-      this.transloco.selectTranslate('components.category.delete.cancel'),
+      this.transloco.selectTranslate('components.publication-category.delete.title'),
+      this.transloco.selectTranslate('components.publication-category.delete.message'),
+      this.transloco.selectTranslate('components.publication-category.delete.confirm'),
+      this.transloco.selectTranslate('components.publication-category.delete.cancel'),
     ]).pipe(take(1));
 
     const deleteActionsSubscription = deleteTranslation$.subscribe(
@@ -216,7 +216,7 @@ export class ListPublicationCategoryComponent implements OnInit {
               this.loadData();
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.categories.success.deleted'
+                  'notifications.publication-category.success.deleted'
                 ),
                 'success'
               );
@@ -235,7 +235,7 @@ export class ListPublicationCategoryComponent implements OnInit {
               } else {
                 this.notificationSrv.addNotification(
                   this.transloco.translate(
-                    'notifications.categories.error.delete'
+                    'notifications.publication-category.error.delete'
                   ),
                   'error'
                 );
