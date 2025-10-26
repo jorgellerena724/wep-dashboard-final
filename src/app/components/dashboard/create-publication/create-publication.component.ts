@@ -114,7 +114,7 @@ export class CreatePublicationComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.publication.error.formInvalid'),
+        this.transloco.translate('notifications.publications.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -151,7 +151,7 @@ export class CreatePublicationComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.publication.success.created'),
+          this.transloco.translate('notifications.publications.success.created'),
           'success'
         );
         this.submitSuccess.emit();
@@ -184,7 +184,7 @@ export class CreatePublicationComponent implements DynamicComponent {
           // Mostrar el mensaje de error del backend si existe, sino mostrar el mensaje genérico
           const errorMessage = error.error?.message || 
             error.error?.detail || 
-            this.transloco.translate('notifications.publication.error.create');
+            this.transloco.translate('notifications.publications.error.create');
           
           this.notificationSrv.addNotification(errorMessage, 'error');
         }
@@ -262,7 +262,7 @@ export class CreatePublicationComponent implements DynamicComponent {
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate(
-              'notifications.publication-categories.error.load'
+              'notifications.publication-category.error.load'
             ),
             'error'
           );

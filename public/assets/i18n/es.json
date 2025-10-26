@@ -169,21 +169,35 @@
     },
     "publications": {
       "success": {
-        "created": "Producto registrado correctamente.",
-        "updated": "Producto actualizado correctamente.",
-        "deleted": "Producto eliminado satisfactoriamente.",
+        "created": "Publicación registrada correctamente.",
+        "updated": "Publicación actualizada correctamente.",
+        "deleted": "Publicación eliminada satisfactoriamente.",
         "statusUpdated": "Estado actualizado"
       },
       "error": {
-        "create": "Error al registrar el producto.",
-        "update": "Error al actualizar el producto.",
-        "delete": "Error al eliminar el producto.",
+        "create": "Error al registrar la publicación.",
+        "update": "Error al actualizar la publicación.",
+        "delete": "Error al eliminar la publicación.",
         "load": "Error al cargar la información.",
-        "loadImage": "Error al cargar imagen del producto.",
+        "loadImage": "Error al cargar imagen de la publicación.",
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
         "statusUpdate": "Error al actualizar el estado.",
-        "cannotDelete": "No se puede eliminar el producto"
+        "cannotDelete": "No se puede eliminar la publicación"
+      }
+    },
+    "publication-category": {
+      "success": {
+        "created": "Categoría registrada correctamente.",
+        "updated": "Categoría actualizada correctamente.",
+        "deleted": "Categoría eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la categoría.",
+        "update": "Error al actualizar la categoría.",
+        "delete": "Error al eliminar la categoría.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
       }
     }
   },

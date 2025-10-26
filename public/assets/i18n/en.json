@@ -166,6 +166,39 @@
         "statusUpdate": "Error updating status.",
         "cannotDelete": "Cannot delete the product"
       }
+    },
+    "publications": {
+      "success": {
+        "created": "Publication registered successfully.",
+        "updated": "Publication updated successfully.",
+        "deleted": "Publication deleted successfully.",
+        "statusUpdated": "Status updated"
+      },
+      "error": {
+        "create": "Error registering publication.",
+        "update": "Error updating publication.",
+        "delete": "Error deleting publication.",
+        "load": "Error loading information.",
+        "loadImage": "Error loading publication image.",
+        "formInvalid": "Check the form fields.",
+        "duplicateImage": "The image you are trying to upload is already on the server.",
+        "statusUpdate": "Error updating status.",
+        "cannotDelete": "Cannot delete the publication"
+      }
+    },
+    "publication-category": {
+      "success": {
+        "created": "Category registered successfully.",
+        "updated": "Category updated successfully.",
+        "deleted": "Category deleted successfully."
+      },
+      "error": {
+        "create": "Error registering category.",
+        "update": "Error updating category.",
+        "delete": "Error deleting category.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields."
+      }
     }
   },
   "language": {

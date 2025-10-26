@@ -82,9 +82,9 @@ export class ListPublicationComponent implements OnInit {
       });
     // Suscribirse a los cambios de idioma para actualizar las columnas
     const columnsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.products.list.table.name'),
-      this.transloco.selectTranslate('components.products.list.table.category'),
-      this.transloco.selectTranslate('components.products.list.table.image'),
+      this.transloco.selectTranslate('components.publications.list.table.name'),
+      this.transloco.selectTranslate('components.publications.list.table.category'),
+      this.transloco.selectTranslate('components.publications.list.table.image'),
     ]);
 
     const columnsSubscription = columnsTranslation$.subscribe(
@@ -178,7 +178,7 @@ export class ListPublicationComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.products.error.load'),
+          this.transloco.translate('notifications.publications.error.load'),
           'error'
         );
         this.loading = false;
@@ -204,7 +204,7 @@ export class ListPublicationComponent implements OnInit {
 
   create() {
     this.transloco
-      .selectTranslate('components.products.create.title')
+      .selectTranslate('components.publications.create.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
@@ -224,7 +224,7 @@ export class ListPublicationComponent implements OnInit {
 
   edit(data: any) {
     this.transloco
-      .selectTranslate('components.products.edit.title')
+      .selectTranslate('components.publications.edit.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
@@ -261,10 +261,10 @@ export class ListPublicationComponent implements OnInit {
 
   async delete(data: any) {
     const deleteTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.products.delete.title'),
-      this.transloco.selectTranslate('components.products.delete.message'),
-      this.transloco.selectTranslate('components.products.delete.confirm'),
-      this.transloco.selectTranslate('components.products.delete.cancel'),
+      this.transloco.selectTranslate('components.publications.delete.title'),
+      this.transloco.selectTranslate('components.publications.delete.message'),
+      this.transloco.selectTranslate('components.publications.delete.confirm'),
+      this.transloco.selectTranslate('components.publications.delete.cancel'),
     ]).pipe(take(1));
 
     const deleteActionsSubscription = deleteTranslation$.subscribe(
@@ -288,7 +288,7 @@ export class ListPublicationComponent implements OnInit {
               this.loadData();
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.products.success.deleted'
+                  'notifications.publications.success.deleted'
                 ),
                 'success'
               );
@@ -296,18 +296,18 @@ export class ListPublicationComponent implements OnInit {
             error: (error) => {
               if (
                 error.error.statusCode === 400 &&
-                error.error.message.includes('No se puede eliminar el producto')
+                error.error.message.includes('No se puede eliminar la publicación')
               ) {
                 this.notificationSrv.addNotification(
                   this.transloco.translate(
-                    'notifications.products.error.cannotDelete'
+                    'notifications.publications.error.cannotDelete'
                   ),
                   'error'
                 );
               } else {
                 this.notificationSrv.addNotification(
                   this.transloco.translate(
-                    'notifications.products.error.delete'
+                    'notifications.publications.error.delete'
                   ),
                   'error'
                 );
