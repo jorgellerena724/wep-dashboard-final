@@ -6,7 +6,6 @@
       label="{{ 'components.carousel.edit.fields.name.title' | transloco }}"
       [control]="form.get('title')"
       [errorMessages]="{
-        required: ( 'components.carousel.edit.fields.name.required' | transloco ),
         minlength: ( 'components.carousel.edit.fields.name.minlength' | transloco ),
       }"
     ></app-text-field>
@@ -21,7 +20,6 @@
     [isTextArea]="true"
     textAreaHeight="h-56"
     [errorMessages]="{
-        required: ( 'components.carousel.edit.fields.description.required' | transloco ),
         minlength: ( 'components.carousel.edit.fields.description.minlength' | transloco ),
       }"
   ></app-text-field>

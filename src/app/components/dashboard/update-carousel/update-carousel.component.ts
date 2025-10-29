@@ -52,13 +52,12 @@ export class UpdateCarouselComponent implements DynamicComponent {
   ) {
     this.form = this.fb.group({
       title: [
-        '',
+        null,
         [
-          Validators.required,
           Validators.minLength(1),
         ],
       ],
-      description: ['', [Validators.required, Validators.minLength(3)]],
+      description: [null, [Validators.minLength(3)]],
       image: [null, Validators.required],
     });
 
@@ -147,9 +146,24 @@ export class UpdateCarouselComponent implements DynamicComponent {
     }
 
     const formData = new FormData();
-    formData.append('title', this.form.get('title')?.value);
+    const titleCtrl = this.form.get('title');
+    const descCtrl = this.form.get('description');
+    const title: string | null = titleCtrl?.value;
+    const description: string | null = descCtrl?.value;
 
-    formData.append('description', this.form.get('description')?.value);
+    // Título: enviar si tiene contenido; si el usuario lo borró explícitamente (touched y vacío), enviar cadena vacía
+    if (title && title.trim().length > 0) {
+      formData.append('title', title.trim());
+    } else if (titleCtrl?.touched) {
+      formData.append('title', '');
+    }
+
+    // Descripción: misma lógica que título
+    if (description && description.trim().length > 0) {
+      formData.append('description', description.trim());
+    } else if (descCtrl?.touched) {
+      formData.append('description', '');
+    }
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);

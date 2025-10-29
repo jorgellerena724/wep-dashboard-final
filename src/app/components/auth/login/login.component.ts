@@ -11,6 +11,7 @@ import { NotificationService } from '../../../shared/services/system/notificatio
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +44,15 @@ export class LoginComponent {
       password: ['', Validators.required],
     });
 
-    // Sincronizar el idioma al iniciar el componente
+    // Sincronizar el idioma al iniciar el componente y respetar el guardado en localStorage
+    if (isPlatformBrowser(this.platformId)) {
+      const savedLang = localStorage.getItem('selectedLang');
+      const active = this.transloco.getActiveLang();
+      if (savedLang && savedLang !== active) {
+        this.transloco.setActiveLang(savedLang);
+      }
+    }
+
     this.syncWithTransloco();
     this.transloco.langChanges$.subscribe((lang) => {
       this.updateLanguageDisplay(lang);
@@ -67,10 +76,16 @@ export class LoginComponent {
     this.currentLanguageCode = lang;
     if (lang === 'es') {
       this.currentLanguageIcon = 'assets/img/españa.ico';
-      this.currentLanguage = this.transloco.translate('language.es');
+      this.transloco
+        .selectTranslate('language.es')
+        .pipe(take(1))
+        .subscribe((t) => (this.currentLanguage = t));
     } else if (lang === 'en') {
       this.currentLanguageIcon = 'assets/img/eeuu.ico';
-      this.currentLanguage = this.transloco.translate('language.en');
+      this.transloco
+        .selectTranslate('language.en')
+        .pipe(take(1))
+        .subscribe((t) => (this.currentLanguage = t));
     }
   }
 
@@ -92,10 +107,13 @@ export class LoginComponent {
       this.authService.login(email, password).subscribe({
         next: (success) => {
           if (success) {
-            // MODIFICADO: Usar la clave de traducción para el mensaje de éxito
-            const successMessage = this.transloco.translate('notifications.login.success');
-            this.notificationSrv.addNotification(successMessage, 'success');
-            this.router.navigate(['/admin']);
+            this.transloco
+              .selectTranslate('notifications.login.success')
+              .pipe(take(1))
+              .subscribe((successMessage) => {
+                this.notificationSrv.addNotification(successMessage, 'success');
+                this.router.navigate(['/admin']);
+              });
           }
           this.isLoading = false;
         },
@@ -105,33 +123,42 @@ export class LoginComponent {
           const statusCode = errorResponse?.status || 500;
           let notificationMessage: string;
 
-          // MODIFICADO: Lógica para seleccionar el mensaje traducido según el código de estado
+          // Lógica para seleccionar el mensaje traducido según el código de estado
           switch (statusCode) {
             case 400:
-              notificationMessage = serverErrorMessage || this.transloco.translate('notifications.login.error.badRequest');
+              notificationMessage = serverErrorMessage || 'notifications.login.error.badRequest';
               break;
             case 401:
-              notificationMessage = serverErrorMessage || this.transloco.translate('notifications.login.error.invalidCredentials');
+              notificationMessage = serverErrorMessage || 'notifications.login.error.invalidCredentials';
               break;
             case 500:
-              notificationMessage = this.transloco.translate('notifications.login.error.serverError');
+              notificationMessage = 'notifications.login.error.serverError';
               break;
             case 502:
             case 0: // El status 0 suele indicar un error de conexión
-              notificationMessage = this.transloco.translate('notifications.login.error.connectionError');
+              notificationMessage = 'notifications.login.error.connectionError';
               break;
             default:
-              notificationMessage = serverErrorMessage || this.transloco.translate('notifications.login.error.unexpected');
+              notificationMessage = serverErrorMessage || 'notifications.login.error.unexpected';
               break;
           }
-          
-          this.notificationSrv.addNotification(notificationMessage, 'error');
+
+          if (serverErrorMessage) {
+            this.notificationSrv.addNotification(serverErrorMessage, 'error');
+          } else {
+            this.transloco
+              .selectTranslate(notificationMessage)
+              .pipe(take(1))
+              .subscribe((msg) => this.notificationSrv.addNotification(msg, 'error'));
+          }
         },
       });
     } else {
-      // MODIFICADO: Usar la clave de traducción para el formulario inválido
-      const invalidFormMessage = this.transloco.translate('notifications.login.error.invalidForm');
-      this.notificationSrv.addNotification(invalidFormMessage, 'error');
+      // Usar traducción reactiva para evitar condiciones de carrera
+      this.transloco
+        .selectTranslate('notifications.login.error.invalidForm')
+        .pipe(take(1))
+        .subscribe((invalidFormMessage) => this.notificationSrv.addNotification(invalidFormMessage, 'error'));
       this.loginForm.markAllAsTouched();
     }
   }
