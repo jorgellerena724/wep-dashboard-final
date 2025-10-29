@@ -50,7 +50,6 @@ export class CreatePublicationCategoryComponent implements DynamicComponent {
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(20),
         ],
       ],
     });

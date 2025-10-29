@@ -56,7 +56,6 @@ export class UpdateHeaderComponent implements DynamicComponent {
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(50),
         ],
       ],
       image: ['', Validators.required],

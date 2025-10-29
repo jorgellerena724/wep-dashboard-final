@@ -716,7 +716,8 @@
             },
             "price": {
               "title": "Precio",
-              "required": "El campo es requerido"
+              "required": "El campo es requerido",
+              "optional": "Opcional"
             },
             "add": "Agregar",
             "empty": "Sin variantes",
@@ -769,7 +770,8 @@
             },
             "price": {
               "title": "Precio",
-              "required": "El campo es requerido"
+              "required": "El campo es requerido",
+              "optional": "Opcional"
             },
             "add": "Agregar",
             "empty": "Sin variantes",

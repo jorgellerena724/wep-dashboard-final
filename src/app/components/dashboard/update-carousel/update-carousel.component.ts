@@ -56,7 +56,6 @@ export class UpdateCarouselComponent implements DynamicComponent {
         [
           Validators.required,
           Validators.minLength(1),
-          Validators.maxLength(40),
         ],
       ],
       description: ['', [Validators.required, Validators.minLength(3)]],

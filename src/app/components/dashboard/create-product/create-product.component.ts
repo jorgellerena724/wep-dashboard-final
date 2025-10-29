@@ -248,7 +248,7 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
   addVariant(): void {
     const variantGroup = this.fb.group({
       description: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(0)]],
+      price: ['', Validators.min(0)], // Price ahora es opcional
     });
 
     this.variantsFormArray.push(variantGroup);
@@ -275,7 +275,7 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
       variantsData.forEach((variant: any) => {
         const variantGroup = this.fb.group({
           description: [variant.description || '', Validators.required],
-          price: [variant.price || 0, [Validators.required, Validators.min(0)]],
+          price: [variant.price || 0, Validators.min(0)], // Price ahora es opcional
         });
 
         this.variantsFormArray.push(variantGroup);

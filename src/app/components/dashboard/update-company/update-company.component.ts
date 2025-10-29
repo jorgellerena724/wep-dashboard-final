@@ -57,7 +57,6 @@ export class UpdateCompanyComponent implements DynamicComponent {
         [
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(20),
         ],
       ],
       description: ['', [Validators.required, Validators.minLength(3)]],

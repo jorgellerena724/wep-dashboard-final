@@ -7,7 +7,6 @@
       [errorMessages]="{
         required: ( 'components.products.edit.fields.name.required' | transloco ),
         minlength: ( 'components.products.edit.fields.name.minlength' | transloco ),
-        maxlength: ( 'components.products.edit.fields.name.maxlength' | transloco ),
       }"
     ></app-text-field>
     <app-select
@@ -74,12 +73,13 @@
             label="{{
               'components.products.edit.fields.variants.price.title' | transloco
             }}"
+            placeholder="{{
+              'components.products.edit.fields.variants.price.optional'
+                | transloco
+            }}"
             [control]="getVariantControl(i, 'price')"
             [allowDecimals]="true"
             [numbersOnly]="true"
-            [errorMessages]="{
-              required: ( 'components.products.edit.fields.variants.price.required' | transloco ),
-            }"
           ></app-text-field>
         </div>
         <button
