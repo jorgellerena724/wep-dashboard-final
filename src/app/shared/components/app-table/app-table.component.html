@@ -163,7 +163,7 @@
     </ng-template>
 
     <ng-template #defaultTemplate let-rowData let-field="field">
-      {{ rowData[field] }}
+      {{ truncate(rowData[field], 30) }}
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
