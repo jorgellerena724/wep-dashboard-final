@@ -52,7 +52,9 @@ export class UpdatePublicationComponent implements DynamicComponent {
   loadingDocument = false;
   imageUrl: string | null = null;
   documentUrl: string | null = null;
-  isDocument: boolean = false;
+  // Nuevas propiedades para distinguir entre archivos existentes y nuevos
+  hasExistingDocument = false;
+  existingDocumentName: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -97,6 +99,7 @@ export class UpdatePublicationComponent implements DynamicComponent {
     const initTasks = [this.fetchCategories()];
     await Promise.all(initTasks);
   }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
@@ -148,7 +151,6 @@ export class UpdatePublicationComponent implements DynamicComponent {
       error: (error) => {
         this.uploading = false;
 
-        // Verificar si existe el mensaje de error y si contiene el texto específico
         if (
           error.status === 400 &&
           error.error?.message &&
@@ -158,11 +160,11 @@ export class UpdatePublicationComponent implements DynamicComponent {
         ) {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
-          // Mostrar el mensaje de error del backend si existe, sino mostrar el mensaje genérico
-          const errorMessage = error.error?.message || 
-            error.error?.detail || 
+          const errorMessage =
+            error.error?.message ||
+            error.error?.detail ||
             this.transloco.translate('notifications.publications.error.update');
-          
+
           this.notificationSrv.addNotification(errorMessage, 'error');
         }
       },
@@ -195,9 +197,9 @@ export class UpdatePublicationComponent implements DynamicComponent {
   }
 
   onFileUploaded(files: File[]): void {
-    const file = files[0]; // Only handle the first file since this component supports single file upload
+    const file = files[0];
     this.selectedFile = file;
-    this.form.get('image')?.setValue(file);
+    this.form.get('photo')?.setValue(file);
     const reader = new FileReader();
     reader.onload = () => {
       this.imageUrl = reader.result as string;
@@ -207,15 +209,20 @@ export class UpdatePublicationComponent implements DynamicComponent {
   }
 
   onDocumentUploaded(files: File[]): void {
-    const file = files[0]; // Only handle the first file since this component supports single file upload
+    const file = files[0];
     this.selectedDocument = file;
     this.form.get('file')?.setValue(file);
-    // For documents, we don't need to preview, just store the file
+
+    // Marcar que ya no estamos usando el documento existente
+    this.hasExistingDocument = false;
+    this.existingDocumentName = null;
+
+    // Actualizar la vista
     this.cdr.detectChanges();
   }
 
   getDocumentIcon(): string {
-    // Si hay un documento seleccionado (nuevo archivo)
+    // Prioridad: archivo nuevo seleccionado
     if (this.selectedDocument) {
       const fileName = this.selectedDocument.name.toLowerCase();
       if (fileName.endsWith('.pdf')) {
@@ -225,10 +232,10 @@ export class UpdatePublicationComponent implements DynamicComponent {
       }
       return 'pi-file';
     }
-    
-    // Si hay un documento existente (desde initialData)
-    if (this.documentUrl) {
-      const fileName = this.documentUrl.toLowerCase();
+
+    // Si hay documento existente
+    if (this.hasExistingDocument && this.existingDocumentName) {
+      const fileName = this.existingDocumentName.toLowerCase();
       if (fileName.endsWith('.pdf')) {
         return 'pi-file-pdf';
       } else if (fileName.endsWith('.zip')) {
@@ -236,12 +243,12 @@ export class UpdatePublicationComponent implements DynamicComponent {
       }
       return 'pi-file';
     }
-    
+
     return 'pi-file';
   }
 
   getDocumentIconColor(): string {
-    // Si hay un documento seleccionado (nuevo archivo)
+    // Prioridad: archivo nuevo seleccionado
     if (this.selectedDocument) {
       const fileName = this.selectedDocument.name.toLowerCase();
       if (fileName.endsWith('.pdf')) {
@@ -251,10 +258,10 @@ export class UpdatePublicationComponent implements DynamicComponent {
       }
       return 'text-gray-400 dark:text-gray-500';
     }
-    
-    // Si hay un documento existente (desde initialData)
-    if (this.documentUrl) {
-      const fileName = this.documentUrl.toLowerCase();
+
+    // Si hay documento existente
+    if (this.hasExistingDocument && this.existingDocumentName) {
+      const fileName = this.existingDocumentName.toLowerCase();
       if (fileName.endsWith('.pdf')) {
         return 'text-red-500';
       } else if (fileName.endsWith('.zip')) {
@@ -262,7 +269,7 @@ export class UpdatePublicationComponent implements DynamicComponent {
       }
       return 'text-gray-400 dark:text-gray-500';
     }
-    
+
     return 'text-gray-400 dark:text-gray-500';
   }
 
@@ -270,27 +277,35 @@ export class UpdatePublicationComponent implements DynamicComponent {
     if (this.selectedDocument) {
       return this.selectedDocument.name.toLowerCase().endsWith('.zip');
     }
-    if (this.documentUrl) {
-      return this.documentUrl.toLowerCase().endsWith('.zip');
+    if (this.hasExistingDocument && this.existingDocumentName) {
+      return this.existingDocumentName.toLowerCase().endsWith('.zip');
     }
     return false;
   }
 
-  removeFile(): void {
-    if (this.selectedFile) {
-      this.selectedFile = null;
+  getDocumentName(): string {
+    if (this.selectedDocument) {
+      return this.selectedDocument.name;
     }
+    if (this.hasExistingDocument && this.existingDocumentName) {
+      return this.existingDocumentName;
+    }
+    return '';
+  }
+
+  removeFile(): void {
+    this.selectedFile = null;
     this.imageUrl = null;
-    this.form.get('image')?.setValue(null);
+    this.form.get('photo')?.setValue(null);
     this.form.markAllAsTouched();
-    this.form.patchValue({ image: null });
+    this.form.patchValue({ photo: null });
     this.cdr.detectChanges();
   }
 
   removeDocument(): void {
-    if (this.selectedDocument) {
-      this.selectedDocument = null;
-    }
+    this.selectedDocument = null;
+    this.hasExistingDocument = false;
+    this.existingDocumentName = null;
     this.documentUrl = null;
     this.form.get('file')?.setValue(null);
     this.form.markAllAsTouched();
@@ -314,7 +329,6 @@ export class UpdatePublicationComponent implements DynamicComponent {
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
     console.error('Error de validación de archivo:"File validation error:"', {
       type: error.type,
       message: error.message,
@@ -322,13 +336,11 @@ export class UpdatePublicationComponent implements DynamicComponent {
       fileSize: error.file.size,
       fileType: error.file.type,
     });
-
     this.selectedFile = null;
   }
 
   onDocumentError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
     console.error(
       'Error de validación de documento:"Document validation error:"',
       {
@@ -339,7 +351,6 @@ export class UpdatePublicationComponent implements DynamicComponent {
         fileType: error.file.type,
       }
     );
-
     this.selectedDocument = null;
   }
 
@@ -350,12 +361,12 @@ export class UpdatePublicationComponent implements DynamicComponent {
       this.srv.getImage(this.initialData.photo).subscribe({
         next: (blob: Blob) => {
           this.createImagePreview(blob);
-          this.form.get('image')?.setValue('existing-image');
+          this.form.get('photo')?.setValue('existing-image');
           this.loadingImage = false;
         },
         error: () => {
           this.setFallbackImage();
-          this.form.get('image')?.setValue('existing-image');
+          this.form.get('photo')?.setValue('existing-image');
           this.loadingImage = false;
         },
       });
@@ -366,27 +377,19 @@ export class UpdatePublicationComponent implements DynamicComponent {
     if (this.initialData?.file) {
       this.loadingDocument = true;
 
-      // For documents, we don't need to fetch the blob, just set the preview
-      this.setFallbackDocument();
+      // Extraer el nombre del archivo de la URL
+      const urlParts = this.initialData.file.split('/');
+      this.existingDocumentName = urlParts[urlParts.length - 1];
+      this.hasExistingDocument = true;
+      this.documentUrl = this.initialData.file;
+
       this.form.get('file')?.setValue('existing-document');
       this.loadingDocument = false;
+      this.cdr.detectChanges();
     }
   }
 
-  private createDocumentPreview(blob: Blob): void {
-    // For documents, we just set a flag to show the preview
-    this.isDocument = true;
-    this.documentUrl = this.initialData.file; // Store the URL for display
-    this.cdr.detectChanges();
-  }
-
-  private setFallbackDocument(): void {
-    this.isDocument = true;
-    this.documentUrl = this.initialData.file;
-    this.cdr.detectChanges();
-  }
-
   ngOnDestroy() {
-    // Limpiar todas las URLs de objetos
+    // Limpiar todas las URLs de objetos si es necesario
   }
 }

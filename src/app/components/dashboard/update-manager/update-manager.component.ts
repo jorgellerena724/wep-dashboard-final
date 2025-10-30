@@ -54,7 +54,7 @@ export class UpdateManagerComponent implements DynamicComponent {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       charge: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(3)]],
+      description: [''],
       image: ['', Validators.required],
     });
 
