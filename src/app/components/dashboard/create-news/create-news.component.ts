@@ -57,7 +57,7 @@ export class CreateNewsComponent implements DynamicComponent {
   ) {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      fecha: ['', Validators.required],
+      fecha: [''],
       description: ['', [Validators.required, Validators.minLength(3)]],
       image: ['', Validators.required],
     });
@@ -167,7 +167,9 @@ export class CreateNewsComponent implements DynamicComponent {
       .replace(/\s+$/, '');
     formData.append('description', processedDescription);
 
-    formData.append('fecha', this.form.get('fecha')?.value);
+    const rawFecha = this.form.get('fecha')?.value;
+    const fechaValue = (rawFecha ?? '').toString().trim();
+    formData.append('fecha', fechaValue.length > 0 ? fechaValue : '');
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
