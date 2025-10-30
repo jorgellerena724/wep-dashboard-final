@@ -145,7 +145,6 @@ export class ListManagerComponent implements OnInit {
             icon: icons['delete'],
             onClick: (data) => this.delete(data),
             class: buttonVariants.outline.red,
-            isVisible: () => this.visible(),
           },
         ];
       }
@@ -177,7 +176,9 @@ export class ListManagerComponent implements OnInit {
               },
               error: (error) => {
                 this.notificationSrv.addNotification(
-                  this.transloco.translate('notifications.managers.error.loadImage'),
+                  this.transloco.translate(
+                    'notifications.managers.error.loadImage'
+                  ),
                   'error'
                 );
               },
@@ -291,7 +292,9 @@ export class ListManagerComponent implements OnInit {
             next: () => {
               this.loadData();
               this.notificationSrv.addNotification(
-                this.transloco.translate('notifications.managers.success.deleted'),
+                this.transloco.translate(
+                  'notifications.managers.success.deleted'
+                ),
                 'success'
               );
             },
@@ -308,7 +311,9 @@ export class ListManagerComponent implements OnInit {
                 );
               } else {
                 this.notificationSrv.addNotification(
-                  this.transloco.translate('notifications.managers.error.delete'),
+                  this.transloco.translate(
+                    'notifications.managers.error.delete'
+                  ),
                   'error'
                 );
               }
@@ -319,9 +324,5 @@ export class ListManagerComponent implements OnInit {
       }
     );
     this.subscriptions.push(deleteActionsSubscription);
-  }
-
-  visible(): boolean {
-    return this.data.length !== 1;
   }
 }
