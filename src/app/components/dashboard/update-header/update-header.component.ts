@@ -51,13 +51,7 @@ export class UpdateHeaderComponent implements DynamicComponent {
     private transloco: TranslocoService
   ) {
     this.form = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-        ],
-      ],
+      name: [''],
       image: ['', Validators.required],
     });
 
