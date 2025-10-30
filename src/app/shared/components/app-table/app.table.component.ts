@@ -338,4 +338,11 @@ export class TableComponent implements OnInit {
       this.first + this.rowsPerPage
     );
   }
+
+  // Trunca cadenas a un máximo de 'limit' caracteres
+  truncate(value: any, limit: number = 30): string {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    return str.length > limit ? str.slice(0, limit) + '…' : str;
+  }
 }

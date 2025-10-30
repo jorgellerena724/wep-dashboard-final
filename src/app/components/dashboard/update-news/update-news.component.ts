@@ -64,7 +64,7 @@ export class UpdateNewsComponent implements DynamicComponent {
         ],
       ],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      fecha: ['', Validators.required],
+      fecha: [''],
       image: [null, Validators.required],
     });
 
@@ -238,7 +238,9 @@ export class UpdateNewsComponent implements DynamicComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
-    formData.append('fecha', this.form.get('fecha')?.value);
+    const rawFecha = this.form.get('fecha')?.value;
+    const fechaValue = (rawFecha ?? '').toString().trim();
+    formData.append('fecha', fechaValue.length > 0 ? fechaValue : '');
 
     // Preservar saltos de línea en la descripción
     const description = this.form.get('description')?.value;
