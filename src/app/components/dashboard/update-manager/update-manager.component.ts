@@ -55,7 +55,7 @@ export class UpdateManagerComponent implements DynamicComponent {
       title: ['', [Validators.required, Validators.minLength(3)]],
       charge: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
-      image: ['', Validators.required],
+      image: [''],
     });
 
     this.id = 0;
