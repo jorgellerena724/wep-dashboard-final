@@ -158,9 +158,16 @@ export class UpdateCarouselComponent implements DynamicComponent {
       formData.append('title', '');
     }
 
-    // Descripción: misma lógica que título
+    // Descripción: misma lógica que título, pero preservando saltos de línea
     if (description && description.trim().length > 0) {
-      formData.append('description', description.trim());
+      // Preservar saltos de línea - no hacer trim completo, solo espacios al inicio/fin de cada línea
+      const processedDescription = description
+        .split('\n')
+        .map((line: string) => line.trimEnd())
+        .join('\n')
+        .replace(/^\s+/, '')
+        .replace(/\s+$/, '');
+      formData.append('description', processedDescription);
     } else if (descCtrl?.touched) {
       formData.append('description', '');
     }

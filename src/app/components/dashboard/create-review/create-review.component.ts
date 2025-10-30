@@ -105,7 +105,15 @@ export class CreateReviewComponent implements DynamicComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
-    formData.append('description', this.form.get('description')?.value);
+    // Preservar saltos de línea en la descripción
+    const description = this.form.get('description')?.value;
+    const processedDescription = description
+      .split('\n')
+      .map((line: string) => line.trimEnd())
+      .join('\n')
+      .replace(/^\s+/, '')
+      .replace(/\s+$/, '');
+    formData.append('description', processedDescription);
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);

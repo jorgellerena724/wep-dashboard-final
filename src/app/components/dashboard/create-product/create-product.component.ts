@@ -324,7 +324,16 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
       'cal_url',
       calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
     );
-    formData.append('description', this.form.get('description')?.value);
+    
+    // Preservar saltos de línea en la descripción
+    const description = this.form.get('description')?.value;
+    const processedDescription = description
+      .split('\n')
+      .map((line: string) => line.trimEnd())
+      .join('\n')
+      .replace(/^\s+/, '')
+      .replace(/\s+$/, '');
+    formData.append('description', processedDescription);
     formData.append('category_id', this.form.get('category')?.value);
 
     // Agregar variants como JSON
