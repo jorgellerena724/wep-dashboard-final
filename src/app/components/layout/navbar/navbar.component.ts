@@ -38,6 +38,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   isHomeSubmenuOpen = false;
   isAboutSubmenuOpen = false;
   isProductsSubmenuOpen = false;
+  isPublicationsSubmenuOpen = false;
   isContactSubmenuOpen = false;
   isHeaderSubmenuOpen = false;
   isUsersSubmenuOpen = false;
@@ -119,6 +120,10 @@ export class NavbarComponent implements OnInit, OnChanges {
     this.isProductsSubmenuOpen = !this.isProductsSubmenuOpen;
   }
 
+  togglePublicationsSubmenu(): void {
+    this.isPublicationsSubmenuOpen = !this.isPublicationsSubmenuOpen;
+  }
+
   toggleContactSubmenu(): void {
     this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
   }
@@ -139,6 +144,7 @@ export class NavbarComponent implements OnInit, OnChanges {
     if (except !== 'home') this.isHomeSubmenuOpen = false;
     if (except !== 'about') this.isAboutSubmenuOpen = false;
     if (except !== 'products') this.isProductsSubmenuOpen = false;
+    if (except !== 'publications') this.isPublicationsSubmenuOpen = false;
     if (except !== 'contact') this.isContactSubmenuOpen = false;
     if (except !== 'header') this.isHeaderSubmenuOpen = false;
     if (except !== 'users') this.isUsersSubmenuOpen = false;
@@ -251,6 +257,11 @@ export class NavbarComponent implements OnInit, OnChanges {
   isProductsRouteActive(): boolean {
     const currentUrl = this.router.url;
     return currentUrl.includes('/categories') || currentUrl.includes('/products');
+  }
+
+  isPublicationsRouteActive(): boolean {
+    const currentUrl = this.router.url;
+    return currentUrl.includes('/publication-category') || currentUrl.includes('/publications');
   }
 
   isContactRouteActive(): boolean {
