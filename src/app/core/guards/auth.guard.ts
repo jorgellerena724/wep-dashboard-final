@@ -17,8 +17,8 @@ export class AuthGuard implements CanActivate {
 
     // Verificar si el token no ha expirado
     if (this.authService.checkTokenExpiration()) {
-      // Token expirado, hacer logout y redirigir
-      this.authService.logout();
+      // Token expirado, hacer logout y redirigir (sin notificación automática)
+      this.authService.logout(false);
       this.router.navigate(['/login'], { replaceUrl: true });
       return false;
     }

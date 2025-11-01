@@ -209,7 +209,7 @@ export class AuthService implements OnDestroy {
           const user = JSON.parse(sessionUser) as User;
 
           if (user.exp && Date.now() >= user.exp) {
-            this.logout();
+            this.logout(false); // No mostrar notificación al iniciar la app
             this.initialNavigationChecked.next(true);
             return;
           }
@@ -229,7 +229,7 @@ export class AuthService implements OnDestroy {
         }
       } catch (error) {
         console.error('Error loading initial state:', error);
-        this.logout();
+        this.logout(false); // No mostrar notificación al iniciar la app
         this.initialNavigationChecked.next(true);
       }
     } else {
@@ -365,7 +365,7 @@ export class AuthService implements OnDestroy {
     this.cleanupAndRedirect();
   }
 
-  public logout(): void {
+  public logout(showNotification: boolean = true): void {
     if (this.isLoggingOut) return;
 
     this.isLoggingOut = true;
@@ -373,9 +373,12 @@ export class AuthService implements OnDestroy {
     this.tokenSubject.next(null);
     this.userSubject.next(null);
 
-    // MODIFICADO: Usar la clave de traducción para el cierre de sesión
-    const logoutMessage = this.transloco.translate('notifications.session.logoutSuccess');
-    this.notificationSrv.addNotification(logoutMessage, 'success');
+    // Solo mostrar notificación si se solicita explícitamente
+    if (showNotification) {
+      // MODIFICADO: Usar la clave de traducción para el cierre de sesión
+      const logoutMessage = this.transloco.translate('notifications.session.logoutSuccess');
+      this.notificationSrv.addNotification(logoutMessage, 'success');
+    }
 
     this.cleanupAndRedirect();
   }

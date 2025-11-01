@@ -26,8 +26,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error) => {
       // Manejar errores de autenticación
       if (error.status === 401) {
-        // Token inválido o expirado
-        authService.logout();
+        // Token inválido o expirado (sin notificación automática)
+        authService.logout(false);
       } else if (error.status === 403) {
         // No autorizado - podrías redirigir a una página de acceso denegado
         console.warn('Acceso denegado');
