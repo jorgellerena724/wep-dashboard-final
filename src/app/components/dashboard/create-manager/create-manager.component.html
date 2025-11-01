@@ -10,6 +10,19 @@
         minlength: ( 'components.managers.create.fields.name.minlength' | transloco ),
       }"
     ></app-text-field>
+    <app-select
+      [placeholder]="
+        'components.publications.create.fields.category.title' | transloco
+      "
+      [options]="categories"
+      formControlName="manager_category"
+      [control]="form.get('manager_category')"
+      [errorMessages]="{
+        required: ( 'components.publications.create.fields.category.required' | transloco ),
+      }"
+    ></app-select>
+  </div>
+  <div class="mb-4 grid grid-cols-1 gap-4">
     <app-text-field
       id="charge"
       label="{{ 'components.managers.create.fields.charge.title' | transloco }}"
@@ -72,8 +85,10 @@
         class="absolute inset-0 flex flex-col"
       >
         <!-- Preview Container -->
-        
-<div class="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500">
+
+        <div
+          class="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500"
+        >
           <div class="relative inline-block">
             <!-- Image Container -->
             <div
@@ -89,7 +104,7 @@
             <button
               type="button"
               (click)="removeFile()"
-              class="absolute top-0 right-2 text-red-500 bg-transparent  transition-all duration-200 p-1 rounded-full"
+              class="absolute top-0 right-2 text-red-500 bg-transparent transition-all duration-200 p-1 rounded-full"
               tooltipPosition="top"
             >
               <i class="pi pi-trash text-lg"></i>

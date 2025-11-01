@@ -20,6 +20,8 @@ import { AppFileUploadComponent } from '../../../shared/components/app-file-uplo
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { ManagerService } from '../../../shared/services/features/manager.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
 
 @Component({
   selector: 'app-create-manager',
@@ -31,6 +33,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    SelectComponent,
   ],
 })
 export class CreateManagerComponent implements DynamicComponent {
@@ -44,16 +47,19 @@ export class CreateManagerComponent implements DynamicComponent {
   uploading = false;
   loadingImage = false;
   imageUrl: string | null = null;
+  categories: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private srv: ManagerService,
     private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private categorySrv: ManagerCategoryService
   ) {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       charge: ['', [Validators.required, Validators.minLength(3)]],
+      manager_category_id: [''],
       description: [''],
       image: [''],
     });
@@ -65,10 +71,13 @@ export class CreateManagerComponent implements DynamicComponent {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.initialData) {
       this.form.patchValue(this.initialData);
     }
+
+    const initTasks = [this.fetchCategories()];
+    await Promise.all(initTasks);
   }
 
   onFileSelected(file: File) {
@@ -91,20 +100,6 @@ export class CreateManagerComponent implements DynamicComponent {
       this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
-  }
-
-  private createImagePreview(blob: Blob): void {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      this.imageUrl = reader.result as string;
-      this.cdr.detectChanges();
-    };
-    reader.readAsDataURL(new Blob([blob]));
-  }
-
-  private setFallbackImage(): void {
-    this.imageUrl = this.initialData.photo;
-    this.cdr.detectChanges();
   }
 
   async onSubmit(): Promise<void> {
@@ -131,6 +126,10 @@ export class CreateManagerComponent implements DynamicComponent {
     formData.append('description', processedDescription);
 
     formData.append('charge', this.form.get('charge')?.value);
+    formData.append(
+      'manager_category_id',
+      this.form.get('manager_category')?.value
+    );
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
@@ -209,6 +208,29 @@ export class CreateManagerComponent implements DynamicComponent {
     });
 
     this.selectedFile = null;
+  }
+
+  fetchCategories(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.categorySrv.get().subscribe({
+        next: (data) => {
+          this.categories = data.map((com: any) => ({
+            value: com.id,
+            label: com.title,
+          }));
+          resolve();
+        },
+        error: (err) => {
+          this.notificationSrv.addNotification(
+            this.transloco.translate(
+              'notifications.publication-category.error.load'
+            ),
+            'error'
+          );
+          reject(err);
+        },
+      });
+    });
   }
 
   ngOnDestroy() {

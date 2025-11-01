@@ -61,6 +61,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'manager-category',
+    loadComponent: () =>
+      import(
+        './components/dashboard/list-manager-category/list-manager-category.component'
+      ).then((m) => m.ListManagerCategoryComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'reviews',
     loadComponent: () =>
       import('./components/dashboard/list-review/list-review.component').then(

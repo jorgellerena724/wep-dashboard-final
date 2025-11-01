@@ -21,15 +21,16 @@ import { ConfirmDialogService } from '../../../shared/services/system/confirm-di
 import { PublicationCategoryService } from '../../../shared/services/features/publication-category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { combineLatest, Subscription, take } from 'rxjs';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
 
 @Component({
-  selector: 'app-list-publication-category',
+  selector: 'app-list-manager-category',
   imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
-  templateUrl: './list-publication-category.component.html',
+  templateUrl: './list-manager-category.component.html',
   standalone: true,
   providers: [],
 })
-export class ListPublicationCategoryComponent implements OnInit {
+export class ListManagerCategoryComponent implements OnInit {
   private transloco = inject(TranslocoService);
   private subscriptions: Subscription[] = [];
   data: HomeData[] = [];
@@ -47,7 +48,7 @@ export class ListPublicationCategoryComponent implements OnInit {
   constructor(
     private modalSrv: ModalService,
     private notificationSrv: NotificationService,
-    private srv: PublicationCategoryService,
+    private srv: ManagerCategoryService,
     private confirmDialogService: ConfirmDialogService
   ) {}
 
