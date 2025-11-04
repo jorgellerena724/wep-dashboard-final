@@ -935,7 +935,8 @@
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres",
-            "uniqueName": "Ya existe un directivo con este nombre"
+            "uniqueName": "Ya existe un directivo con este nombre",
+            "duplicateTitle": "Ya existe una publicación con este nombre"
           },
           "category": {
             "title": "Categoría",
@@ -971,7 +972,8 @@
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres",
-            "uniqueName": "Ya existe un directivo con este nombre"
+            "uniqueName": "Ya existe un directivo con este nombre",
+            "duplicateTitle": "Ya existe una publicación con este nombre"
           },
           "category": {
             "title": "Categoría",

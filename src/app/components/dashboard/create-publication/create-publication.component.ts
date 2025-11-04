@@ -11,6 +11,9 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -22,6 +25,8 @@ import { PublicationsService } from '../../../shared/services/features/publicati
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
 import { PublicationCategoryService } from '../../../shared/services/features/publication-category.service';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-create-publication',
@@ -44,6 +49,7 @@ export class CreatePublicationComponent implements DynamicComponent {
   id: number;
   form: FormGroup;
   categories: any[] = [];
+  publications: any[] = [];
   selectedFile: File | null = null;
   selectedDocument: File | null = null;
   uploading = false;
@@ -59,7 +65,11 @@ export class CreatePublicationComponent implements DynamicComponent {
     private categorySrv: PublicationCategoryService
   ) {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
+      title: [
+        '',
+        [Validators.required, Validators.minLength(3)],
+        [this.uniqueTitleValidator()],
+      ],
       publication_category: ['', Validators.required],
       image: [''],
       file: ['', Validators.required],
@@ -77,7 +87,7 @@ export class CreatePublicationComponent implements DynamicComponent {
       this.form.patchValue(this.initialData);
     }
 
-    const initTasks = [this.fetchCategories()];
+    const initTasks = [this.fetchCategories(), this.fetchPublications()];
     await Promise.all(initTasks);
   }
 
@@ -304,6 +314,48 @@ export class CreatePublicationComponent implements DynamicComponent {
         },
       });
     });
+  }
+
+  fetchPublications(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.srv.get().subscribe({
+        next: (data) => {
+          this.publications = data || [];
+          resolve();
+        },
+        error: (err) => {
+          // Silently fail - validation will work without preloaded data
+          this.publications = [];
+          resolve();
+        },
+      });
+    });
+  }
+
+  uniqueTitleValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const title = control.value?.trim().toLowerCase();
+      
+      if (!title || title.length < 3) {
+        return of(null);
+      }
+
+      return this.srv.get().pipe(
+        map((publications: any[]) => {
+          const exists = publications.some(
+            (pub: any) => pub.title?.trim().toLowerCase() === title
+          );
+          return exists ? { duplicateTitle: true } : null;
+        }),
+        catchError(() => {
+          // Fallback to local publications array if API call fails
+          const exists = this.publications.some(
+            (pub: any) => pub.title?.trim().toLowerCase() === title
+          );
+          return of(exists ? { duplicateTitle: true } : null);
+        })
+      );
+    };
   }
 
   ngOnDestroy() {

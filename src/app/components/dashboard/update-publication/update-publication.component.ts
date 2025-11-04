@@ -11,6 +11,9 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -23,6 +26,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer } from '@angular/platform-browser';
 import { PublicationCategoryService } from '../../../shared/services/features/publication-category.service';
 import { PublicationsService } from '../../../shared/services/features/publications.service';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-update-publication',
@@ -45,6 +50,7 @@ export class UpdatePublicationComponent implements DynamicComponent {
   id: number;
   form: FormGroup;
   categories: any[] = [];
+  publications: any[] = [];
   selectedFile: File | null = null;
   selectedDocument: File | null = null;
   uploading = false;
@@ -96,8 +102,11 @@ export class UpdatePublicationComponent implements DynamicComponent {
       }
     }
 
-    const initTasks = [this.fetchCategories()];
+    const initTasks = [this.fetchCategories(), this.fetchPublications()];
     await Promise.all(initTasks);
+
+    // Agregar el validador asíncrono después de inicializar
+    this.form.get('title')?.setAsyncValidators([this.uniqueTitleValidator()]);
   }
 
   async onSubmit(): Promise<void> {
@@ -194,6 +203,53 @@ export class UpdatePublicationComponent implements DynamicComponent {
         },
       });
     });
+  }
+
+  fetchPublications(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.srv.get().subscribe({
+        next: (data) => {
+          this.publications = data || [];
+          resolve();
+        },
+        error: (err) => {
+          // Silently fail - validation will work without preloaded data
+          this.publications = [];
+          resolve();
+        },
+      });
+    });
+  }
+
+  uniqueTitleValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const title = control.value?.trim().toLowerCase();
+      
+      if (!title || title.length < 2) {
+        return of(null);
+      }
+
+      return this.srv.get().pipe(
+        map((publications: any[]) => {
+          // Exclude current publication from the check
+          const exists = publications.some(
+            (pub: any) =>
+              pub.id !== this.id &&
+              pub.title?.trim().toLowerCase() === title
+          );
+          return exists ? { duplicateTitle: true } : null;
+        }),
+        catchError(() => {
+          // Fallback to local publications array if API call fails
+          const exists = this.publications.some(
+            (pub: any) =>
+              pub.id !== this.id &&
+              pub.title?.trim().toLowerCase() === title
+          );
+          return of(exists ? { duplicateTitle: true } : null);
+        })
+      );
+    };
   }
 
   onFileUploaded(files: File[]): void {
