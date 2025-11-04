@@ -145,7 +145,8 @@
         "update": "Error updating category.",
         "delete": "Error deleting category.",
         "load": "Error loading information.",
-        "formInvalid": "Check the form fields."
+        "formInvalid": "Check the form fields.",
+        "duplicateName": "A category with this name already exists."
       }
     },
     "categories": {
@@ -159,7 +160,8 @@
         "update": "Error updating category.",
         "delete": "Error deleting category.",
         "load": "Error loading information.",
-        "formInvalid": "Check the form fields."
+        "formInvalid": "Check the form fields.",
+        "duplicateName": "A category with this name already exists."
       }
     },
     "products": {
@@ -211,7 +213,8 @@
         "update": "Error updating category.",
         "delete": "Error deleting category.",
         "load": "Error loading information.",
-        "formInvalid": "Check the form fields."
+        "formInvalid": "Check the form fields.",
+        "duplicateName": "A category with this name already exists."
       }
     }
   },

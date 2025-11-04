@@ -145,7 +145,8 @@
         "update": "Error al actualizar la categoría.",
         "delete": "Error al eliminar la categoría.",
         "load": "Error al cargar la información.",
-        "formInvalid": "Compruebe los campos del formulario."
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateName": "Ya existe una categoría con este nombre."
       }
     },
     "categories": {
@@ -159,7 +160,8 @@
         "update": "Error al actualizar la categoría.",
         "delete": "Error al eliminar la categoría.",
         "load": "Error al cargar la información.",
-        "formInvalid": "Compruebe los campos del formulario."
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateName": "Ya existe una categoría con este nombre."
       }
     },
     "products": {
@@ -211,7 +213,8 @@
         "update": "Error al actualizar la categoría.",
         "delete": "Error al eliminar la categoría.",
         "load": "Error al cargar la información.",
-        "formInvalid": "Compruebe los campos del formulario."
+        "formInvalid": "Compruebe los campos del formulario.",
+        "duplicateName": "Ya existe una categoría con este nombre."
       }
     }
   },
