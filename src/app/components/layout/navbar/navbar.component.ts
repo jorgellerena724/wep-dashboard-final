@@ -15,6 +15,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ModalService, ModalConfig } from '../../../shared/services/system/modal.service';
 import { ChangeUserPasswordComponent } from '../../users/change-user-password/change-user-password.component';
+import { BackupService } from '../../../shared/services/system/backup.service';
+import { NotificationService } from '../../../shared/services/system/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -57,6 +59,8 @@ export class NavbarComponent implements OnInit, OnChanges {
     private router: Router,
     private authSrv: AuthService,
     private modalSrv: ModalService,
+    private backupService: BackupService,
+    private notificationService: NotificationService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.router.events
@@ -93,12 +97,87 @@ export class NavbarComponent implements OnInit, OnChanges {
 
   saveInformation(): void {
     this.userMenuOpen = false;
-    // TODO: Implementar lógica para salvar información
+    
+    this.notificationService.addNotification('Generando backup...', 'info');
+    
+    this.backupService.downloadBackup().subscribe({
+      next: (blob: Blob) => {
+        // Crear URL temporal para el blob
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Generar nombre de archivo con fecha
+        const date = new Date();
+        const dateStr = date.toISOString().split('T')[0];
+        link.download = `backup_${dateStr}.zip`;
+        
+        // Descargar el archivo
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Limpiar URL temporal
+        window.URL.revokeObjectURL(url);
+        
+        this.notificationService.addNotification('Backup descargado exitosamente', 'success');
+      },
+      error: (error) => {
+        console.error('Error al descargar backup:', error);
+        const errorMessage = error?.error?.detail || error?.message || 'Error al descargar el backup';
+        this.notificationService.addNotification(`Error al descargar backup: ${errorMessage}`, 'error');
+      }
+    });
   }
 
   restoreInformation(): void {
     this.userMenuOpen = false;
-    // TODO: Implementar lógica para restaurar información
+    
+    // Crear input file dinámicamente
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.zip';
+    
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (!file) {
+        return;
+      }
+      
+      // Verificar que es un archivo ZIP
+      if (!file.name.endsWith('.zip')) {
+        this.notificationService.addNotification('Por favor seleccione un archivo ZIP', 'error');
+        return;
+      }
+      
+      // Confirmar antes de restaurar
+      const confirmMessage = this.transloco.translate('navbar.confirm_restore') || 
+        '¿Está seguro de que desea restaurar el backup? Esto sobreescribirá la base de datos y la carpeta uploads actuales.';
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+      
+      this.notificationService.addNotification('Restaurando backup...', 'info');
+      
+      this.backupService.restoreBackup(file).subscribe({
+        next: (response) => {
+          this.notificationService.addNotification('Backup restaurado exitosamente. Por favor, recargue la página.', 'success');
+          
+          // Recargar la página después de 2 segundos
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        },
+        error: (error) => {
+          console.error('Error al restaurar backup:', error);
+          const errorMessage = error?.error?.detail || error?.message || 'Error al restaurar el backup';
+          this.notificationService.addNotification(`Error al restaurar backup: ${errorMessage}`, 'error');
+        }
+      });
+    };
+    
+    input.click();
   }
 
   changePassword(): void {
