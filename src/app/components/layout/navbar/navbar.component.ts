@@ -91,6 +91,16 @@ export class NavbarComponent implements OnInit, OnChanges {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
+  saveInformation(): void {
+    this.userMenuOpen = false;
+    // TODO: Implementar lógica para salvar información
+  }
+
+  restoreInformation(): void {
+    this.userMenuOpen = false;
+    // TODO: Implementar lógica para restaurar información
+  }
+
   changePassword(): void {
     this.userMenuOpen = false;
     const changePasswordTitle = this.transloco.translate('navbar.changepass');
