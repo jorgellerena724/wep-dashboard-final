@@ -84,6 +84,7 @@
         "loadImage": "Error al cargar el archivo multimedia",
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
+        "duplicateName": "Ya existe una novedad con este nombre.",
         "statusUpdate": "Error al actualizar el estado.",
         "cannotDelete": "No se puede eliminar el producto"
       }

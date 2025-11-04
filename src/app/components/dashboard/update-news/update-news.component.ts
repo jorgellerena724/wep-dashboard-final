@@ -11,6 +11,8 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -21,6 +23,7 @@ import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface
 import { NewsService } from '../../../shared/services/features/news.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { HomeData } from '../../../shared/interfaces/home.interface';
 
 @Component({
   selector: 'app-update-news',
@@ -47,6 +50,7 @@ export class UpdateNewsComponent implements DynamicComponent {
   imageUrl: string | null = null;
   isVideo: boolean = false;
   videoUrl: SafeResourceUrl | null = null;
+  existingNews: HomeData[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -62,6 +66,7 @@ export class UpdateNewsComponent implements DynamicComponent {
           Validators.required,
           Validators.minLength(3),
         ],
+        [this.duplicateNameValidator.bind(this)],
       ],
       description: ['', [Validators.required, Validators.minLength(3)]],
       fecha: [''],
@@ -76,6 +81,7 @@ export class UpdateNewsComponent implements DynamicComponent {
   }
 
   ngOnInit() {
+    this.loadExistingNews();
     if (this.initialData) {
       this.form.patchValue(this.initialData);
 
@@ -85,6 +91,44 @@ export class UpdateNewsComponent implements DynamicComponent {
         this.loadCurrentImage();
       }
     }
+  }
+
+  loadExistingNews(): void {
+    this.srv.get().subscribe({
+      next: (news) => {
+        this.existingNews = news || [];
+        // Actualizar validación después de cargar noticias
+        const titleControl = this.form.get('title');
+        if (titleControl && titleControl.value) {
+          titleControl.updateValueAndValidity();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading news:', error);
+      },
+    });
+  }
+
+  duplicateNameValidator(control: AbstractControl): Promise<ValidationErrors | null> {
+    return new Promise((resolve) => {
+      const title = control.value?.trim().toLowerCase();
+      if (!title) {
+        resolve(null);
+        return;
+      }
+
+      const isDuplicate = this.existingNews.some(
+        (news) =>
+          news.title?.trim().toLowerCase() === title &&
+          news.id !== this.id
+      );
+
+      if (isDuplicate) {
+        resolve({ duplicateName: true });
+      } else {
+        resolve(null);
+      }
+    });
   }
 
   private loadCurrentImage(): void {
@@ -227,10 +271,17 @@ export class UpdateNewsComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      const message = this.transloco.translate(
-        'notifications.news.error.formInvalid'
-      );
-      this.notificationSrv.addNotification(message, 'warning');
+      if (this.form.get('title')?.errors?.['duplicateName']) {
+        this.notificationSrv.addNotification(
+          this.transloco.translate('notifications.news.error.duplicateName'),
+          'warning'
+        );
+      } else {
+        const message = this.transloco.translate(
+          'notifications.news.error.formInvalid'
+        );
+        this.notificationSrv.addNotification(message, 'warning');
+      }
       this.form.markAllAsTouched();
       return;
     }
@@ -273,6 +324,7 @@ export class UpdateNewsComponent implements DynamicComponent {
         );
         this.notificationSrv.addNotification(message, 'success');
         this.submitSuccess.emit();
+        this.loadExistingNews();
 
         if (this.initialData?.onSave) {
           this.initialData.onSave();

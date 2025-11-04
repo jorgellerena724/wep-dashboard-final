@@ -84,6 +84,7 @@
         "loadImage": "Error loading multimedia file",
         "formInvalid": "Check the form fields.",
         "duplicateImage": "The image you are trying to upload is already on the server.",
+        "duplicateName": "A news with this name already exists.",
         "statusUpdate": "Error updating status.",
         "cannotDelete": "Cannot delete the product"
       }
