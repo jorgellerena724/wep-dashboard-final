@@ -59,7 +59,7 @@ export class CreateManagerComponent implements DynamicComponent {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       charge: ['', [Validators.required, Validators.minLength(3)]],
-      manager_category_id: [''],
+      manager_category: [''],
       description: [''],
       image: [''],
     });
@@ -73,7 +73,12 @@ export class CreateManagerComponent implements DynamicComponent {
 
   async ngOnInit() {
     if (this.initialData) {
-      this.form.patchValue(this.initialData);
+      // Handle both manager_category_id (from backend) and manager_category (form field)
+      const formData = { ...this.initialData };
+      if (formData.manager_category_id && !formData.manager_category) {
+        formData.manager_category = formData.manager_category_id;
+      }
+      this.form.patchValue(formData);
     }
 
     const initTasks = [this.fetchCategories()];
@@ -126,10 +131,12 @@ export class CreateManagerComponent implements DynamicComponent {
     formData.append('description', processedDescription);
 
     formData.append('charge', this.form.get('charge')?.value);
-    formData.append(
-      'manager_category_id',
-      this.form.get('manager_category')?.value
-    );
+
+    // Get manager_category value and ensure it's a valid number or not sent if empty
+    const categoryId = this.form.get('manager_category')?.value;
+    if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+      formData.append('manager_category_id', categoryId.toString());
+    }
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);

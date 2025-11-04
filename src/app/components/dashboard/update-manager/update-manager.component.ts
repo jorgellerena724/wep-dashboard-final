@@ -20,6 +20,8 @@ import { AppFileUploadComponent } from '../../../shared/components/app-file-uplo
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { ManagerService } from '../../../shared/services/features/manager.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
 
 @Component({
   selector: 'app-update-manager',
@@ -44,16 +46,19 @@ export class UpdateManagerComponent implements DynamicComponent {
   uploading = false;
   loadingImage = false;
   imageUrl: string | null = null;
+  categories: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private srv: ManagerService,
     private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private categorySrv: ManagerCategoryService
   ) {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       charge: ['', [Validators.required, Validators.minLength(3)]],
+      manager_category: [''],
       description: [''],
       image: [''],
     });
@@ -65,16 +70,27 @@ export class UpdateManagerComponent implements DynamicComponent {
     });
   }
 
-  ngOnInit() {
-    if (this.initialData) {
-      this.form.patchValue(this.initialData);
+  async ngOnInit() {
+    const initTasks = [this.fetchCategories()];
 
+    if (this.initialData) {
+      // Handle both manager_category_id (from backend) and manager_category (form field)
+      const formData = { ...this.initialData };
+      if (formData.manager_category?.id) {
+        formData.manager_category = formData.manager_category.id;
+      } else if (formData.manager_category_id && !formData.manager_category) {
+        formData.manager_category = formData.manager_category_id;
+      }
+
+      this.form.patchValue(formData);
       this.id = this.initialData.id;
 
       if (this.initialData.photo) {
         this.loadCurrentImage();
       }
     }
+
+    await Promise.all(initTasks);
   }
 
   private loadCurrentImage(): void {
@@ -157,6 +173,12 @@ export class UpdateManagerComponent implements DynamicComponent {
 
     formData.append('charge', this.form.get('charge')?.value);
 
+    // Get manager_category value and ensure it's a valid number or not sent if empty
+    const categoryId = this.form.get('manager_category')?.value;
+    if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+      formData.append('manager_category_id', categoryId.toString());
+    }
+
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
     } else if (this.imageUrl === null && this.initialData?.photo) {
@@ -237,6 +259,29 @@ export class UpdateManagerComponent implements DynamicComponent {
     });
 
     this.selectedFile = null;
+  }
+
+  fetchCategories(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.categorySrv.get().subscribe({
+        next: (data) => {
+          this.categories = data.map((com: any) => ({
+            value: com.id,
+            label: com.title,
+          }));
+          resolve();
+        },
+        error: (err) => {
+          this.notificationSrv.addNotification(
+            this.transloco.translate(
+              'notifications.publication-category.error.load'
+            ),
+            'error'
+          );
+          reject(err);
+        },
+      });
+    });
   }
 
   ngOnDestroy() {

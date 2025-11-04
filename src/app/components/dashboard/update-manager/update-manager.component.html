@@ -10,6 +10,19 @@
         minlength: ( 'components.managers.edit.fields.name.minlength' | transloco ),
       }"
     ></app-text-field>
+    <app-select
+      [placeholder]="
+        'components.publications.create.fields.category.title' | transloco
+      "
+      [options]="categories"
+      formControlName="manager_category"
+      [control]="form.get('manager_category')"
+      [errorMessages]="{
+        required: ( 'components.publications.create.fields.category.required' | transloco ),
+      }"
+    ></app-select>
+  </div>
+  <div class="mb-4 grid grid-cols-1 gap-4">
     <app-text-field
       id="charge"
       label="{{ 'components.managers.edit.fields.charge.title' | transloco }}"
