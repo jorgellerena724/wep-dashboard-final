@@ -98,7 +98,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   saveInformation(): void {
     this.userMenuOpen = false;
     
-    this.notificationService.addNotification('Generando backup...', 'info');
+    this.notificationService.addNotification(this.transloco.translate('navbar.backup.generating'), 'info');
     
     this.backupService.downloadBackup().subscribe({
       next: (blob: Blob) => {
@@ -120,12 +120,13 @@ export class NavbarComponent implements OnInit, OnChanges {
         // Limpiar URL temporal
         window.URL.revokeObjectURL(url);
         
-        this.notificationService.addNotification('Backup descargado exitosamente', 'success');
+        this.notificationService.addNotification(this.transloco.translate('navbar.backup.download_success'), 'success');
       },
       error: (error) => {
         console.error('Error al descargar backup:', error);
-        const errorMessage = error?.error?.detail || error?.message || 'Error al descargar el backup';
-        this.notificationService.addNotification(`Error al descargar backup: ${errorMessage}`, 'error');
+        const errorMessage = error?.error?.detail || error?.message || this.transloco.translate('navbar.backup.download_error');
+        const translatedMessage = this.transloco.translate('navbar.backup.download_error_message', { message: errorMessage });
+        this.notificationService.addNotification(translatedMessage, 'error');
       }
     });
   }
@@ -146,23 +147,22 @@ export class NavbarComponent implements OnInit, OnChanges {
       
       // Verificar que es un archivo ZIP
       if (!file.name.endsWith('.zip')) {
-        this.notificationService.addNotification('Por favor seleccione un archivo ZIP', 'error');
+        this.notificationService.addNotification(this.transloco.translate('navbar.backup.invalid_file'), 'error');
         return;
       }
       
       // Confirmar antes de restaurar
-      const confirmMessage = this.transloco.translate('navbar.confirm_restore') || 
-        '¿Está seguro de que desea restaurar el backup? Esto sobreescribirá la base de datos y la carpeta uploads actuales.';
+      const confirmMessage = this.transloco.translate('navbar.confirm_restore');
       
       if (!confirm(confirmMessage)) {
         return;
       }
       
-      this.notificationService.addNotification('Restaurando backup...', 'info');
+      this.notificationService.addNotification(this.transloco.translate('navbar.backup.restoring'), 'info');
       
       this.backupService.restoreBackup(file).subscribe({
         next: (response) => {
-          this.notificationService.addNotification('Backup restaurado exitosamente. Por favor, recargue la página.', 'success');
+          this.notificationService.addNotification(this.transloco.translate('navbar.backup.restore_success'), 'success');
           
           // Recargar la página después de 2 segundos
           setTimeout(() => {
@@ -171,8 +171,9 @@ export class NavbarComponent implements OnInit, OnChanges {
         },
         error: (error) => {
           console.error('Error al restaurar backup:', error);
-          const errorMessage = error?.error?.detail || error?.message || 'Error al restaurar el backup';
-          this.notificationService.addNotification(`Error al restaurar backup: ${errorMessage}`, 'error');
+          const errorMessage = error?.error?.detail || error?.message || this.transloco.translate('navbar.backup.restore_error');
+          const translatedMessage = this.transloco.translate('navbar.backup.restore_error_message', { message: errorMessage });
+          this.notificationService.addNotification(translatedMessage, 'error');
         }
       });
     };

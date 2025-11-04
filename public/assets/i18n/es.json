@@ -252,6 +252,21 @@
     "changepass": "Cambiar contraseña",
     "name": "Nombre",
     "client": "Cliente",
+    "save_information": "Salvar información",
+    "restore_information": "Restaurar información",
+    "backup": {
+      "generating": "Generando backup...",
+      "download_success": "Backup descargado exitosamente",
+      "download_error": "Error al descargar backup",
+      "download_error_message": "Error al descargar backup: {{message}}",
+      "restore_confirm": "¿Está seguro de que desea restaurar el backup? Esto sobreescribirá la base de datos y la carpeta uploads actuales.",
+      "restoring": "Restaurando backup...",
+      "restore_success": "Backup restaurado exitosamente. Por favor, recargue la página.",
+      "restore_error": "Error al restaurar el backup",
+      "restore_error_message": "Error al restaurar backup: {{message}}",
+      "invalid_file": "Por favor seleccione un archivo ZIP"
+    },
+    "confirm_restore": "¿Está seguro de que desea restaurar el backup? Esto sobreescribirá la base de datos y la carpeta uploads actuales.",
     "mobile": {
       "admin": "Administración",
       "header": "Encabezado",

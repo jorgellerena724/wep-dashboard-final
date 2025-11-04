@@ -252,6 +252,21 @@
     "changepass": "Change password",
     "name": "Name",
     "client": "Client",
+    "save_information": "Save information",
+    "restore_information": "Restore information",
+    "backup": {
+      "generating": "Generating backup...",
+      "download_success": "Backup downloaded successfully",
+      "download_error": "Error downloading backup",
+      "download_error_message": "Error downloading backup: {{message}}",
+      "restore_confirm": "Are you sure you want to restore the backup? This will overwrite the current database and uploads folder.",
+      "restoring": "Restoring backup...",
+      "restore_success": "Backup restored successfully. Please reload the page.",
+      "restore_error": "Error restoring backup",
+      "restore_error_message": "Error restoring backup: {{message}}",
+      "invalid_file": "Please select a ZIP file"
+    },
+    "confirm_restore": "Are you sure you want to restore the backup? This will overwrite the current database and uploads folder.",
     "mobile": {
       "admin": "Administration",
       "header": "Header",
