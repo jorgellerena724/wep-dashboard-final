@@ -33,6 +33,7 @@ import { ManagerCategoryService } from '../../../shared/services/features/manage
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    SelectComponent,
   ],
 })
 export class UpdateManagerComponent implements DynamicComponent {
