@@ -1,0 +1,29 @@
+<!-- create-manager-category.component.html -->
+<form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
+  <div class="mb-4 grid">
+    <app-text-field
+      id="title"
+      label="{{
+        'components.manager-category.create.fields.name.title' | transloco
+      }}"
+      [control]="form.get('title')"
+      [errorMessages]="{
+        required: ( 'components.manager-category.create.fields.name.required' | transloco ),
+        minlength: ( 'components.manager-category.create.fields.name.minlength' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
+  <hr class="border-gray-500 my-1 border-opacity-10" />
+</form>
+<style>
+  /* Estilos para override de PrimeNG */
+  :host ::ng-deep .p-fileupload-content {
+    display: none !important;
+  }
+  :host ::ng-deep app-file-upload label {
+    font-weight: bold !important;
+    color: black !important;
+    font-size: 14px;
+  }
+</style>
+

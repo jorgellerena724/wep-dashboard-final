@@ -15,10 +15,9 @@ import {
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { icons } from '../../../core/constants/icons.constant';
 import { HomeData } from '../../../shared/interfaces/home.interface';
-import { CreatePublicationCategoryComponent } from '../create-publication-category/create-publication-category.component';
-import { UpdatePublicationCategoryComponent } from '../update-publication-category/update-publication-category.component';
+import { CreateManagerCategoryComponent } from '../create-manager-category/create-manager-category.component';
+import { UpdateManagerCategoryComponent } from '../update-manager-category/update-manager-category.component';
 import { ConfirmDialogService } from '../../../shared/services/system/confirm-dialog.service';
-import { PublicationCategoryService } from '../../../shared/services/features/publication-category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { combineLatest, Subscription, take } from 'rxjs';
 import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
@@ -73,7 +72,7 @@ export class ListManagerCategoryComponent implements OnInit {
     // Suscribirse a los cambios de idioma para actualizar las columnas
     const columnsTranslation$ = combineLatest([
       this.transloco.selectTranslate(
-        'components.publication-category.list.table.name'
+        'components.manager-category.list.table.name'
       ),
     ]);
 
@@ -132,7 +131,7 @@ export class ListManagerCategoryComponent implements OnInit {
       error: (error) => {
         this.notificationSrv.addNotification(
           this.transloco.translate(
-            'notifications.publication-category.error.load'
+            'notifications.manager-category.error.load'
           ),
           'error'
         );
@@ -147,12 +146,12 @@ export class ListManagerCategoryComponent implements OnInit {
 
   create() {
     this.transloco
-      .selectTranslate('components.publication-category.create.title')
+      .selectTranslate('components.manager-category.create.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
           title: translatedTitle,
-          component: CreatePublicationCategoryComponent,
+          component: CreateManagerCategoryComponent,
           data: {
             initialData: {
               onSave: () => {
@@ -167,12 +166,12 @@ export class ListManagerCategoryComponent implements OnInit {
 
   edit(data: any) {
     this.transloco
-      .selectTranslate('components.publication-category.edit.title')
+      .selectTranslate('components.manager-category.edit.title')
       .pipe(take(1))
       .subscribe((translatedTitle) => {
         const modalConfig: ModalConfig = {
           title: translatedTitle,
-          component: UpdatePublicationCategoryComponent,
+          component: UpdateManagerCategoryComponent,
           data: {
             initialData: {
               ...data,
@@ -189,16 +188,16 @@ export class ListManagerCategoryComponent implements OnInit {
   async delete(data: any) {
     const deleteTranslation$ = combineLatest([
       this.transloco.selectTranslate(
-        'components.publication-category.delete.title'
+        'components.manager-category.delete.title'
       ),
       this.transloco.selectTranslate(
-        'components.publication-category.delete.message'
+        'components.manager-category.delete.message'
       ),
       this.transloco.selectTranslate(
-        'components.publication-category.delete.confirm'
+        'components.manager-category.delete.confirm'
       ),
       this.transloco.selectTranslate(
-        'components.publication-category.delete.cancel'
+        'components.manager-category.delete.cancel'
       ),
     ]).pipe(take(1));
 
@@ -223,7 +222,7 @@ export class ListManagerCategoryComponent implements OnInit {
               this.loadData();
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.publication-category.success.deleted'
+                  'notifications.manager-category.success.deleted'
                 ),
                 'success'
               );
@@ -242,7 +241,7 @@ export class ListManagerCategoryComponent implements OnInit {
               } else {
                 this.notificationSrv.addNotification(
                   this.transloco.translate(
-                    'notifications.publication-category.error.delete'
+                    'notifications.manager-category.error.delete'
                   ),
                   'error'
                 );
