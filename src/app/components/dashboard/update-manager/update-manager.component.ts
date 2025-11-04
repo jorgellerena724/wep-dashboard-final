@@ -11,7 +11,12 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
+import { map, catchError } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
@@ -74,24 +79,38 @@ export class UpdateManagerComponent implements DynamicComponent {
   async ngOnInit() {
     const initTasks = [this.fetchCategories()];
 
+    // Agregar el validador asíncrono después de inicializar
+    this.form.get('title')?.setAsyncValidators([this.uniqueNameValidator()]);
+
     if (this.initialData) {
       // Handle both manager_category_id (from backend) and manager_category (form field)
       const formData = { ...this.initialData };
+      
+      // Determinar el valor de la categoría
       if (formData.manager_category?.id) {
+        // Si tiene un objeto manager_category con id
         formData.manager_category = formData.manager_category.id;
-      } else if (formData.manager_category_id && !formData.manager_category) {
+      } else if (formData.manager_category_id !== null && formData.manager_category_id !== undefined && formData.manager_category_id !== '') {
+        // Si tiene manager_category_id directo
         formData.manager_category = formData.manager_category_id;
+      } else {
+        // No tiene categoría (null, undefined, o vacío)
+        formData.manager_category = null;
       }
 
-      this.form.patchValue(formData);
       this.id = this.initialData.id;
+      
+      // Esperar a que las categorías se carguen antes de hacer patchValue
+      await Promise.all(initTasks);
+      
+      this.form.patchValue(formData);
 
       if (this.initialData.photo) {
         this.loadCurrentImage();
       }
+    } else {
+      await Promise.all(initTasks);
     }
-
-    await Promise.all(initTasks);
   }
 
   private loadCurrentImage(): void {
@@ -174,11 +193,33 @@ export class UpdateManagerComponent implements DynamicComponent {
 
     formData.append('charge', this.form.get('charge')?.value);
 
-    // Get manager_category value and ensure it's a valid number or not sent if empty
+    // Get manager_category value and ensure it's a valid number or not sent if empty/null
     const categoryId = this.form.get('manager_category')?.value;
-    if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+    const hadCategoryBefore = this.initialData?.manager_category_id || this.initialData?.manager_category?.id;
+    
+    // Verificar si queremos remover la categoría
+    const wantsToRemoveCategory = hadCategoryBefore && (
+      categoryId === null ||
+      categoryId === undefined ||
+      categoryId === '' ||
+      categoryId === 'null'
+    );
+    
+    if (wantsToRemoveCategory) {
+      // Si tenía categoría y ahora queremos removerla, usar el campo especial
+      formData.append('remove_manager_category', 'true');
+    } else if (
+      categoryId !== null &&
+      categoryId !== undefined &&
+      categoryId !== '' &&
+      categoryId !== 'null' &&
+      !isNaN(Number(categoryId)) &&
+      Number(categoryId) > 0
+    ) {
+      // Si tiene un valor válido, enviar el ID de la categoría
       formData.append('manager_category_id', categoryId.toString());
     }
+    // Si no tenía categoría y sigue sin tenerla, no enviamos ningún campo
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
@@ -262,14 +303,40 @@ export class UpdateManagerComponent implements DynamicComponent {
     this.selectedFile = null;
   }
 
+  uniqueNameValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      const name = control.value.trim().toLowerCase();
+      const currentManagerId = this.id;
+
+      return this.srv.get().pipe(
+        map((managers: any[]) => {
+          const exists = managers.some(
+            (manager) =>
+              manager.title?.toLowerCase() === name &&
+              manager.id !== currentManagerId
+          );
+          return exists ? { uniqueName: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
   fetchCategories(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.categorySrv.get().subscribe({
         next: (data) => {
-          this.categories = data.map((com: any) => ({
-            value: com.id,
-            label: com.title,
-          }));
+          this.categories = [
+            { value: null, label: 'Sin categoría' },
+            ...data.map((com: any) => ({
+              value: com.id,
+              label: com.title,
+            })),
+          ];
           resolve();
         },
         error: (err) => {

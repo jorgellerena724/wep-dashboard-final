@@ -11,7 +11,12 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
+import { map, catchError } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
@@ -57,7 +62,11 @@ export class CreateManagerComponent implements DynamicComponent {
     private categorySrv: ManagerCategoryService
   ) {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
+      title: [
+        '',
+        [Validators.required, Validators.minLength(3)],
+        [this.uniqueNameValidator()],
+      ],
       charge: ['', [Validators.required, Validators.minLength(3)]],
       manager_category: [''],
       description: [''],
@@ -132,9 +141,14 @@ export class CreateManagerComponent implements DynamicComponent {
 
     formData.append('charge', this.form.get('charge')?.value);
 
-    // Get manager_category value and ensure it's a valid number or not sent if empty
+    // Get manager_category value and ensure it's a valid number or not sent if empty/null
     const categoryId = this.form.get('manager_category')?.value;
-    if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+    if (
+      categoryId !== null &&
+      categoryId !== undefined &&
+      categoryId !== '' &&
+      categoryId !== 'null'
+    ) {
       formData.append('manager_category_id', categoryId.toString());
     }
 
@@ -217,14 +231,37 @@ export class CreateManagerComponent implements DynamicComponent {
     this.selectedFile = null;
   }
 
+  uniqueNameValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (!control.value || control.value.trim() === '') {
+        return of(null);
+      }
+
+      const name = control.value.trim().toLowerCase();
+
+      return this.srv.get().pipe(
+        map((managers: any[]) => {
+          const exists = managers.some(
+            (manager) => manager.title?.toLowerCase() === name
+          );
+          return exists ? { uniqueName: true } : null;
+        }),
+        catchError(() => of(null))
+      );
+    };
+  }
+
   fetchCategories(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.categorySrv.get().subscribe({
         next: (data) => {
-          this.categories = data.map((com: any) => ({
-            value: com.id,
-            label: com.title,
-          }));
+          this.categories = [
+            { value: null, label: 'Sin categoría' },
+            ...data.map((com: any) => ({
+              value: com.id,
+              label: com.title,
+            })),
+          ];
           resolve();
         },
         error: (err) => {

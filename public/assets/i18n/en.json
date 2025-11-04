@@ -356,7 +356,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "image": {
             "title": "Company logo",
@@ -391,7 +392,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "description": {
             "title": "Description",
@@ -430,7 +432,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "_date": {
             "title": "Date",
@@ -461,7 +464,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "_date": {
             "title": "Date",
@@ -510,7 +514,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "description": {
             "title": "Description",
@@ -548,7 +553,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "charge": {
             "title": "Charge",
@@ -581,7 +587,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "charge": {
             "title": "Charge",
@@ -630,7 +637,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "description": {
             "title": "Description",
@@ -657,7 +665,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "description": {
             "title": "Description",
@@ -742,7 +751,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "price": {
             "title": "Price"
@@ -792,7 +802,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "price": {
             "title": "Price"
@@ -930,7 +941,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "category": {
             "title": "Category",
@@ -965,7 +977,8 @@
             "title": "Name",
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
-            "maxlength": "Name must be up to 20 characters"
+            "maxlength": "Name must be up to 20 characters",
+            "uniqueName": "A manager with this name already exists"
           },
           "category": {
             "title": "Category",

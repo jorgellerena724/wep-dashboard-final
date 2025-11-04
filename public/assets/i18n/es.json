@@ -356,7 +356,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "image": {
             "title": "Logo de la empresa",
@@ -384,7 +385,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "description": {
             "title": "Descripción",
@@ -423,7 +425,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "_date": {
             "title": "Fecha",
@@ -447,7 +450,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "_date": {
             "title": "Fecha",
@@ -489,7 +493,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "description": {
             "title": "Descripción",
@@ -527,7 +532,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "charge": {
             "title": "Cargo",
@@ -560,7 +566,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "charge": {
             "title": "Cargo",
@@ -609,7 +616,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "description": {
             "title": "Descripción",
@@ -636,7 +644,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "description": {
             "title": "Descripción",
@@ -925,7 +934,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "category": {
             "title": "Categoría",
@@ -960,7 +970,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "category": {
             "title": "Categoría",
@@ -1077,7 +1088,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 3 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "uniqueName": "Ya existe un directivo con este nombre"
           },
           "email": {
             "title": "Correo",
