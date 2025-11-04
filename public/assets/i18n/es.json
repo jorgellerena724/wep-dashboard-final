@@ -730,7 +730,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 2 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "duplicateTitle": "Ya existe un producto con este nombre"
           },
           "calurl": {
             "title": "Link para agendar citas",
@@ -788,7 +789,8 @@
             "title": "Nombre",
             "required": "El nombre es requerido",
             "minlength": "El nombre debe tener al menos 2 caracteres",
-            "maxlength": "El nombre debe tener hasta 20 caracteres"
+            "maxlength": "El nombre debe tener hasta 20 caracteres",
+            "duplicateTitle": "Ya existe un producto con este nombre"
           },
           "calurl": {
             "title": "Link para agendar citas",

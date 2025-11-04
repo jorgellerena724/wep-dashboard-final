@@ -15,6 +15,9 @@ import {
   ReactiveFormsModule,
   FormArray,
   FormControl,
+  AbstractControl,
+  ValidationErrors,
+  AsyncValidatorFn,
 } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -27,6 +30,8 @@ import { SelectComponent } from '../../../shared/components/app-select/app-selec
 import { ProductService } from '../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface ProductVariant {
   description: string;
@@ -64,6 +69,7 @@ export class UpdateProductComponent implements DynamicComponent {
   id: number;
   form: FormGroup;
   categories: any[] = [];
+  products: any[] = [];
   uploading = false;
   loadingImage = false;
   showCalUrlField = false;
@@ -121,8 +127,11 @@ export class UpdateProductComponent implements DynamicComponent {
       }
     }
 
-    const initTasks = [this.fetchCategories()];
+    const initTasks = [this.fetchCategories(), this.fetchProducts()];
     await Promise.all(initTasks);
+
+    // Agregar el validador asíncrono después de inicializar
+    this.form.get('title')?.setAsyncValidators([this.uniqueTitleValidator()]);
   }
 
   // Cargar archivos existentes desde los datos del producto
@@ -529,6 +538,53 @@ export class UpdateProductComponent implements DynamicComponent {
         },
       });
     });
+  }
+
+  fetchProducts(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.srv.get().subscribe({
+        next: (data) => {
+          this.products = data || [];
+          resolve();
+        },
+        error: (err) => {
+          // Silently fail - validation will work without preloaded data
+          this.products = [];
+          resolve();
+        },
+      });
+    });
+  }
+
+  uniqueTitleValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const title = control.value?.trim().toLowerCase();
+      
+      if (!title || title.length < 2) {
+        return of(null);
+      }
+
+      return this.srv.get().pipe(
+        map((products: any[]) => {
+          // Exclude current product from the check
+          const exists = products.some(
+            (product: any) =>
+              product.id !== this.id &&
+              product.title?.trim().toLowerCase() === title
+          );
+          return exists ? { duplicateTitle: true } : null;
+        }),
+        catchError(() => {
+          // Fallback to local products array if API call fails
+          const exists = this.products.some(
+            (product: any) =>
+              product.id !== this.id &&
+              product.title?.trim().toLowerCase() === title
+          );
+          return of(exists ? { duplicateTitle: true } : null);
+        })
+      );
+    };
   }
 
   onFileError(error: FileUploadError): void {

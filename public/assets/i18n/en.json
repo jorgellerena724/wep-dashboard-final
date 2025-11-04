@@ -752,7 +752,8 @@
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
             "maxlength": "Name must be up to 20 characters",
-            "uniqueName": "A manager with this name already exists"
+            "uniqueName": "A manager with this name already exists",
+            "duplicateTitle": "A product with this name already exists"
           },
           "price": {
             "title": "Price"
@@ -803,7 +804,8 @@
             "required": "Name is required",
             "minlength": "Name must be at least 3 characters",
             "maxlength": "Name must be up to 20 characters",
-            "uniqueName": "A manager with this name already exists"
+            "uniqueName": "A manager with this name already exists",
+            "duplicateTitle": "A product with this name already exists"
           },
           "price": {
             "title": "Price"
