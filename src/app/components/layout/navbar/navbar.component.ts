@@ -249,6 +249,7 @@ export class NavbarComponent implements OnInit, OnChanges {
     const currentUrl = this.router.url;
     return (
       currentUrl.includes('/company') ||
+      currentUrl.includes('/manager-category') ||
       currentUrl.includes('/managers') ||
       currentUrl.includes('/reviews')
     );
