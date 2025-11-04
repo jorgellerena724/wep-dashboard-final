@@ -238,9 +238,11 @@ export class UpdateNewsComponent implements DynamicComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
+    // Siempre enviar fecha: si está vacía, enviar cadena vacía para indicar que se debe eliminar
     const rawFecha = this.form.get('fecha')?.value;
-    const fechaValue = (rawFecha ?? '').toString().trim();
-    formData.append('fecha', fechaValue.length > 0 ? fechaValue : '');
+    const fechaValue = rawFecha ? rawFecha.toString().trim() : '';
+    // Siempre enviar el campo fecha, incluso si está vacío (para poder eliminar la fecha)
+    formData.append('fecha', fechaValue);
 
     // Preservar saltos de línea en la descripción
     const description = this.form.get('description')?.value;

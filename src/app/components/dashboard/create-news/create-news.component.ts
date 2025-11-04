@@ -167,9 +167,12 @@ export class CreateNewsComponent implements DynamicComponent {
       .replace(/\s+$/, '');
     formData.append('description', processedDescription);
 
+    // Solo agregar fecha si tiene un valor válido
     const rawFecha = this.form.get('fecha')?.value;
-    const fechaValue = (rawFecha ?? '').toString().trim();
-    formData.append('fecha', fechaValue.length > 0 ? fechaValue : '');
+    const fechaValue = rawFecha ? rawFecha.toString().trim() : '';
+    if (fechaValue.length > 0) {
+      formData.append('fecha', fechaValue);
+    }
 
     if (this.selectedFile) {
       formData.append('photo', this.selectedFile, this.selectedFile.name);
