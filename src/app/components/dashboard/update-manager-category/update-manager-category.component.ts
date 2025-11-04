@@ -11,6 +11,8 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
@@ -18,6 +20,7 @@ import { TextFieldComponent } from '../../../shared/components/app-text-field/ap
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { HomeData } from '../../../shared/interfaces/home.interface';
 
 @Component({
   selector: 'app-update-manager-category',
@@ -37,6 +40,7 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
   @Output() submitSuccess = new EventEmitter<void>();
   id: number;
   form: FormGroup;
+  existingCategories: HomeData[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +55,7 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
           Validators.required,
           Validators.minLength(3),
         ],
+        [this.duplicateNameValidator.bind(this)],
       ],
     });
 
@@ -62,19 +67,64 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
   }
 
   ngOnInit() {
+    this.loadExistingCategories();
     if (this.initialData) {
       this.form.patchValue(this.initialData);
-
       this.id = this.initialData.id;
     }
   }
 
+  loadExistingCategories(): void {
+    this.srv.get().subscribe({
+      next: (categories) => {
+        this.existingCategories = categories || [];
+        // Actualizar validación después de cargar categorías
+        const titleControl = this.form.get('title');
+        if (titleControl && titleControl.value) {
+          titleControl.updateValueAndValidity();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+      },
+    });
+  }
+
+  duplicateNameValidator(control: AbstractControl): Promise<ValidationErrors | null> {
+    return new Promise((resolve) => {
+      const title = control.value?.trim().toLowerCase();
+      if (!title) {
+        resolve(null);
+        return;
+      }
+
+      const isDuplicate = this.existingCategories.some(
+        (category) =>
+          category.title?.trim().toLowerCase() === title &&
+          category.id !== this.id
+      );
+
+      if (isDuplicate) {
+        resolve({ duplicateName: true });
+      } else {
+        resolve(null);
+      }
+    });
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.manager-category.error.formInvalid'),
-        'warning'
-      );
+      if (this.form.get('title')?.errors?.['duplicateName']) {
+        this.notificationSrv.addNotification(
+          this.transloco.translate('notifications.manager-category.error.duplicateName'),
+          'warning'
+        );
+      } else {
+        this.notificationSrv.addNotification(
+          this.transloco.translate('notifications.manager-category.error.formInvalid'),
+          'warning'
+        );
+      }
       this.form.markAllAsTouched();
       return;
     }
@@ -89,6 +139,7 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
           'success'
         );
         this.submitSuccess.emit();
+        this.loadExistingCategories();
 
         if (this.initialData?.onSave) {
           this.initialData.onSave();
