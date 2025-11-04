@@ -134,6 +134,20 @@
         "duplicateImage": "The image you are trying to upload is already on the server."
       }
     },
+    "manager-category": {
+      "success": {
+        "created": "Category registered successfully.",
+        "updated": "Category updated successfully.",
+        "deleted": "Category deleted successfully."
+      },
+      "error": {
+        "create": "Error registering category.",
+        "update": "Error updating category.",
+        "delete": "Error deleting category.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields."
+      }
+    },
     "categories": {
       "success": {
         "created": "Category registered successfully.",
@@ -813,6 +827,42 @@
     "publication-category": {
       "list": {
         "title": "Publication categories",
+        "table": {
+          "name": "Name"
+        }
+      },
+      "create": {
+        "title": "Register category",
+        "fields": {
+          "name": {
+            "title": "Name",
+            "required": "Name is required",
+            "minlength": "Name must be at least 3 characters",
+            "maxlength": "Name must be up to 20 characters"
+          }
+        }
+      },
+      "edit": {
+        "title": "Edit category",
+        "fields": {
+          "name": {
+            "title": "Name",
+            "required": "Name is required",
+            "minlength": "Name must be at least 3 characters",
+            "maxlength": "Name must be up to 20 characters"
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete element?",
+        "message": "Are you sure you want to delete this element? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "manager-category": {
+      "list": {
+        "title": "Manager categories",
         "table": {
           "name": "Name"
         }

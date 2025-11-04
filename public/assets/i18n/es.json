@@ -134,6 +134,20 @@
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
       }
     },
+    "manager-category": {
+      "success": {
+        "created": "Categoría registrada correctamente.",
+        "updated": "Categoría actualizada correctamente.",
+        "deleted": "Categoría eliminada satisfactoriamente."
+      },
+      "error": {
+        "create": "Error al registrar la categoría.",
+        "update": "Error al actualizar la categoría.",
+        "delete": "Error al eliminar la categoría.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario."
+      }
+    },
     "categories": {
       "success": {
         "created": "Categoría registrada correctamente.",
@@ -808,6 +822,42 @@
     "publication-category": {
       "list": {
         "title": "Categorías de publicaciones",
+        "table": {
+          "name": "Nombre"
+        }
+      },
+      "create": {
+        "title": "Registrar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar categoría",
+        "fields": {
+          "name": {
+            "title": "Nombre",
+            "required": "El nombre es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres",
+            "maxlength": "El nombre debe tener hasta 20 caracteres"
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar elemento?",
+        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "manager-category": {
+      "list": {
+        "title": "Categorías de directivos",
         "table": {
           "name": "Nombre"
         }
