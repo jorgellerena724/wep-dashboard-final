@@ -25,6 +25,7 @@ import {
   SidebarMenuItemComponent,
   MenuItem,
 } from './sidebar-menu-item.component';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-sidebar',
@@ -34,6 +35,7 @@ import {
     NavbarComponent,
     TranslocoModule,
     SidebarMenuItemComponent,
+    TooltipModule,
   ],
   templateUrl: './sidebar.component.html',
 })
