@@ -74,7 +74,8 @@
         "created": "Novedad registrada correctamente.",
         "updated": "Novedad actualizada correctamente.",
         "deleted": "Novedad eliminada satisfactoriamente.",
-        "statusUpdated": "Estado actualizado"
+        "statusUpdated": "Estado actualizado",
+        "orderUpdated": "Orden actualizado correctamente"
       },
       "error": {
         "create": "Error al registrar la novedad.",
@@ -86,6 +87,7 @@
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor.",
         "duplicateName": "Ya existe una novedad con este nombre.",
         "statusUpdate": "Error al actualizar el estado.",
+        "orderUpdate": "Error al actualizar el orden",
         "cannotDelete": "No se puede eliminar el producto"
       }
     },
@@ -1157,7 +1159,9 @@
       "changePassword": "Cambiar contraseña",
       "delete": "Eliminar",
       "disable": "Desactivar Estado",
-      "enable": "Activar Estado"
+      "enable": "Activar Estado",
+      "moveUp": "Subir",
+      "moveDown": "Bajar"
     },
     "search": "Buscar...",
     "nodata": "No se encontraron registros.",

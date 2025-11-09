@@ -5,4 +5,5 @@ export interface HomeData {
   version: number;
   photo: string;
   status: boolean;
+  order?: number;
 }

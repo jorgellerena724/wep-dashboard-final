@@ -88,6 +88,8 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.transloco.selectTranslate('table.buttons.enable'),
       this.transloco.selectTranslate('status.active'),
       this.transloco.selectTranslate('status.inactive'),
+      this.transloco.selectTranslate('table.buttons.moveUp'),
+      this.transloco.selectTranslate('table.buttons.moveDown'),
     ]);
 
     const setupSubscription = allTranslations$.subscribe(
@@ -104,6 +106,8 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         enableTranslation,
         activeStatusTranslation,
         inactiveStatusTranslation,
+        moveUpTranslation,
+        moveDownTranslation,
       ]) => {
         // Asignar traducciones de estado y limpiar espacios
         this.activeStatus = activeStatusTranslation.trim();
@@ -130,6 +134,26 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Configurar acciones de fila
         this.rowActions = [
+          {
+            label: moveUpTranslation,
+            icon: 'pi pi-chevron-up',
+            onClick: (data) => this.moveNewsUp(data),
+            class: buttonVariants.outline.neutral,
+            isDisabled: (data: any) => {
+              const index = this.data.findIndex((item) => item.id === data.id);
+              return index === 0; // Deshabilitar si es el primer elemento
+            },
+          },
+          {
+            label: moveDownTranslation,
+            icon: 'pi pi-chevron-down',
+            onClick: (data) => this.moveNewsDown(data),
+            class: buttonVariants.outline.neutral,
+            isDisabled: (data: any) => {
+              const index = this.data.findIndex((item) => item.id === data.id);
+              return index === this.data.length - 1; // Deshabilitar si es el último elemento
+            },
+          },
           {
             label: editTranslation,
             icon: icons['edit'],
@@ -167,6 +191,7 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loading = true;
     this.srv.get().subscribe({
       next: (data: HomeData[]) => {
+        console.log('📥 Datos recibidos del servidor:', data.map(item => ({ id: item.id, title: item.title, order: item.order })));
         this.data = data.map((item: any) => ({
           ...item,
           // Usar las propiedades con las traducciones de estado
@@ -333,6 +358,107 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     );
     this.subscriptions.push(deleteActionsSubscription);
+  }
+
+  moveNewsUp(data: any) {
+    console.log('🔼 MOVE UP - Elemento clickeado:', { id: data.id, title: data.title, order: data.order });
+    
+    const currentIndex = this.data.findIndex((item) => item.id === data.id);
+    console.log('  Índice en el array completo:', currentIndex, '/ Total elementos:', this.data.length);
+    
+    if (currentIndex === 0) {
+      console.log('  ⚠️ Ya es el primer elemento, no se puede subir más');
+      return; // Ya es la primera
+    }
+
+    const currentItem = this.data[currentIndex];
+    const previousItem = this.data[currentIndex - 1];
+
+    // Obtener los valores de order actuales (usar índice como fallback si order es undefined)
+    const currentOrder = currentItem.order ?? currentIndex;
+    const previousOrder = previousItem.order ?? (currentIndex - 1);
+
+    console.log('  Current Item:', { id: currentItem.id, title: currentItem.title, order: currentOrder, index: currentIndex });
+    console.log('  Previous Item:', { id: previousItem.id, title: previousItem.title, order: previousOrder, index: currentIndex - 1 });
+
+    // Intercambiar posiciones en el array local
+    this.data[currentIndex] = previousItem;
+    this.data[currentIndex - 1] = currentItem;
+
+    console.log('  Enviando al backend:');
+    console.log('    Item', currentItem.id, '(', currentItem.title, ') -> order:', previousOrder);
+    console.log('    Item', previousItem.id, '(', previousItem.title, ') -> order:', currentOrder);
+
+    // Actualizar el orden en el backend: el elemento actual recibe el order menor (del anterior)
+    // y el anterior recibe el order mayor (del actual)
+    this.updateBothNewsOrder(currentItem.id, previousOrder, previousItem.id, currentOrder);
+  }
+
+  moveNewsDown(data: any) {
+    console.log('🔽 MOVE DOWN - Elemento clickeado:', { id: data.id, title: data.title, order: data.order });
+    
+    const currentIndex = this.data.findIndex((item) => item.id === data.id);
+    console.log('  Índice en el array completo:', currentIndex, '/ Total elementos:', this.data.length);
+    
+    if (currentIndex === this.data.length - 1) {
+      console.log('  ⚠️ Ya es el último elemento, no se puede bajar más');
+      return; // Ya es la última
+    }
+
+    const currentItem = this.data[currentIndex];
+    const nextItem = this.data[currentIndex + 1];
+
+    // Obtener los valores de order actuales (usar índice como fallback si order es undefined)
+    const currentOrder = currentItem.order ?? currentIndex;
+    const nextOrder = nextItem.order ?? (currentIndex + 1);
+
+    console.log('  Current Item:', { id: currentItem.id, title: currentItem.title, order: currentOrder, index: currentIndex });
+    console.log('  Next Item:', { id: nextItem.id, title: nextItem.title, order: nextOrder, index: currentIndex + 1 });
+
+    // Intercambiar posiciones en el array local
+    this.data[currentIndex] = nextItem;
+    this.data[currentIndex + 1] = currentItem;
+
+    console.log('  Enviando al backend:');
+    console.log('    Item', currentItem.id, '(', currentItem.title, ') -> order:', nextOrder);
+    console.log('    Item', nextItem.id, '(', nextItem.title, ') -> order:', currentOrder);
+
+    // Actualizar el orden en el backend: el elemento actual recibe el order mayor (del siguiente)
+    // y el siguiente recibe el order menor (del actual)
+    this.updateBothNewsOrder(currentItem.id, nextOrder, nextItem.id, currentOrder);
+  }
+
+  private updateBothNewsOrder(id1: number, order1: number, id2: number, order2: number) {
+    console.log('📡 Actualizando orden en el backend:');
+    console.log('  ID:', id1, '-> Order:', order1);
+    console.log('  ID:', id2, '-> Order:', order2);
+
+    // Actualizar ambas noticias en paralelo
+    const update1$ = this.srv.updateOrder(id1, order1);
+    const update2$ = this.srv.updateOrder(id2, order2);
+
+    // Esperar a que ambas actualizaciones terminen
+    combineLatest([update1$, update2$]).subscribe({
+      next: (responses) => {
+        console.log('✅ Respuestas del backend:', responses);
+        console.log('🔄 Recargando datos...');
+        // Recargar los datos para asegurar que el orden es correcto
+        this.onRefresh();
+        // Notificación de éxito con traducción
+        this.translateAndNotify('notifications.news.success.orderUpdated', 'success');
+      },
+      error: (error) => {
+        console.error('❌ Error al actualizar orden:', error);
+        // Si hay error, recargar los datos para restaurar el orden correcto
+        this.onRefresh();
+        if (error?.error?.message && error.error?.statusCode === 400) {
+          this.notificationSrv.addNotification(error.error.message, 'error');
+        } else {
+          // Notificación de error genérico con traducción
+          this.translateAndNotify('notifications.news.error.orderUpdate', 'error');
+        }
+      },
+    });
   }
 
   /**

@@ -74,7 +74,8 @@
         "created": "News registered successfully.",
         "updated": "News updated successfully.",
         "deleted": "News deleted successfully.",
-        "statusUpdated": "Status updated"
+        "statusUpdated": "Status updated",
+        "orderUpdated": "Order updated successfully"
       },
       "error": {
         "create": "Error registering news.",
@@ -86,6 +87,7 @@
         "duplicateImage": "The image you are trying to upload is already on the server.",
         "duplicateName": "A news with this name already exists.",
         "statusUpdate": "Error updating status.",
+        "orderUpdate": "Error updating order",
         "cannotDelete": "Cannot delete the product"
       }
     },
@@ -1173,7 +1175,9 @@
       "changePassword": "Change password",
       "delete": "Delete",
       "disable": "Disable status",
-      "enable": "Enable status"
+      "enable": "Enable status",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "search": "Search...",
     "nodata": "No records found.",

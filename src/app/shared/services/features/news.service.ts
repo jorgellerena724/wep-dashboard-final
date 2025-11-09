@@ -53,4 +53,10 @@ export class NewsService {
       id: id,
     });
   }
+
+  updateOrder(id: number, newOrder: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('order', newOrder.toString());
+    return this.http.patch(`${this.apiUrl}news/${id}`, formData);
+  }
 }
