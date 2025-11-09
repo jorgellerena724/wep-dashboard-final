@@ -1185,6 +1185,7 @@
     "alt": "Previsualización",
     "info": "Puede cambiar el archivo seleccionando por uno nuevo.",
     "required": "• El archivo es requerido",
+    "delete": "Eliminar",
     "nodata": {
       "title": "No hay archivo seleccionado",
       "subtitle": "Seleccione un archivo para ver la previsualización"

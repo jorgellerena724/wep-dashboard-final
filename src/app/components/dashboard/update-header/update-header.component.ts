@@ -19,6 +19,7 @@ import { NotificationService } from '../../../shared/services/system/notificatio
 import { AppFileUploadComponent } from '../../../shared/components/app-file-upload/app-file-upload.component';
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-update-header',
@@ -30,6 +31,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class UpdateHeaderComponent implements DynamicComponent {

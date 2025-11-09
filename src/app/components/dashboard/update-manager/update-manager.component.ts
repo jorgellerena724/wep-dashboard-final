@@ -27,6 +27,7 @@ import { ManagerService } from '../../../shared/services/features/manager.servic
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
 import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-update-manager',
@@ -39,6 +40,7 @@ import { ManagerCategoryService } from '../../../shared/services/features/manage
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
+    TooltipModule,
   ],
 })
 export class UpdateManagerComponent implements DynamicComponent {

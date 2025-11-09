@@ -28,6 +28,7 @@ import { PublicationCategoryService } from '../../../shared/services/features/pu
 import { PublicationsService } from '../../../shared/services/features/publications.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-update-publication',
@@ -40,6 +41,7 @@ import { map, catchError } from 'rxjs/operators';
     AppFileUploadComponent,
     SelectComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class UpdatePublicationComponent implements DynamicComponent {

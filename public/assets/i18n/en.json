@@ -1201,6 +1201,7 @@
     "alt": "Preview",
     "info": "You can change the image by selecting a new one.",
     "required": "• The image is required",
+    "delete": "Delete",
     "nodata": {
       "title": "No image selected",
       "subtitle": "Select an image to preview"

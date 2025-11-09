@@ -20,6 +20,7 @@ import { AppFileUploadComponent } from '../../../shared/components/app-file-uplo
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { CompanyService } from '../../../shared/services/features/company.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-update-company',
@@ -31,6 +32,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class UpdateCompanyComponent implements DynamicComponent {

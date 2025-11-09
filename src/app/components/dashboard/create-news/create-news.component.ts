@@ -24,6 +24,7 @@ import { NewsService } from '../../../shared/services/features/news.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HomeData } from '../../../shared/interfaces/home.interface';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-create-news',
@@ -35,6 +36,7 @@ import { HomeData } from '../../../shared/interfaces/home.interface';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class CreateNewsComponent implements DynamicComponent {

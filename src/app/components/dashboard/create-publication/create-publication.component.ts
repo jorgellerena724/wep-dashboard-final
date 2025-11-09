@@ -27,6 +27,7 @@ import { SelectComponent } from '../../../shared/components/app-select/app-selec
 import { PublicationCategoryService } from '../../../shared/services/features/publication-category.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-create-publication',
@@ -39,6 +40,7 @@ import { map, catchError } from 'rxjs/operators';
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
+    TooltipModule,
   ],
 })
 export class CreatePublicationComponent implements DynamicComponent {

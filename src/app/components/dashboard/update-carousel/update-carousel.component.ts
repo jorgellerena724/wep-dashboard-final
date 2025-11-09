@@ -19,6 +19,7 @@ import { AppFileUploadComponent } from '../../../shared/components/app-file-uplo
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { CarouselService } from '../../../shared/services/features/carousel.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-update-carousel',
@@ -30,6 +31,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class UpdateCarouselComponent implements DynamicComponent {

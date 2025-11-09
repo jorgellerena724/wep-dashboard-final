@@ -20,6 +20,7 @@ import { AppFileUploadComponent } from '../../../shared/components/app-file-uplo
 import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface';
 import { ReviewService } from '../../../shared/services/features/review.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-create-review',
@@ -31,6 +32,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class CreateReviewComponent implements DynamicComponent {
