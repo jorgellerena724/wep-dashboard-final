@@ -251,6 +251,7 @@
   },
   "navbar": {
     "title": "Web Empresarial Profesional",
+    "logo": "Logo",
     "logout": "Cerrar Sesión",
     "changepass": "Cambiar contraseña",
     "name": "Nombre",
@@ -310,7 +311,9 @@
     "contact": "Contáctenos",
     "info": "Información",
     "users": "Usuarios",
-    "users_manage": "Gestionar usuarios"
+    "users_manage": "Gestionar usuarios",
+    "expand": "Expandir",
+    "collapse": "Contraer"
   },
   "admin": {
     "header": {

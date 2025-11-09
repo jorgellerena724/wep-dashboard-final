@@ -251,6 +251,7 @@
   },
   "navbar": {
     "title": "Professional Business Website",
+    "logo": "Logo",
     "logout": "Logout",
     "changepass": "Change password",
     "name": "Name",
@@ -310,7 +311,9 @@
     "contact": "Contact Us",
     "info": "Information",
     "users": "Users",
-    "users_manage": "Manage users"
+    "users_manage": "Manage users",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "admin": {
     "header": {
