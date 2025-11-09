@@ -23,6 +23,33 @@
       >
       </app-table>
     </div>
+    <ng-template #orderTemplate let-rowData let-field="field">
+      <div class="flex justify-center items-center">
+        <div class="flex flex-col gap-0">
+          <!-- Botón Subir -->
+          <button
+            (click)="moveNewsUp(rowData)"
+            [disabled]="isFirstItem(rowData)"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-b border-gray-600 dark:border-gray-400"
+            pTooltip="Subir"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-up text-sm"></i>
+          </button>
+          <!-- Botón Bajar -->
+          <button
+            (click)="moveNewsDown(rowData)"
+            [disabled]="isLastItem(rowData)"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            pTooltip="Bajar"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-down text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
     <ng-template #imageTemplate let-rowData let-field="field">
       <div class="flex justify-center items-center">
         <div class="relative">

@@ -15,6 +15,7 @@ import {
   RowAction,
 } from '../../../shared/components/app-table/app.table.component';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { buttonVariants } from '../../../core/constants/button-variant.constant';
 import {
   ModalService,
@@ -32,7 +33,7 @@ import { combineLatest, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-list-news',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule, TooltipModule],
   templateUrl: './list-news.component.html',
   standalone: true,
   providers: [],
@@ -52,6 +53,10 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
+  
+  @ViewChild('orderTemplate', { static: true })
+  orderTemplate!: TemplateRef<any>;
+  
   customTemplates: { [key: string]: TemplateRef<any> } = {};
 
   columns: Column[] = [];
@@ -125,6 +130,7 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Configurar columnas de la tabla
         this.columns = [
+          { field: 'order', header: 'Orden', width: '80px' },
           { field: 'title', header: nameTranslation, sortable: true, filter: true },
           { field: 'description', header: descriptionTranslation, sortable: true, filter: true },
           { field: 'fecha', header: dateTranslation, sortable: true, filter: true },
@@ -134,26 +140,6 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Configurar acciones de fila
         this.rowActions = [
-          {
-            label: moveUpTranslation,
-            icon: 'pi pi-chevron-up',
-            onClick: (data) => this.moveNewsUp(data),
-            class: buttonVariants.outline.neutral,
-            isDisabled: (data: any) => {
-              const index = this.data.findIndex((item) => item.id === data.id);
-              return index === 0; // Deshabilitar si es el primer elemento
-            },
-          },
-          {
-            label: moveDownTranslation,
-            icon: 'pi pi-chevron-down',
-            onClick: (data) => this.moveNewsDown(data),
-            class: buttonVariants.outline.neutral,
-            isDisabled: (data: any) => {
-              const index = this.data.findIndex((item) => item.id === data.id);
-              return index === this.data.length - 1; // Deshabilitar si es el último elemento
-            },
-          },
           {
             label: editTranslation,
             icon: icons['edit'],
@@ -183,8 +169,9 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Asignar el template personalizado para el campo 'image'
+    // Asignar los templates personalizados
     this.customTemplates['image'] = this.imageTemplate;
+    this.customTemplates['order'] = this.orderTemplate;
   }
 
   loadData() {
@@ -235,6 +222,14 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getVideoUrl(rowData: HomeData): string {
     return this.videoUrls[rowData.id] || '';
+  }
+
+  isFirstItem(rowData: HomeData): boolean {
+    return this.data.findIndex(item => item.id === rowData.id) === 0;
+  }
+
+  isLastItem(rowData: HomeData): boolean {
+    return this.data.findIndex(item => item.id === rowData.id) === this.data.length - 1;
   }
 
   create() {
