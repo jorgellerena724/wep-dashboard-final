@@ -196,8 +196,16 @@ export class UpdateProductComponent implements DynamicComponent {
   }
 
   // Métodos para manejar archivos múltiples (igual que en create)
-  onFileUploaded(files: File[]): void {
-    files.forEach((file) => {
+  onFileUploaded(files: FileList | File[]): void {
+    // Convertir FileList a Array si es necesario
+    const filesArray = files instanceof FileList ? Array.from(files) : files;
+
+    filesArray.forEach((file) => {
+      // Validar formato y tamaño
+      if (!this.validateFile(file)) {
+        return; // Saltar este archivo si no es válido
+      }
+
       const supportedVideoTypes = [
         'video/mp4',
         'video/webm',
@@ -227,6 +235,7 @@ export class UpdateProductComponent implements DynamicComponent {
           file,
           this.productFiles.length - 1
         );
+        this.cdr.detectChanges();
       } else {
         const reader = new FileReader();
         reader.onload = () => {
@@ -252,6 +261,41 @@ export class UpdateProductComponent implements DynamicComponent {
         reader.readAsDataURL(file);
       }
     });
+  }
+
+  private validateFile(file: File): boolean {
+    // Tipos permitidos según especificaciones: JPG, PNG, MP4, MOV
+    const allowedTypes = [
+      'image/jpeg', // JPG
+      'image/png', // PNG
+      'video/mp4', // MP4
+      'video/quicktime', // MOV
+    ];
+
+    // Tamaño máximo: 20MB
+    const MAX_SIZE = 20 * 1024 * 1024; // 20MB en bytes
+
+    // Validar tipo de archivo
+    if (!allowedTypes.includes(file.type)) {
+      this.notificationSrv.addNotification(
+        'Formato no permitido. Solo se permiten: JPG, PNG, MP4, MOV. Formato recibido: ' +
+          file.type,
+        'error'
+      );
+      return false;
+    }
+
+    // Validar tamaño
+    if (file.size > MAX_SIZE) {
+      const sizeInMB = Math.round((file.size / (1024 * 1024)) * 100) / 100;
+      this.notificationSrv.addNotification(
+        `Archivo demasiado grande. Tamaño máximo permitido: 20MB. Tamaño recibido: ${sizeInMB}MB`,
+        'error'
+      );
+      return false;
+    }
+
+    return true;
   }
 
   private addFileToFormArray(
@@ -453,16 +497,25 @@ export class UpdateProductComponent implements DynamicComponent {
     const variantsData = this.getVariantsData();
     formData.append('variants', JSON.stringify(variantsData));
 
-    // Agregar títulos de archivos (todos los archivos, existentes y nuevos)
-    const fileTitles = this.filesFormArray.controls.map(
-      (control) => control.get('title')?.value
-    );
-    formData.append('file_titles', JSON.stringify(fileTitles));
+    // Separar archivos existentes y nuevos
+    const existingFiles = this.productFiles.filter((file) => file.isExisting);
+    const newFiles = this.productFiles.filter((file) => !file.isExisting && file.file);
 
-    // Agregar SOLO archivos nuevos (no los existentes)
-    const newFiles = this.productFiles.filter(
-      (file) => !file.isExisting && file.file
-    );
+    // Enviar información de archivos existentes que deben mantenerse
+    const existingFilesData = existingFiles.map((file) => ({
+      path: file.existingPath,
+      title: this.filesFormArray.at(this.productFiles.indexOf(file)).get('title')?.value || ''
+    }));
+    formData.append('existing_files', JSON.stringify(existingFilesData));
+
+    // Agregar títulos de archivos nuevos
+    const newFileTitles = newFiles.map((file) => {
+      const index = this.productFiles.indexOf(file);
+      return this.filesFormArray.at(index).get('title')?.value || '';
+    });
+    formData.append('file_titles', JSON.stringify(newFileTitles));
+
+    // Agregar archivos nuevos
     newFiles.forEach((productFile) => {
       if (productFile.file) {
         formData.append('files', productFile.file, productFile.file.name);
