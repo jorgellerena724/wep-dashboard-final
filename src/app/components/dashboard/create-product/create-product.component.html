@@ -153,19 +153,12 @@
     </div>
 
     <!-- Información sobre imagen principal -->
-    <div
-      class="p-3 bg-white dark:bg-white border border-black rounded-lg"
-    >
-      <div class="flex items-start gap-2">
-        <i
-          class="pi pi-info-circle text-gray-700 dark:text-gray-300 mt-0.5"
-        ></i>
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{
-            "components.products.create.fields.image.mainImageInfo" | transloco
-          }}
-        </div>
-      </div>
+    <div class="text-md text-gray-500">
+      <small>
+        {{
+          "components.products.edit.fields.image.mainImageInfo" | transloco
+        }}</small
+      >
     </div>
 
     <!-- Mensaje de error cuando no hay archivos -->
@@ -178,7 +171,9 @@
       class="mt-1 text-sm text-red-500"
     >
       <ul class="list-disc pl-4">
-        <li>{{ "components.products.create.fields.image.required" | transloco }}</li>
+        <li>
+          {{ "components.products.create.fields.image.required" | transloco }}
+        </li>
       </ul>
     </div>
 
@@ -273,7 +268,8 @@
             class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:hover:bg-transparent"
             pTooltip="{{
               i === 0
-                ? ('components.products.create.fields.image.firstImage' | transloco)
+                ? ('components.products.create.fields.image.firstImage'
+                  | transloco)
                 : ('components.products.create.fields.image.moveUp' | transloco)
             }}"
             tooltipPosition="top"
@@ -290,8 +286,10 @@
             class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:hover:bg-transparent"
             pTooltip="{{
               i === productFiles.length - 1
-                ? ('components.products.create.fields.image.lastImage' | transloco)
-                : ('components.products.create.fields.image.moveDown' | transloco)
+                ? ('components.products.create.fields.image.lastImage'
+                  | transloco)
+                : ('components.products.create.fields.image.moveDown'
+                  | transloco)
             }}"
             tooltipPosition="top"
           >
@@ -304,7 +302,9 @@
           type="button"
           (click)="removeFile(i)"
           class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
-          pTooltip="{{ 'components.products.create.fields.image.deleteImage' | transloco }}"
+          pTooltip="{{
+            'components.products.create.fields.image.deleteImage' | transloco
+          }}"
           tooltipPosition="top"
         >
           <i class="pi pi-trash"></i>
