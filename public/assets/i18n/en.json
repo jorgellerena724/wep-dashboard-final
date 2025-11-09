@@ -803,7 +803,7 @@
             "deleteImage": "Delete",
             "titlePlaceholder": "Title",
             "titleRequired": "Image title is required",
-            "required": "• The image is required",
+            "required": "You must add at least one image or video",
             "nodata": {
               "title": "No image selected",
               "subtitle": "Select an image to preview"
@@ -863,7 +863,7 @@
             "deleteImage": "Delete",
             "titlePlaceholder": "Title",
             "titleRequired": "Image title is required",
-            "required": "• The image is required",
+            "required": "You must add at least one image or video",
             "nodata": {
               "title": "No image selected",
               "subtitle": "Select an image to preview"

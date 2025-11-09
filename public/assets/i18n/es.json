@@ -781,7 +781,7 @@
             "deleteImage": "Eliminar",
             "titlePlaceholder": "Título",
             "titleRequired": "El título de la imagen es requerido",
-            "required": "• La imagen es requerida",
+            "required": "Debe agregar al menos una imagen o video",
             "nodata": {
               "title": "No hay imagen seleccionada",
               "subtitle": "Seleccione una imagen para ver la previsualización"
@@ -846,7 +846,7 @@
             "deleteImage": "Eliminar",
             "titlePlaceholder": "Título",
             "titleRequired": "El título de la imagen es requerido",
-            "required": "• La imagen es requerida",
+            "required": "Debe agregar al menos una imagen o video",
             "nodata": {
               "title": "No hay imagen seleccionada",
               "subtitle": "Seleccione una imagen para ver la previsualización"
