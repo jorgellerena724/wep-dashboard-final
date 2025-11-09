@@ -751,10 +751,16 @@
           "name": {
             "title": "Name",
             "required": "Name is required",
-            "minlength": "Name must be at least 3 characters",
+            "minlength": "Name must be at least 2 characters",
             "maxlength": "Name must be up to 20 characters",
             "uniqueName": "A manager with this name already exists",
             "duplicateTitle": "A product with this name already exists"
+          },
+          "calurl": {
+            "title": "Link to schedule appointments",
+            "required": "The name is required",
+            "minlength": "The name must be at least 2 characters",
+            "maxlength": "The name must be up to 20 characters"
           },
           "price": {
             "title": "Price"
@@ -784,11 +790,19 @@
             "info": "You can add more variants using the + button"
           },
           "image": {
-            "title": "Product or service image",
+            "title": "Product or service files",
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
             "uploadInfo": "You can add one or more images. If you want, you can add a title to each image.",
+            "mainImageInfo": "The first image in the list will be the main product image. Use the arrows to reorder the images.",
+            "moveUp": "Move image up",
+            "moveDown": "Move image down",
+            "firstImage": "Already the first image",
+            "lastImage": "Already the last image",
+            "deleteImage": "Delete",
+            "titlePlaceholder": "Title",
+            "titleRequired": "Image title is required",
             "required": "• The image is required",
             "nodata": {
               "title": "No image selected",
@@ -836,11 +850,19 @@
             "info": "You can add more variants using the + button"
           },
           "image": {
-            "title": "Product or service image",
+            "title": "Product or service files",
             "select": "Select image",
             "recommendation": "Recommended format: JPG, PNG. Maximum size 1Mb",
             "info": "You can change the image by selecting a new one.",
             "uploadInfo": "You can add one or more images. If you want, you can add a title to each image.",
+            "mainImageInfo": "The first image in the list will be the main product image. Use the arrows to reorder the images.",
+            "moveUp": "Move image up",
+            "moveDown": "Move image down",
+            "firstImage": "Already the first image",
+            "lastImage": "Already the last image",
+            "deleteImage": "Delete",
+            "titlePlaceholder": "Title",
+            "titleRequired": "Image title is required",
             "required": "• The image is required",
             "nodata": {
               "title": "No image selected",

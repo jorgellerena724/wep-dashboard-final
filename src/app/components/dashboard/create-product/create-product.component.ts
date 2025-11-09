@@ -33,6 +33,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface ProductVariant {
   description: string;
@@ -58,6 +59,7 @@ interface ProductFile {
     AppFileUploadComponent,
     SelectComponent,
     TranslocoModule,
+    TooltipModule,
   ],
 })
 export class CreateProductComponent implements DynamicComponent, OnInit {
@@ -79,6 +81,7 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
   // Propiedades para las variantes
   variants: ProductVariant[] = [];
   variantsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
+
 
   constructor(
     private fb: FormBuilder,
@@ -246,6 +249,39 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
     // Remover de arrays
     this.productFiles.splice(index, 1);
     this.filesFormArray.removeAt(index);
+    this.cdr.detectChanges();
+  }
+
+  // Métodos para reordenar imágenes con flechas
+  moveFileUp(index: number): void {
+    if (index === 0) return; // Ya es la primera
+
+    // Intercambiar en productFiles
+    const temp = this.productFiles[index];
+    this.productFiles[index] = this.productFiles[index - 1];
+    this.productFiles[index - 1] = temp;
+
+    // Intercambiar en filesFormArray
+    const control = this.filesFormArray.at(index);
+    this.filesFormArray.removeAt(index);
+    this.filesFormArray.insert(index - 1, control);
+
+    this.cdr.detectChanges();
+  }
+
+  moveFileDown(index: number): void {
+    if (index === this.productFiles.length - 1) return; // Ya es la última
+
+    // Intercambiar en productFiles
+    const temp = this.productFiles[index];
+    this.productFiles[index] = this.productFiles[index + 1];
+    this.productFiles[index + 1] = temp;
+
+    // Intercambiar en filesFormArray
+    const control = this.filesFormArray.at(index);
+    this.filesFormArray.removeAt(index);
+    this.filesFormArray.insert(index + 1, control);
+
     this.cdr.detectChanges();
   }
 

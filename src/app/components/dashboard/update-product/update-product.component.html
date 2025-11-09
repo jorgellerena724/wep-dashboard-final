@@ -152,6 +152,22 @@
       }}</small>
     </div>
 
+    <!-- Información sobre imagen principal -->
+    <div
+      class="p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg"
+    >
+      <div class="flex items-start gap-2">
+        <i
+          class="pi pi-info-circle text-gray-700 dark:text-gray-300 mt-0.5"
+        ></i>
+        <div class="text-sm text-gray-700 dark:text-gray-300">
+          {{
+            "components.products.edit.fields.image.mainImageInfo" | transloco
+          }}
+        </div>
+      </div>
+    </div>
+
     <!-- Mensaje de error cuando no hay archivos -->
     <div
       *ngIf="
@@ -169,8 +185,16 @@
     <div *ngIf="productFiles.length > 0" class="space-y-4">
       <div
         *ngFor="let productFile of productFiles; let i = index"
-        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
+        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black relative"
       >
+        <!-- Badge de imagen principal -->
+        <div
+          *ngIf="i === 0"
+          class="absolute -top-2 -left-2 bg-gray-800 dark:bg-gray-700 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
+        >
+          <i class="pi pi-star-fill"></i>
+        </div>
+
         <!-- Preview -->
         <div
           class="flex-shrink-0 w-32 h-32 flex items-center justify-center bg-gray-100 rounded-lg border"
@@ -249,11 +273,51 @@
           ></app-text-field>
         </div>
 
+        <!-- Botones de reordenamiento -->
+        <div class="flex flex-col gap-1">
+          <!-- Botón subir -->
+          <button
+            type="button"
+            (click)="moveFileUp(i)"
+            [disabled]="i === 0"
+            [class.opacity-30]="i === 0"
+            [class.cursor-not-allowed]="i === 0"
+            class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:hover:bg-transparent"
+            pTooltip="{{
+              i === 0
+                ? ('components.products.edit.fields.image.firstImage' | transloco)
+                : ('components.products.edit.fields.image.moveUp' | transloco)
+            }}"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-up"></i>
+          </button>
+          <!-- Botón bajar -->
+          <button
+            type="button"
+            (click)="moveFileDown(i)"
+            [disabled]="i === productFiles.length - 1"
+            [class.opacity-30]="i === productFiles.length - 1"
+            [class.cursor-not-allowed]="i === productFiles.length - 1"
+            class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:hover:bg-transparent"
+            pTooltip="{{
+              i === productFiles.length - 1
+                ? ('components.products.edit.fields.image.lastImage' | transloco)
+                : ('components.products.edit.fields.image.moveDown' | transloco)
+            }}"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-down"></i>
+          </button>
+        </div>
+
         <!-- Botón eliminar -->
         <button
           type="button"
           (click)="removeFile(i)"
           class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
+          pTooltip="{{ 'components.products.edit.fields.image.deleteImage' | transloco }}"
+          tooltipPosition="top"
         >
           <i class="pi pi-trash"></i>
         </button>
