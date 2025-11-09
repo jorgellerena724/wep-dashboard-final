@@ -67,6 +67,7 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
   @Input() initialData?: any;
   @Output() formValid = new EventEmitter<boolean>();
   @Output() submitSuccess = new EventEmitter<void>();
+  @Output() submitError = new EventEmitter<void>();
   id: number;
   form: FormGroup;
   categories: any[] = [];
@@ -106,6 +107,9 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
     });
 
     this.id = 0;
+
+    // Marcar el FormArray de files como requerido desde el inicio
+    this.filesFormArray.setErrors({ required: true });
 
     this.form.statusChanges.subscribe(() => {
       this.formValid.emit(this.form.valid);
@@ -228,6 +232,11 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
       file: [productFile.file],
     });
     this.filesFormArray.push(fileGroup);
+    
+    // Limpiar el error de required cuando hay al menos un archivo en el FormArray
+    if (this.filesFormArray.length > 0) {
+      this.filesFormArray.setErrors(null);
+    }
   }
 
   removeFile(index: number): void {
@@ -249,6 +258,13 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
     // Remover de arrays
     this.productFiles.splice(index, 1);
     this.filesFormArray.removeAt(index);
+    
+    // Marcar como requerido si no quedan archivos
+    if (this.productFiles.length === 0) {
+      this.filesFormArray.setErrors({ required: true });
+      this.filesFormArray.markAsTouched();
+    }
+    
     this.cdr.detectChanges();
   }
 
@@ -360,6 +376,8 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
       );
       this.filesFormArray.markAsTouched();
 
+      // Emitir error para que el modal resetee el estado de loading
+      this.submitError.emit();
       return;
     }
 
@@ -424,6 +442,7 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
           this.transloco.translate('notifications.products.error.create'),
           'error'
         );
+        this.submitError.emit();
       },
     });
   }
@@ -543,6 +562,8 @@ export class CreateProductComponent implements DynamicComponent, OnInit {
     });
     this.productFiles = [];
     this.filesFormArray.clear();
+    // Marcar como requerido después de limpiar
+    this.filesFormArray.setErrors({ required: true });
     this.variants = [];
     this.variantsFormArray.clear();
   }

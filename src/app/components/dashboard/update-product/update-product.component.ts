@@ -68,6 +68,7 @@ export class UpdateProductComponent implements DynamicComponent {
   @Input() initialData?: any;
   @Output() formValid = new EventEmitter<boolean>();
   @Output() submitSuccess = new EventEmitter<void>();
+  @Output() submitError = new EventEmitter<void>();
   id: number;
   form: FormGroup;
   categories: any[] = [];
@@ -104,6 +105,9 @@ export class UpdateProductComponent implements DynamicComponent {
     });
 
     this.id = 0;
+
+    // Marcar el FormArray de files como requerido desde el inicio
+    this.filesFormArray.setErrors({ required: true });
 
     this.form.statusChanges.subscribe(() => {
       this.formValid.emit(this.form.valid);
@@ -312,6 +316,11 @@ export class UpdateProductComponent implements DynamicComponent {
       file: [file],
     });
     this.filesFormArray.push(fileGroup);
+    
+    // Limpiar el error de required cuando hay al menos un archivo en el FormArray
+    if (this.filesFormArray.length > 0) {
+      this.filesFormArray.setErrors(null);
+    }
   }
 
   removeFile(index: number): void {
@@ -333,6 +342,13 @@ export class UpdateProductComponent implements DynamicComponent {
     // Remover de arrays
     this.productFiles.splice(index, 1);
     this.filesFormArray.removeAt(index);
+    
+    // Marcar como requerido si no quedan archivos
+    if (this.productFiles.length === 0) {
+      this.filesFormArray.setErrors({ required: true });
+      this.filesFormArray.markAsTouched();
+    }
+    
     this.cdr.detectChanges();
   }
 
@@ -507,6 +523,8 @@ export class UpdateProductComponent implements DynamicComponent {
       );
       this.filesFormArray.markAsTouched();
 
+      // Emitir error para que el modal resetee el estado de loading
+      this.submitError.emit();
       return;
     }
 
@@ -598,6 +616,7 @@ export class UpdateProductComponent implements DynamicComponent {
             'error'
           );
         }
+        this.submitError.emit();
       },
     });
   }
