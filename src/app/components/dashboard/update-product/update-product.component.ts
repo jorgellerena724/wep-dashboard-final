@@ -99,7 +99,7 @@ export class UpdateProductComponent implements DynamicComponent {
       title: ['', [Validators.required, Validators.minLength(2)]],
       cal_url: [''],
       category: ['', Validators.required],
-      description: ['', [Validators.required, Validators.minLength(3)]],
+      description: [''],
       files: this.filesFormArray,
       variants: this.variantsFormArray,
     });
@@ -536,14 +536,16 @@ export class UpdateProductComponent implements DynamicComponent {
       calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
     );
     
-    // Preservar saltos de línea en la descripción
-    const description = this.form.get('description')?.value;
+    // Preservar saltos de línea en la descripción o enviar cadena vacía
+    const description = this.form.get('description')?.value || '';
     const processedDescription = description
-      .split('\n')
-      .map((line: string) => line.trimEnd())
-      .join('\n')
-      .replace(/^\s+/, '')
-      .replace(/\s+$/, '');
+      ? description
+          .split('\n')
+          .map((line: string) => line.trimEnd())
+          .join('\n')
+          .replace(/^\s+/, '')
+          .replace(/\s+$/, '')
+      : '';
     formData.append('description', processedDescription);
     formData.append('category_id', this.form.get('category')?.value);
 
