@@ -771,7 +771,8 @@
             },
             "add": "Agregar",
             "empty": "Sin variantes",
-            "info": "Puede agregar mas variantes en el botón de +"
+            "info": "Puede agregar mas variantes en el botón de +",
+            "deleteVariant": "Eliminar"
           },
           "image": {
             "title": "Archivos de los productos o servicios",
@@ -828,11 +829,12 @@
             "price": {
               "title": "Precio",
               "required": "El campo es requerido",
-              "optional": "Opcional"
+              "opcional": "Opcional"
             },
             "add": "Agregar",
             "empty": "Sin variantes",
-            "info": "Puede agregar mas variantes en el botón de +"
+            "info": "Puede agregar mas variantes en el botón de +",
+            "deleteVariant": "Eliminar"
           },
           "category": {
             "title": "Categoría",

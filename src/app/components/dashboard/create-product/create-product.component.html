@@ -89,6 +89,10 @@
           type="button"
           (click)="removeVariant(i)"
           class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
+          pTooltip="{{
+            'components.products.create.fields.variants.deleteVariant' | transloco
+          }}"
+          tooltipPosition="top"
         >
           <i class="pi pi-trash"></i>
         </button>
