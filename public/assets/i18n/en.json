@@ -789,7 +789,7 @@
             "price": {
               "title": "Price",
               "required": "This field is required",
-              "optional": "Optional"
+              "optional": "Optional price"
             },
             "add": "Add",
             "empty": "No variants",
@@ -850,7 +850,7 @@
             "price": {
               "title": "Price",
               "required": "This field is required",
-              "optional": "Optional"
+              "optional": "Optional price"
             },
             "add": "Add",
             "empty": "No variants",
