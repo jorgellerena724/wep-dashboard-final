@@ -270,7 +270,7 @@
         </div>
 
         <!-- Botones de reordenamiento -->
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-0">
           <!-- Botón subir -->
           <button
             type="button"
@@ -278,7 +278,7 @@
             [disabled]="i === 0"
             [class.opacity-30]="i === 0"
             [class.cursor-not-allowed]="i === 0"
-            class="p-2 text-gray-700 dark:text-gray-300 rounded transition-colors"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-b border-gray-600 dark:border-gray-400"
             pTooltip="{{
               i === 0
                 ? ('components.products.edit.fields.image.firstImage'
@@ -287,7 +287,7 @@
             }}"
             tooltipPosition="top"
           >
-            <i class="pi pi-chevron-up"></i>
+            <i class="pi pi-chevron-up text-sm"></i>
           </button>
           <!-- Botón bajar -->
           <button
@@ -296,7 +296,7 @@
             [disabled]="i === productFiles.length - 1"
             [class.opacity-30]="i === productFiles.length - 1"
             [class.cursor-not-allowed]="i === productFiles.length - 1"
-            class="p-2 text-gray-700 dark:text-gray-300 rounded transition-colors"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             pTooltip="{{
               i === productFiles.length - 1
                 ? ('components.products.edit.fields.image.lastImage'
@@ -305,7 +305,7 @@
             }}"
             tooltipPosition="top"
           >
-            <i class="pi pi-chevron-down"></i>
+            <i class="pi pi-chevron-down text-sm"></i>
           </button>
         </div>
 
