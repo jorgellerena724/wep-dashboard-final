@@ -829,7 +829,7 @@
             "price": {
               "title": "Precio",
               "required": "El campo es requerido",
-              "opcional": "Opcional"
+              "optional": "Opcional"
             },
             "add": "Agregar",
             "empty": "Sin variantes",
