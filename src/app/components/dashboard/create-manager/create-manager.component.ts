@@ -80,6 +80,11 @@ export class CreateManagerComponent implements DynamicComponent {
     this.form.statusChanges.subscribe(() => {
       this.formValid.emit(this.form.valid);
     });
+
+    // Re-validar el nombre cuando cambie la categoría
+    this.form.get('manager_category')?.valueChanges.subscribe(() => {
+      this.form.get('title')?.updateValueAndValidity();
+    });
   }
 
   async ngOnInit() {
@@ -240,12 +245,17 @@ export class CreateManagerComponent implements DynamicComponent {
       }
 
       const name = control.value.trim().toLowerCase();
+      const selectedCategoryId = this.form.get('manager_category')?.value;
 
       return this.srv.get().pipe(
         map((managers: any[]) => {
-          const exists = managers.some(
-            (manager) => manager.title?.toLowerCase() === name
-          );
+          const exists = managers.some((manager) => {
+            const managerCategoryId = manager.manager_category_id || manager.manager_category?.id || null;
+            const isSameCategory = managerCategoryId === selectedCategoryId;
+            const isSameName = manager.title?.toLowerCase() === name;
+            
+            return isSameName && isSameCategory;
+          });
           return exists ? { uniqueName: true } : null;
         }),
         catchError(() => of(null))
