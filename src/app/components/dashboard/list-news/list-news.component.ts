@@ -87,6 +87,7 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.transloco.selectTranslate('components.news.list.table.date'),
       this.transloco.selectTranslate('components.news.list.table.status'),
       this.transloco.selectTranslate('components.news.list.table.image'),
+      this.transloco.selectTranslate('components.news.list.table.order'),
       this.transloco.selectTranslate('table.buttons.edit'),
       this.transloco.selectTranslate('table.buttons.delete'),
       this.transloco.selectTranslate('table.buttons.disable'),
@@ -105,6 +106,7 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         dateTranslation,
         statusTranslation,
         imageTranslation,
+        orderTranslation,
         editTranslation,
         deleteTranslation,
         disableTranslation,
@@ -130,7 +132,7 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Configurar columnas de la tabla
         this.columns = [
-          { field: 'order', header: 'Orden', width: '80px' },
+          { field: 'order', header: orderTranslation, width: '80px' },
           { field: 'title', header: nameTranslation, sortable: true, filter: true },
           { field: 'description', header: descriptionTranslation, sortable: true, filter: true },
           { field: 'fecha', header: dateTranslation, sortable: true, filter: true },

@@ -428,7 +428,8 @@
           "description": "Description",
           "date": "Date",
           "status": "Status",
-          "image": "Image"
+          "image": "Image",
+          "order": "Order"
         }
       },
       "create": {

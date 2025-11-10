@@ -421,7 +421,8 @@
           "description": "Descripción",
           "date": "Fecha",
           "status": "Estado",
-          "image": "Imagen"
+          "image": "Imagen",
+          "order": "Orden"
         }
       },
       "create": {
