@@ -33,7 +33,13 @@ import { combineLatest, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-list-news',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule, TooltipModule],
+  imports: [
+    CommonModule,
+    TableComponent,
+    ButtonModule,
+    TranslocoModule,
+    TooltipModule,
+  ],
   templateUrl: './list-news.component.html',
   standalone: true,
   providers: [],
@@ -53,10 +59,10 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('imageTemplate', { static: true })
   imageTemplate!: TemplateRef<any>;
-  
+
   @ViewChild('orderTemplate', { static: true })
   orderTemplate!: TemplateRef<any>;
-  
+
   customTemplates: { [key: string]: TemplateRef<any> } = {};
 
   columns: Column[] = [];
@@ -133,10 +139,30 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
         // Configurar columnas de la tabla
         this.columns = [
           { field: 'order', header: orderTranslation, width: '80px' },
-          { field: 'title', header: nameTranslation, sortable: true, filter: true },
-          { field: 'description', header: descriptionTranslation, sortable: true, filter: true },
-          { field: 'fecha', header: dateTranslation, sortable: true, filter: true },
-          { field: 'statusToShow', header: statusTranslation, sortable: true, filter: true },
+          {
+            field: 'title',
+            header: nameTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'description',
+            header: descriptionTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'fecha',
+            header: dateTranslation,
+            sortable: true,
+            filter: true,
+          },
+          {
+            field: 'statusToShow',
+            header: statusTranslation,
+            sortable: true,
+            filter: true,
+          },
           { field: 'image', header: imageTranslation, width: '240px' },
         ];
 
@@ -155,10 +181,15 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
             class: buttonVariants.outline.red,
           },
           {
-            label: (data) => (data.status ? disableTranslation : enableTranslation),
-            icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
+            label: (data) =>
+              data.status ? disableTranslation : enableTranslation,
+            icon: (data) =>
+              data.status ? icons['activate'] : icons['deactivate'],
             onClick: (data) => this.toggleStatus(data),
-            class: (data) => (data.status ? buttonVariants.outline.gray : buttonVariants.outline.neutral),
+            class: (data) =>
+              data.status
+                ? buttonVariants.outline.gray
+                : buttonVariants.outline.neutral,
           },
         ];
 
@@ -180,7 +211,6 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loading = true;
     this.srv.get().subscribe({
       next: (data: HomeData[]) => {
-        console.log('📥 Datos recibidos del servidor:', data.map(item => ({ id: item.id, title: item.title, order: item.order })));
         this.data = data.map((item: any) => ({
           ...item,
           // Usar las propiedades con las traducciones de estado
@@ -201,7 +231,10 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
               },
               error: () => {
                 // Notificación con traducción
-                this.translateAndNotify('notifications.news.error.loadImage', 'error');
+                this.translateAndNotify(
+                  'notifications.news.error.loadImage',
+                  'error'
+                );
               },
             });
           }
@@ -227,11 +260,14 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   isFirstItem(rowData: HomeData): boolean {
-    return this.data.findIndex(item => item.id === rowData.id) === 0;
+    return this.data.findIndex((item) => item.id === rowData.id) === 0;
   }
 
   isLastItem(rowData: HomeData): boolean {
-    return this.data.findIndex(item => item.id === rowData.id) === this.data.length - 1;
+    return (
+      this.data.findIndex((item) => item.id === rowData.id) ===
+      this.data.length - 1
+    );
   }
 
   create() {
@@ -292,9 +328,12 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
       next: () => {
         data.status = newStatus;
         const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
-        
+
         // Notificación de éxito con traducción y parámetros
-        const message = this.transloco.translate('notifications.news.success.statusUpdated', { status: statusText });
+        const message = this.transloco.translate(
+          'notifications.news.success.statusUpdated',
+          { status: statusText }
+        );
         this.notificationSrv.addNotification(message, 'success');
 
         // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
@@ -305,7 +344,10 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           // Notificación de error genérico con traducción
-          this.translateAndNotify('notifications.news.error.statusUpdate', 'error');
+          this.translateAndNotify(
+            'notifications.news.error.statusUpdate',
+            'error'
+          );
         }
       },
     });
@@ -339,14 +381,23 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
             next: () => {
               this.onRefresh();
               // Notificación de éxito con traducción
-              this.translateAndNotify('notifications.news.success.deleted', 'success');
+              this.translateAndNotify(
+                'notifications.news.success.deleted',
+                'success'
+              );
             },
             error: (error) => {
               if (error?.error?.message && error.error?.statusCode === 400) {
-                 this.notificationSrv.addNotification(error.error.message, 'error');
+                this.notificationSrv.addNotification(
+                  error.error.message,
+                  'error'
+                );
               } else {
                 // Notificación de error genérico con traducción
-                this.translateAndNotify('notifications.news.error.delete', 'error');
+                this.translateAndNotify(
+                  'notifications.news.error.delete',
+                  'error'
+                );
               }
               this.loading = false;
             },
@@ -358,13 +409,9 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   moveNewsUp(data: any) {
-    console.log('🔼 MOVE UP - Elemento clickeado:', { id: data.id, title: data.title, order: data.order });
-    
     const currentIndex = this.data.findIndex((item) => item.id === data.id);
-    console.log('  Índice en el array completo:', currentIndex, '/ Total elementos:', this.data.length);
-    
+
     if (currentIndex === 0) {
-      console.log('  ⚠️ Ya es el primer elemento, no se puede subir más');
       return; // Ya es la primera
     }
 
@@ -373,32 +420,26 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Obtener los valores de order actuales (usar índice como fallback si order es undefined)
     const currentOrder = currentItem.order ?? currentIndex;
-    const previousOrder = previousItem.order ?? (currentIndex - 1);
-
-    console.log('  Current Item:', { id: currentItem.id, title: currentItem.title, order: currentOrder, index: currentIndex });
-    console.log('  Previous Item:', { id: previousItem.id, title: previousItem.title, order: previousOrder, index: currentIndex - 1 });
+    const previousOrder = previousItem.order ?? currentIndex - 1;
 
     // Intercambiar posiciones en el array local
     this.data[currentIndex] = previousItem;
     this.data[currentIndex - 1] = currentItem;
 
-    console.log('  Enviando al backend:');
-    console.log('    Item', currentItem.id, '(', currentItem.title, ') -> order:', previousOrder);
-    console.log('    Item', previousItem.id, '(', previousItem.title, ') -> order:', currentOrder);
-
     // Actualizar el orden en el backend: el elemento actual recibe el order menor (del anterior)
     // y el anterior recibe el order mayor (del actual)
-    this.updateBothNewsOrder(currentItem.id, previousOrder, previousItem.id, currentOrder);
+    this.updateBothNewsOrder(
+      currentItem.id,
+      previousOrder,
+      previousItem.id,
+      currentOrder
+    );
   }
 
   moveNewsDown(data: any) {
-    console.log('🔽 MOVE DOWN - Elemento clickeado:', { id: data.id, title: data.title, order: data.order });
-    
     const currentIndex = this.data.findIndex((item) => item.id === data.id);
-    console.log('  Índice en el array completo:', currentIndex, '/ Total elementos:', this.data.length);
-    
+
     if (currentIndex === this.data.length - 1) {
-      console.log('  ⚠️ Ya es el último elemento, no se puede bajar más');
       return; // Ya es la última
     }
 
@@ -407,29 +448,28 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Obtener los valores de order actuales (usar índice como fallback si order es undefined)
     const currentOrder = currentItem.order ?? currentIndex;
-    const nextOrder = nextItem.order ?? (currentIndex + 1);
-
-    console.log('  Current Item:', { id: currentItem.id, title: currentItem.title, order: currentOrder, index: currentIndex });
-    console.log('  Next Item:', { id: nextItem.id, title: nextItem.title, order: nextOrder, index: currentIndex + 1 });
+    const nextOrder = nextItem.order ?? currentIndex + 1;
 
     // Intercambiar posiciones en el array local
     this.data[currentIndex] = nextItem;
     this.data[currentIndex + 1] = currentItem;
 
-    console.log('  Enviando al backend:');
-    console.log('    Item', currentItem.id, '(', currentItem.title, ') -> order:', nextOrder);
-    console.log('    Item', nextItem.id, '(', nextItem.title, ') -> order:', currentOrder);
-
     // Actualizar el orden en el backend: el elemento actual recibe el order mayor (del siguiente)
     // y el siguiente recibe el order menor (del actual)
-    this.updateBothNewsOrder(currentItem.id, nextOrder, nextItem.id, currentOrder);
+    this.updateBothNewsOrder(
+      currentItem.id,
+      nextOrder,
+      nextItem.id,
+      currentOrder
+    );
   }
 
-  private updateBothNewsOrder(id1: number, order1: number, id2: number, order2: number) {
-    console.log('📡 Actualizando orden en el backend:');
-    console.log('  ID:', id1, '-> Order:', order1);
-    console.log('  ID:', id2, '-> Order:', order2);
-
+  private updateBothNewsOrder(
+    id1: number,
+    order1: number,
+    id2: number,
+    order2: number
+  ) {
     // Actualizar ambas noticias en paralelo
     const update1$ = this.srv.updateOrder(id1, order1);
     const update2$ = this.srv.updateOrder(id2, order2);
@@ -437,22 +477,25 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
     // Esperar a que ambas actualizaciones terminen
     combineLatest([update1$, update2$]).subscribe({
       next: (responses) => {
-        console.log('✅ Respuestas del backend:', responses);
-        console.log('🔄 Recargando datos...');
         // Recargar los datos para asegurar que el orden es correcto
         this.onRefresh();
         // Notificación de éxito con traducción
-        this.translateAndNotify('notifications.news.success.orderUpdated', 'success');
+        this.translateAndNotify(
+          'notifications.news.success.orderUpdated',
+          'success'
+        );
       },
       error: (error) => {
-        console.error('❌ Error al actualizar orden:', error);
         // Si hay error, recargar los datos para restaurar el orden correcto
         this.onRefresh();
         if (error?.error?.message && error.error?.statusCode === 400) {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           // Notificación de error genérico con traducción
-          this.translateAndNotify('notifications.news.error.orderUpdate', 'error');
+          this.translateAndNotify(
+            'notifications.news.error.orderUpdate',
+            'error'
+          );
         }
       },
     });
@@ -464,7 +507,11 @@ export class ListNewsComponent implements OnInit, OnDestroy, AfterViewInit {
    * @param severity - El tipo de notificación ('success', 'error', 'info', 'warn').
    * @param params - Un objeto con parámetros para la traducción (opcional).
    */
-  private translateAndNotify(key: string, severity: 'success' | 'error' | 'info' | 'warn', params?: object) {
+  private translateAndNotify(
+    key: string,
+    severity: 'success' | 'error' | 'info' | 'warn',
+    params?: object
+  ) {
     this.transloco
       .selectTranslate(key, params)
       .pipe(take(1))

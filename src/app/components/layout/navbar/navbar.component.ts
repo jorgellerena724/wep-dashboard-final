@@ -8,12 +8,21 @@ import {
   Inject,
   PLATFORM_ID,
 } from '@angular/core';
-import { RouterModule, Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  RouterModule,
+  Router,
+  NavigationEnd,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { ModalService, ModalConfig } from '../../../shared/services/system/modal.service';
+import {
+  ModalService,
+  ModalConfig,
+} from '../../../shared/services/system/modal.service';
 import { ChangeUserPasswordComponent } from '../../users/change-user-password/change-user-password.component';
 import { BackupService } from '../../../shared/services/system/backup.service';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -54,6 +63,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   currentLanguageCode: string = 'es';
   userData: any = null;
   showUsersMenu = true;
+  showBackupButtons = false;
 
   constructor(
     private router: Router,
@@ -97,73 +107,94 @@ export class NavbarComponent implements OnInit, OnChanges {
 
   saveInformation(): void {
     this.userMenuOpen = false;
-    
-    this.notificationService.addNotification(this.transloco.translate('navbar.backup.generating'), 'info');
-    
+
+    this.notificationService.addNotification(
+      this.transloco.translate('navbar.backup.generating'),
+      'info'
+    );
+
     this.backupService.downloadBackup().subscribe({
       next: (blob: Blob) => {
         // Crear URL temporal para el blob
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        
+
         // Generar nombre de archivo con fecha
         const date = new Date();
         const dateStr = date.toISOString().split('T')[0];
         link.download = `backup_${dateStr}.zip`;
-        
+
         // Descargar el archivo
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         // Limpiar URL temporal
         window.URL.revokeObjectURL(url);
-        
-        this.notificationService.addNotification(this.transloco.translate('navbar.backup.download_success'), 'success');
+
+        this.notificationService.addNotification(
+          this.transloco.translate('navbar.backup.download_success'),
+          'success'
+        );
       },
       error: (error) => {
         console.error('Error al descargar backup:', error);
-        const errorMessage = error?.error?.detail || error?.message || this.transloco.translate('navbar.backup.download_error');
-        const translatedMessage = this.transloco.translate('navbar.backup.download_error_message', { message: errorMessage });
+        const errorMessage =
+          error?.error?.detail ||
+          error?.message ||
+          this.transloco.translate('navbar.backup.download_error');
+        const translatedMessage = this.transloco.translate(
+          'navbar.backup.download_error_message',
+          { message: errorMessage }
+        );
         this.notificationService.addNotification(translatedMessage, 'error');
-      }
+      },
     });
   }
 
   restoreInformation(): void {
     this.userMenuOpen = false;
-    
+
     // Crear input file dinámicamente
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.zip';
-    
+
     input.onchange = (event: any) => {
       const file = event.target.files[0];
       if (!file) {
         return;
       }
-      
+
       // Verificar que es un archivo ZIP
       if (!file.name.endsWith('.zip')) {
-        this.notificationService.addNotification(this.transloco.translate('navbar.backup.invalid_file'), 'error');
+        this.notificationService.addNotification(
+          this.transloco.translate('navbar.backup.invalid_file'),
+          'error'
+        );
         return;
       }
-      
+
       // Confirmar antes de restaurar
       const confirmMessage = this.transloco.translate('navbar.confirm_restore');
-      
+
       if (!confirm(confirmMessage)) {
         return;
       }
-      
-      this.notificationService.addNotification(this.transloco.translate('navbar.backup.restoring'), 'info');
-      
+
+      this.notificationService.addNotification(
+        this.transloco.translate('navbar.backup.restoring'),
+        'info'
+      );
+
       this.backupService.restoreBackup(file).subscribe({
         next: (response) => {
-          this.notificationService.addNotification(this.transloco.translate('navbar.backup.restore_success'), 'success');
-          
+          this.notificationService.addNotification(
+            this.transloco.translate('navbar.backup.restore_success'),
+            'success'
+          );
+
           // Recargar la página después de 2 segundos
           setTimeout(() => {
             window.location.reload();
@@ -171,13 +202,19 @@ export class NavbarComponent implements OnInit, OnChanges {
         },
         error: (error) => {
           console.error('Error al restaurar backup:', error);
-          const errorMessage = error?.error?.detail || error?.message || this.transloco.translate('navbar.backup.restore_error');
-          const translatedMessage = this.transloco.translate('navbar.backup.restore_error_message', { message: errorMessage });
+          const errorMessage =
+            error?.error?.detail ||
+            error?.message ||
+            this.transloco.translate('navbar.backup.restore_error');
+          const translatedMessage = this.transloco.translate(
+            'navbar.backup.restore_error_message',
+            { message: errorMessage }
+          );
           this.notificationService.addNotification(translatedMessage, 'error');
-        }
+        },
       });
     };
-    
+
     input.click();
   }
 
@@ -261,14 +298,21 @@ export class NavbarComponent implements OnInit, OnChanges {
       ];
       let rawData: string | null = null;
       for (const key of possibleKeys) {
-        const data = isPlatformBrowser(this.platformId) ? localStorage.getItem(key) : null;
+        const data = isPlatformBrowser(this.platformId)
+          ? localStorage.getItem(key)
+          : null;
         if (data) {
           rawData = data;
           break;
         }
       }
       if (!rawData && isPlatformBrowser(this.platformId)) {
-        const extras = ['session', 'userSession', 'wep_session', 'sessionClient'];
+        const extras = [
+          'session',
+          'userSession',
+          'wep_session',
+          'sessionClient',
+        ];
         for (const k of extras) {
           const d = localStorage.getItem(k);
           if (d) {
@@ -302,8 +346,7 @@ export class NavbarComponent implements OnInit, OnChanges {
           if (clientFromStorage) {
             try {
               this.userData.client = clientFromStorage;
-            } catch (e) {
-            }
+            } catch (e) {}
           }
         }
       }
@@ -323,8 +366,10 @@ export class NavbarComponent implements OnInit, OnChanges {
     }
 
     if (this.userData.client) return String(this.userData.client);
-    if (this.userData.session && this.userData.session.client) return String(this.userData.session.client);
-    if (this.userData.user && this.userData.user.client) return String(this.userData.user.client);
+    if (this.userData.session && this.userData.session.client)
+      return String(this.userData.session.client);
+    if (this.userData.user && this.userData.user.client)
+      return String(this.userData.user.client);
     if (this.userData.client_name) return String(this.userData.client_name);
     const clientFromStorage = this.getClientFromLocalStorage();
     return clientFromStorage ?? '—';
@@ -347,12 +392,17 @@ export class NavbarComponent implements OnInit, OnChanges {
 
   isProductsRouteActive(): boolean {
     const currentUrl = this.router.url;
-    return currentUrl.includes('/categories') || currentUrl.includes('/products');
+    return (
+      currentUrl.includes('/categories') || currentUrl.includes('/products')
+    );
   }
 
   isPublicationsRouteActive(): boolean {
     const currentUrl = this.router.url;
-    return currentUrl.includes('/publication-category') || currentUrl.includes('/publications');
+    return (
+      currentUrl.includes('/publication-category') ||
+      currentUrl.includes('/publications')
+    );
   }
 
   isContactRouteActive(): boolean {
@@ -412,15 +462,18 @@ export class NavbarComponent implements OnInit, OnChanges {
     const clientFromInput = this.sessionClient;
     if (clientFromInput !== undefined && clientFromInput !== null) {
       this.showUsersMenu = this.isClientAllowed(clientFromInput);
+      this.showBackupButtons = this.isClientAllowed(clientFromInput);
       return;
     }
 
     const clientFromStorage = this.getClientFromLocalStorage();
     if (clientFromStorage !== null) {
       this.showUsersMenu = this.isClientAllowed(clientFromStorage);
+      this.showBackupButtons = this.isClientAllowed(clientFromStorage);
       return;
     }
     this.showUsersMenu = true;
+    this.showBackupButtons = false;
   }
 
   private isClientAllowed(clientValue: string | undefined | null): boolean {
@@ -440,7 +493,7 @@ export class NavbarComponent implements OnInit, OnChanges {
       'currentUser',
       'wep_session',
       'sessionClient',
-      'client'
+      'client',
     ];
     for (const key of candidateKeys) {
       const raw = localStorage.getItem(key);
@@ -449,8 +502,10 @@ export class NavbarComponent implements OnInit, OnChanges {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
           if ('client' in parsed && parsed.client) return parsed.client;
-          if ('session' in parsed && parsed.session && parsed.session.client) return parsed.session.client;
-          if ('user' in parsed && parsed.user && parsed.user.client) return parsed.user.client;
+          if ('session' in parsed && parsed.session && parsed.session.client)
+            return parsed.session.client;
+          if ('user' in parsed && parsed.user && parsed.user.client)
+            return parsed.user.client;
         }
         if (typeof parsed === 'string' && parsed.trim().length > 0) {
           return parsed;
