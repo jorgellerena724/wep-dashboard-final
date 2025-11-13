@@ -28,4 +28,8 @@ export class NotificationComponent implements OnInit {
   removeNotification(notification: Notification): void {
     this.notificationService.removeNotification(notification);
   }
+
+  roundProgress(progress: number | undefined): number {
+    return Math.round(progress || 0);
+  }
 }

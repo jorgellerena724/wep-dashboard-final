@@ -223,24 +223,46 @@ export class NavbarComponent implements OnInit, OnChanges {
         return;
       }
 
-      this.notificationService.addNotification(
+      // Crear notificación con barra de progreso
+      const notificationId = this.notificationService.addNotification(
         this.transloco.translate('navbar.backup.restoring'),
-        'info'
+        'info',
+        true
       );
+
+      // Simular progreso durante la restauración del backup
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 12; // Incremento aleatorio para simular progreso
+        if (progress < 85) {
+          this.notificationService.updateProgress(notificationId, progress);
+        }
+      }, 300);
 
       this.backupService.restoreBackup(file).subscribe({
         next: (response) => {
-          this.notificationService.addNotification(
-            this.transloco.translate('navbar.backup.restore_success'),
-            'success'
-          );
+          // Completar el progreso
+          clearInterval(progressInterval);
+          this.notificationService.updateProgress(notificationId, 100);
 
-          // Recargar la página después de 2 segundos
+          // Mostrar notificación de éxito después de un breve delay
+          setTimeout(() => {
+            this.notificationService.addNotification(
+              this.transloco.translate('navbar.backup.restore_success'),
+              'success'
+            );
+          }, 1000);
+
+          // Recargar la página después de 3 segundos
           setTimeout(() => {
             window.location.reload();
-          }, 2000);
+          }, 3000);
         },
         error: (error) => {
+          // Detener progreso y remover notificación en caso de error
+          clearInterval(progressInterval);
+          this.notificationService.removeNotificationById(notificationId);
+
           console.error('Error al restaurar backup:', error);
           const errorMessage =
             error?.error?.detail ||
