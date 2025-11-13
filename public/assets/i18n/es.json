@@ -270,7 +270,10 @@
       "restore_error_message": "Error al restaurar backup: {{message}}",
       "invalid_file": "Por favor seleccione un archivo ZIP"
     },
-    "confirm_restore": "¿Está seguro de que desea restaurar el backup? Esto sobreescribirá la base de datos y la carpeta uploads actuales.",
+    "confirm_restore": "¿Está seguro de que desea restaurar el backup?<br>Esto sobreescribirá la base de datos y la carpeta uploads actuales.",
+    "confirm_restore_title": "Confirmar Restauración",
+    "confirm_restore_button": "Restaurar",
+    "cancel_button": "Cancelar",
     "mobile": {
       "admin": "Administración",
       "header": "Encabezado",

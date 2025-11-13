@@ -7,6 +7,7 @@ import {
   Input,
   Inject,
   PLATFORM_ID,
+  ViewChild,
 } from '@angular/core';
 import { RouterModule, Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -17,6 +18,7 @@ import { ModalService, ModalConfig } from '../../../shared/services/system/modal
 import { ChangeUserPasswordComponent } from '../../users/change-user-password/change-user-password.component';
 import { BackupService } from '../../../shared/services/system/backup.service';
 import { NotificationService } from '../../../shared/services/system/notification.service';
+import { ConfirmDialogComponent } from '../../../shared/components/app-confirm-dialog/app-confirm-dialog.component';
 
 @Component({
   selector: 'app-navbar',
@@ -27,12 +29,14 @@ import { NotificationService } from '../../../shared/services/system/notificatio
     RouterLink,
     RouterLinkActive,
     TranslocoModule,
+    ConfirmDialogComponent,
   ],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent implements OnInit, OnChanges {
   @Input() sessionClient?: string;
+  @ViewChild('confirmDialog') confirmDialog!: ConfirmDialogComponent;
 
   private transloco = inject(TranslocoService);
 
@@ -131,7 +135,7 @@ export class NavbarComponent implements OnInit, OnChanges {
     });
   }
 
-  restoreInformation(): void {
+  async restoreInformation(): Promise<void> {
     this.userMenuOpen = false;
     
     // Crear input file dinámicamente
@@ -139,7 +143,7 @@ export class NavbarComponent implements OnInit, OnChanges {
     input.type = 'file';
     input.accept = '.zip';
     
-    input.onchange = (event: any) => {
+    input.onchange = async (event: any) => {
       const file = event.target.files[0];
       if (!file) {
         return;
@@ -151,10 +155,16 @@ export class NavbarComponent implements OnInit, OnChanges {
         return;
       }
       
-      // Confirmar antes de restaurar
-      const confirmMessage = this.transloco.translate('navbar.confirm_restore');
+      // Configurar el diálogo de confirmación
+      this.confirmDialog.title = this.transloco.translate('navbar.confirm_restore_title');
+      this.confirmDialog.message = this.transloco.translate('navbar.confirm_restore');
+      this.confirmDialog.confirmLabel = this.transloco.translate('navbar.confirm_restore_button');
+      this.confirmDialog.cancelLabel = this.transloco.translate('navbar.cancel_button');
       
-      if (!confirm(confirmMessage)) {
+      // Mostrar el diálogo de confirmación
+      const confirmed = await this.confirmDialog.show();
+      
+      if (!confirmed) {
         return;
       }
       

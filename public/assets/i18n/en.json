@@ -270,7 +270,10 @@
       "restore_error_message": "Error restoring backup: {{message}}",
       "invalid_file": "Please select a ZIP file"
     },
-    "confirm_restore": "Are you sure you want to restore the backup? This will overwrite the current database and uploads folder.",
+    "confirm_restore": "Are you sure you want to restore the backup?<br>This will overwrite the current database and uploads folder.",
+    "confirm_restore_title": "Confirm Restoration",
+    "confirm_restore_button": "Restore",
+    "cancel_button": "Cancel",
     "mobile": {
       "admin": "Administration",
       "header": "Header",

@@ -15,7 +15,7 @@
   </ng-template>
   <hr class="border-t border-gray-600 w-full dark:border-gray-300" />
   <div class="p-4">
-    <p class="text-gray-600 dark:text-gray-300">{{ message }}</p>
+    <p class="text-gray-600 dark:text-gray-300" [innerHTML]="message"></p>
   </div>
 
   <ng-template pTemplate="footer">
