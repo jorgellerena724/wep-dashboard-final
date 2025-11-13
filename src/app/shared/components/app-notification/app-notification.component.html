@@ -12,7 +12,7 @@
       'bg-yellow-50/80 border-yellow-400 text-yellow-800':
         notification.type === 'warning'
     }"
-    class="flex items-center w-full max-w-xs sm:max-w-sm lg:max-w-md p-4 mb-4 border-l-4 rounded-lg shadow-lg backdrop-blur-sm  transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+    class="flex items-center w-full max-w-xs sm:max-w-sm lg:max-w-md p-4 mb-4 border-l-4 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
     role="alert"
   >
     <!-- Icon Container -->
@@ -81,6 +81,28 @@
     <!-- Message -->
     <div class="ms-4 flex-1 text-sm font-medium break-words">
       {{ notification.message }}
+
+      <!-- Progress Bar -->
+      <div
+        *ngIf="notification.showProgress"
+        class="mt-2 w-full bg-gray-200 rounded-full h-2"
+      >
+        <div
+          [ngClass]="{
+            'bg-green-600': notification.type === 'success',
+            'bg-red-600': notification.type === 'error',
+            'bg-blue-600': notification.type === 'info',
+            'bg-yellow-600': notification.type === 'warning'
+          }"
+          class="h-2 rounded-full transition-all duration-300 ease-out"
+          [style.width.%]="notification.progress || 0"
+        ></div>
+      </div>
+
+      <!-- Progress Text -->
+      <div *ngIf="notification.showProgress" class="mt-1 text-xs opacity-75">
+        {{ notification.progress || 0 }}%
+      </div>
     </div>
 
     <button

@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { NotificationService } from '../../services/system/notification.service';
+import {
+  NotificationService,
+  Notification,
+} from '../../services/system/notification.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -7,20 +10,22 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app-notification.component.html',
   styleUrls: ['./app-notification.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class NotificationComponent implements OnInit {
-  notifications: any[] = [];
+  notifications: Notification[] = [];
 
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
-    this.notificationService.notifications$.subscribe((notifications: any[]) => {
-      this.notifications = notifications;
-    });
+    this.notificationService.notifications$.subscribe(
+      (notifications: Notification[]) => {
+        this.notifications = notifications;
+      }
+    );
   }
 
-  removeNotification(notification: any): void {
+  removeNotification(notification: Notification): void {
     this.notificationService.removeNotification(notification);
   }
 }

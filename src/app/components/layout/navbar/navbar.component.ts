@@ -112,13 +112,28 @@ export class NavbarComponent implements OnInit, OnChanges {
   saveInformation(): void {
     this.userMenuOpen = false;
 
-    this.notificationService.addNotification(
+    // Crear notificación con barra de progreso
+    const notificationId = this.notificationService.addNotification(
       this.transloco.translate('navbar.backup.generating'),
-      'info'
+      'info',
+      true
     );
+
+    // Simular progreso durante la generación del backup
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15; // Incremento aleatorio para simular progreso
+      if (progress < 90) {
+        this.notificationService.updateProgress(notificationId, progress);
+      }
+    }, 200);
 
     this.backupService.downloadBackup().subscribe({
       next: (blob: Blob) => {
+        // Completar el progreso
+        clearInterval(progressInterval);
+        this.notificationService.updateProgress(notificationId, 100);
+
         // Crear URL temporal para el blob
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -137,12 +152,19 @@ export class NavbarComponent implements OnInit, OnChanges {
         // Limpiar URL temporal
         window.URL.revokeObjectURL(url);
 
-        this.notificationService.addNotification(
-          this.transloco.translate('navbar.backup.download_success'),
-          'success'
-        );
+        // Mostrar notificación de éxito después de un breve delay
+        setTimeout(() => {
+          this.notificationService.addNotification(
+            this.transloco.translate('navbar.backup.download_success'),
+            'success'
+          );
+        }, 1000);
       },
       error: (error) => {
+        // Detener progreso y remover notificación en caso de error
+        clearInterval(progressInterval);
+        this.notificationService.removeNotificationById(notificationId);
+
         console.error('Error al descargar backup:', error);
         const errorMessage =
           error?.error?.detail ||
