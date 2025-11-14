@@ -130,9 +130,14 @@ export class NavbarComponent implements OnInit, OnChanges {
 
     this.backupService.downloadBackup().subscribe({
       next: (blob: Blob) => {
-        // Completar el progreso
+        // Completar el progreso y remover la notificación
         clearInterval(progressInterval);
         this.notificationService.updateProgress(notificationId, 100);
+
+        // Remover la notificación de progreso después de completarla
+        setTimeout(() => {
+          this.notificationService.removeNotificationById(notificationId);
+        }, 500);
 
         // Crear URL temporal para el blob
         const url = window.URL.createObjectURL(blob);
@@ -241,9 +246,14 @@ export class NavbarComponent implements OnInit, OnChanges {
 
       this.backupService.restoreBackup(file).subscribe({
         next: (response) => {
-          // Completar el progreso
+          // Completar el progreso y remover la notificación
           clearInterval(progressInterval);
           this.notificationService.updateProgress(notificationId, 100);
+
+          // Remover la notificación de progreso después de completarla
+          setTimeout(() => {
+            this.notificationService.removeNotificationById(notificationId);
+          }, 500);
 
           // Mostrar notificación de éxito después de un breve delay
           setTimeout(() => {
