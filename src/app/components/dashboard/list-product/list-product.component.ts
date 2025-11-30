@@ -41,6 +41,8 @@ export class ListProductComponent implements OnInit {
   data: any[] = [];
   image: any;
   loading = false;
+  activeStatus = '';
+  inactiveStatus = '';
   imageUrls: { [key: number]: string } = {};
   videoUrls: { [key: number]: string } = {};
 
@@ -142,11 +144,18 @@ export class ListProductComponent implements OnInit {
     const rowsTranslation$ = combineLatest([
       this.transloco.selectTranslate('table.buttons.edit'),
       this.transloco.selectTranslate('table.buttons.delete'),
+      this.transloco.selectTranslate('table.buttons.disable'),
+      this.transloco.selectTranslate('table.buttons.enable'),
     ]);
 
     // Suscribirse a los cambios de idioma para las acciones de fila
     const rowActionsSubscription = rowsTranslation$.subscribe(
-      ([editTranslation, deleteTranslation]) => {
+      ([
+        editTranslation,
+        deleteTranslation,
+        enableTranslation,
+        disableTranslation,
+      ]) => {
         this.rowActions = [
           {
             label: editTranslation,
@@ -159,6 +168,17 @@ export class ListProductComponent implements OnInit {
             icon: icons['delete'],
             onClick: (data) => this.delete(data),
             class: buttonVariants.outline.red,
+          },
+          {
+            label: (data) =>
+              data.status ? disableTranslation : enableTranslation,
+            icon: (data) =>
+              data.status ? icons['activate'] : icons['deactivate'],
+            onClick: (data) => this.toggleStatus(data),
+            class: (data) =>
+              data.status
+                ? buttonVariants.outline.gray
+                : buttonVariants.outline.neutral,
           },
         ];
       }
@@ -398,5 +418,52 @@ export class ListProductComponent implements OnInit {
       }
     );
     this.subscriptions.push(deleteActionsSubscription);
+  }
+
+  toggleStatus(data: any) {
+    const newStatus = !data.status;
+    const formData = new FormData();
+    formData.append('id', data.id);
+    formData.append('status', String(newStatus));
+    this.srv.patch(formData, data.id).subscribe({
+      next: () => {
+        data.status = newStatus;
+        const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
+
+        // Notificación de éxito con traducción y parámetros
+        const message = this.transloco.translate(
+          'notifications.news.success.statusUpdated',
+          { status: statusText }
+        );
+        this.notificationSrv.addNotification(message, 'success');
+
+        // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
+        data.statusToShow = statusText;
+      },
+      error: (error) => {
+        if (error?.error?.message && error.error?.statusCode === 400) {
+          this.notificationSrv.addNotification(error.error.message, 'error');
+        } else {
+          // Notificación de error genérico con traducción
+          this.translateAndNotify(
+            'notifications.news.error.statusUpdate',
+            'error'
+          );
+        }
+      },
+    });
+  }
+
+  private translateAndNotify(
+    key: string,
+    severity: 'success' | 'error' | 'info' | 'warn',
+    params?: object
+  ) {
+    this.transloco
+      .selectTranslate(key, params)
+      .pipe(take(1))
+      .subscribe((message) => {
+        this.notificationSrv.addNotification(message, severity);
+      });
   }
 }
