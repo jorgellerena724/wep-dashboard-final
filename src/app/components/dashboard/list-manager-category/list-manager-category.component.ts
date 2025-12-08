@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   TableComponent,
   Column,
@@ -24,7 +24,7 @@ import { ManagerCategoryService } from '../../../shared/services/features/manage
 
 @Component({
   selector: 'app-list-manager-category',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-manager-category.component.html',
   standalone: true,
   providers: [],

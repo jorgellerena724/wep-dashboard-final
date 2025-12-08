@@ -7,7 +7,7 @@ import {
   ViewChild,
   AfterViewInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   TableComponent,
   Column,
@@ -34,12 +34,11 @@ import { combineLatest, Subscription, take } from 'rxjs';
 @Component({
   selector: 'app-list-news',
   imports: [
-    CommonModule,
     TableComponent,
     ButtonModule,
     TranslocoModule,
-    TooltipModule,
-  ],
+    TooltipModule
+],
   templateUrl: './list-news.component.html',
   standalone: true,
   providers: [],

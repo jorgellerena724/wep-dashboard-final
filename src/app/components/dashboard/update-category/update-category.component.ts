@@ -14,7 +14,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -28,10 +28,9 @@ import { HomeData } from '../../../shared/interfaces/home.interface';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
-    TranslocoModule,
-  ],
+    TranslocoModule
+],
 })
 export class UpdateCategoryComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);

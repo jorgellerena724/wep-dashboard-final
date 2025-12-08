@@ -5,7 +5,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -19,10 +19,9 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
-    TranslocoModule,
-  ],
+    TranslocoModule
+],
 })
 export class CreateUserComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);

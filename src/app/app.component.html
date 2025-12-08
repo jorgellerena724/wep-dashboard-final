@@ -1,6 +1,6 @@
 <app-modal></app-modal>
 <app-notification></app-notification>
-<ng-container *ngIf="showLayout; else noLayout">
+@if (showLayout) {
   @defer {
   <div class="flex flex-col min-h-screen relative">
     <app-sidebar></app-sidebar>
@@ -11,8 +11,7 @@
     </main>
     <app-footer [ngClass]="{'ml-0': isMobile, 'ml-20': isCollapsed && !isMobile, 'ml-64': !isCollapsed && !isMobile}" class="transition-all duration-300"></app-footer>
   </div>
-  }
-</ng-container>
-<ng-template #noLayout>
+}
+} @else {
   <router-outlet></router-outlet>
-</ng-template>
+}

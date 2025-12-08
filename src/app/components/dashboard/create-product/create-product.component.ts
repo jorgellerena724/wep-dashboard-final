@@ -20,7 +20,7 @@ import {
   ValidationErrors,
   AsyncValidatorFn,
 } from '@angular/forms';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -54,13 +54,12 @@ interface ProductFile {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
     AppFileUploadComponent,
     SelectComponent,
     TranslocoModule,
-    TooltipModule,
-  ],
+    TooltipModule
+],
 })
 export class CreateProductComponent implements DynamicComponent, OnInit {
   private transloco = inject(TranslocoService);

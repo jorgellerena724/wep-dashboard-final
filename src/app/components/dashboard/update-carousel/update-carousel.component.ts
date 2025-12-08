@@ -11,7 +11,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -27,12 +27,11 @@ import { TooltipModule } from 'primeng/tooltip';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
-    TooltipModule,
-  ],
+    TooltipModule
+],
 })
 export class UpdateCarouselComponent implements DynamicComponent {
   @Input() initialData?: any;

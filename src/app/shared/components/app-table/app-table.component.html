@@ -1,25 +1,26 @@
 <div
   class="card border bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] dark:border-gray-200 rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.2),_0_0_40px_rgba(0,0,0,0.15),_0_0_60px_rgba(0,0,0,0.1),_0_0_80px_rgba(0,0,0,0.05)] border-gray-600"
->
+  >
   <div
     class="flex items-center justify-between p-2 border-b border-gray-600 dark:border-gray-200"
-  >
+    >
     <!-- Contenedor para los botones de acción a la izquierda -->
     <div class="flex items-center gap-2">
-      <ng-container *ngFor="let action of headerActions">
-        <button
-          pButton
-          [type]="'button'"
-          [icon]="action.icon"
-          [pTooltip]="action.label"
-          tooltipPosition="top"
-          [class]="action.class"
-          class="w-full sm:w-auto flex items-center justify-center gap-2 p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
-          (click)="action.onClick()"
-          [disabled]="isHeaderActionDisabled(action) || false"
-          *ngIf="isHeaderActionVisible(action)"
-        ></button>
-      </ng-container>
+      @for (action of headerActions; track action) {
+        @if (isHeaderActionVisible(action)) {
+          <button
+            pButton
+            [type]="'button'"
+            [icon]="action.icon"
+            [pTooltip]="action.label"
+            tooltipPosition="top"
+            [class]="action.class"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
+            (click)="action.onClick()"
+            [disabled]="isHeaderActionDisabled(action) || false"
+          ></button>
+        }
+      }
     </div>
 
     <!-- Botón de refresh a la derecha -->
@@ -28,7 +29,7 @@
       class="p-2 text-gray-800 dark:text-gray-300 transition-colors rotate-on-hover"
       pTooltip="{{ 'table.tooltips.refresh' | transloco }}"
       tooltipPosition="top"
-    >
+      >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="27"
@@ -36,344 +37,351 @@
         fill="currentColor"
         class="bi bi-arrow-clockwise"
         viewBox="0 0 16 16"
-      >
+        >
         <path
           fill-rule="evenodd"
           d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-        />
-        <path
-          d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-        />
-      </svg>
-    </button>
-  </div>
+          />
+          <path
+            d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
+            />
+          </svg>
+        </button>
+      </div>
 
-  <p-table
-    #dt
-    [value]="displayedData"
-    [columns]="columnsWithActions"
-    styleClass="p-datatable-sm "
-    [resizableColumns]="true"
-    responsiveLayout="scroll "
-    class="w-full"
-    [stripedRows]="true"
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th
-          *ngFor="let col of columnsWithActions"
+      <p-table
+        #dt
+        [value]="displayedData"
+        [columns]="columnsWithActions"
+        styleClass="p-datatable-sm "
+        [resizableColumns]="true"
+        responsiveLayout="scroll "
+        class="w-full"
+        [stripedRows]="true"
+        >
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of columnsWithActions; track col) {
+              <th
           [pSortableColumn]="
             col.field !== 'actions' && col.sortable ? col.field : undefined
           "
-          [width]="col.width"
-          class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b-1 border-b-gray-700 dark:border-b-gray-200 dark:border-b-1"
-        >
-          <div class="flex items-center justify-between gap-2">
-            <span>{{ col.header }}</span>
-            <div
-              class="flex items-center gap-2"
-              *ngIf="col.field !== 'actions'"
-            >
-              <p-sortIcon
-                *ngIf="col.sortable"
-                [field]="col.field"
-                class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-                pTooltip="{{ 'table.tooltips.sort' | transloco }}"
-                tooltipPosition="top"
-              ></p-sortIcon>
-              <button
-                *ngIf="col.filter"
-                type="button"
-                (click)="$event.stopPropagation(); toggleFilter(col.field)"
-                pTooltip="{{ 'table.tooltips.filter' | transloco }}"
-                tooltipPosition="top"
-              >
-                <i
-                  class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-                ></i>
-              </button>
-            </div>
-          </div>
-          <div
-            *ngIf="col.filter && showFilterInput[col.field]"
-            class="mt-2"
-            [formGroup]="columnFiltersForm"
-            (click)="$event.stopPropagation()"
-          >
-            <div class="relative">
-              <input
-                type="text"
-                [formControlName]="col.field"
-                class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] w-full px-3 py-2 text-sm rounded-md border border-gray-800 dark:border-gray-300"
+                [width]="col.width"
+                class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b-1 border-b-gray-700 dark:border-b-gray-200 dark:border-b-1"
+                >
+                <div class="flex items-center justify-between gap-2">
+                  <span>{{ col.header }}</span>
+                  @if (col.field !== 'actions') {
+                    <div
+                      class="flex items-center gap-2"
+                      >
+                      @if (col.sortable) {
+                        <p-sortIcon
+                          [field]="col.field"
+                          class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                          pTooltip="{{ 'table.tooltips.sort' | transloco }}"
+                          tooltipPosition="top"
+                        ></p-sortIcon>
+                      }
+                      @if (col.filter) {
+                        <button
+                          type="button"
+                          (click)="$event.stopPropagation(); toggleFilter(col.field)"
+                          pTooltip="{{ 'table.tooltips.filter' | transloco }}"
+                          tooltipPosition="top"
+                          >
+                          <i
+                            class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                          ></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (col.filter && showFilterInput[col.field]) {
+                  <div
+                    class="mt-2"
+                    [formGroup]="columnFiltersForm"
+                    (click)="$event.stopPropagation()"
+                    >
+                    <div class="relative">
+                      <input
+                        type="text"
+                        [formControlName]="col.field"
+                        class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] w-full px-3 py-2 text-sm rounded-md border border-gray-800 dark:border-gray-300"
                 [placeholder]="
                   col.filterPlaceholder || ('table.search' | transloco)
                 "
-              />
-              <button
-                type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-                (click)="clearFilter(col.field)"
-                *ngIf="columnFiltersForm.get(col.field)?.value"
-              >
-                <i class="pi pi-times"></i>
-              </button>
-            </div>
-          </div>
-        </th>
-      </tr>
-    </ng-template>
+                        />
+                        @if (columnFiltersForm.get(col.field)?.value) {
+                          <button
+                            type="button"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                            (click)="clearFilter(col.field)"
+                            >
+                            <i class="pi pi-times"></i>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </th>
+              }
+            </tr>
+          </ng-template>
 
-    <ng-template pTemplate="body" let-rowData>
-      <tr
-        class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200"
-      >
-        <td
-          *ngFor="let col of columnsWithActions"
-          class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-gray-400 dark:border-gray-600"
-        >
-          <ng-container *ngIf="col.field !== 'actions'; else actionsTemplate">
-            <ng-container
+          <ng-template pTemplate="body" let-rowData>
+            <tr
+              class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200"
+              >
+              @for (col of columnsWithActions; track col) {
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-gray-400 dark:border-gray-600"
+                  >
+                  @if (col.field !== 'actions') {
+                    <ng-container
               *ngTemplateOutlet="
                 customTemplates[col.field] || defaultTemplate;
                 context: { $implicit: rowData, field: col.field }
               "
-            >
-            </ng-container>
-          </ng-container>
-          <ng-template #actionsTemplate>
-            <div class="flex items-center gap-2">
-              <ng-container *ngFor="let action of rowActions">
-                <button
-                  pButton
-                  [icon]="getRowActionIcon(action, rowData)"
-                  [pTooltip]="getRowActionLabel(action, rowData)"
-                  tooltipPosition="top"
-                  (click)="action.onClick(rowData)"
+                      >
+                    </ng-container>
+                  } @else {
+                    <div class="flex items-center gap-2">
+                      @for (action of rowActions; track action) {
+                        @if (isRowActionVisible(action, rowData)) {
+                          <button
+                            pButton
+                            [icon]="getRowActionIcon(action, rowData)"
+                            [pTooltip]="getRowActionLabel(action, rowData)"
+                            tooltipPosition="top"
+                            (click)="action.onClick(rowData)"
                   [class]="
                     'p-button-text ' + getRowActionClass(action, rowData)
                   "
-                  [disabled]="isRowActionDisabled(action, rowData) || false"
-                  *ngIf="isRowActionVisible(action, rowData)"
-                ></button>
-              </ng-container>
-            </div>
+                            [disabled]="isRowActionDisabled(action, rowData) || false"
+                          ></button>
+                        }
+                      }
+                    </div>
+                  }
+                </td>
+              }
+            </tr>
           </ng-template>
-        </td>
-      </tr>
-    </ng-template>
 
-    <ng-template #defaultTemplate let-rowData let-field="field">
-      {{ truncate(rowData[field], 30) }}
-    </ng-template>
+          <ng-template #defaultTemplate let-rowData let-field="field">
+            {{ truncate(rowData[field], 30) }}
+          </ng-template>
 
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td
-          [attr.colspan]="columnsWithActions.length"
-          class="text-center py-4 text-gray-500 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] italic"
-        >
-          {{ "table.nodata" | transloco }}
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
-  <div class="p-2 w-full">
-    <p-paginator
-      [rows]="rowsPerPage"
-      [totalRecords]="totalRecords"
-      (onPageChange)="onPageChange($event)"
-      [rowsPerPageOptions]="[7, 10, 15, 25]"
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td
+                [attr.colspan]="columnsWithActions.length"
+                class="text-center py-4 text-gray-500 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] italic"
+                >
+                {{ "table.nodata" | transloco }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+        <div class="p-2 w-full">
+          <p-paginator
+            [rows]="rowsPerPage"
+            [totalRecords]="totalRecords"
+            (onPageChange)="onPageChange($event)"
+            [rowsPerPageOptions]="[7, 10, 15, 25]"
       currentPageReportTemplate="{{
         'table.pagination.first' | transloco
       }} {first} {{ 'table.pagination.second' | transloco }} {last} {{
         'table.pagination.third' | transloco
       }} {totalRecords} {{ 'table.pagination.fourth' | transloco }}"
-      [showCurrentPageReport]="true"
-      class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)]"
-    ></p-paginator>
-  </div>
-</div>
-<style>
-  input:focus,
-  label:focus {
-    outline: 1px solid #1f2937;
-  }
-  .dark input:focus,
-  label:focus {
-    outline: 1px solid #e5e7eb;
-  }
+            [showCurrentPageReport]="true"
+            class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)]"
+          ></p-paginator>
+        </div>
+      </div>
+      <style>
+        input:focus,
+        label:focus {
+        outline: 1px solid #1f2937;
+      }
+      .dark input:focus,
+      label:focus {
+      outline: 1px solid #e5e7eb;
+    }
 
-  input[type="text"] {
+    input[type="text"] {
     font-weight: normal !important;
   }
   .p-paginator {
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    background: rgb(232 232 232 / var(--tw-text-opacity, 1));
-    color: var(--p-paginator-color);
-    padding: var(--p-paginator-padding);
-    border-radius: var(--p-paginator-border-radius);
-    gap: var(--p-paginator-gap);
-  }
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: rgb(232 232 232 / var(--tw-text-opacity, 1));
+  color: var(--p-paginator-color);
+  padding: var(--p-paginator-padding);
+  border-radius: var(--p-paginator-border-radius);
+  gap: var(--p-paginator-gap);
+}
 
-  .dark .p-paginator {
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    background: #18181b;
-    color: var(--p-paginator-color);
-    padding: var(--p-paginator-padding);
-    border-radius: var(--p-paginator-border-radius);
-    gap: var(--p-paginator-gap);
-  }
+.dark .p-paginator {
+min-height: 100px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-wrap: wrap;
+background: #18181b;
+color: var(--p-paginator-color);
+padding: var(--p-paginator-padding);
+border-radius: var(--p-paginator-border-radius);
+gap: var(--p-paginator-gap);
+}
 
-  .dark .p-paginator-page.p-paginator-page-selected {
-    background: #1f2937;
-    pointer-events: none;
-    color: white !important;
-  }
+.dark .p-paginator-page.p-paginator-page-selected {
+background: #1f2937;
+pointer-events: none;
+color: white !important;
+}
 
-  .rotate-on-hover:hover {
-    animation: rotate 0.5s linear;
-  }
+.rotate-on-hover:hover {
+animation: rotate 0.5s linear;
+}
 
-  .p-paginator-page.p-paginator-page-selected {
-    background: #9ca3af;
-    pointer-events: none;
-    color: white !important;
-  }
+.p-paginator-page.p-paginator-page-selected {
+background: #9ca3af;
+pointer-events: none;
+color: white !important;
+}
 
-  .dark .p-paginator-current {
-    color: #d1d5db;
-  }
+.dark .p-paginator-current {
+color: #d1d5db;
+}
 
-  .p-paginator-current {
-    color: #343b46;
-  }
+.p-paginator-current {
+color: #343b46;
+}
 
-  .dark .p-icon {
-    display: inline-block;
-    vertical-align: baseline;
-    color: #d1d5db;
-  }
+.dark .p-icon {
+display: inline-block;
+vertical-align: baseline;
+color: #d1d5db;
+}
 
-  .p-icon {
-    display: inline-block;
-    vertical-align: baseline;
-    color: #343b46;
-  }
+.p-icon {
+display: inline-block;
+vertical-align: baseline;
+color: #343b46;
+}
 
-  .p-paginator-page:hover,
-  .p-paginator-next:hover,
-  .p-paginator-last:hover,
-  .p-paginator-first:hover,
-  .p-paginator-prev:hover {
-    background: #d1d5db !important;
-  }
+.p-paginator-page:hover,
+.p-paginator-next:hover,
+.p-paginator-last:hover,
+.p-paginator-first:hover,
+.p-paginator-prev:hover {
+background: #d1d5db !important;
+}
 
-  .dark .p-paginator-page:hover,
-  .dark .p-paginator-next:hover,
-  .dark .p-paginator-last:hover,
-  .dark .p-paginator-first:hover,
-  .dark .p-paginator-prev:hover {
-    background: #343b46 !important;
-  }
+.dark .p-paginator-page:hover,
+.dark .p-paginator-next:hover,
+.dark .p-paginator-last:hover,
+.dark .p-paginator-first:hover,
+.dark .p-paginator-prev:hover {
+background: #343b46 !important;
+}
 
-  .p-select-option.p-select-option-selected {
-    background: #9ca3af;
-    color: white;
-  }
+.p-select-option.p-select-option-selected {
+background: #9ca3af;
+color: white;
+}
 
-  .p-select-option.p-select-option-selected:hover {
-    background: #9ca3af;
-    color: white;
-  }
+.p-select-option.p-select-option-selected:hover {
+background: #9ca3af;
+color: white;
+}
 
-  .dark .p-select-option.p-select-option-selected {
-    background: #1f2937;
-    pointer-events: none;
-    color: white;
-  }
+.dark .p-select-option.p-select-option-selected {
+background: #1f2937;
+pointer-events: none;
+color: white;
+}
 
-  .dark .p-select-option.p-select-option-selected:hover {
-    background: #1f2937;
-    pointer-events: none;
-    color: white;
-  }
+.dark .p-select-option.p-select-option-selected:hover {
+background: #1f2937;
+pointer-events: none;
+color: white;
+}
 
-  :root {
-    --p-select-focus-border-color: #1f2937 !important;
-  }
+:root {
+--p-select-focus-border-color: #1f2937 !important;
+}
 
-  .dark {
-    --p-select-focus-border-color: #ffffff !important;
-  }
+.dark {
+--p-select-focus-border-color: #ffffff !important;
+}
 
-  .p-select-option:hover {
-    background: #d1d5db;
-  }
+.p-select-option:hover {
+background: #d1d5db;
+}
 
-  .dark .p-select-option:hover {
-    background: #343b46;
-  }
+.dark .p-select-option:hover {
+background: #343b46;
+}
 
-  .p-select-option {
-    color: #343b46;
-  }
+.p-select-option {
+color: #343b46;
+}
 
-  .dark .p-select-option {
-    color: #d1d5db;
-  }
+.dark .p-select-option {
+color: #d1d5db;
+}
 
-  .p-paginator-page,
-  .p-paginator-next,
-  .p-paginator-last,
-  .p-paginator-first,
-  .p-paginator-prev {
-    color: #343b46;
-  }
+.p-paginator-page,
+.p-paginator-next,
+.p-paginator-last,
+.p-paginator-first,
+.p-paginator-prev {
+color: #343b46;
+}
 
-  .dark {
-    .p-paginator-page,
-    .p-paginator-next,
-    .p-paginator-last,
-    .p-paginator-first,
-    .p-paginator-prev {
-      color: #d1d5db;
-    }
-  }
+.dark {
+.p-paginator-page,
+.p-paginator-next,
+.p-paginator-last,
+.p-paginator-first,
+.p-paginator-prev {
+color: #d1d5db;
+}
+}
 
-  .p-select-list {
-    flex-direction: row;
-  }
+.p-select-list {
+flex-direction: row;
+}
 
-  @keyframes rotate {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+@keyframes rotate {
+from {
+transform: rotate(0deg);
+}
+to {
+transform: rotate(360deg);
+}
+}
 
-  .rotate-on-hover:hover {
-    animation: rotate 0.5s linear;
-  }
+.rotate-on-hover:hover {
+animation: rotate 0.5s linear;
+}
 
-  @media (max-width: 660px) {
-    .p-paginator {
-      min-height: 200px;
-    }
-  }
+@media (max-width: 660px) {
+.p-paginator {
+min-height: 200px;
+}
+}
 
-  @media (max-width: 660px) {
-    .dark .p-paginator {
-      min-height: 200px;
-    }
-  }
+@media (max-width: 660px) {
+.dark .p-paginator {
+min-height: 200px;
+}
+}
 </style>
