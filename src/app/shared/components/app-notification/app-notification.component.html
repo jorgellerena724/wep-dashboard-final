@@ -1,8 +1,8 @@
 <div
   class="fixed top-4 right-4 z-[9999] space-y-4 sm:space-y-6 sm:top-6 sm:right-6 lg:top-8 lg:right-8"
 >
+  @for (notification of notifications; track notification) {
   <div
-    *ngFor="let notification of notifications"
     [ngClass]="{
       'bg-green-50/80 border-green-400 text-green-800':
         notification.type === 'success',
@@ -26,88 +26,64 @@
       class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-opacity-10"
     >
       <!-- SVG Icons -->
-      <ng-container [ngSwitch]="notification.type">
-        <!-- Success Icon -->
-        <svg
-          *ngSwitchCase="'success'"
-          class="w-6 h-6"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
-          />
-        </svg>
-        <!-- Error Icon -->
-        <svg
-          *ngSwitchCase="'error'"
-          class="w-6 h-6"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
-          />
-        </svg>
-        <!-- Info Icon -->
-        <svg
-          *ngSwitchCase="'info'"
-          class="w-6 h-6"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
-          />
-        </svg>
-        <!-- Warning Icon -->
-        <svg
-          *ngSwitchCase="'warning'"
-          class="w-6 h-6"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
-          />
-        </svg>
-      </ng-container>
+      @switch (notification.type) {
+      <!-- Success Icon -->
+      @case ('success') {
+      <svg
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+        />
+      </svg>
+      }
+      <!-- Error Icon -->
+      @case ('error') {
+      <svg
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
+        />
+      </svg>
+      }
+      <!-- Info Icon -->
+      @case ('info') {
+      <svg
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
+        />
+      </svg>
+      }
+      <!-- Warning Icon -->
+      @case ('warning') {
+      <svg
+        class="w-6 h-6"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z"
+        />
+      </svg>
+      } }
     </div>
-
     <!-- Message -->
-    <div class="ms-4 flex-1 text-sm font-medium break-words min-w-0">
+    <div class="ms-4 flex-1 text-sm font-medium break-words">
       {{ notification.message }}
-
-      <!-- Progress Bar -->
-      <div
-        *ngIf="notification.showProgress"
-        class="mt-2 w-full bg-gray-200 rounded-full h-2"
-      >
-        <div
-          [ngClass]="{
-            'bg-green-600': notification.type === 'success',
-            'bg-red-600': notification.type === 'error',
-            'bg-blue-600': notification.type === 'info',
-            'bg-yellow-600': notification.type === 'warning'
-          }"
-          class="h-2 rounded-full transition-all duration-300 ease-out"
-          [style.width.%]="notification.progress || 0"
-        ></div>
-      </div>
-
-      <!-- Progress Text -->
-      <div
-        *ngIf="notification.showProgress"
-        class="mt-1 text-xs opacity-75 text-center"
-      >
-        {{ roundProgress(notification.progress) }}%
-      </div>
     </div>
-
     <button
       type="button"
       (click)="removeNotification(notification)"
@@ -136,4 +112,5 @@
       </svg>
     </button>
   </div>
+  }
 </div>

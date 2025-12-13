@@ -5,7 +5,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   TableComponent,
   Column,
@@ -28,7 +28,7 @@ import { combineLatest, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-list-header',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-header.component.html',
   standalone: true,
   providers: [],

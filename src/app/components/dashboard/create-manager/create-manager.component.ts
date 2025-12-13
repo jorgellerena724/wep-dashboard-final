@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 import { map, catchError } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
-import { CommonModule } from '@angular/common';
+
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -35,13 +35,12 @@ import { TooltipModule } from 'primeng/tooltip';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
-    TooltipModule,
-  ],
+    TooltipModule
+],
 })
 export class CreateManagerComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);

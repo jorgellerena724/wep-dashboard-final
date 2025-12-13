@@ -6,20 +6,20 @@
   >
     <!-- Contenedor para los botones de acción a la izquierda -->
     <div class="flex items-center gap-2">
-      <ng-container *ngFor="let action of headerActions">
-        <button
-          pButton
-          [type]="'button'"
-          [icon]="action.icon"
-          [pTooltip]="action.label"
-          tooltipPosition="top"
-          [class]="action.class"
-          class="w-full sm:w-auto flex items-center justify-center gap-2 p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
-          (click)="action.onClick()"
-          [disabled]="isHeaderActionDisabled(action) || false"
-          *ngIf="isHeaderActionVisible(action)"
-        ></button>
-      </ng-container>
+      @for (action of headerActions; track action) { @if
+      (isHeaderActionVisible(action)) {
+      <button
+        pButton
+        [type]="'button'"
+        [icon]="action.icon"
+        [pTooltip]="action.label"
+        tooltipPosition="top"
+        [class]="action.class"
+        class="w-full sm:w-auto flex items-center justify-center gap-2 p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
+        (click)="action.onClick()"
+        [disabled]="isHeaderActionDisabled(action) || false"
+      ></button>
+      } }
     </div>
 
     <!-- Botón de refresh a la derecha -->
@@ -60,8 +60,8 @@
   >
     <ng-template pTemplate="header">
       <tr>
+        @for (col of columnsWithActions; track col) {
         <th
-          *ngFor="let col of columnsWithActions"
           [pSortableColumn]="
             col.field !== 'actions' && col.sortable ? col.field : undefined
           "
@@ -70,19 +70,17 @@
         >
           <div class="flex items-center justify-between gap-2">
             <span>{{ col.header }}</span>
-            <div
-              class="flex items-center gap-2"
-              *ngIf="col.field !== 'actions'"
-            >
+            @if (col.field !== 'actions') {
+            <div class="flex items-center gap-2">
+              @if (col.sortable) {
               <p-sortIcon
-                *ngIf="col.sortable"
                 [field]="col.field"
                 class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
                 pTooltip="{{ 'table.tooltips.sort' | transloco }}"
                 tooltipPosition="top"
               ></p-sortIcon>
+              } @if (col.filter) {
               <button
-                *ngIf="col.filter"
                 type="button"
                 (click)="$event.stopPropagation(); toggleFilter(col.field)"
                 pTooltip="{{ 'table.tooltips.filter' | transloco }}"
@@ -92,10 +90,12 @@
                   class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
                 ></i>
               </button>
+              }
             </div>
+            }
           </div>
+          @if (col.filter && showFilterInput[col.field]) {
           <div
-            *ngIf="col.filter && showFilterInput[col.field]"
             class="mt-2"
             [formGroup]="columnFiltersForm"
             (click)="$event.stopPropagation()"
@@ -109,17 +109,20 @@
                   col.filterPlaceholder || ('table.search' | transloco)
                 "
               />
+              @if (columnFiltersForm.get(col.field)?.value) {
               <button
                 type="button"
                 class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                 (click)="clearFilter(col.field)"
-                *ngIf="columnFiltersForm.get(col.field)?.value"
               >
                 <i class="pi pi-times"></i>
               </button>
+              }
             </div>
           </div>
+          }
         </th>
+        }
       </tr>
     </ng-template>
 
@@ -127,38 +130,36 @@
       <tr
         class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200"
       >
+        @for (col of columnsWithActions; track col) {
         <td
-          *ngFor="let col of columnsWithActions"
           class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-gray-400 dark:border-gray-600"
         >
-          <ng-container *ngIf="col.field !== 'actions'; else actionsTemplate">
-            <ng-container
-              *ngTemplateOutlet="
-                customTemplates[col.field] || defaultTemplate;
-                context: { $implicit: rowData, field: col.field }
-              "
-            >
-            </ng-container>
+          @if (col.field !== 'actions') {
+          <ng-container
+            *ngTemplateOutlet="
+              customTemplates[col.field] || defaultTemplate;
+              context: { $implicit: rowData, field: col.field }
+            "
+          >
           </ng-container>
-          <ng-template #actionsTemplate>
-            <div class="flex items-center gap-2">
-              <ng-container *ngFor="let action of rowActions">
-                <button
-                  pButton
-                  [icon]="getRowActionIcon(action, rowData)"
-                  [pTooltip]="getRowActionLabel(action, rowData)"
-                  tooltipPosition="top"
-                  (click)="action.onClick(rowData)"
-                  [class]="
-                    'p-button-text ' + getRowActionClass(action, rowData)
-                  "
-                  [disabled]="isRowActionDisabled(action, rowData) || false"
-                  *ngIf="isRowActionVisible(action, rowData)"
-                ></button>
-              </ng-container>
-            </div>
-          </ng-template>
+          } @else {
+          <div class="flex items-center gap-2">
+            @for (action of rowActions; track action) { @if
+            (isRowActionVisible(action, rowData)) {
+            <button
+              pButton
+              [icon]="getRowActionIcon(action, rowData)"
+              [pTooltip]="getRowActionLabel(action, rowData)"
+              tooltipPosition="top"
+              (click)="action.onClick(rowData)"
+              [class]="'p-button-text ' + getRowActionClass(action, rowData)"
+              [disabled]="isRowActionDisabled(action, rowData) || false"
+            ></button>
+            } }
+          </div>
+          }
         </td>
+        }
       </tr>
     </ng-template>
 

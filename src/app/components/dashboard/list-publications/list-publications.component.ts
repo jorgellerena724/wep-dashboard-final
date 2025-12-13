@@ -5,7 +5,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   TableComponent,
   Column,
@@ -30,7 +30,7 @@ import { UpdatePublicationComponent } from '../update-publication/update-publica
 
 @Component({
   selector: 'app-list-publications',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-publications.component.html',
   standalone: true,
   providers: [],

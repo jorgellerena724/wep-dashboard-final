@@ -7,7 +7,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
@@ -21,10 +21,9 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     TextFieldComponent,
-    TranslocoModule,
-  ],
+    TranslocoModule
+],
 })
 export class UpdateUserComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);

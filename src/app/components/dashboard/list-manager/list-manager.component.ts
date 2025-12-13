@@ -5,7 +5,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   TableComponent,
   Column,
@@ -30,7 +30,7 @@ import { combineLatest, Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-list-manager',
-  imports: [CommonModule, TableComponent, ButtonModule, TranslocoModule],
+  imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-manager.component.html',
   standalone: true,
   providers: [],

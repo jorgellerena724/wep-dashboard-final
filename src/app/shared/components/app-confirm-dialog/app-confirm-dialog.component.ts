@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, DialogModule, ButtonModule],
+  imports: [DialogModule, ButtonModule],
   templateUrl: './app-confirm-dialog.component.html',
 })
 export class ConfirmDialogComponent {

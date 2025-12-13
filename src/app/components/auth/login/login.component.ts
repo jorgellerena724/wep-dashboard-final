@@ -9,7 +9,7 @@ import {
 } from '@angular/forms';
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { take } from 'rxjs/operators';
 
@@ -17,7 +17,7 @@ import { take } from 'rxjs/operators';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-  imports: [ReactiveFormsModule, CommonModule, TranslocoModule],
+  imports: [ReactiveFormsModule, TranslocoModule],
   standalone: true,
 })
 export class LoginComponent {

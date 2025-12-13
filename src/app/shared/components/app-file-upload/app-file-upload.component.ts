@@ -6,7 +6,7 @@ import {
   Output,
   OnChanges,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { ButtonModule } from 'primeng/button';
@@ -18,12 +18,11 @@ import { FileUploadError } from '../../interfaces/fileUpload.interface';
   templateUrl: './app-file-upload.component.html',
   standalone: true,
   imports: [
-    CommonModule,
     FileUploadModule,
     ImageModule,
     ButtonModule,
-    TooltipModule,
-  ],
+    TooltipModule
+],
 })
 export class AppFileUploadComponent implements OnChanges {
   @Input() label: string = 'Cargar archivo';
