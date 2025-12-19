@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost:3002/api/';
+const apiUrl = 'http://localhost:8000/api/';
 const imgUrl = `${apiUrl}images/`;
 
 export const environment = {
