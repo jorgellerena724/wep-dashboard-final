@@ -1,21 +1,22 @@
 # ==================== ETAPA 1: BUILDER ====================
-FROM node:18-alpine AS builder
+# USAR NODE 20 o 22 (Angular CLI lo requiere)
+FROM node:20-alpine AS builder
 
 # Dependencias necesarias para build de Angular
 RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
-# 1. Copiar archivos de dependencias (mejor cache)
+# Copiar archivos de dependencias (mejor cache)
 COPY package.json package-lock.json* ./
 
-# 2. Instalar dependencias
+# Instalar dependencias
 RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
-# 3. Copiar todo el código fuente
+# Copiar todo el código fuente
 COPY . .
 
-# 4. Build de Angular
+# Build de Angular
 # NOTA: environment.prod.ts ya tiene las URLs correctas
 RUN npm run build -- \
   --configuration=production \
@@ -29,7 +30,6 @@ FROM nginx:alpine
 # Metadatos
 LABEL org.opencontainers.image.title="WEP Admin Panel"
 LABEL org.opencontainers.image.description="Panel de administración Angular para WEP"
-LABEL org.opencontainers.image.vendor="Shirkasoft"
 
 # Eliminar contenido por defecto
 RUN rm -rf /usr/share/nginx/html/*
