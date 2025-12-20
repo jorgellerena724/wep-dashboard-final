@@ -1,5 +1,5 @@
 const apiUrl = 'https://api.shirkasoft.net/api/';
-const imgUrl = `https://filesapi.shirkasoft.net/wep/`;
+const imgUrl = `${apiUrl}images/`;
 
 export const environment = {
   use_minio: true,
