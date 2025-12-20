@@ -1,5 +1,5 @@
-const apiUrl = 'http://localhost:8000/api/';
-const imgUrl = `http://localhost:9002/wep/`;
+const apiUrl = 'http://wep-backend:8000/api/';
+const imgUrl = `http://minio-storage:9002/wep/`;
 
 export const environment = {
   use_minio: true,
