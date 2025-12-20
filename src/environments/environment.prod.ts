@@ -1,5 +1,5 @@
-const apiUrl = 'http://wep-backend:8000/api/';
-const imgUrl = `http://minio-storage:9002/wep/`;
+const apiUrl = 'https://api.shirkasoft.net/api/';
+const imgUrl = `https://filesapi.shirkasoft.net/wep/`;
 
 export const environment = {
   use_minio: true,
