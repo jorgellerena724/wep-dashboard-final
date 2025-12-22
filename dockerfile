@@ -1,8 +1,9 @@
-# ==================== ETAPA 1: BUILDER ======================
+# ==================== ETAPA 1: BUILDER ========================
 FROM node:20-alpine AS builder
 
 # Instalar dependencias necesarias para compilación nativa
 RUN apk add --no-cache python3 make g++ git
+
 WORKDIR /app
 
 # 1. Copiar archivos de dependencias
@@ -18,6 +19,7 @@ COPY . .
 # 4. Build de Angular con SSR
 RUN npm run build -- \
   --configuration=production \
+  --output-path=dist \
   --output-hashing=all \
   --source-map=false
 
@@ -63,9 +65,6 @@ RUN echo "🔍 === Verificación de despliegue ===" && \
 
 # 5. Copiar configuración personalizada de Nginx
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Verificar configuración de nginx
-RUN nginx -t
 
 # 6. Healthcheck para monitoreo
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
