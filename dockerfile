@@ -1,4 +1,4 @@
-# ==================== ETAPA 1: BUILDER ========================
+# ==================== ETAPA 1: BUILDER ======================
 FROM node:20-alpine AS builder
 
 RUN apk add --no-cache python3 make g++ git
