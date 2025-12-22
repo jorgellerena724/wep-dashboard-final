@@ -29,7 +29,7 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # CORREGIDO: Copiar desde browser/ (donde Angular SSR/SSG pone los archivos)
-COPY --from=builder /app/dist/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/wep-dashboard/browser /usr/share/nginx/html
 
 # Verificar copia
 RUN echo "=== Archivos copiados ===" && \
