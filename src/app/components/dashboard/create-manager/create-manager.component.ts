@@ -26,7 +26,7 @@ import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface
 import { ManagerService } from '../../../shared/services/features/manager.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
-import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-category.service';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
@@ -39,8 +39,8 @@ import { TooltipModule } from 'primeng/tooltip';
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
-    TooltipModule
-],
+    TooltipModule,
+  ],
 })
 export class CreateManagerComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -249,10 +249,13 @@ export class CreateManagerComponent implements DynamicComponent {
       return this.srv.get().pipe(
         map((managers: any[]) => {
           const exists = managers.some((manager) => {
-            const managerCategoryId = manager.manager_category_id || manager.manager_category?.id || null;
+            const managerCategoryId =
+              manager.manager_category_id ||
+              manager.manager_category?.id ||
+              null;
             const isSameCategory = managerCategoryId === selectedCategoryId;
             const isSameName = manager.title?.toLowerCase() === name;
-            
+
             return isSameName && isSameCategory;
           });
           return exists ? { uniqueName: true } : null;

@@ -18,7 +18,7 @@ import {
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
-import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { HomeData } from '../../../shared/interfaces/home.interface';
 
@@ -26,11 +26,7 @@ import { HomeData } from '../../../shared/interfaces/home.interface';
   selector: 'app-create-manager-category',
   templateUrl: './create-manager-category.component.html',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    TextFieldComponent,
-    TranslocoModule
-],
+  imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
 })
 export class CreateManagerCategoryComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -50,10 +46,7 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
     this.form = this.fb.group({
       title: [
         '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-        ],
+        [Validators.required, Validators.minLength(3)],
         [this.duplicateNameValidator.bind(this)],
       ],
     });
@@ -89,7 +82,9 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
     });
   }
 
-  duplicateNameValidator(control: AbstractControl): Promise<ValidationErrors | null> {
+  duplicateNameValidator(
+    control: AbstractControl
+  ): Promise<ValidationErrors | null> {
     return new Promise((resolve) => {
       const title = control.value?.trim().toLowerCase();
       if (!title) {
@@ -115,12 +110,16 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
     if (this.form.invalid) {
       if (this.form.get('title')?.errors?.['duplicateName']) {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.manager-category.error.duplicateName'),
+          this.transloco.translate(
+            'notifications.manager-category.error.duplicateName'
+          ),
           'warning'
         );
       } else {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.manager-category.error.formInvalid'),
+          this.transloco.translate(
+            'notifications.manager-category.error.formInvalid'
+          ),
           'warning'
         );
       }
@@ -134,7 +133,9 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
     this.srv.post(formData).subscribe({
       next: (response) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.manager-category.success.created'),
+          this.transloco.translate(
+            'notifications.manager-category.success.created'
+          ),
           'success'
         );
         this.submitSuccess.emit();
@@ -150,7 +151,9 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.manager-category.error.create'),
+          this.transloco.translate(
+            'notifications.manager-category.error.create'
+          ),
           'error'
         );
         console.error('Error:', error);
@@ -162,4 +165,3 @@ export class CreateManagerCategoryComponent implements DynamicComponent {
     return this.form.invalid;
   }
 }
-

@@ -2,7 +2,7 @@ const apiUrl = 'https://api.shirkasoft.net/api/';
 const imgUrl = `${apiUrl}images/`;
 
 export const environment = {
-  use_minio: true,
+  use_minio: false,
   production: true,
   api: `${apiUrl}`,
   api_users: `${apiUrl}users/`,

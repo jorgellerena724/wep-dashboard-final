@@ -20,7 +20,7 @@ import { UpdateManagerCategoryComponent } from '../update-manager-category/updat
 import { ConfirmDialogService } from '../../../shared/services/system/confirm-dialog.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { combineLatest, Subscription, take } from 'rxjs';
-import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-category.service';
 
 @Component({
   selector: 'app-list-manager-category',
@@ -130,9 +130,7 @@ export class ListManagerCategoryComponent implements OnInit {
       },
       error: (error) => {
         this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.manager-category.error.load'
-          ),
+          this.transloco.translate('notifications.manager-category.error.load'),
           'error'
         );
         this.loading = false;

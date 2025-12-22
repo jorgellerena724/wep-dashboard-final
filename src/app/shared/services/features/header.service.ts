@@ -24,11 +24,11 @@ export class HeaderService {
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = this.use_minio ? `${
-      this.imgUrl
-        }${this.authService.getClient()}/${name}?no-cache=${timestamp}` : `${
-      this.imgUrl
-        }${name}?no-cache=${timestamp}`;
+    const url = this.use_minio
+      ? `${
+          this.imgUrl
+        }${this.authService.getClient()}/${name}/?no-cache=${timestamp}`
+      : `${this.imgUrl}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });

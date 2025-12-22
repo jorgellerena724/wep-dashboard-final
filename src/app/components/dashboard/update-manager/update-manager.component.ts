@@ -26,7 +26,7 @@ import { FileUploadError } from '../../../shared/interfaces/fileUpload.interface
 import { ManagerService } from '../../../shared/services/features/manager.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../shared/components/app-select/app-select.component';
-import { ManagerCategoryService } from '../../../shared/services/features/manager-categpry.service';
+import { ManagerCategoryService } from '../../../shared/services/features/manager-category.service';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
@@ -39,8 +39,8 @@ import { TooltipModule } from 'primeng/tooltip';
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
-    TooltipModule
-],
+    TooltipModule,
+  ],
 })
 export class UpdateManagerComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -91,12 +91,16 @@ export class UpdateManagerComponent implements DynamicComponent {
     if (this.initialData) {
       // Handle both manager_category_id (from backend) and manager_category (form field)
       const formData = { ...this.initialData };
-      
+
       // Determinar el valor de la categoría
       if (formData.manager_category?.id) {
         // Si tiene un objeto manager_category con id
         formData.manager_category = formData.manager_category.id;
-      } else if (formData.manager_category_id !== null && formData.manager_category_id !== undefined && formData.manager_category_id !== '') {
+      } else if (
+        formData.manager_category_id !== null &&
+        formData.manager_category_id !== undefined &&
+        formData.manager_category_id !== ''
+      ) {
         // Si tiene manager_category_id directo
         formData.manager_category = formData.manager_category_id;
       } else {
@@ -105,10 +109,10 @@ export class UpdateManagerComponent implements DynamicComponent {
       }
 
       this.id = this.initialData.id;
-      
+
       // Esperar a que las categorías se carguen antes de hacer patchValue
       await Promise.all(initTasks);
-      
+
       this.form.patchValue(formData);
 
       if (this.initialData.photo) {
@@ -201,16 +205,18 @@ export class UpdateManagerComponent implements DynamicComponent {
 
     // Get manager_category value and ensure it's a valid number or not sent if empty/null
     const categoryId = this.form.get('manager_category')?.value;
-    const hadCategoryBefore = this.initialData?.manager_category_id || this.initialData?.manager_category?.id;
-    
+    const hadCategoryBefore =
+      this.initialData?.manager_category_id ||
+      this.initialData?.manager_category?.id;
+
     // Verificar si queremos remover la categoría
-    const wantsToRemoveCategory = hadCategoryBefore && (
-      categoryId === null ||
-      categoryId === undefined ||
-      categoryId === '' ||
-      categoryId === 'null'
-    );
-    
+    const wantsToRemoveCategory =
+      hadCategoryBefore &&
+      (categoryId === null ||
+        categoryId === undefined ||
+        categoryId === '' ||
+        categoryId === 'null');
+
     if (wantsToRemoveCategory) {
       // Si tenía categoría y ahora queremos removerla, usar el campo especial
       formData.append('remove_manager_category', 'true');
@@ -322,11 +328,14 @@ export class UpdateManagerComponent implements DynamicComponent {
       return this.srv.get().pipe(
         map((managers: any[]) => {
           const exists = managers.some((manager) => {
-            const managerCategoryId = manager.manager_category_id || manager.manager_category?.id || null;
+            const managerCategoryId =
+              manager.manager_category_id ||
+              manager.manager_category?.id ||
+              null;
             const isSameCategory = managerCategoryId === selectedCategoryId;
             const isSameName = manager.title?.toLowerCase() === name;
             const isDifferentManager = manager.id !== currentManagerId;
-            
+
             return isSameName && isSameCategory && isDifferentManager;
           });
           return exists ? { uniqueName: true } : null;
