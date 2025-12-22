@@ -32,7 +32,7 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist/browser /usr/share/nginx/html
 
 # Verificar copia
-#modifique para push
+#modifique para push sssss
 RUN echo "=== Archivos copiados ===" && \
     ls -la /usr/share/nginx/html/ && \
     [ -f "/usr/share/nginx/html/index.html" ] && echo "✅ index.html existe" || echo "❌ index.html NO existe"
