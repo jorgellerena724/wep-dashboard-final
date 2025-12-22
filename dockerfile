@@ -1,4 +1,4 @@
-# ==================== ETAPA 1: BUILDER ======================
+# ==================== ETAPA 1: BUILDER ========================
 FROM node:20-alpine AS builder
 
 RUN apk add --no-cache python3 make g++ git
@@ -29,10 +29,9 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # CORREGIDO: Copiar desde browser/ (donde Angular SSR/SSG pone los archivos)
-COPY --from=builder /app/dist/wep-dashboard/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/browser /usr/share/nginx/html
 
 # Verificar copia
-#modifique para push sssss
 RUN echo "=== Archivos copiados ===" && \
     ls -la /usr/share/nginx/html/ && \
     [ -f "/usr/share/nginx/html/index.html" ] && echo "✅ index.html existe" || echo "❌ index.html NO existe"
