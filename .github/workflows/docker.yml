@@ -1,9 +1,13 @@
+# .github/workflows/docker.yml
 name: 🐳 Build and Push Docker Image
 
 on:
   push:
+    branches: [ main, develop ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Permite ejecución manual desde GitHub UI
+  workflow_dispatch:  # Ejecución manual
 
 env:
   REGISTRY: ghcr.io
@@ -14,26 +18,29 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write  # Esto habilita GITHUB_TOKEN para GHCR
+      packages: write
+      id-token: write
 
     steps:
-      # 1. Obtener el código
+      # 1. Checkout del código
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. Setup Docker Buildx (para mejores builds)
+      # 2. Setup Docker Buildx
       - name: ⚙️ Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       # 3. Login al GitHub Container Registry
-      - name: 🔐 Login to GHCR
+      - name: 🔐 Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}  # Token automático
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. Extraer metadatos para tags de Docker
+      # 4. Extraer metadatos para tags (VERSIÓN CORREGIDA)
       - name: 🏷️ Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -41,24 +48,40 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
             type=ref,event=tag
             type=sha,prefix={{branch}}-
+            type=raw,value=nightly-{{date 'YYYYMMDD'}}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
-      # 5. Construir y push de la imagen
+      # 5. Cache de layers de Docker (OPCIONAL)
+      - name: 🗄️ Setup Docker layer caching
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # 6. Construir y push de la imagen (VERSIÓN SIMPLIFICADA)
       - name: 🐳 Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
 
-      # 6. Confirmación del éxito
-      - name: ✅ Success notification
+      # 7. Notificación de éxito
+      - name: 📢 Notify success
+        if: success()
         run: |
           echo "🎉 Docker image built and pushed successfully!"
-          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          echo "🏷️ Tags: ${{ steps.meta.outputs.tags }}"
+          echo "📦 Registry: ${{ env.REGISTRY }}"
+          echo "🏷️ Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "📌 Tags: ${{ steps.meta.outputs.tags }}"
+          echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
