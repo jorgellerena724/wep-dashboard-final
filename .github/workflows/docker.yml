@@ -3,7 +3,7 @@ name: Build wep-admin Docker Image
 on:
   push:
     branches: [main, master]
-  workflow_dispatch:  # Opcional: permite ejecución manual
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,11 +13,9 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code (con SSH key)
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Si usas SSH para el repo, GitHub Actions usa automáticamente el token
-          # No necesitas configurar SSH keys manualmente para el checkout
           fetch-depth: 0
 
       - name: Setup Docker Buildx
@@ -27,22 +25,20 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          # GitHub Actions proporciona automáticamente un token para el registry
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}  # Este token existe automáticamente
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker image
-        id: build
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/wep-admin:latest
-            ghcr.io/${{ github.repository_owner }}/wep-admin:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.created=${{ fromJSON(format('{0:0}', fromJSON('{}'))).now.utc }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.created=${{ fromJSON('{"date":""}').date || 'unknown' }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=latest
           cache-from: type=gha
