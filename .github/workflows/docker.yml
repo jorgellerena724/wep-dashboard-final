@@ -1,10 +1,9 @@
-# .github/workflows/docker.yml
-name: 🐳 Build Docker Image
+name: Build wep-admin Docker Image
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [main, master]
+  workflow_dispatch:  # Opcional: permite ejecución manual
 
 jobs:
   build:
@@ -14,66 +13,26 @@ jobs:
       packages: write
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout code (con SSH key)
         uses: actions/checkout@v4
-
-      - name: ⚙️ Setup Node.js 20
-        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          # Si usas SSH para el repo, GitHub Actions usa automáticamente el token
+          # No necesitas configurar SSH keys manualmente para el checkout
+          fetch-depth: 0
 
-      - name: 📦 Install dependencies
-        run: |
-          npm ci --legacy-peer-deps --no-audit
-          echo "✅ Dependencies installed"
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: 🧹 Clean previous builds
-        run: |
-          rm -rf dist 2>/dev/null || true
-          echo "🧹 Cleaned previous builds"
-
-      - name: 🏗️ Build Angular CLIENT
-        run: |
-          echo "🏗️ Building Angular CLIENT..."
-          npx ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot
-          echo "✅ Client build completed"
-          echo "📁 Browser files created: $(find dist/wep-dashboard/browser -type f | wc -l)"
-
-      - name: 🚀 Build Angular SERVER (con prerender)
-        run: |
-          echo "🚀 Building Angular SERVER with prerender..."
-          echo "⚠️ Setting environment variables for prerender mode"
-          
-          # CONFIGURACIÓN CRÍTICA PARA PRERENDER
-          export NG_PRERENDER=true
-          export PORT=0  # Puerto dinámico durante prerender
-          export NODE_ENV=development  # Ayuda a la detección
-          
-          # Ejecutar build del servidor
-          echo "▶️ Starting server build with prerender..."
-          npx ng run wep-dashboard:server:production
-          
-          echo "✅ Server build completed"
-          echo "📁 Server files created: $(find dist/wep-dashboard/server -type f | wc -l)"
-          
-          # Verificar archivo crítico
-          if [ -f dist/wep-dashboard/server/server.mjs ]; then
-            echo "✅ server.mjs created successfully"
-            echo "📊 File size: $(wc -c < dist/wep-dashboard/server/server.mjs) bytes"
-          else
-            echo "❌ ERROR: server.mjs NOT created!"
-            exit 1
-          fi
-
-      - name: 🔐 Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
+          # GitHub Actions proporciona automáticamente un token para el registry
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}  # Este token existe automáticamente
 
-      - name: 🐳 Build and Push Docker Image
+      - name: Build Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -83,23 +42,28 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/wep-admin:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.created=${{ fromJSON(format('{0:0}', fromJSON('{}'))).now.utc }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            org.opencontainers.image.version=latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
 
-      - name: ✅ Success Message
+      - name: Success Summary
         if: success()
         run: |
-          echo "🎉 🎉 🎉 DOCKER IMAGE BUILT SUCCESSFULLY! 🎉 🎉 🎉"
-          echo ""
-          echo "📦 Image: ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
-          echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
-          echo ""
-          echo "🚀 Para desplegar en tu VPS:"
-          echo "   docker pull ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
-          echo "   docker run -d -p 4004:4004 --name wep-admin ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
-          echo ""
-          echo "🔧 Configuración:"
-          echo "   • Puerto: 4004"
-          echo "   • SSR: Habilitado"
-          echo "   • Prerender: Habilitado"
-          echo "   • Health check: /health"
+          echo "## 🚀 Docker Image Built Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📦 Image:** \`ghcr.io/${{ github.repository_owner }}/wep-admin:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📥 Pull Command:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/wep-admin:latest" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🚀 Run Command:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d --name wep-admin -p 4004:4004 ghcr.io/${{ github.repository_owner }}/wep-admin:latest" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View Package on GitHub](https://github.com/${{ github.repository_owner }}?tab=packages&q=wep-admin)" >> $GITHUB_STEP_SUMMARY

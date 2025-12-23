@@ -1,54 +1,60 @@
-# ==================== ETAPA 1: BUILDER ========================
+# Etapa de construcción
 FROM node:20-alpine AS builder
 
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# 1. Copiar archivos de dependencias
-COPY package.json package-lock.json ./
-
-# 2. Instalar dependencias
-RUN npm ci --legacy-peer-deps --no-audit --prefer-offline
-
-# 3. Copiar todo el código fuente
-COPY . .
-
-# 4. Build de Angular con SSR
-RUN npm run build --configuration=production
-
-# 5. Verificar estructura generada
-RUN echo "✅ Build completado" && \
-    ls -la dist/wep-dashboard/ && \
-    echo "📄 Server file:" && \
-    [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ SI" || echo "❌ NO"
-
-# ==================== ETAPA 2: PRODUCCIÓN ====================
-FROM node:20-alpine
-
-# 1. Instalar PM2
-RUN npm install -g pm2
-
-WORKDIR /app
-
-# 2. Copiar desde builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/package-lock.json ./
-
-# 3. Instalar solo dependencias de producción
-RUN npm ci --omit=dev --no-audit --prefer-offline
-
-# 4. Copiar configuración de PM2
+# Copiar archivos de dependencias
+COPY package*.json ./
 COPY ecosystem.config.js ./
 
-# 5. Crear directorio de logs
-RUN mkdir -p logs
+# Instalar todas las dependencias (incluyendo devDependencies si necesitas construir)
+RUN npm ci
 
-# 6. Exponer puerto 4004
+# Copiar el resto de la aplicación
+COPY . .
+
+# Verificar que los archivos de construcción existen
+RUN ls -la dist/ 2>/dev/null || echo "Dist directory not found, may need build step"
+
+# Etapa de producción
+FROM node:20-alpine AS runner
+
+# Instalar PM2 globalmente
+RUN npm install -g pm2@latest
+
+# Crear usuario no-root para mayor seguridad
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Instalar curl para healthcheck (opcional)
+RUN apk add --no-cache curl
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos necesarios desde la etapa de builder
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/ecosystem.config.js ./
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+
+# Crear directorio para logs con permisos adecuados
+RUN mkdir -p logs && chown -R nodejs:nodejs logs
+
+# Cambiar a usuario no-root
+USER nodejs
+
+# Exponer el puerto definido en ecosystem.config.js
 EXPOSE 4004
 
-# 7. Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -q -O- http://localhost:4004/health >/dev/null 2>&1 || exit 1
+# Variables de entorno adicionales (si las necesitas)
+ENV NODE_ENV=production \
+    PM2_HOME=/app/.pm2
 
-# 8. Iniciar con PM2
-CMD ["pm2-runtime", "start", "ecosystem.config.js"]
+# Configurar healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:4004/ || exit 1
+
+# Comando para iniciar con PM2 en modo runtime (optimizado para contenedores)
+CMD ["pm2-runtime", "ecosystem.config.js"]
