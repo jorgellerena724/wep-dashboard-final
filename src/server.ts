@@ -142,7 +142,7 @@ export function app(): Express {
 }
 
 function run(): void {
-  const port = process.env['PORT'] || 4000;
+  const port = process.env['PORT'] || 4004;
   const host = process.env['HOST'] || '0.0.0.0';
 
   const server = app();
