@@ -1,40 +1,41 @@
-# Etapa 1: Instalar TODAS las dependencias (incluyendo dev) para build
-FROM node:20-alpine AS deps
+# Etapa de build
+FROM node:20-alpine AS builder
+
 WORKDIR /app
+
+# 1. Copiar archivos de dependencias
 COPY package*.json ./
 COPY ecosystem.config.js ./
+
+# 2. Instalar dependencias
 RUN npm install
 
-# Etapa 2: Build con todas las dependencias disponibles
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# 3. Copiar todo
 COPY . .
+
+# 4. Build de Angular (¡esto funciona bien!)
 RUN npm run build
 
-# Etapa 3: Solo producción
-FROM node:20-alpine AS runner
-RUN npm install -g pm2@latest
+# Etapa de producción
+FROM node:20-alpine
 
-# Crear usuario no-root
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# Instalar PM2
+RUN npm install -g pm2@latest
 
 WORKDIR /app
 
 # Copiar solo lo esencial
-COPY --from=builder --chown=nodejs:nodejs /app/ecosystem.config.js ./
-COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+COPY --from=builder /app/ecosystem.config.js ./
+COPY --from=builder /app/package*.json ./
 
-# Instalar SOLO dependencias de producción
-RUN npm ci --only=production
+# Instalar SOLO dependencias de producción (sin problemas de sincronización)
+RUN npm install --production --no-audit
 
-# Copiar el build
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+# Copiar el build de Angular
+COPY --from=builder /app/dist ./dist
 
-# Configurar logs
-RUN mkdir -p logs && chown -R nodejs:nodejs logs
-USER nodejs
+# Logs
+RUN mkdir -p logs
 
 EXPOSE 4004
 ENV NODE_ENV=production
