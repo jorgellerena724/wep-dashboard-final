@@ -43,12 +43,12 @@ COPY ecosystem.config.js ./
 # 5. Crear directorio de logs
 RUN mkdir -p logs && chmod 755 logs
 
-# 6. Exponer puerto
-EXPOSE 4000
+# 6. Exponer puerto 4004 (cambiar de 4000)
+EXPOSE 4004
 
-# 7. Health check
+# 7. Health check con puerto 4004
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -q -O- http://localhost:4000/health >/dev/null 2>&1 || exit 1
+  CMD wget -q -O- http://localhost:4004/health >/dev/null 2>&1 || exit 1
 
 # 8. Iniciar con PM2
 CMD ["pm2-runtime", "start", "ecosystem.config.js"]
