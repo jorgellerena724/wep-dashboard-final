@@ -1,7 +1,10 @@
+# .github/workflows/docker.yml
 name: 🐳 Build Docker Image
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # También manual
 
 jobs:
   build:
@@ -29,21 +32,17 @@ jobs:
         run: |
           echo "🏗️ Building Angular application..."
           
-          # Build completo con prerender
-          # El server.ts usará puerto dinámico (0) durante prerender
-          # y puerto 4004 en producción
+          # Build cliente
           npx ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot
-          
           echo "✅ Client build completed"
-          echo "📁 Browser files: $(find dist/wep-dashboard/browser -type f | wc -l)"
           
-          # Build del servidor SSR
+          # Build servidor SSR (usará puerto dinámico durante prerender)
           echo "🚀 Building SSR server..."
           npx ng run wep-dashboard:server:production
-          
           echo "✅ Server build completed"
-          echo "📁 Server files: $(find dist/wep-dashboard/server -type f | wc -l)"
-          [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ server.mjs created successfully" || echo "❌ server.mjs missing"
+          
+          # Verificar archivos
+          [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ server.mjs created" || echo "❌ server.mjs missing"
 
       - name: 🔐 Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -56,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/wep-admin:latest
             ghcr.io/${{ github.repository_owner }}/wep-admin:${{ github.sha }}
@@ -65,8 +64,9 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: ✅ Success Message
+        if: success()
         run: |
-          echo "🎉 🎉 🎉 DOCKER IMAGE BUILT SUCCESSFULLY! 🎉 🎉 🎉"
+          echo "🎉 DOCKER IMAGE BUILT SUCCESSFULLY!"
           echo ""
           echo "📦 Image: ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
           echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
@@ -74,9 +74,3 @@ jobs:
           echo "📥 To deploy on your VPS:"
           echo "   docker pull ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
           echo "   docker run -d -p 4004:4004 --name wep-admin ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
-          echo ""
-          echo "🔧 Configuration:"
-          echo "   - Port: 4004"
-          echo "   - SSR: Enabled"
-          echo "   - Prerender: Enabled"
-          echo "   - Process manager: PM2"
