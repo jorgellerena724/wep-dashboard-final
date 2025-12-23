@@ -1,21 +1,25 @@
-# Dockerfile corregido
+# Etapa de construcción
 FROM node:20-alpine AS builder
 
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de dependencias
+# 1. Copiar archivos de configuración y dependencias
 COPY package*.json ./
 COPY ecosystem.config.js ./
 
-# Sincronizar package-lock.json si es necesario
-RUN npm install --package-lock-only --no-audit --progress=false || npm install
+# 2. Instalar todas las dependencias (incluyendo devDependencies para build)
+RUN npm ci
 
-# Instalar dependencias
-RUN npm ci --only=production
-
-# Copiar el resto de la aplicación
+# 3. Copiar el código fuente
 COPY . .
+
+# 4. ⚠️ PASO CRÍTICO: Construir la aplicación
+# Este comando crea el directorio /app/dist
+RUN npm run build
+
+# Verificar que el directorio dist existe (para debugging)
+RUN ls -la dist/ || echo "Atención: Directorio dist no encontrado después del build"
 
 # Etapa de producción
 FROM node:20-alpine AS runner
@@ -30,7 +34,8 @@ RUN addgroup -g 1001 -S nodejs && \
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos necesarios desde la etapa de builder
+# Copiar solo lo necesario desde la etapa de builder
+# Importante: ¡Ahora /app/dist existe porque se creó con npm run build!
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/ecosystem.config.js ./
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
@@ -42,11 +47,15 @@ RUN mkdir -p logs && chown -R nodejs:nodejs logs
 # Cambiar a usuario no-root
 USER nodejs
 
-# Exponer el puerto
+# Exponer el puerto definido en ecosystem.config.js
 EXPOSE 4004
 
 # Variables de entorno
 ENV NODE_ENV=production
 
-# Comando para iniciar con PM2
+# Health check (opcional)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD node -e "const http = require('http'); http.get('http://localhost:4004', (res) => { if(res.statusCode !== 200) process.exit(1); }).on('error', () => process.exit(1))"
+
+# Comando para iniciar con PM2 en modo runtime
 CMD ["pm2-runtime", "ecosystem.config.js"]
