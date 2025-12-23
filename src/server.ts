@@ -142,21 +142,44 @@ export function app(): Express {
 }
 
 function run(): void {
-  const port = process.env['PORT'] || 4004;
+  // DETECTAR si estamos en modo PRERENDER (durante el build)
+  const isPrerender = process.argv.some(arg => 
+    arg.includes('prerender') || 
+    arg.includes('.angular/prerender-root/')
+  );
+  
+  // USAR PUERTO 0 (aleatorio) durante prerender, 4004 en producción
+  // Puerto 0 = el sistema asigna un puerto libre automáticamente
+  const defaultPort = isPrerender ? 0 : 4004;
+  
+  const port = process.env['PORT'] || defaultPort;
   const host = process.env['HOST'] || '0.0.0.0';
 
   const server = app();
   
   const listener = server.listen(parseInt(port as string), host, () => {
-    const distFolder = join(process.cwd(), 'dist/wep-dashboard/browser');
-    console.log(`✅ Server SSR listening on: http://${host}:${port}`);
-    console.log(`📁 Static files from: ${distFolder}`);
-    console.log(`🩺 Health check: http://${host}:${port}/health`);
-    console.log(`📝 Mode: ${process.env['NODE_ENV'] || 'development'}`);
-    console.log(`🔄 PM2 PID: ${process.ppid}`);
+    const actualPort = (listener.address() as any).port;
+    
+    // Solo mostrar logs si NO es prerender
+    if (!isPrerender) {
+      const distFolder = join(process.cwd(), 'dist/wep-dashboard/browser');
+      console.log(`✅ Server SSR listening on: http://${host}:${actualPort}`);
+      console.log(`📁 Static files from: ${distFolder}`);
+      console.log(`🩺 Health check: http://${host}:${actualPort}/health`);
+      console.log(`📝 Mode: ${process.env['NODE_ENV'] || 'development'}`);
+    }
+    
+    // Comunicar el puerto al proceso padre (Angular CLI)
+    // Esto es CRUCIAL para que Angular sepa en qué puerto está el servidor
+    if (isPrerender && process.send) {
+      process.send({ 
+        kind: 'server-ready', 
+        port: actualPort 
+      });
+    }
   });
 
-  // Graceful shutdown
+  // Manejo de señales para shutdown limpio
   const shutdown = (signal: string) => {
     console.log(`${signal} received, shutting down...`);
     
@@ -186,5 +209,5 @@ function run(): void {
   });
 }
 
-// Entry point
+// Punto de entrada
 run();

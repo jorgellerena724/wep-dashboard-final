@@ -1,6 +1,6 @@
 .git
+.git
 .gitignore
-.gitattributes
 node_modules
 npm-debug.log
 yarn-debug.log
@@ -14,12 +14,9 @@ coverage
 logs
 .env
 .env.local
-.env.development
-.env.production
 .DS_Store
 Thumbs.db
 docker-compose.yml
-docker-compose.*.yml
 README.md
 CHANGELOG.md
 LICENSE

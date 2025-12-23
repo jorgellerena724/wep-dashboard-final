@@ -13,12 +13,12 @@ RUN npm ci --legacy-peer-deps --no-audit --prefer-offline
 COPY . .
 
 # 4. Build de Angular con SSR
-RUN npm run build:ssr
+RUN npm run build --configuration=production
 
 # 5. Verificar estructura generada
 RUN echo "✅ Build completado" && \
     ls -la dist/wep-dashboard/ && \
-    echo "📄 Server file exists:" && \
+    echo "📄 Server file:" && \
     [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ SI" || echo "❌ NO"
 
 # ==================== ETAPA 2: PRODUCCIÓN ====================
@@ -41,12 +41,12 @@ RUN npm ci --omit=dev --no-audit --prefer-offline
 COPY ecosystem.config.js ./
 
 # 5. Crear directorio de logs
-RUN mkdir -p logs && chmod 755 logs
+RUN mkdir -p logs
 
-# 6. Exponer puerto 4004 
+# 6. Exponer puerto 4004
 EXPOSE 4004
 
-# 7. Health check con puerto 4004
+# 7. Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget -q -O- http://localhost:4004/health >/dev/null 2>&1 || exit 1
 
