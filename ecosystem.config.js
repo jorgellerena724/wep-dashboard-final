@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "wep-admin-ssr",
-      script: "node dist/wep-dashboard/server/server.mjs",
+      script: "npm run start",
       instances: 1,
       exec_mode: "fork",
       watch: false,
