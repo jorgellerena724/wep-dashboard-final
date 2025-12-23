@@ -4,7 +4,7 @@ name: 🐳 Build Docker Image
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # También manual
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,21 +28,43 @@ jobs:
           npm ci --legacy-peer-deps --no-audit
           echo "✅ Dependencies installed"
 
-      - name: 🏗️ Build Angular with SSR
+      - name: 🧹 Clean previous builds
         run: |
-          echo "🏗️ Building Angular application..."
-          
-          # Build cliente
+          rm -rf dist 2>/dev/null || true
+          echo "🧹 Cleaned previous builds"
+
+      - name: 🏗️ Build Angular CLIENT
+        run: |
+          echo "🏗️ Building Angular CLIENT..."
           npx ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot
           echo "✅ Client build completed"
+          echo "📁 Browser files created: $(find dist/wep-dashboard/browser -type f | wc -l)"
+
+      - name: 🚀 Build Angular SERVER (con prerender)
+        run: |
+          echo "🚀 Building Angular SERVER with prerender..."
+          echo "⚠️ Setting environment variables for prerender mode"
           
-          # Build servidor SSR (usará puerto dinámico durante prerender)
-          echo "🚀 Building SSR server..."
+          # CONFIGURACIÓN CRÍTICA PARA PRERENDER
+          export NG_PRERENDER=true
+          export PORT=0  # Puerto dinámico durante prerender
+          export NODE_ENV=development  # Ayuda a la detección
+          
+          # Ejecutar build del servidor
+          echo "▶️ Starting server build with prerender..."
           npx ng run wep-dashboard:server:production
-          echo "✅ Server build completed"
           
-          # Verificar archivos
-          [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ server.mjs created" || echo "❌ server.mjs missing"
+          echo "✅ Server build completed"
+          echo "📁 Server files created: $(find dist/wep-dashboard/server -type f | wc -l)"
+          
+          # Verificar archivo crítico
+          if [ -f dist/wep-dashboard/server/server.mjs ]; then
+            echo "✅ server.mjs created successfully"
+            echo "📊 File size: $(wc -c < dist/wep-dashboard/server/server.mjs) bytes"
+          else
+            echo "❌ ERROR: server.mjs NOT created!"
+            exit 1
+          fi
 
       - name: 🔐 Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -55,22 +77,29 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/wep-admin:latest
             ghcr.io/${{ github.repository_owner }}/wep-admin:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: ✅ Success Message
         if: success()
         run: |
-          echo "🎉 DOCKER IMAGE BUILT SUCCESSFULLY!"
+          echo "🎉 🎉 🎉 DOCKER IMAGE BUILT SUCCESSFULLY! 🎉 🎉 🎉"
           echo ""
           echo "📦 Image: ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
           echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
           echo ""
-          echo "📥 To deploy on your VPS:"
+          echo "🚀 Para desplegar en tu VPS:"
           echo "   docker pull ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
           echo "   docker run -d -p 4004:4004 --name wep-admin ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
+          echo ""
+          echo "🔧 Configuración:"
+          echo "   • Puerto: 4004"
+          echo "   • SSR: Habilitado"
+          echo "   • Prerender: Habilitado"
+          echo "   • Health check: /health"

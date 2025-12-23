@@ -6,17 +6,19 @@
     "start": "node dist/wep-dashboard/server/server.mjs",
     "build": "ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot",
     "build:ssr": "ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot && ng run wep-dashboard:server:production",
+    "build:ssr:ci": "npm run build:client && NG_PRERENDER=true PORT=0 npm run build:server",
     "build:client": "ng build --configuration production",
     "build:server": "ng run wep-dashboard:server:production",
-    "build:breeze": "ng build --configuration breeze --optimization=true --source-map=false --output-hashing=all --aot",
-    "build:deploy": "ng build --configuration deploy --optimization=true --source-map=false --output-hashing=all --aot",
-    "build:staging": "ng build --configuration staging --optimization=true --source-map=false --output-hashing=all --aot",
+    "build:breeze": "ng build --configuration breeze",
+    "build:deploy": "ng build --configuration deploy",
+    "build:staging": "ng build --configuration staging",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:wep-dashboard": "node dist/wep-dashboard/server/server.mjs",
     "docker:build": "docker build -t wep-admin .",
     "docker:run": "docker run -p 4004:4004 --name wep-admin wep-admin",
-    "docker:logs": "docker logs -f wep-admin"
+    "docker:logs": "docker logs -f wep-admin",
+    "docker:test": "docker run -p 4004:4004 --rm wep-admin"
   },
   "private": true,
   "dependencies": {

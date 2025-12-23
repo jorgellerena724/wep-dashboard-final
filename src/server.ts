@@ -142,55 +142,108 @@ export function app(): Express {
 }
 
 function run(): void {
-  // DETECTAR si estamos en modo PRERENDER (durante el build)
-  const isPrerender = process.argv.some(arg => 
-    arg.includes('prerender') || 
-    arg.includes('.angular/prerender-root/')
-  );
+  // DETECCIÓN ROBUSTA de modo PRERENDER
+  const isPrerender = 
+    // 1. Variable de entorno explícita
+    process.env['NG_PRERENDER'] === 'true' ||
+    // 2. Puerto 0 (indicador de puerto dinámico)
+    process.env['PORT'] === '0' ||
+    // 3. Comando contiene "prerender"
+    process.argv.some(arg => arg.toLowerCase().includes('prerender')) ||
+    // 4. Ruta de trabajo contiene ".angular/prerender-root/"
+    process.cwd().includes('.angular/prerender-root') ||
+    // 5. Argumentos contienen la ruta de prerender
+    process.argv.some(arg => arg.includes('.angular/prerender-root/')) ||
+    // 6. Variable NODE_ENV indica desarrollo (durante build)
+    process.env['NODE_ENV'] === 'development';
   
-  // USAR PUERTO 0 (aleatorio) durante prerender, 4004 en producción
-  // Puerto 0 = el sistema asigna un puerto libre automáticamente
-  const defaultPort = isPrerender ? 0 : 4004;
+  // LOGS de diagnóstico (solo si es prerender para no saturar)
+  if (isPrerender) {
+    console.log('🔧 [PRERENDER MODE] Detected prerender environment');
+    console.log(`🔧 [PRERENDER MODE] CWD: ${process.cwd()}`);
+    console.log(`🔧 [PRERENDER MODE] PORT from env: ${process.env['PORT']}`);
+    console.log(`🔧 [PRERENDER MODE] NG_PRERENDER: ${process.env['NG_PRERENDER']}`);
+    console.log(`🔧 [PRERENDER MODE] NODE_ENV: ${process.env['NODE_ENV']}`);
+  }
   
-  const port = process.env['PORT'] || defaultPort;
+  // DECISIÓN DE PUERTO: 0 durante prerender, 4004 en producción
+  let defaultPort: number | string;
+  
+  if (isPrerender) {
+    // DURANTE PRERENDER: usar puerto 0 (dinámico/aleatorio)
+    defaultPort = 0;
+    console.log(`🔧 [PRERENDER MODE] Using dynamic port (0 = system assigned)`);
+  } else {
+    // EN PRODUCCIÓN: usar puerto fijo 4004
+    defaultPort = 4004;
+    console.log(`🔧 [PRODUCTION MODE] Using fixed port 4004`);
+  }
+  
+  // Obtener puerto final (variable de entorno tiene prioridad)
+  const port = process.env['PORT'] ? parseInt(process.env['PORT']) : defaultPort;
   const host = process.env['HOST'] || '0.0.0.0';
 
   const server = app();
   
-  const listener = server.listen(parseInt(port as string), host, () => {
+  const listener = server.listen(port, host, () => {
     const actualPort = (listener.address() as any).port;
+    const address = (listener.address() as any).address;
     
-    // Solo mostrar logs si NO es prerender
-    if (!isPrerender) {
+    if (isPrerender) {
+      // EN PRERENDER: solo log breve y comunicar puerto a Angular CLI
+      console.log(`🔧 [PRERENDER MODE] Server ready on http://${address}:${actualPort}`);
+      
+      // COMUNICACIÓN CRÍTICA con proceso padre (Angular CLI)
+      if (process.send) {
+        process.send({ 
+          kind: 'server-ready', 
+          port: actualPort,
+          address: address
+        });
+        console.log(`🔧 [PRERENDER MODE] Sent port ${actualPort} to parent process`);
+      }
+    } else {
+      // EN PRODUCCIÓN: mostrar logs completos
       const distFolder = join(process.cwd(), 'dist/wep-dashboard/browser');
-      console.log(`✅ Server SSR listening on: http://${host}:${actualPort}`);
+      console.log(`✅ Server SSR listening on: http://${address}:${actualPort}`);
       console.log(`📁 Static files from: ${distFolder}`);
-      console.log(`🩺 Health check: http://${host}:${actualPort}/health`);
-      console.log(`📝 Mode: ${process.env['NODE_ENV'] || 'development'}`);
+      console.log(`🩺 Health check: http://${address}:${actualPort}/health`);
+      console.log(`📝 Mode: ${process.env['NODE_ENV'] || 'production'}`);
     }
+  });
+
+  // Manejo de errores del listener
+  listener.on('error', (error: NodeJS.ErrnoException) => {
+    console.error('❌ Server listen error:', error.message);
     
-    // Comunicar el puerto al proceso padre (Angular CLI)
-    // Esto es CRUCIAL para que Angular sepa en qué puerto está el servidor
-    if (isPrerender && process.send) {
-      process.send({ 
-        kind: 'server-ready', 
-        port: actualPort 
-      });
+    // Si es error de puerto en uso durante prerender, intentar con puerto 0
+    if (error.code === 'EADDRINUSE' && isPrerender && port !== 0) {
+      console.log('🔄 Retrying with dynamic port (0)...');
+      listener.close();
+      server.listen(0, host);
+    } else {
+      process.exit(1);
     }
   });
 
   // Manejo de señales para shutdown limpio
   const shutdown = (signal: string) => {
-    console.log(`${signal} received, shutting down...`);
+    if (!isPrerender) {
+      console.log(`${signal} received, shutting down gracefully...`);
+    }
     
     listener.close(() => {
-      console.log('Server closed successfully');
+      if (!isPrerender) {
+        console.log('Server closed successfully');
+      }
       process.exit(0);
     });
     
     // Force exit after 10 seconds
     setTimeout(() => {
-      console.error('Forcing exit...');
+      if (!isPrerender) {
+        console.error('Forcing exit...');
+      }
       process.exit(1);
     }, 10000);
   };
@@ -198,14 +251,20 @@ function run(): void {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
   
-  // Error handling
+  // Manejo de errores no capturados
   process.on('uncaughtException', (error: Error) => {
-    console.error('Uncaught Exception:', error);
+    console.error('❌ Uncaught Exception:', error.message);
+    if (!isPrerender) {
+      console.error('Stack:', error.stack);
+    }
     shutdown('UNCAUGHT_EXCEPTION');
   });
   
   process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    console.error('⚠️ Unhandled Rejection at:', promise);
+    if (!isPrerender && reason instanceof Error) {
+      console.error('Reason:', reason.message);
+    }
   });
 }
 
