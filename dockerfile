@@ -43,7 +43,7 @@ COPY ecosystem.config.js ./
 # 5. Crear directorio de logs
 RUN mkdir -p logs && chmod 755 logs
 
-# 6. Exponer puerto 4004 (cambiar de 4000)
+# 6. Exponer puerto 4004 
 EXPOSE 4004
 
 # 7. Health check con puerto 4004
