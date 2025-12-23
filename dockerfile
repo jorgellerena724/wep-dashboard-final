@@ -1,4 +1,4 @@
-# Etapa de construcción
+# Dockerfile corregido
 FROM node:20-alpine AS builder
 
 # Establecer directorio de trabajo
@@ -8,14 +8,14 @@ WORKDIR /app
 COPY package*.json ./
 COPY ecosystem.config.js ./
 
-# Instalar todas las dependencias (incluyendo devDependencies si necesitas construir)
-RUN npm ci
+# Sincronizar package-lock.json si es necesario
+RUN npm install --package-lock-only --no-audit --progress=false || npm install
+
+# Instalar dependencias
+RUN npm ci --only=production
 
 # Copiar el resto de la aplicación
 COPY . .
-
-# Verificar que los archivos de construcción existen
-RUN ls -la dist/ 2>/dev/null || echo "Dist directory not found, may need build step"
 
 # Etapa de producción
 FROM node:20-alpine AS runner
@@ -26,9 +26,6 @@ RUN npm install -g pm2@latest
 # Crear usuario no-root para mayor seguridad
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
-
-# Instalar curl para healthcheck (opcional)
-RUN apk add --no-cache curl
 
 # Establecer directorio de trabajo
 WORKDIR /app
@@ -45,16 +42,11 @@ RUN mkdir -p logs && chown -R nodejs:nodejs logs
 # Cambiar a usuario no-root
 USER nodejs
 
-# Exponer el puerto definido en ecosystem.config.js
+# Exponer el puerto
 EXPOSE 4004
 
-# Variables de entorno adicionales (si las necesitas)
-ENV NODE_ENV=production \
-    PM2_HOME=/app/.pm2
+# Variables de entorno
+ENV NODE_ENV=production
 
-# Configurar healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:4004/ || exit 1
-
-# Comando para iniciar con PM2 en modo runtime (optimizado para contenedores)
+# Comando para iniciar con PM2
 CMD ["pm2-runtime", "ecosystem.config.js"]
