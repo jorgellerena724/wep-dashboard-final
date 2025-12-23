@@ -1,87 +1,105 @@
 # .github/workflows/docker.yml
-name: 🐳 Build and Push Docker Image
+name: 🐳 Build Docker Image
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*.*.*' ]
-  pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Ejecución manual
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/wep-admin
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      id-token: write
 
     steps:
-      # 1. Checkout del código
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: 20
+          cache: 'npm'
 
-      # 2. Setup Docker Buildx
-      - name: ⚙️ Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: 📦 Install dependencies
+        run: |
+          npm ci --legacy-peer-deps --no-audit
+          echo "✅ Dependencies installed"
 
-      # 3. Login al GitHub Container Registry
+      - name: 🧹 Clean previous builds
+        run: |
+          rm -rf dist 2>/dev/null || true
+          echo "🧹 Cleaned previous builds"
+
+      - name: 🏗️ Build Angular CLIENT
+        run: |
+          echo "🏗️ Building Angular CLIENT..."
+          npx ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot
+          echo "✅ Client build completed"
+          echo "📁 Browser files created: $(find dist/wep-dashboard/browser -type f | wc -l)"
+
+      - name: 🚀 Build Angular SERVER (con prerender)
+        run: |
+          echo "🚀 Building Angular SERVER with prerender..."
+          echo "⚠️ Setting environment variables for prerender mode"
+          
+          # CONFIGURACIÓN CRÍTICA PARA PRERENDER
+          export NG_PRERENDER=true
+          export PORT=0  # Puerto dinámico durante prerender
+          export NODE_ENV=development  # Ayuda a la detección
+          
+          # Ejecutar build del servidor
+          echo "▶️ Starting server build with prerender..."
+          npx ng run wep-dashboard:server:production
+          
+          echo "✅ Server build completed"
+          echo "📁 Server files created: $(find dist/wep-dashboard/server -type f | wc -l)"
+          
+          # Verificar archivo crítico
+          if [ -f dist/wep-dashboard/server/server.mjs ]; then
+            echo "✅ server.mjs created successfully"
+            echo "📊 File size: $(wc -c < dist/wep-dashboard/server/server.mjs) bytes"
+          else
+            echo "❌ ERROR: server.mjs NOT created!"
+            exit 1
+          fi
+
       - name: 🔐 Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. Extraer metadatos para tags (VERSIÓN CORREGIDA)
-      - name: 🏷️ Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=tag
-            type=sha,prefix={{branch}}-
-            type=raw,value=nightly-{{date 'YYYYMMDD'}}
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
-
-      # 5. Cache de layers de Docker (OPCIONAL)
-      - name: 🗄️ Setup Docker layer caching
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      # 6. Construir y push de la imagen (VERSIÓN SIMPLIFICADA)
-      - name: 🐳 Build and push Docker image
+      - name: 🐳 Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/wep-admin:latest
+            ghcr.io/${{ github.repository_owner }}/wep-admin:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-      # 7. Notificación de éxito
-      - name: 📢 Notify success
+      - name: ✅ Success Message
         if: success()
         run: |
-          echo "🎉 Docker image built and pushed successfully!"
-          echo "📦 Registry: ${{ env.REGISTRY }}"
-          echo "🏷️ Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          echo "📌 Tags: ${{ steps.meta.outputs.tags }}"
+          echo "🎉 🎉 🎉 DOCKER IMAGE BUILT SUCCESSFULLY! 🎉 🎉 🎉"
+          echo ""
+          echo "📦 Image: ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
           echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
+          echo ""
+          echo "🚀 Para desplegar en tu VPS:"
+          echo "   docker pull ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
+          echo "   docker run -d -p 4004:4004 --name wep-admin ghcr.io/${{ github.repository_owner }}/wep-admin:latest"
+          echo ""
+          echo "🔧 Configuración:"
+          echo "   • Puerto: 4004"
+          echo "   • SSR: Habilitado"
+          echo "   • Prerender: Habilitado"
+          echo "   • Health check: /health"
