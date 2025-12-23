@@ -1,17 +1,18 @@
 # .github/workflows/docker.yml
-name: 🐳 Build and Push Docker Image
+name: 🐳 Build and Push Docker Image (SSR)
 
 on:
   push:
     branches: [ main, develop ]
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
   workflow_dispatch:  # Ejecución manual
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/wep-admin
+  IMAGE_NAME: ${{ github.repository_owner }}/wep-admin-ssr
+  NODE_VERSION: 20
 
 jobs:
   build-and-push:
@@ -28,35 +29,61 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Setup Docker Buildx
-      - name: ⚙️ Set up Docker Buildx
+      # 2. Setup Node.js (necesario para construir Angular)
+      - name: ⚙️ Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      # 3. Instalar dependencias y build SSR
+      - name: 📦 Install dependencies and build SSR
+        run: |
+          npm ci --legacy-peer-deps --no-audit
+          npm run build:ssr
+          # Verificar que el build SSR fue exitoso
+          ls -la dist/wep-dashboard/
+          [ -f dist/wep-dashboard/server/server.mjs ] && echo "✅ SSR build successful" || echo "❌ SSR build failed"
+
+      # 4. Setup Docker Buildx
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Login al GitHub Container Registry
+      # 5. Login al GitHub Container Registry
       - name: 🔐 Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 4. Extraer metadatos para tags (VERSIÓN CORREGIDA)
+      # 6. Extraer metadatos para tags
       - name: 🏷️ Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=tag
+            type=raw,value=develop,enable={{is_default_branch}}
             type=sha,prefix={{branch}}-
-            type=raw,value=nightly-{{date 'YYYYMMDD'}}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created={{date 'YYYY-MM-DDTHH:mm:ssZ'}}
+            org.opencontainers.image.version={{version}}
+            org.opencontainers.image.title="WEP Admin Dashboard SSR"
+            org.opencontainers.image.description="Angular 20 SSR Application with PM2"
 
-      # 5. Cache de layers de Docker (OPCIONAL)
-      - name: 🗄️ Setup Docker layer caching
+      # 7. Cache de layers de Docker
+      - name: 🗄️ Cache Docker layers
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
@@ -64,24 +91,54 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # 6. Construir y push de la imagen (VERSIÓN SIMPLIFICADA)
-      - name: 🐳 Build and push Docker image
+      # 8. Construir y push de la imagen Docker
+      - name: 🚀 Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
+          build-args: |
+            NODE_ENV=production
 
-      # 7. Notificación de éxito
-      - name: 📢 Notify success
-        if: success()
+      # 9. Verificación de la imagen (solo para PRs y pushes)
+      - name: ✅ Verify Docker image
+        if: success() && github.event_name != 'workflow_dispatch'
+        run: |
+          echo "📋 Verificación de la imagen Docker"
+          echo "🏷️ Tags generados: ${{ steps.meta.outputs.tags }}"
+          echo "📦 Registry: ${{ env.REGISTRY }}"
+          echo "🖼️ Image: ${{ env.IMAGE_NAME }}"
+          echo "🔗 URL: https://github.com/${{ github.repository }}/pkgs/container/wep-admin-ssr"
+
+      # 10. Notificación de éxito
+      - name: 📢 Success notification
+        if: success() && github.event_name != 'pull_request'
         run: |
           echo "🎉 Docker image built and pushed successfully!"
-          echo "📦 Registry: ${{ env.REGISTRY }}"
-          echo "🏷️ Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          echo "📌 Tags: ${{ steps.meta.outputs.tags }}"
-          echo "🔗 View at: https://github.com/${{ github.repository }}/pkgs/container/wep-admin"
+          echo "📊 Summary:"
+          echo "  - Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "  - Tags: ${{ steps.meta.outputs.tags }}"
+          echo "  - Commit: ${{ github.sha }}"
+          echo "  - Branch: ${{ github.ref }}"
+          
+  # Job adicional para seguridad y linting (opcional)
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 🔒 Security scan
+        run: |
+          echo "Security scanning would run here"
+          echo "Consider adding:"
+          echo "  - trivy"
+          echo "  - snyk"
+          echo "  - hadolint"

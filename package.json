@@ -4,13 +4,18 @@
   "scripts": {
     "ng": "ng",
     "start": "node dist/wep-dashboard/server/server.mjs",
-    "build": "ng build --configuration production --optimization=true --source-map=false  --output-hashing=all --aot",
-    "build:breeze": "ng build --configuration breeze --optimization=true --source-map=false  --output-hashing=all --aot",
-    "build:deploy": "ng build --configuration deploy --optimization=true --source-map=false  --output-hashing=all --aot",
-    "build:staging": "ng build --configuration staging --optimization=true --source-map=false  --output-hashing=all --aot",
+    "build": "ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot",
+    "build:ssr": "ng build --configuration production --optimization=true --source-map=false --output-hashing=all --aot && ng run wep-dashboard:server:production",
+    "build:breeze": "ng build --configuration breeze --optimization=true --source-map=false --output-hashing=all --aot",
+    "build:deploy": "ng build --configuration deploy --optimization=true --source-map=false --output-hashing=all --aot",
+    "build:staging": "ng build --configuration staging --optimization=true --source-map=false --output-hashing=all --aot",
+    "build:staging:ssr": "ng build --configuration staging --optimization=true --source-map=false --output-hashing=all --aot && ng run wep-dashboard:server:staging",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:wep-dashboard": "node dist/wep-dashboard/server/server.mjs"
+    "serve:ssr:wep-dashboard": "node dist/wep-dashboard/server/server.mjs",
+    "docker:build": "docker build -t wep-admin-ssr .",
+    "docker:run": "docker run -p 4000:4000 --name wep-admin wep-admin-ssr",
+    "docker:logs": "docker logs -f wep-admin"
   },
   "private": true,
   "dependencies": {
