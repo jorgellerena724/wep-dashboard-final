@@ -17,7 +17,6 @@ import {
 } from '@angular/forms';
 import { map, catchError } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
-
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';

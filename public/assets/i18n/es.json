@@ -405,7 +405,7 @@
           "image": {
             "title": "Imagen del carrusel",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -449,7 +449,7 @@
           },
           "image": {
             "title": "Archivo de la novedad",
-            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+            "recommendation": "Formato recomendado: WEBP, MP4. Tamaño máximo 20Mb"
           }
         }
       },
@@ -474,7 +474,7 @@
           },
           "image": {
             "title": "Archivo de la novedad",
-            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+            "recommendation": "Formato recomendado: WEBP, MP4. Tamaño máximo 20Mb"
           }
         }
       },
@@ -514,7 +514,7 @@
           "image": {
             "title": "Imagen de la empresa",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -559,7 +559,7 @@
           "image": {
             "title": "Imagen del directivo",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -593,7 +593,7 @@
           "image": {
             "title": "Imagen del directivo",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -637,7 +637,7 @@
           "image": {
             "title": "Logo del cliente",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -665,7 +665,7 @@
           "image": {
             "title": "Logo del cliente",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -780,7 +780,7 @@
           "image": {
             "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "uploadInfo": "Puede agregar una o más imágenes y videos. Si lo desea, puede agregar un título a cada archivo.",
             "mainImageInfo": "El primer archivo en el listado será la imagen o video principal del producto. Usa las flechas para reordenar los archivos.",
@@ -846,7 +846,7 @@
           "image": {
             "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "uploadInfo": "Puede agregar una o más imágenes y videos. Si lo desea, puede agregar un título a cada archivo.",
             "mainImageInfo": "El primer archivo en el listado será la imagen o video principal del producto. Usa las flechas para reordenar los archivos.",
@@ -980,7 +980,7 @@
           "image": {
             "title": "Imagen de la publicación",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -1019,7 +1019,7 @@
           "image": {
             "title": "Imagen de la publicación",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {

@@ -59,8 +59,8 @@ interface ProductFile {
     AppFileUploadComponent,
     SelectComponent,
     TranslocoModule,
-    TooltipModule
-],
+    TooltipModule,
+  ],
 })
 export class UpdateProductComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -83,7 +83,6 @@ export class UpdateProductComponent implements DynamicComponent {
   // Propiedades para las variantes
   variants: ProductVariant[] = [];
   variantsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
-
 
   constructor(
     private fb: FormBuilder,
@@ -207,11 +206,6 @@ export class UpdateProductComponent implements DynamicComponent {
     const filesArray = files instanceof FileList ? Array.from(files) : files;
 
     filesArray.forEach((file) => {
-      // Validar formato y tamaño
-      if (!this.validateFile(file)) {
-        return; // Saltar este archivo si no es válido
-      }
-
       const supportedVideoTypes = [
         'video/mp4',
         'video/webm',
@@ -269,41 +263,6 @@ export class UpdateProductComponent implements DynamicComponent {
     });
   }
 
-  private validateFile(file: File): boolean {
-    // Tipos permitidos según especificaciones: JPG, PNG, MP4, MOV
-    const allowedTypes = [
-      'image/jpeg', // JPG
-      'image/png', // PNG
-      'video/mp4', // MP4
-      'video/quicktime', // MOV
-    ];
-
-    // Tamaño máximo: 20MB
-    const MAX_SIZE = 20 * 1024 * 1024; // 20MB en bytes
-
-    // Validar tipo de archivo
-    if (!allowedTypes.includes(file.type)) {
-      this.notificationSrv.addNotification(
-        'Formato no permitido. Solo se permiten: JPG, PNG, MP4, MOV. Formato recibido: ' +
-          file.type,
-        'error'
-      );
-      return false;
-    }
-
-    // Validar tamaño
-    if (file.size > MAX_SIZE) {
-      const sizeInMB = Math.round((file.size / (1024 * 1024)) * 100) / 100;
-      this.notificationSrv.addNotification(
-        `Archivo demasiado grande. Tamaño máximo permitido: 20MB. Tamaño recibido: ${sizeInMB}MB`,
-        'error'
-      );
-      return false;
-    }
-
-    return true;
-  }
-
   private addFileToFormArray(
     title: string,
     file: File | null,
@@ -315,7 +274,7 @@ export class UpdateProductComponent implements DynamicComponent {
       file: [file],
     });
     this.filesFormArray.push(fileGroup);
-    
+
     // Limpiar el error de required cuando hay al menos un archivo en el FormArray
     if (this.filesFormArray.length > 0) {
       this.filesFormArray.setErrors(null);
@@ -341,13 +300,13 @@ export class UpdateProductComponent implements DynamicComponent {
     // Remover de arrays
     this.productFiles.splice(index, 1);
     this.filesFormArray.removeAt(index);
-    
+
     // Marcar como requerido si no quedan archivos
     if (this.productFiles.length === 0) {
       this.filesFormArray.setErrors({ required: true });
       this.filesFormArray.markAsTouched();
     }
-    
+
     this.cdr.detectChanges();
   }
 
@@ -534,7 +493,7 @@ export class UpdateProductComponent implements DynamicComponent {
       'cal_url',
       calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
     );
-    
+
     // Preservar saltos de línea en la descripción o enviar cadena vacía
     const description = this.form.get('description')?.value || '';
     const processedDescription = description
@@ -554,12 +513,16 @@ export class UpdateProductComponent implements DynamicComponent {
 
     // Separar archivos existentes y nuevos
     const existingFiles = this.productFiles.filter((file) => file.isExisting);
-    const newFiles = this.productFiles.filter((file) => !file.isExisting && file.file);
+    const newFiles = this.productFiles.filter(
+      (file) => !file.isExisting && file.file
+    );
 
     // Enviar información de archivos existentes que deben mantenerse
     const existingFilesData = existingFiles.map((file) => ({
       path: file.existingPath,
-      title: this.filesFormArray.at(this.productFiles.indexOf(file)).get('title')?.value || ''
+      title:
+        this.filesFormArray.at(this.productFiles.indexOf(file)).get('title')
+          ?.value || '',
     }));
     formData.append('existing_files', JSON.stringify(existingFilesData));
 
@@ -668,7 +631,7 @@ export class UpdateProductComponent implements DynamicComponent {
   uniqueTitleValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const title = control.value?.trim().toLowerCase();
-      
+
       if (!title || title.length < 2) {
         return of(null);
       }

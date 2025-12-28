@@ -23,13 +23,13 @@
     ></app-select>
   </div>
   @if (showCalUrlField) {
-    <div>
-      <app-text-field
-        id="cal_url"
-        label="{{ 'components.products.create.fields.calurl.title' | transloco }}"
-        [control]="form.get('cal_url')"
-      ></app-text-field>
-    </div>
+  <div>
+    <app-text-field
+      id="cal_url"
+      label="{{ 'components.products.create.fields.calurl.title' | transloco }}"
+      [control]="form.get('cal_url')"
+    ></app-text-field>
+  </div>
   }
 
   <!-- Sección de Variantes -->
@@ -38,14 +38,14 @@
     <div class="flex items-center justify-between">
       <h4
         class="text-black text-sm mb-1 dark:text-[rgb(209,213,219)] font-bold"
-        >
+      >
         {{ "components.products.edit.fields.variants.title" | transloco }}
       </h4>
       <button
         type="button"
         (click)="addVariant()"
         class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
-        >
+      >
         <i class="pi pi-plus"></i>
         <span>{{
           "components.products.edit.fields.variants.add" | transloco
@@ -55,25 +55,25 @@
 
     <!-- Lista de variantes existentes -->
     @if (variants.length > 0) {
-      <div class="space-y-3">
-        @for (variant of variants; track variant; let i = $index) {
-          <div
-            class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
-            >
-            <div class="flex-1 grid grid-cols-2 gap-3">
-              <app-text-field
-                [id]="'variant-description-' + i"
+    <div class="space-y-3">
+      @for (variant of variants; track variant; let i = $index) {
+      <div
+        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
+      >
+        <div class="flex-1 grid grid-cols-2 gap-3">
+          <app-text-field
+            [id]="'variant-description-' + i"
             label="{{
               'components.products.edit.fields.variants.description.title'
                 | transloco
             }}"
-                [control]="getVariantControl(i, 'description')"
+            [control]="getVariantControl(i, 'description')"
             [errorMessages]="{
               required: ( 'components.products.edit.fields.variants.description.required' | transloco ),
             }"
-              ></app-text-field>
-              <app-text-field
-                [id]="'variant-price-' + i"
+          ></app-text-field>
+          <app-text-field
+            [id]="'variant-price-' + i"
             label="{{
               'components.products.edit.fields.variants.price.title' | transloco
             }}"
@@ -81,41 +81,39 @@
               'components.products.edit.fields.variants.price.optional'
                 | transloco
             }}"
-                [control]="getVariantControl(i, 'price')"
-                [allowDecimals]="true"
-                [numbersOnly]="true"
-              ></app-text-field>
-            </div>
-            <button
-              type="button"
-              (click)="removeVariant(i)"
-              class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
+            [control]="getVariantControl(i, 'price')"
+            [allowDecimals]="true"
+            [numbersOnly]="true"
+          ></app-text-field>
+        </div>
+        <button
+          type="button"
+          (click)="removeVariant(i)"
+          class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
           pTooltip="{{
             'components.products.edit.fields.variants.deleteVariant' | transloco
           }}"
-              tooltipPosition="top"
-              >
-              <i class="pi pi-trash"></i>
-            </button>
-          </div>
-        }
+          tooltipPosition="top"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
       </div>
+      }
+    </div>
     }
 
     <!-- Estado vacío para variantes -->
     @if (variants.length === 0) {
-      <div
-        class="p-4 bg-white dark:bg-white rounded-lg border border-black"
-        >
-        <div class="text-center py-8">
-          <i
-            class="pi pi-list text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-          ></i>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ "components.products.edit.fields.variants.empty" | transloco }}
-          </p>
-        </div>
+    <div class="p-4 bg-white dark:bg-white rounded-lg border border-black">
+      <div class="text-center py-8">
+        <i
+          class="pi pi-list text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
+        ></i>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ "components.products.edit.fields.variants.empty" | transloco }}
+        </p>
       </div>
+    </div>
     }
   </div>
 
@@ -162,199 +160,179 @@
     <div class="text-md text-gray-500">
       <small>
         {{
-        "components.products.edit.fields.image.mainImageInfo" | transloco
+          "components.products.edit.fields.image.mainImageInfo" | transloco
         }}</small
-        >
-      </div>
+      >
+    </div>
 
-      <!-- Mensaje de error cuando no hay archivos -->
-      @if (
-        filesFormArray.invalid &&
-        filesFormArray.touched &&
-        productFiles.length === 0
-        ) {
+    <!-- Mensaje de error cuando no hay archivos -->
+    @if ( filesFormArray.invalid && filesFormArray.touched &&
+    productFiles.length === 0 ) {
+    <div class="mt-1 text-sm text-red-500">
+      <ul class="list-disc pl-4">
+        <li>
+          {{ "components.products.edit.fields.image.required" | transloco }}
+        </li>
+      </ul>
+    </div>
+    }
+
+    <!-- Lista de archivos cargados -->
+    @if (productFiles.length > 0) {
+    <div class="space-y-4">
+      @for (productFile of productFiles; track productFile; let i = $index) {
+      <div
+        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black relative"
+      >
+        <!-- Badge de imagen principal -->
+        @if (i === 0) {
         <div
-          class="mt-1 text-sm text-red-500"
-          >
-          <ul class="list-disc pl-4">
-            <li>
-              {{ "components.products.edit.fields.image.required" | transloco }}
-            </li>
-          </ul>
+          class="absolute -top-2 -left-2 bg-gray-800 dark:bg-gray-700 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
+        >
+          <i class="pi pi-star-fill"></i>
         </div>
-      }
-
-      <!-- Lista de archivos cargados -->
-      @if (productFiles.length > 0) {
-        <div class="space-y-4">
-          @for (productFile of productFiles; track productFile; let i = $index) {
+        }
+        <!-- Preview -->
+        <div
+          class="flex-shrink-0 w-32 h-32 flex items-center justify-center bg-gray-100 rounded-lg border"
+        >
+          <div class="relative w-full h-full flex items-center justify-center">
+            <!-- Loading state para archivos existentes -->
+            @if ( loadingImage && productFile.isExisting &&
+            !productFile.previewUrl && !productFile.videoUrl ) {
             <div
-              class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black relative"
-              >
-              <!-- Badge de imagen principal -->
-              @if (i === 0) {
-                <div
-                  class="absolute -top-2 -left-2 bg-gray-800 dark:bg-gray-700 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
-                  >
-                  <i class="pi pi-star-fill"></i>
-                </div>
-              }
-              <!-- Preview -->
+              class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg"
+            >
               <div
-                class="flex-shrink-0 w-32 h-32 flex items-center justify-center bg-gray-100 rounded-lg border"
+                class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"
+              ></div>
+            </div>
+            }
+            <!-- Imagen -->
+            @if (!productFile.isVideo && productFile.previewUrl) {
+            <div class="w-full h-full flex items-center justify-center">
+              <img
+                [src]="productFile.previewUrl"
+                class="max-w-full max-h-full object-contain rounded-lg"
+                alt="Preview"
+              />
+            </div>
+            }
+            <!-- Video -->
+            @if (productFile.isVideo && productFile.videoUrl) {
+            <div class="w-full h-full flex items-center justify-center">
+              <video
+                controls
+                [src]="productFile.videoUrl"
+                class="max-w-full max-h-full object-contain rounded-lg"
+                #videoPlayer
+                (loadedmetadata)="videoPlayer.muted = true"
+              >
+                <div
+                  class="absolute inset-0 flex items-center justify-center bg-black text-white p-2 text-xs"
                 >
-                <div class="relative w-full h-full flex items-center justify-center">
-                  <!-- Loading state para archivos existentes -->
-                  @if (
-                    loadingImage &&
-                    productFile.isExisting &&
-                    !productFile.previewUrl &&
-                    !productFile.videoUrl
-                    ) {
-                    <div
-                      class="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-lg"
-                      >
-                      <div
-                        class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"
-                      ></div>
-                    </div>
-                  }
-                  <!-- Imagen -->
-                  @if (!productFile.isVideo && productFile.previewUrl) {
-                    <div
-                      class="w-full h-full flex items-center justify-center"
-                      >
-                      <img
-                        [src]="productFile.previewUrl"
-                        class="max-w-full max-h-full object-contain rounded-lg"
-                        alt="Preview"
-                        />
-                      </div>
-                    }
-                    <!-- Video -->
-                    @if (productFile.isVideo && productFile.videoUrl) {
-                      <div
-                        class="w-full h-full flex items-center justify-center"
-                        >
-                        <video
-                          controls
-                          [src]="productFile.videoUrl"
-                          class="max-w-full max-h-full object-contain rounded-lg"
-                          #videoPlayer
-                          (loadedmetadata)="videoPlayer.muted = true"
-                          >
-                          <div
-                            class="absolute inset-0 flex items-center justify-center bg-black text-white p-2 text-xs"
-                            >
-                            <p>{{ "video.unsupported" | transloco }}</p>
-                          </div>
-                        </video>
-                      </div>
-                    }
-                    <!-- Icono si no hay preview -->
-                    @if (
-                      !productFile.previewUrl &&
-                      !productFile.videoUrl &&
-                      !loadingImage
-                      ) {
-                      <div
-                        class="text-gray-400"
-                        >
-                        <i class="pi pi-image text-2xl"></i>
-                      </div>
-                    }
-                  </div>
+                  <p>{{ "video.unsupported" | transloco }}</p>
                 </div>
-                <!-- Campo de título - Ahora completamente opcional -->
-                <div class="flex-1">
-                  <app-text-field
-                    [id]="'file-title-' + i"
-                    [control]="getFileControl(i, 'title')"
+              </video>
+            </div>
+            }
+            <!-- Icono si no hay preview -->
+            @if ( !productFile.previewUrl && !productFile.videoUrl &&
+            !loadingImage ) {
+            <div class="text-gray-400">
+              <i class="pi pi-image text-2xl"></i>
+            </div>
+            }
+          </div>
+        </div>
+        <!-- Campo de título - Ahora completamente opcional -->
+        <div class="flex-1">
+          <app-text-field
+            [id]="'file-title-' + i"
+            [control]="getFileControl(i, 'title')"
             placeholder="{{
               'components.products.edit.fields.image.titlePlaceholder'
                 | transloco
             }}"
-                  ></app-text-field>
-                </div>
-                <!-- Botones de reordenamiento -->
-                <div class="flex flex-col gap-0">
-                  <!-- Botón subir -->
-                  <button
-                    type="button"
-                    (click)="moveFileUp(i)"
-                    [disabled]="i === 0"
-                    [class.opacity-30]="i === 0"
-                    [class.cursor-not-allowed]="i === 0"
-                    class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-b border-gray-600 dark:border-gray-400"
+          ></app-text-field>
+        </div>
+        <!-- Botones de reordenamiento -->
+        <div class="flex flex-col gap-0">
+          <!-- Botón subir -->
+          <button
+            type="button"
+            (click)="moveFileUp(i)"
+            [disabled]="i === 0"
+            [class.opacity-30]="i === 0"
+            [class.cursor-not-allowed]="i === 0"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-b border-gray-600 dark:border-gray-400"
             pTooltip="{{
               i === 0
                 ? ('components.products.edit.fields.image.firstImage'
                   | transloco)
                 : ('components.products.edit.fields.image.moveUp' | transloco)
             }}"
-                    tooltipPosition="top"
-                    >
-                    <i class="pi pi-chevron-up text-sm"></i>
-                  </button>
-                  <!-- Botón bajar -->
-                  <button
-                    type="button"
-                    (click)="moveFileDown(i)"
-                    [disabled]="i === productFiles.length - 1"
-                    [class.opacity-30]="i === productFiles.length - 1"
-                    [class.cursor-not-allowed]="i === productFiles.length - 1"
-                    class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-up text-sm"></i>
+          </button>
+          <!-- Botón bajar -->
+          <button
+            type="button"
+            (click)="moveFileDown(i)"
+            [disabled]="i === productFiles.length - 1"
+            [class.opacity-30]="i === productFiles.length - 1"
+            [class.cursor-not-allowed]="i === productFiles.length - 1"
+            class="p-0 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             pTooltip="{{
               i === productFiles.length - 1
                 ? ('components.products.edit.fields.image.lastImage'
                   | transloco)
                 : ('components.products.edit.fields.image.moveDown' | transloco)
             }}"
-                    tooltipPosition="top"
-                    >
-                    <i class="pi pi-chevron-down text-sm"></i>
-                  </button>
-                </div>
-                <!-- Botón eliminar -->
-                <button
-                  type="button"
-                  (click)="removeFile(i)"
-                  class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
+            tooltipPosition="top"
+          >
+            <i class="pi pi-chevron-down text-sm"></i>
+          </button>
+        </div>
+        <!-- Botón eliminar -->
+        <button
+          type="button"
+          (click)="removeFile(i)"
+          class="p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
           pTooltip="{{
             'components.products.edit.fields.image.deleteImage' | transloco
           }}"
-                  tooltipPosition="top"
-                  >
-                  <i class="pi pi-trash"></i>
-                </button>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Estado vacío para archivos -->
-        @if (productFiles.length === 0) {
-          <div
-            class="p-4 bg-white dark:bg-white rounded-lg border border-black"
-            >
-            <div class="text-center py-8">
-              <i
-                class="pi pi-image text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-              ></i>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ "image.nodata.title" | transloco }}
-              </p>
-            </div>
-          </div>
-        }
+          tooltipPosition="top"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
       </div>
-    </form>
-
-    <style>
-      :host ::ng-deep .p-fileupload-content {
-      display: none !important;
+      }
+    </div>
     }
-    :host ::ng-deep app-file-upload label {
+
+    <!-- Estado vacío para archivos -->
+    @if (productFiles.length === 0) {
+    <div class="p-4 bg-white dark:bg-white rounded-lg border border-black">
+      <div class="text-center py-8">
+        <i
+          class="pi pi-image text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
+        ></i>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ "image.nodata.title" | transloco }}
+        </p>
+      </div>
+    </div>
+    }
+  </div>
+</form>
+
+<style>
+  :host ::ng-deep .p-fileupload-content {
+    display: none !important;
+  }
+  :host ::ng-deep app-file-upload label {
     font-weight: bold !important;
     color: black !important;
     font-size: 14px;

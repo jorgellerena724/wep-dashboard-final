@@ -14,7 +14,6 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -35,8 +34,8 @@ import { TooltipModule } from 'primeng/tooltip';
     TextFieldComponent,
     AppFileUploadComponent,
     TranslocoModule,
-    TooltipModule
-],
+    TooltipModule,
+  ],
 })
 export class CreateNewsComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -102,7 +101,9 @@ export class CreateNewsComponent implements DynamicComponent {
     });
   }
 
-  duplicateNameValidator(control: AbstractControl): Promise<ValidationErrors | null> {
+  duplicateNameValidator(
+    control: AbstractControl
+  ): Promise<ValidationErrors | null> {
     return new Promise((resolve) => {
       const title = control.value?.trim().toLowerCase();
       if (!title) {
@@ -112,8 +113,7 @@ export class CreateNewsComponent implements DynamicComponent {
 
       const isDuplicate = this.existingNews.some(
         (news) =>
-          news.title?.trim().toLowerCase() === title &&
-          news.id !== this.id
+          news.title?.trim().toLowerCase() === title && news.id !== this.id
       );
 
       if (isDuplicate) {

@@ -15,7 +15,6 @@ import {
   ValidationErrors,
   AsyncValidatorFn,
 } from '@angular/forms';
-
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -39,8 +38,8 @@ import { TooltipModule } from 'primeng/tooltip';
     AppFileUploadComponent,
     TranslocoModule,
     SelectComponent,
-    TooltipModule
-],
+    TooltipModule,
+  ],
 })
 export class CreatePublicationComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
@@ -126,14 +125,14 @@ export class CreatePublicationComponent implements DynamicComponent {
     if (!this.selectedDocument) {
       return 'pi-file';
     }
-    
+
     const fileName = this.selectedDocument.name.toLowerCase();
     if (fileName.endsWith('.pdf')) {
       return 'pi-file-pdf';
     } else if (fileName.endsWith('.zip')) {
       return 'zip';
     }
-    
+
     return 'pi-file';
   }
 
@@ -141,14 +140,14 @@ export class CreatePublicationComponent implements DynamicComponent {
     if (!this.selectedDocument) {
       return 'text-gray-400 dark:text-gray-500';
     }
-    
+
     const fileName = this.selectedDocument.name.toLowerCase();
     if (fileName.endsWith('.pdf')) {
       return 'text-red-500';
     } else if (fileName.endsWith('.zip')) {
       return 'text-green-500';
     }
-    
+
     return 'text-gray-400 dark:text-gray-500';
   }
 
@@ -159,7 +158,9 @@ export class CreatePublicationComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.publications.error.formInvalid'),
+        this.transloco.translate(
+          'notifications.publications.error.formInvalid'
+        ),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -196,7 +197,9 @@ export class CreatePublicationComponent implements DynamicComponent {
         this.form.patchValue({ photo: '' });
 
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.publications.success.created'),
+          this.transloco.translate(
+            'notifications.publications.success.created'
+          ),
           'success'
         );
         this.submitSuccess.emit();
@@ -227,10 +230,11 @@ export class CreatePublicationComponent implements DynamicComponent {
           this.notificationSrv.addNotification(error.error.message, 'error');
         } else {
           // Mostrar el mensaje de error del backend si existe, sino mostrar el mensaje genérico
-          const errorMessage = error.error?.message || 
-            error.error?.detail || 
+          const errorMessage =
+            error.error?.message ||
+            error.error?.detail ||
             this.transloco.translate('notifications.publications.error.create');
-          
+
           this.notificationSrv.addNotification(errorMessage, 'error');
         }
       },
@@ -336,7 +340,7 @@ export class CreatePublicationComponent implements DynamicComponent {
   uniqueTitleValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const title = control.value?.trim().toLowerCase();
-      
+
       if (!title || title.length < 3) {
         return of(null);
       }

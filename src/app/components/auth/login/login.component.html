@@ -2,7 +2,7 @@
   <div
     class="absolute inset-0 bg-center bg-no-repeat bg-cover bg-slate-200"
     style="
-      background-image: url('/assets/img/background_login.jpg');
+      background-image: url('assets/img/background_login.jpg');
       background-position: 25% center;
     "
   ></div>
@@ -10,9 +10,8 @@
   <div class="relative w-full max-w-sm px-4">
     <div
       class="border border-gray-500 px-8 py-10 text-left bg-gray-900 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.2),0_0_40px_rgba(0,0,0,0.15),0_0_60px_rgba(0,0,0,0.1),0_0_80px_rgba(0,0,0,0.05)] transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
-      >
+    >
       <div class="flex flex-col justify-center items-center h-full select-none">
-
         <!--  Selector de Idioma -->
         <div class="w-full flex justify-end mb-4 relative z-50">
           <div class="relative inline-block text-left">
@@ -24,8 +23,12 @@
                 id="language-menu-login"
                 [attr.aria-expanded]="languageMenuOpen"
                 aria-haspopup="true"
-                >
-                <img [src]="currentLanguageIcon" [alt]="currentLanguage" class="w-5 h-5" />
+              >
+                <img
+                  [src]="currentLanguageIcon"
+                  [alt]="currentLanguage"
+                  class="w-5 h-5"
+                />
                 <svg
                   class="h-6 w-6 transition-transform duration-200"
                   [class.rotate-180]="languageMenuOpen"
@@ -33,188 +36,190 @@
                   viewBox="0 0 20 20"
                   fill="currentColor"
                   aria-hidden="true"
-                  >
+                >
                   <path
                     fill-rule="evenodd"
                     d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                     clip-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
+                  />
+                </svg>
+              </button>
+            </div>
 
-              <div
-                class="origin-top-right absolute right-0 mt-2 w-28 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700 z-50"
-                [class.hidden]="!languageMenuOpen"
-                [class.opacity-0]="!languageMenuOpen"
-                [class.scale-95]="!languageMenuOpen"
-                [class.opacity-100]="languageMenuOpen"
-                [class.scale-100]="languageMenuOpen"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="language-menu-login"
+            <div
+              class="origin-top-right absolute right-0 mt-2 w-28 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700 z-50"
+              [class.hidden]="!languageMenuOpen"
+              [class.opacity-0]="!languageMenuOpen"
+              [class.scale-95]="!languageMenuOpen"
+              [class.opacity-100]="languageMenuOpen"
+              [class.scale-100]="languageMenuOpen"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="language-menu-login"
+            >
+              <div class="py-2" role="none">
+                <a
+                  (click)="selectLanguage('es')"
+                  class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  role="menuitem"
                 >
-                <div class="py-2" role="none">
-                  <a
-                    (click)="selectLanguage('es')"
-                    class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                    role="menuitem"
-                    >
-                    <img src="assets/img/españa.ico" alt="España" class="mr-2 w-4 h-4" />
-                    {{ "language.es" | transloco }}
-                  </a>
-                  <a
-                    (click)="selectLanguage('en')"
-                    class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                    role="menuitem"
-                    >
-                    <img src="assets/img/eeuu.ico" alt="USA" class="mr-2 w-4 h-4" />
-                    {{ "language.en" | transloco }}
-                  </a>
-                </div>
+                  <img
+                    src="assets/img/españa.ico"
+                    alt="España"
+                    class="mr-2 w-4 h-4"
+                  />
+                  {{ "language.es" | transloco }}
+                </a>
+                <a
+                  (click)="selectLanguage('en')"
+                  class="flex items-center cursor-pointer px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                  role="menuitem"
+                >
+                  <img
+                    src="assets/img/eeuu.ico"
+                    alt="USA"
+                    class="mr-2 w-4 h-4"
+                  />
+                  {{ "language.en" | transloco }}
+                </a>
               </div>
             </div>
           </div>
-          <!-- FIN: Selector de Idioma -->
+        </div>
+        <!-- FIN: Selector de Idioma -->
 
-          <div class="flex flex-col items-center justify-center gap-2 mb-2 relative z-10">
-            <div>
-              <img
-                src="/assets/img/logo-1.ico"
-                alt="Photo"
-                class="h-20 w-22 transition-transform duration-300 ease-in-out hover:scale-110"
-                title="Logo"
-                />
-              </div>
+        <div
+          class="flex flex-col items-center justify-center gap-2 mb-2 relative z-10"
+        >
+          <div>
+            <img
+              src="assets/img/logo-1.ico"
+              alt="Photo"
+              class="h-20 w-22 transition-transform duration-300 ease-in-out hover:scale-110"
+              title="Logo"
+            />
+          </div>
+        </div>
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          class="space-y-6 w-full relative z-10"
+        >
+          <div class="w-full flex flex-col gap-2">
+            <label class="font-semibold text-md text-gray-400">{{
+              "login.email.title" | transloco
+            }}</label>
+            <input
+              id="email"
+              formControlName="email"
+              placeholder="{{ 'login.email.placeholder' | transloco }}"
+              class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
+            />
+
+            @if ( loginForm.get('email')?.touched &&
+            loginForm.get('email')?.hasError('required') ) {
+            <div class="text-red-600 text-sm">
+              {{ "login.email.required" | transloco }}
             </div>
-            <form
-              [formGroup]="loginForm"
-              (ngSubmit)="onSubmit()"
-              class="space-y-6 w-full relative z-10"
+            }
+          </div>
+          <div class="w-full flex flex-col gap-2 mt-4">
+            <label class="font-semibold text-md text-gray-400">{{
+              "login.password.title" | transloco
+            }}</label>
+            <div class="relative">
+              <input
+                id="password"
+                formControlName="password"
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="{{ 'login.password.placeholder' | transloco }}"
+                class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
+              />
+              @if (loginForm.get('password')?.value) {
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 border-none outline-none focus:outline-none"
+                style="background: none"
               >
-              <div class="w-full flex flex-col gap-2">
-                <label class="font-semibold text-md text-gray-400">{{
-                  "login.email.title" | transloco
-                }}</label>
-                <input
-                  id="email"
-                  formControlName="email"
-                  placeholder="{{ 'login.email.placeholder' | transloco }}"
-                  class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
+                @if (!showPassword) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-eye"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"
                   />
+                  <path
+                    d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"
+                  />
+                </svg>
+                } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-eye-slash"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"
+                  />
+                  <path
+                    d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"
+                  />
+                  <path
+                    d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"
+                  />
+                </svg>
+                }
+              </button>
+              }
+            </div>
+            @if ( loginForm.get('password')?.touched &&
+            loginForm.get('password')?.hasError('required') ) {
+            <div class="text-red-600 text-sm">
+              {{ "login.password.required" | transloco }}
+            </div>
+            }
+          </div>
 
-                  @if (
-                    loginForm.get('email')?.touched &&
-                    loginForm.get('email')?.hasError('required')
-                    ) {
-                    <div
-                      class="text-red-600 text-sm"
-                      >
-                      {{ "login.email.required" | transloco }}
-                    </div>
-                  }
-                </div>
-                <div class="w-full flex flex-col gap-2 mt-4">
-                  <label class="font-semibold text-md text-gray-400">{{
-                    "login.password.title" | transloco
-                  }}</label>
-                  <div class="relative">
-                    <input
-                      id="password"
-                      formControlName="password"
-                      [type]="showPassword ? 'text' : 'password'"
-                      placeholder="{{ 'login.password.placeholder' | transloco }}"
-                      class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
-                      />
-                      @if (loginForm.get('password')?.value) {
-                        <button
-                          type="button"
-                          (click)="togglePasswordVisibility()"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 border-none outline-none focus:outline-none"
-                          style="background: none"
-                          >
-                          @if (!showPassword) {
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              fill="currentColor"
-                              class="bi bi-eye"
-                              viewBox="0 0 16 16"
-                              >
-                              <path
-                                d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"
-                                />
-                                <path
-                                  d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"
-                                  />
-                                </svg>
-                              } @else {
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
-                                  fill="currentColor"
-                                  class="bi bi-eye-slash"
-                                  viewBox="0 0 16 16"
-                                  >
-                                  <path
-                                    d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"
-                                    />
-                                    <path
-                                      d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"
-                                      />
-                                      <path
-                                        d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"
-                                        />
-                                      </svg>
-                                    }
-                                  </button>
-                                }
-                              </div>
-                              @if (
-                                loginForm.get('password')?.touched &&
-                                loginForm.get('password')?.hasError('required')
-                                ) {
-                                <div
-                                  class="text-red-600 text-sm"
-                                  >
-                                  {{ "login.password.required" | transloco }}
-                                </div>
-                              }
-                            </div>
-
-                            <div class="mt-4 w-full">
-                              <button
-                                type="submit"
-                                class="w-full h-[1cm] px-2 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition duration-200 backdrop-blur-sm flex items-center justify-center"
-                                [disabled]="isLoading"
-                                >
-                                @if (isLoading) {
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    fill="currentColor"
-                                    class="bi bi-arrow-clockwise animate-spin"
-                                    viewBox="0 0 16 16"
-                                    >
-                                    <path
-                                      fill-rule="evenodd"
-                                      d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-                                      />
-                                      <path
-                                        d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-                                        />
-                                      </svg>
-                                      <span class="ml-2">{{ "login.loading" | transloco }}</span>
-                                    } @else {
-                                      {{ "login.load" | transloco }}
-                                    }
-                                  </button>
-                                </div>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+          <div class="mt-4 w-full">
+            <button
+              type="submit"
+              class="w-full h-[1cm] px-2 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition duration-200 backdrop-blur-sm flex items-center justify-center"
+              [disabled]="isLoading"
+            >
+              @if (isLoading) {
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-arrow-clockwise animate-spin"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
+                />
+                <path
+                  d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
+                />
+              </svg>
+              <span class="ml-2">{{ "login.loading" | transloco }}</span>
+              } @else {
+              {{ "login.load" | transloco }}
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
