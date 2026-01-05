@@ -219,6 +219,37 @@
         "formInvalid": "Check the form fields.",
         "duplicateName": "A category with this name already exists."
       }
+    },
+    "chatbot_config": {
+      "success": {
+        "created": "Chatbot configuration created successfully",
+        "updated": "Chatbot configuration updated successfully",
+        "deleted": "Chatbot configuration deleted successfully"
+      },
+      "error": {
+        "formInvalid": "Please fill in all required fields",
+        "create": "Error creating chatbot configuration",
+        "update": "Error updating chatbot configuration",
+        "delete": "Error deleting chatbot configuration",
+        "load": "Error loading chatbot configurations",
+        "duplicateName": "A model with this name already exists.",
+        "cannotDelete": "The model cannot be deleted; it is being used in a configuration."
+      }
+    },
+    "chatbot_model": {
+      "success": {
+        "created": "Chatbot configuration created successfully",
+        "updated": "Chatbot configuration updated successfully",
+        "deleted": "Chatbot configuration deleted successfully"
+      },
+      "error": {
+        "formInvalid": "Please fill in all required fields",
+        "create": "Error creating chatbot configuration",
+        "update": "Error updating chatbot configuration",
+        "delete": "Error deleting chatbot configuration",
+        "load": "Error loading chatbot configurations",
+        "duplicateName": "A model with this name already exists."
+      }
     }
   },
   "language": {

@@ -8,6 +8,7 @@ import {
   ChangeDetectionStrategy,
   input,
   untracked,
+  DestroyRef,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -23,10 +24,11 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../../shared/components/app-select/app-select.component';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 import { UserService } from '../../../../shared/services/users/user.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-create-chatbot-config',
-  templateUrl: './create-chatbot-config.component.html',
+  selector: 'app-update-chatbot-config',
+  templateUrl: './update-chatbot-config.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -36,12 +38,13 @@ import { UserService } from '../../../../shared/services/users/user.service';
     SelectComponent,
   ],
 })
-export class CreateChatbotConfigComponent implements DynamicComponent {
+export class UpdateChatbotConfigComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private chatbotConfigSrv = inject(ChatbotService);
   private userSrv = inject(UserService);
   private notificationSrv = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
 
   initialData = input<any>();
   formValid = output<boolean>();
@@ -53,18 +56,19 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
   users = signal<any[]>([]);
   uploading = signal(false);
   isFormValid = signal(false);
+  configId = signal<number | null>(null);
 
   // Computed
   isSubmitting = signal<boolean>(false);
   isFormInvalid = computed(() => !this.isFormValid() || this.uploading());
 
-  // Form
+  // Form - API_KEY NO es requerido en update (solo en create)
   form: FormGroup;
 
   constructor() {
     this.form = this.fb.group({
       user_id: ['', [Validators.required]],
-      api_key: ['', [Validators.required, Validators.minLength(20)]],
+      api_key: ['', [Validators.minLength(20)]], // Solo validación de longitud si se envía
       model_id: ['', [Validators.required]],
       prompt: ['', [Validators.required, Validators.minLength(10)]],
     });
@@ -73,7 +77,16 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          this.form.patchValue(data);
+          // Mapear datos correctamente
+          const formData = {
+            user_id: data.user_id || data.user?.id, // Tomar user_id directo o del objeto user
+            model_id: data.model_id || data.model?.id, // Tomar model_id directo o del objeto model
+            prompt: data.prompt || '',
+            api_key: '', // No establecer api_key porque no se envía por seguridad
+          };
+
+          this.form.patchValue(formData);
+          this.configId.set(data.id); // Guardar el ID para el update
         });
       }
     });
@@ -90,9 +103,11 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
     });
 
     // Suscripción al estado del formulario
-    this.form.statusChanges.subscribe(() => {
-      this.isFormValid.set(this.form.valid);
-    });
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.isFormValid.set(this.form.valid);
+      });
 
     // Re-validar cuando cambie el usuario
     this.form.get('user_id')?.valueChanges.subscribe(() => {
@@ -100,9 +115,11 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
     });
   }
 
-  async fetchUsers(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.userSrv.get().subscribe({
+  fetchUsers(): void {
+    this.userSrv
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (data) => {
           this.users.set(
             data.map((user: any) => ({
@@ -110,22 +127,21 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
               label: `${user.full_name} (${user.email})`,
             }))
           );
-          resolve();
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.users.error.load'),
             'error'
           );
-          reject(err);
         },
       });
-    });
   }
 
-  async fetchModels(): Promise<void> {
-    return new Promise((resolve) => {
-      this.chatbotConfigSrv.getModels().subscribe({
+  fetchModels(): void {
+    this.chatbotConfigSrv
+      .getModels()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (data) => {
           this.models.set(
             data.map((model: any) => ({
@@ -133,7 +149,6 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
               label: model.name,
             }))
           );
-          resolve();
         },
         error: (err) => {
           this.notificationSrv.addNotification(
@@ -144,7 +159,6 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
           );
         },
       });
-    });
   }
 
   async onSubmit(): Promise<void> {
@@ -163,67 +177,91 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    const payload = {
-      user_id: this.form.get('user_id')?.value,
-      api_key: this.form.get('api_key')?.value.trim(),
-      model_id: this.form.get('model_id')?.value,
-      prompt: this.form.get('prompt')?.value.trim(),
+    // Construir payload - API_KEY solo si tiene valor
+    const formValue = this.form.value;
+    const payload: any = {
+      user_id: formValue.user_id,
+      model_id: formValue.model_id,
+      prompt: formValue.prompt.trim(),
     };
 
-    this.chatbotConfigSrv.post(payload).subscribe({
-      next: (response) => {
-        this.uploading.set(false);
+    // Solo incluir api_key si no está vacío
+    if (formValue.api_key && formValue.api_key.trim() !== '') {
+      payload.api_key = formValue.api_key.trim();
+    }
 
-        this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.chatbot_config.success.created'
-          ),
-          'success'
-        );
+    const configId = this.configId();
+    if (!configId) {
+      this.notificationSrv.addNotification(
+        this.transloco.translate(
+          'notifications.chatbot_config.error.invalidId'
+        ),
+        'error'
+      );
+      this.uploading.set(false);
+      this.submitError.emit();
+      return;
+    }
 
-        this.submitSuccess.emit();
+    // Usar PATCH para actualizar
+    this.chatbotConfigSrv
+      .patch(payload, configId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.uploading.set(false);
 
-        if (this.initialData()?.onSave) {
-          this.initialData().onSave();
-        }
-      },
-      error: (error) => {
-        this.uploading.set(false);
+          this.notificationSrv.addNotification(
+            this.transloco.translate(
+              'notifications.chatbot_config.success.updated'
+            ),
+            'success'
+          );
 
-        let errorMessage = this.transloco.translate(
-          'notifications.chatbot_config.error.create'
-        );
+          this.submitSuccess.emit();
 
-        // Manejar errores específicos
-        if (error.status === 400) {
-          if (
-            error.error?.detail?.includes('already exists') ||
-            error.error?.detail?.includes('Ya existe')
-          ) {
+          const data = this.initialData();
+          if (data?.onSave) {
+            data.onSave();
+          }
+        },
+        error: (error) => {
+          this.uploading.set(false);
+
+          let errorMessage = this.transloco.translate(
+            'notifications.chatbot_config.error.update'
+          );
+
+          // Manejar errores específicos
+          if (error.status === 400) {
+            if (
+              error.error?.detail?.includes('already exists') ||
+              error.error?.detail?.includes('Ya existe')
+            ) {
+              errorMessage = this.transloco.translate(
+                'notifications.chatbot_config.error.userExists'
+              );
+            } else if (error.error?.detail?.includes('invalid API key')) {
+              errorMessage = this.transloco.translate(
+                'notifications.chatbot_config.error.invalidApiKey'
+              );
+            }
+          } else if (error.status === 409) {
             errorMessage = this.transloco.translate(
               'notifications.chatbot_config.error.userExists'
             );
-          } else if (error.error?.detail?.includes('invalid API key')) {
+          } else if (error.status === 404) {
             errorMessage = this.transloco.translate(
-              'notifications.chatbot_config.error.invalidApiKey'
+              'notifications.users.error.notFound'
             );
           }
-        } else if (error.status === 409) {
-          errorMessage = this.transloco.translate(
-            'notifications.chatbot_config.error.userExists'
-          );
-        } else if (error.status === 404) {
-          errorMessage = this.transloco.translate(
-            'notifications.users.error.notFound'
-          );
-        }
 
-        this.notificationSrv.addNotification(errorMessage, 'error');
+          this.notificationSrv.addNotification(errorMessage, 'error');
 
-        this.isSubmitting.set(false);
-        this.submitError.emit();
-      },
-    });
+          this.isSubmitting.set(false);
+          this.submitError.emit();
+        },
+      });
   }
 
   getFormControl(controlName: string): FormControl {

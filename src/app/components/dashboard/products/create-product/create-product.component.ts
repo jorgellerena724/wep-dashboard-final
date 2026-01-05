@@ -9,7 +9,6 @@ import {
   ChangeDetectionStrategy,
   DestroyRef,
   PLATFORM_ID,
-  Inject,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -18,9 +17,6 @@ import {
   ReactiveFormsModule,
   FormArray,
   FormControl,
-  AbstractControl,
-  ValidationErrors,
-  AsyncValidatorFn,
 } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
 import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
@@ -33,8 +29,6 @@ import { SelectComponent } from '../../../../shared/components/app-select/app-se
 import { ProductService } from '../../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

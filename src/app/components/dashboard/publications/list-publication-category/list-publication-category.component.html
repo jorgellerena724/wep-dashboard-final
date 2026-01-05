@@ -10,14 +10,14 @@
       {{ "components.publication-category.list.title" | transloco }}
     </h1>
 
-    <!-- La tabla con sus nuevas propiedades -->
+    <!-- La tabla con signals -->
     <div class="mt-4">
       <app-table
-        [data]="data"
-        [columns]="columns"
-        [loading]="loading"
-        [headerActions]="headerActions"
-        [rowActions]="rowActions"
+        [data]="data()"
+        [columns]="columns()"
+        [loading]="loading()"
+        [headerActions]="headerActions()"
+        [rowActions]="rowActions()"
         (refresh)="onRefresh()"
       >
       </app-table>

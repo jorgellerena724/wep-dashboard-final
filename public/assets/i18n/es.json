@@ -248,7 +248,8 @@
         "update": "Error al actualizar la configuración del chatbot",
         "delete": "Error al eliminar la configuración del chatbot",
         "load": "Error al cargar las configuraciones del chatbot",
-        "duplicateName": "Ya existe un modelo con este nombre."
+        "duplicateName": "Ya existe un modelo con este nombre.",
+        "cannotDelete": "No se puede eliminar el modelo, está siendo usado en una configuración."
       }
     }
   },
@@ -386,13 +387,46 @@
   },
   "components": {
     "chatbot_config": {
+      "list": {
+        "title": "Configuraciones de Chatbot",
+        "table": {
+          "name": "Nombre de usuario",
+          "model": "Nombre del modelo de IA",
+          "status": "Estado"
+        },
+        "errors": {}
+      },
       "create": {
-        "title": "Registrar Configuración de Chatbot",
+        "title": "Registrar Configuración de IA",
         "fields": {
           "user": {
             "title": "Usuario",
             "required": "El usuario es requerido",
-            "exists": "Este usuario ya tiene una configuración de chatbot"
+            "exists": "Este usuario ya tiene una configuración de IA"
+          },
+          "apiKey": {
+            "title": "API Key",
+            "required": "La API Key es requerida",
+            "minlength": "La API Key debe tener al menos 20 caracteres"
+          },
+          "model": {
+            "title": "Modelo de IA",
+            "required": "El modelo es requerido"
+          },
+          "prompt": {
+            "title": "Prompt del Sistema",
+            "required": "El prompt del sistema es requerido",
+            "minlength": "El prompt debe tener al menos 10 caracteres"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar Configuración de IA",
+        "fields": {
+          "user": {
+            "title": "Usuario",
+            "required": "El usuario es requerido",
+            "exists": "Este usuario ya tiene una configuración de IA"
           },
           "apiKey": {
             "title": "API Key",

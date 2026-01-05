@@ -1,4 +1,3 @@
-<!-- update-header.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
@@ -17,7 +16,7 @@
       [placeholder]="
         'components.publications.create.fields.category.title' | transloco
       "
-      [options]="categories"
+      [options]="categories()"
       formControlName="publication_category"
       [control]="getFormControl('publication_category')"
       [errorMessages]="{
@@ -48,7 +47,7 @@
     ></app-file-upload>
     <!-- Document Preview Section -->
     <div class="mt-4 relative h-[100px]">
-      @if (selectedDocument) {
+      @if (selectedDocument()) {
       <div
         class="absolute inset-0 flex items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-500"
       >
@@ -61,8 +60,7 @@
             height="24"
             fill="currentColor"
             [class]="
-              'bi bi-file-earmark-zip mb-2 inline-block ' +
-              getDocumentIconColor()
+              'bi bi-file-earmark-zip mb-2 inline-block ' + documentIconColor()
             "
             style="margin-right: 2px"
             viewBox="0 0 16 16"
@@ -80,15 +78,15 @@
           <i
             [class]="
               'pi ' +
-              getDocumentIcon() +
+              documentIcon() +
               ' mb-2 inline-block ' +
-              getDocumentIconColor()
+              documentIconColor()
             "
             style="font-size: 24px; margin-right: 2px"
           ></i>
           }
           <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ selectedDocument.name }}
+            {{ selectedDocument()?.name }}
           </p>
           <button
             type="button"
@@ -103,7 +101,7 @@
       </div>
       }
       <!-- Estado cuando no hay documento -->
-      @if (!selectedDocument) {
+      @if (!selectedDocument()) {
       <div class="absolute inset-0 flex items-center justify-center">
         <div
           [class.border-red-500]="
@@ -162,7 +160,7 @@
     <!-- Contenedor de altura fija para la previsualización -->
     <div class="mt-4 relative h-[240px]">
       <!-- Loading state -->
-      @if (loadingImage) {
+      @if (loadingImage()) {
       <div
         class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg"
       >
@@ -177,7 +175,7 @@
       </div>
       }
       <!-- Image Preview Section -->
-      @if (imageUrl && !loadingImage) {
+      @if (imageUrl() && !loadingImage()) {
       <div class="absolute inset-0 flex flex-col">
         <!-- Preview Container -->
         <div
@@ -189,7 +187,7 @@
               class="relative overflow-hidden rounded-lg shadow-md border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
             >
               <img
-                [src]="imageUrl"
+                [src]="imageUrl()"
                 class="max-w-[280px] max-h-[240px] min-w-[200px] min-h-[150px] object-contain p-2 rounded-lg"
                 alt="{{ 'image.alt' | transloco }}"
               />
@@ -216,7 +214,7 @@
       </div>
       }
       <!-- Estado cuando no hay imagen -->
-      @if (!imageUrl && !loadingImage) {
+      @if (!imageUrl() && !loadingImage()) {
       <div class="absolute inset-0 flex items-center justify-center">
         <div
           [class.border-red-500]="

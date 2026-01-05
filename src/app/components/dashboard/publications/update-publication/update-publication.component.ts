@@ -1,22 +1,23 @@
 import {
-  ChangeDetectorRef,
   Component,
-  EventEmitter,
   inject,
-  Input,
-  Output,
+  signal,
+  computed,
+  effect,
+  ChangeDetectionStrategy,
+  input,
+  output,
+  DestroyRef,
 } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormControl,
   AbstractControl,
   ValidationErrors,
-  AsyncValidatorFn,
-  FormControl,
 } from '@angular/forms';
-
 import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../../shared/services/system/notification.service';
@@ -27,9 +28,16 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer } from '@angular/platform-browser';
 import { PublicationCategoryService } from '../../../../shared/services/features/publication-category.service';
 import { PublicationsService } from '../../../../shared/services/features/publications.service';
-import { Observable, of } from 'rxjs';
+import {
+  Observable,
+  of,
+  switchMap,
+  debounceTime,
+  distinctUntilChanged,
+} from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { TooltipModule } from 'primeng/tooltip';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-update-publication',
@@ -43,35 +51,117 @@ import { TooltipModule } from 'primeng/tooltip';
     TranslocoModule,
     TooltipModule,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UpdatePublicationComponent implements DynamicComponent {
+  // Servicios
   private transloco = inject(TranslocoService);
-  @Input() initialData?: any;
-  @Output() formValid = new EventEmitter<boolean>();
-  @Output() submitSuccess = new EventEmitter<void>();
-  id: number;
-  form: FormGroup;
-  categories: any[] = [];
-  publications: any[] = [];
-  selectedFile: File | null = null;
-  selectedDocument: File | null = null;
-  uploading = false;
-  loadingImage = false;
-  loadingDocument = false;
-  imageUrl: string | null = null;
-  documentUrl: string | null = null;
-  // Nuevas propiedades para distinguir entre archivos existentes y nuevos
-  hasExistingDocument = false;
-  existingDocumentName: string | null = null;
+  private fb = inject(FormBuilder);
+  private srv = inject(PublicationsService);
+  private notificationSrv = inject(NotificationService);
+  private categorySrv = inject(PublicationCategoryService);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(
-    private fb: FormBuilder,
-    private srv: PublicationsService,
-    private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef,
-    private categorySrv: PublicationCategoryService,
-    private sanitizer: DomSanitizer
-  ) {
+  // Signals para inputs/outputs
+  initialData = input<any>();
+  formValid = output<boolean>();
+  submitSuccess = output<void>();
+  submitError = output<void>();
+
+  // Signals para estado
+  id = signal<number>(0);
+  uploading = signal<boolean>(false);
+  loadingImage = signal<boolean>(false);
+  loadingDocument = signal<boolean>(false);
+  categories = signal<any[]>([]);
+  selectedFile = signal<File | null>(null);
+  selectedDocument = signal<File | null>(null);
+  imageUrl = signal<string | null>(null);
+  documentUrl = signal<string | null>(null);
+  hasExistingDocument = signal<boolean>(false);
+  existingDocumentName = signal<string | null>(null);
+
+  // Computed signals
+  isFormInvalid = computed(() => {
+    return this.form.invalid || this.uploading();
+  });
+
+  documentIcon = computed(() => {
+    const document = this.selectedDocument();
+    const existingName = this.existingDocumentName();
+
+    if (document) {
+      const fileName = document.name.toLowerCase();
+      if (fileName.endsWith('.pdf')) return 'pi-file-pdf';
+      if (fileName.endsWith('.zip')) return 'zip';
+      return 'pi-file';
+    }
+
+    if (this.hasExistingDocument() && existingName) {
+      const fileName = existingName.toLowerCase();
+      if (fileName.endsWith('.pdf')) return 'pi-file-pdf';
+      if (fileName.endsWith('.zip')) return 'zip';
+      return 'pi-file';
+    }
+
+    return 'pi-file';
+  });
+
+  documentIconColor = computed(() => {
+    const document = this.selectedDocument();
+    const existingName = this.existingDocumentName();
+
+    if (document) {
+      const fileName = document.name.toLowerCase();
+      if (fileName.endsWith('.pdf')) return 'text-red-500';
+      if (fileName.endsWith('.zip')) return 'text-green-500';
+      return 'text-gray-400 dark:text-gray-500';
+    }
+
+    if (this.hasExistingDocument() && existingName) {
+      const fileName = existingName.toLowerCase();
+      if (fileName.endsWith('.pdf')) return 'text-red-500';
+      if (fileName.endsWith('.zip')) return 'text-green-500';
+      return 'text-gray-400 dark:text-gray-500';
+    }
+
+    return 'text-gray-400 dark:text-gray-500';
+  });
+
+  isZipFile = computed(() => {
+    const document = this.selectedDocument();
+    const existingName = this.existingDocumentName();
+
+    if (document) {
+      return document.name.toLowerCase().endsWith('.zip');
+    }
+
+    if (this.hasExistingDocument() && existingName) {
+      return existingName.toLowerCase().endsWith('.zip');
+    }
+
+    return false;
+  });
+
+  documentName = computed(() => {
+    const document = this.selectedDocument();
+    const existingName = this.existingDocumentName();
+
+    if (document) {
+      return document.name;
+    }
+
+    if (this.hasExistingDocument() && existingName) {
+      return existingName;
+    }
+
+    return '';
+  });
+
+  // Formulario
+  form: FormGroup;
+
+  constructor() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
       publication_category: ['', Validators.required],
@@ -79,36 +169,44 @@ export class UpdatePublicationComponent implements DynamicComponent {
       photo: [''],
     });
 
-    this.id = 0;
+    // Effects
+    effect(() => {
+      const data = this.initialData();
+      if (data) {
+        this.form.patchValue(data);
+        this.form
+          .get('publication_category')
+          ?.setValue(data.publication_category?.id || '');
+        this.id.set(data.id || 0);
 
-    this.form.statusChanges.subscribe(() => {
-      this.formValid.emit(this.form.valid);
+        // Cargar archivos existentes
+        if (data.photo) {
+          this.loadCurrentImage(data.photo);
+        }
+        if (data.file) {
+          this.loadCurrentDocument(data.file);
+        }
+      }
     });
-  }
 
-  async ngOnInit(): Promise<void> {
-    if (this.initialData) {
-      console.log(this.initialData);
-      this.form.patchValue(this.initialData);
-      this.form
-        .get('publication_category')
-        ?.setValue(this.initialData.publication_category.id);
-      this.id = this.initialData.id;
+    effect(() => {
+      this.fetchCategories();
+    });
 
-      // Load existing files if they exist
-      if (this.initialData.photo) {
-        this.loadCurrentImage();
+    // Configurar validación asíncrona
+    effect(() => {
+      const titleControl = this.form.get('title');
+      if (titleControl) {
+        titleControl.setAsyncValidators([this.uniqueTitleValidator()]);
       }
-      if (this.initialData.file) {
-        this.loadCurrentDocument();
-      }
-    }
+    });
 
-    const initTasks = [this.fetchCategories(), this.fetchPublications()];
-    await Promise.all(initTasks);
-
-    // Agregar el validador asíncrono después de inicializar
-    this.form.get('title')?.setAsyncValidators([this.uniqueTitleValidator()]);
+    // Suscripción a cambios del formulario
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.formValid.emit(this.form.valid);
+      });
   }
 
   async onSubmit(): Promise<void> {
@@ -120,6 +218,7 @@ export class UpdatePublicationComponent implements DynamicComponent {
         'warning'
       );
       this.form.markAllAsTouched();
+      this.submitError.emit();
       return;
     }
 
@@ -130,106 +229,87 @@ export class UpdatePublicationComponent implements DynamicComponent {
       this.form.get('publication_category')?.value
     );
 
-    if (this.selectedFile) {
-      formData.append('photo', this.selectedFile, this.selectedFile.name);
+    const selectedFile = this.selectedFile();
+    if (selectedFile) {
+      formData.append('photo', selectedFile, selectedFile.name);
     }
 
-    if (this.selectedDocument) {
-      formData.append(
-        'file',
-        this.selectedDocument,
-        this.selectedDocument.name
-      );
+    const selectedDocument = this.selectedDocument();
+    if (selectedDocument) {
+      formData.append('file', selectedDocument, selectedDocument.name);
     }
 
-    this.uploading = true;
+    this.uploading.set(true);
 
-    this.srv.patch(formData, this.id).subscribe({
-      next: (response) => {
-        this.uploading = false;
-        this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.publications.success.updated'
-          ),
-          'success'
-        );
-        this.submitSuccess.emit();
+    this.srv
+      .patch(formData, this.id())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.uploading.set(false);
+          this.notificationSrv.addNotification(
+            this.transloco.translate(
+              'notifications.publications.success.updated'
+            ),
+            'success'
+          );
+          this.submitSuccess.emit();
 
-        if (this.initialData?.onSave) {
-          this.initialData.onSave();
-        }
-      },
-      error: (error) => {
-        this.uploading = false;
+          const data = this.initialData();
+          if (data?.onSave) {
+            data.onSave();
+          }
+        },
+        error: (error) => {
+          this.uploading.set(false);
 
-        if (
-          error.status === 400 &&
-          error.error?.message &&
-          error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
-          )
-        ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
-        } else {
-          const errorMessage =
-            error.error?.message ||
-            error.error?.detail ||
-            this.transloco.translate('notifications.publications.error.update');
+          if (error.status === 400 && error.error?.message) {
+            this.notificationSrv.addNotification(error.error.message, 'error');
+          } else {
+            const errorMessage =
+              error.error?.message ||
+              error.error?.detail ||
+              this.transloco.translate(
+                'notifications.publications.error.update'
+              );
 
-          this.notificationSrv.addNotification(errorMessage, 'error');
-        }
-      },
-    });
-  }
-
-  get isFormInvalid(): boolean {
-    return this.form.invalid || this.uploading;
+            this.notificationSrv.addNotification(errorMessage, 'error');
+          }
+          this.submitError.emit();
+        },
+      });
   }
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
   }
 
-  fetchCategories(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.categorySrv.get().subscribe({
+  private fetchCategories(): void {
+    this.categorySrv
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (data) => {
-          this.categories = data.map((com: any) => ({
-            value: com.id,
-            label: com.title,
-          }));
-          resolve();
+          this.categories.set(
+            data.map((com: any) => ({
+              value: com.id,
+              label: com.title,
+            }))
+          );
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.categories.error.load'),
             'error'
           );
-          reject(err);
         },
       });
-    });
   }
 
-  fetchPublications(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.srv.get().subscribe({
-        next: (data) => {
-          this.publications = data || [];
-          resolve();
-        },
-        error: (err) => {
-          // Silently fail - validation will work without preloaded data
-          this.publications = [];
-          resolve();
-        },
-      });
-    });
-  }
-
-  uniqueTitleValidator(): AsyncValidatorFn {
+  uniqueTitleValidator() {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const title = control.value?.trim().toLowerCase();
+      const currentId = this.id();
 
       if (!title || title.length < 2) {
         return of(null);
@@ -237,20 +317,14 @@ export class UpdatePublicationComponent implements DynamicComponent {
 
       return this.srv.get().pipe(
         map((publications: any[]) => {
-          // Exclude current publication from the check
           const exists = publications.some(
             (pub: any) =>
-              pub.id !== this.id && pub.title?.trim().toLowerCase() === title
+              pub.id !== currentId && pub.title?.trim().toLowerCase() === title
           );
           return exists ? { duplicateTitle: true } : null;
         }),
         catchError(() => {
-          // Fallback to local publications array if API call fails
-          const exists = this.publications.some(
-            (pub: any) =>
-              pub.id !== this.id && pub.title?.trim().toLowerCase() === title
-          );
-          return of(exists ? { duplicateTitle: true } : null);
+          return of(null);
         })
       );
     };
@@ -258,198 +332,95 @@ export class UpdatePublicationComponent implements DynamicComponent {
 
   onFileUploaded(files: File[]): void {
     const file = files[0];
-    this.selectedFile = file;
+    this.selectedFile.set(file);
     this.form.get('photo')?.setValue(file);
+
     const reader = new FileReader();
     reader.onload = () => {
-      this.imageUrl = reader.result as string;
-      this.cdr.detectChanges();
+      this.imageUrl.set(reader.result as string);
     };
     reader.readAsDataURL(file);
   }
 
   onDocumentUploaded(files: File[]): void {
     const file = files[0];
-    this.selectedDocument = file;
+    this.selectedDocument.set(file);
     this.form.get('file')?.setValue(file);
 
     // Marcar que ya no estamos usando el documento existente
-    this.hasExistingDocument = false;
-    this.existingDocumentName = null;
-
-    // Actualizar la vista
-    this.cdr.detectChanges();
-  }
-
-  getDocumentIcon(): string {
-    // Prioridad: archivo nuevo seleccionado
-    if (this.selectedDocument) {
-      const fileName = this.selectedDocument.name.toLowerCase();
-      if (fileName.endsWith('.pdf')) {
-        return 'pi-file-pdf';
-      } else if (fileName.endsWith('.zip')) {
-        return 'zip';
-      }
-      return 'pi-file';
-    }
-
-    // Si hay documento existente
-    if (this.hasExistingDocument && this.existingDocumentName) {
-      const fileName = this.existingDocumentName.toLowerCase();
-      if (fileName.endsWith('.pdf')) {
-        return 'pi-file-pdf';
-      } else if (fileName.endsWith('.zip')) {
-        return 'zip';
-      }
-      return 'pi-file';
-    }
-
-    return 'pi-file';
-  }
-
-  getDocumentIconColor(): string {
-    // Prioridad: archivo nuevo seleccionado
-    if (this.selectedDocument) {
-      const fileName = this.selectedDocument.name.toLowerCase();
-      if (fileName.endsWith('.pdf')) {
-        return 'text-red-500';
-      } else if (fileName.endsWith('.zip')) {
-        return 'text-green-500';
-      }
-      return 'text-gray-400 dark:text-gray-500';
-    }
-
-    // Si hay documento existente
-    if (this.hasExistingDocument && this.existingDocumentName) {
-      const fileName = this.existingDocumentName.toLowerCase();
-      if (fileName.endsWith('.pdf')) {
-        return 'text-red-500';
-      } else if (fileName.endsWith('.zip')) {
-        return 'text-green-500';
-      }
-      return 'text-gray-400 dark:text-gray-500';
-    }
-
-    return 'text-gray-400 dark:text-gray-500';
-  }
-
-  isZipFile(): boolean {
-    if (this.selectedDocument) {
-      return this.selectedDocument.name.toLowerCase().endsWith('.zip');
-    }
-    if (this.hasExistingDocument && this.existingDocumentName) {
-      return this.existingDocumentName.toLowerCase().endsWith('.zip');
-    }
-    return false;
-  }
-
-  getDocumentName(): string {
-    if (this.selectedDocument) {
-      return this.selectedDocument.name;
-    }
-    if (this.hasExistingDocument && this.existingDocumentName) {
-      return this.existingDocumentName;
-    }
-    return '';
+    this.hasExistingDocument.set(false);
+    this.existingDocumentName.set(null);
   }
 
   removeFile(): void {
-    this.selectedFile = null;
-    this.imageUrl = null;
+    const oldUrl = this.imageUrl();
+    if (oldUrl && oldUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(oldUrl);
+    }
+
+    this.selectedFile.set(null);
+    this.imageUrl.set(null);
     this.form.get('photo')?.setValue(null);
     this.form.markAllAsTouched();
-    this.form.patchValue({ photo: null });
-    this.cdr.detectChanges();
   }
 
   removeDocument(): void {
-    this.selectedDocument = null;
-    this.hasExistingDocument = false;
-    this.existingDocumentName = null;
-    this.documentUrl = null;
+    this.selectedDocument.set(null);
+    this.hasExistingDocument.set(false);
+    this.existingDocumentName.set(null);
+    this.documentUrl.set(null);
     this.form.get('file')?.setValue(null);
     this.form.markAllAsTouched();
-    this.form.patchValue({ file: null });
-    this.cdr.detectChanges();
-  }
-
-  private createImagePreview(blob: Blob): void {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      this.imageUrl = reader.result as string;
-      this.cdr.detectChanges();
-    };
-    reader.readAsDataURL(new Blob([blob]));
-  }
-
-  private setFallbackImage(): void {
-    this.imageUrl = this.initialData.photo;
-    this.cdr.detectChanges();
   }
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-    console.error('Error de validación de archivo:"File validation error:"', {
-      type: error.type,
-      message: error.message,
-      fileName: error.file.name,
-      fileSize: error.file.size,
-      fileType: error.file.type,
-    });
-    this.selectedFile = null;
+    console.error('Error de validación de archivo:', error);
+    this.selectedFile.set(null);
   }
 
   onDocumentError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-    console.error(
-      'Error de validación de documento:"Document validation error:"',
-      {
-        type: error.type,
-        message: error.message,
-        fileName: error.file.name,
-        fileSize: error.file.size,
-        fileType: error.file.type,
-      }
-    );
-    this.selectedDocument = null;
+    console.error('Error de validación de documento:', error);
+    this.selectedDocument.set(null);
   }
 
-  private loadCurrentImage(): void {
-    if (this.initialData?.photo) {
-      this.loadingImage = true;
+  private loadCurrentImage(photoUrl: string): void {
+    this.loadingImage.set(true);
 
-      this.srv.getImage(this.initialData.photo).subscribe({
+    this.srv
+      .getImage(photoUrl)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (blob: Blob) => {
-          this.createImagePreview(blob);
-          this.form.get('photo')?.setValue('existing-image');
-          this.loadingImage = false;
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            this.imageUrl.set(reader.result as string);
+            this.form.get('photo')?.setValue('existing-image');
+            this.loadingImage.set(false);
+          };
+          reader.readAsDataURL(new Blob([blob]));
         },
         error: () => {
-          this.setFallbackImage();
+          this.imageUrl.set(photoUrl);
           this.form.get('photo')?.setValue('existing-image');
-          this.loadingImage = false;
+          this.loadingImage.set(false);
         },
       });
-    }
   }
 
-  private loadCurrentDocument(): void {
-    if (this.initialData?.file) {
-      this.loadingDocument = true;
+  private loadCurrentDocument(fileUrl: string): void {
+    this.loadingDocument.set(true);
 
-      // Extraer el nombre del archivo de la URL
-      const urlParts = this.initialData.file.split('/');
-      this.existingDocumentName = urlParts[urlParts.length - 1];
-      this.hasExistingDocument = true;
-      this.documentUrl = this.initialData.file;
+    // Extraer el nombre del archivo de la URL
+    const urlParts = fileUrl.split('/');
+    const documentName = urlParts[urlParts.length - 1];
 
-      this.form.get('file')?.setValue('existing-document');
-      this.loadingDocument = false;
-      this.cdr.detectChanges();
-    }
-  }
+    this.existingDocumentName.set(documentName);
+    this.hasExistingDocument.set(true);
+    this.documentUrl.set(fileUrl);
 
-  ngOnDestroy() {
-    // Limpiar todas las URLs de objetos si es necesario
+    this.form.get('file')?.setValue('existing-document');
+    this.loadingDocument.set(false);
   }
 }

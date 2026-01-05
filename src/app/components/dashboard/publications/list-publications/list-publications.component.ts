@@ -1,11 +1,14 @@
 import {
   Component,
   inject,
-  OnInit,
+  signal,
+  computed,
+  effect,
   TemplateRef,
-  ViewChild,
+  viewChild,
+  DestroyRef,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-
 import {
   TableComponent,
   Column,
@@ -24,306 +27,292 @@ import { PublicationData } from '../../../../shared/interfaces/publications.inte
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { PublicationsService } from '../../../../shared/services/features/publications.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { combineLatest, Subscription, take } from 'rxjs';
 import { CreatePublicationComponent } from '../create-publication/create-publication.component';
 import { UpdatePublicationComponent } from '../update-publication/update-publication.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-publications',
   imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-publications.component.html',
   standalone: true,
-  providers: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListPublicationComponent implements OnInit {
+export class ListPublicationComponent {
+  // Servicios
   private transloco = inject(TranslocoService);
-  private subscriptions: Subscription[] = [];
-  data: any[] = [];
-  image: any;
-  loading = false;
-  imageUrls: { [key: number]: string } = {};
+  private modalSrv = inject(ModalService);
+  private notificationSrv = inject(NotificationService);
+  private srv = inject(PublicationsService);
+  private confirmDialogService = inject(ConfirmDialogService);
+  private destroyRef = inject(DestroyRef);
 
-  @ViewChild('imageTemplate', { static: true })
-  imageTemplate!: TemplateRef<any>;
-  customTemplates: { [key: string]: TemplateRef<any> } = {};
+  // ViewChild signals
+  imageTemplate = viewChild<TemplateRef<any>>('imageTemplate');
 
-  columns: Column[] = [];
+  // Signals para el estado
+  data = signal<any[]>([]);
+  loading = signal<boolean>(false);
+  imageUrls = signal<{ [key: number]: string }>({});
 
-  // Definimos las acciones del encabezado
-  headerActions: TableAction[] = [];
+  // Computed signal para templates personalizados
+  customTemplates = computed<{ [key: string]: TemplateRef<any> }>(() => {
+    const imgTemplate = this.imageTemplate();
+    const templates: { [key: string]: TemplateRef<any> } = {};
 
-  // Definimos las acciones de fila
-  rowActions: RowAction[] = [];
+    if (imgTemplate) {
+      templates['firstImage'] = imgTemplate;
+    }
 
-  constructor(
-    private modalSrv: ModalService,
-    private notificationSrv: NotificationService,
-    private srv: PublicationsService,
-    private confirmDialogService: ConfirmDialogService
-  ) {}
+    return templates;
+  });
 
-  ngOnInit() {
-    this.setupTranslations();
+  // Computed signals para traducciones
+  columns = computed<Column[]>(() => {
+    const nameTranslation = this.transloco.translate(
+      'components.publications.list.table.name'
+    );
+    const categoryTranslation = this.transloco.translate(
+      'components.publications.list.table.category'
+    );
+    const imageTranslation = this.transloco.translate(
+      'components.publications.list.table.image'
+    );
+
+    return [
+      {
+        field: 'title',
+        header: nameTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'categoryName',
+        header: categoryTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'firstImage',
+        header: imageTranslation,
+        width: '240px',
+      },
+    ];
+  });
+
+  headerActions = computed<TableAction[]>(() => {
+    const createTranslation = this.transloco.translate('table.buttons.create');
+    return [
+      {
+        label: createTranslation,
+        icon: icons['add'],
+        onClick: () => this.create(),
+        class: 'p-button-primary',
+      },
+    ];
+  });
+
+  rowActions = computed<RowAction[]>(() => {
+    const editTranslation = this.transloco.translate('table.buttons.edit');
+    const deleteTranslation = this.transloco.translate('table.buttons.delete');
+
+    return [
+      {
+        label: editTranslation,
+        icon: icons['edit'],
+        onClick: (data) => this.edit(data),
+        class: buttonVariants.outline.green,
+      },
+      {
+        label: deleteTranslation,
+        icon: icons['delete'],
+        onClick: (data) => this.delete(data),
+        class: buttonVariants.outline.red,
+      },
+    ];
+  });
+
+  // Computed para traducciones del diálogo de eliminación
+  private deleteTranslations = computed(() => ({
+    title: this.transloco.translate('components.publications.delete.title'),
+    message: this.transloco.translate('components.publications.delete.message'),
+    confirm: this.transloco.translate('components.publications.delete.confirm'),
+    cancel: this.transloco.translate('components.publications.delete.cancel'),
+  }));
+
+  constructor() {
+    // Cargar datos iniciales
     this.loadData();
+
+    // Effect para recargar cuando cambie el idioma
+    effect(() => {
+      this.transloco.selectTranslate('table.buttons.create');
+      // Las computed properties se actualizarán automáticamente
+    });
   }
 
-  private setupTranslations() {
-    const headerActionsSubscription = this.transloco
-      .selectTranslate('table.buttons.create')
-      .subscribe((createTranslation) => {
-        this.headerActions = [
-          {
-            label: createTranslation,
-            icon: icons['add'],
-            onClick: () => this.create(),
-            class: 'p-button-primary',
-          },
-        ];
+  loadData(): void {
+    this.loading.set(true);
+
+    this.srv
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data: PublicationData[]) => {
+          const processedData = data.map((item: any) => ({
+            ...item,
+            categoryName: item.publication_category.title,
+          }));
+
+          this.data.set(processedData);
+          this.loading.set(false);
+
+          // Cargar las imágenes de las publicaciones
+          this.loadPublicationImages(processedData);
+        },
+        error: (error) => {
+          this.notificationSrv.addNotification(
+            this.transloco.translate('notifications.publications.error.load'),
+            'error'
+          );
+          this.loading.set(false);
+        },
       });
-    // Suscribirse a los cambios de idioma para actualizar las columnas
-    const columnsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.publications.list.table.name'),
-      this.transloco.selectTranslate(
-        'components.publications.list.table.category'
-      ),
-      this.transloco.selectTranslate(
-        'components.publications.list.table.image'
-      ),
-    ]);
-
-    const columnsSubscription = columnsTranslation$.subscribe(
-      ([nameTranslation, categoryTranslation, imageTranslation]) => {
-        this.columns = [
-          {
-            field: 'title',
-            header: nameTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'categoryName',
-            header: categoryTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'firstImage',
-            header: imageTranslation,
-            width: '240px',
-          },
-        ];
-      }
-    );
-
-    const rowsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('table.buttons.edit'),
-      this.transloco.selectTranslate('table.buttons.delete'),
-    ]);
-
-    // Suscribirse a los cambios de idioma para las acciones de fila
-    const rowActionsSubscription = rowsTranslation$.subscribe(
-      ([editTranslation, deleteTranslation]) => {
-        this.rowActions = [
-          {
-            label: editTranslation,
-            icon: icons['edit'],
-            onClick: (data) => this.edit(data),
-            class: buttonVariants.outline.green,
-          },
-          {
-            label: deleteTranslation,
-            icon: icons['delete'],
-            onClick: (data) => this.delete(data),
-            class: buttonVariants.outline.red,
-          },
-        ];
-      }
-    );
-
-    this.subscriptions.push(
-      headerActionsSubscription,
-      columnsSubscription,
-      rowActionsSubscription
-    );
   }
 
-  ngAfterViewInit() {
-    this.customTemplates['firstImage'] = this.imageTemplate;
-  }
-
-  loadData() {
-    this.loading = true;
-    this.srv.get().subscribe({
-      next: (data: PublicationData[]) => {
-        this.data = data.map((item: any) => ({
-          ...item,
-          categoryName: item.publication_category.title,
-        }));
-
-        this.loading = false;
-
-        data.forEach((item) => {
-          if (item.photo) {
-            this.srv.getImage(item.photo).subscribe({
-              next: (imageBlob) => {
-                this.imageUrls[item.id] = URL.createObjectURL(imageBlob);
-              },
-              error: (error) => {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate(
-                    'notifications.managers.error.loadImage'
-                  ),
-                  'error'
-                );
-              },
-            });
-          }
-        });
-      },
-      error: (error) => {
-        this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.publications.error.load'),
-          'error'
-        );
-        this.loading = false;
-      },
-    });
-  }
-
-  onRefresh() {
-    // Limpiar URLs de imágenes
-    Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
+  private loadPublicationImages(publications: any[]): void {
+    publications.forEach((item) => {
+      if (item.photo) {
+        this.srv
+          .getImage(item.photo)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (imageBlob) => {
+              const url = URL.createObjectURL(imageBlob);
+              this.imageUrls.update((urls) => ({ ...urls, [item.id]: url }));
+            },
+            error: (error) => {
+              this.notificationSrv.addNotification(
+                this.transloco.translate(
+                  'notifications.managers.error.loadImage'
+                ),
+                'error'
+              );
+            },
+          });
       }
     });
+  }
 
-    this.imageUrls = {};
+  onRefresh(): void {
+    this.cleanupBlobUrls();
+    this.imageUrls.set({});
     this.loadData();
   }
 
   getImageUrl(rowData: any): string {
-    return this.imageUrls[rowData.id] || '';
+    return this.imageUrls()[rowData.id] || '';
   }
 
-  create() {
-    this.transloco
-      .selectTranslate('components.publications.create.title')
-      .pipe(take(1))
-      .subscribe((translatedTitle) => {
-        const modalConfig: ModalConfig = {
-          title: translatedTitle,
-          component: CreatePublicationComponent,
-          data: {
-            initialData: {
-              onSave: () => {
-                this.loadData();
-              },
-            },
+  create(): void {
+    const translatedTitle = this.transloco.translate(
+      'components.publications.create.title'
+    );
+
+    const modalConfig: ModalConfig = {
+      title: translatedTitle,
+      component: CreatePublicationComponent,
+      data: {
+        initialData: {
+          onSave: () => {
+            this.loadData();
           },
-        };
-        this.modalSrv.open(modalConfig);
-      });
+        },
+      },
+    };
+    this.modalSrv.open(modalConfig);
   }
 
-  edit(data: any) {
-    this.transloco
-      .selectTranslate('components.publications.edit.title')
-      .pipe(take(1))
-      .subscribe((translatedTitle) => {
-        const modalConfig: ModalConfig = {
-          title: translatedTitle,
-          component: UpdatePublicationComponent,
-          data: {
-            initialData: {
-              ...data,
-              onSave: () => {
-                this.loadData();
-              },
-            },
+  edit(data: any): void {
+    const translatedTitle = this.transloco.translate(
+      'components.publications.edit.title'
+    );
+
+    const modalConfig: ModalConfig = {
+      title: translatedTitle,
+      component: UpdatePublicationComponent,
+      data: {
+        initialData: {
+          ...data,
+          onSave: () => {
+            this.loadData();
           },
-        };
-        this.modalSrv.open(modalConfig);
-      });
+        },
+      },
+    };
+    this.modalSrv.open(modalConfig);
   }
 
   onImageError(event: any): void {
     event.target.style.display = 'none';
   }
 
-  ngOnDestroy() {
-    // Limpiar URLs de imágenes
-    Object.values(this.imageUrls).forEach((url) => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
+  async delete(data: any): Promise<void> {
+    const translations = this.deleteTranslations();
+
+    const confirmed = await this.confirmDialogService.confirm({
+      title: translations.title,
+      message: translations.message,
+      confirmLabel: translations.confirm,
+      cancelLabel: translations.cancel,
     });
 
-    // Limpiar suscripciones
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  async delete(data: any) {
-    const deleteTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.publications.delete.title'),
-      this.transloco.selectTranslate('components.publications.delete.message'),
-      this.transloco.selectTranslate('components.publications.delete.confirm'),
-      this.transloco.selectTranslate('components.publications.delete.cancel'),
-    ]).pipe(take(1));
-
-    const deleteActionsSubscription = deleteTranslation$.subscribe(
-      async ([
-        titleTranslation,
-        messageTranslation,
-        confirmTranslation,
-        cancelTranslation,
-      ]) => {
-        const confirmed = await this.confirmDialogService.confirm({
-          title: titleTranslation,
-          message: messageTranslation,
-          confirmLabel: confirmTranslation,
-          cancelLabel: cancelTranslation,
-        });
-
-        if (confirmed) {
-          this.loading = true;
-          this.srv.delete(data.id).subscribe({
-            next: () => {
-              this.loadData();
+    if (confirmed) {
+      this.loading.set(true);
+      this.srv
+        .delete(data.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.loadData();
+            this.notificationSrv.addNotification(
+              this.transloco.translate(
+                'notifications.publications.success.deleted'
+              ),
+              'success'
+            );
+          },
+          error: (error) => {
+            if (
+              error.error.statusCode === 400 &&
+              error.error.message.includes(
+                'No se puede eliminar la publicación'
+              )
+            ) {
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.publications.success.deleted'
+                  'notifications.publications.error.cannotDelete'
                 ),
-                'success'
+                'error'
               );
-            },
-            error: (error) => {
-              if (
-                error.error.statusCode === 400 &&
-                error.error.message.includes(
-                  'No se puede eliminar la publicación'
-                )
-              ) {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate(
-                    'notifications.publications.error.cannotDelete'
-                  ),
-                  'error'
-                );
-              } else {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate(
-                    'notifications.publications.error.delete'
-                  ),
-                  'error'
-                );
-              }
-              this.loading = false;
-            },
-          });
-        }
-      }
-    );
-    this.subscriptions.push(deleteActionsSubscription);
+            } else {
+              this.notificationSrv.addNotification(
+                this.transloco.translate(
+                  'notifications.publications.error.delete'
+                ),
+                'error'
+              );
+            }
+            this.loading.set(false);
+          },
+        });
+    }
+  }
+
+  private cleanupBlobUrls(): void {
+    const images = this.imageUrls();
+    Object.values(images).forEach((url) => {
+      if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+    });
   }
 }

@@ -3,7 +3,7 @@
   <div class="grid grid-cols-2 mb-4 gap-4">
     <app-select
       [placeholder]="
-        'components.chatbot_config.create.fields.user.title' | transloco
+        'components.chatbot_config.edit.fields.user.title' | transloco
       "
       [options]="users()"
       [isSearchable]="true"
@@ -11,21 +11,21 @@
       [control]="getFormControl('user_id')"
       [errorMessages]="{
         required:
-          ('components.chatbot_config.create.fields.user.required' | transloco),
+          ('components.chatbot_config.edit.fields.user.required' | transloco),
         userExists:
-          ('components.chatbot_config.create.fields.user.exists' | transloco)
+          ('components.chatbot_config.edit.fields.user.exists' | transloco)
       }"
     ></app-select>
     <app-select
       [placeholder]="
-        'components.chatbot_config.create.fields.model.title' | transloco
+        'components.chatbot_config.edit.fields.model.title' | transloco
       "
       [options]="models()"
       formControlName="model_id"
       [control]="getFormControl('model_id')"
       [errorMessages]="{
         required:
-          ('components.chatbot_config.create.fields.model.required' | transloco)
+          ('components.chatbot_config.edit.fields.model.required' | transloco)
       }"
     ></app-select>
   </div>
@@ -37,17 +37,15 @@
     <app-text-field
       id="api_key"
       label="{{
-        'components.chatbot_config.create.fields.apiKey.title' | transloco
+        'components.chatbot_config.edit.fields.apiKey.title' | transloco
       }}"
       [control]="getFormControl('api_key')"
       type="password"
       [errorMessages]="{
         required:
-          ('components.chatbot_config.create.fields.apiKey.required'
-          | transloco),
+          ('components.chatbot_config.edit.fields.apiKey.required' | transloco),
         minlength:
-          ('components.chatbot_config.create.fields.apiKey.minlength'
-          | transloco)
+          ('components.chatbot_config.edit.fields.apiKey.minlength' | transloco)
       }"
     ></app-text-field>
   </div>
@@ -59,18 +57,16 @@
     <app-text-field
       id="prompt"
       label="{{
-        'components.chatbot_config.create.fields.prompt.title' | transloco
+        'components.chatbot_config.edit.fields.prompt.title' | transloco
       }}"
       [control]="getFormControl('prompt')"
       [isTextArea]="true"
       textAreaHeight="h-40"
       [errorMessages]="{
         required:
-          ('components.chatbot_config.create.fields.prompt.required'
-          | transloco),
+          ('components.chatbot_config.edit.fields.prompt.required' | transloco),
         minlength:
-          ('components.chatbot_config.create.fields.prompt.minlength'
-          | transloco)
+          ('components.chatbot_config.edit.fields.prompt.minlength' | transloco)
       }"
     ></app-text-field>
   </div>

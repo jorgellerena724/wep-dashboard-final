@@ -1,19 +1,20 @@
 import {
-  ChangeDetectorRef,
   Component,
-  EventEmitter,
   inject,
-  Input,
-  Output,
+  input,
+  output,
+  signal,
+  effect,
+  untracked,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  computed,
 } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  AbstractControl,
-  ValidationErrors,
-  AsyncValidatorFn,
   FormControl,
 } from '@angular/forms';
 import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
@@ -25,9 +26,8 @@ import { PublicationsService } from '../../../../shared/services/features/public
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../../shared/components/app-select/app-select.component';
 import { PublicationCategoryService } from '../../../../shared/services/features/publication-category.service';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
 import { TooltipModule } from 'primeng/tooltip';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-create-publication',
@@ -41,119 +41,115 @@ import { TooltipModule } from 'primeng/tooltip';
     SelectComponent,
     TooltipModule,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreatePublicationComponent implements DynamicComponent {
+  // Servicios
   private transloco = inject(TranslocoService);
-  @Input() initialData?: any;
-  @Output() formValid = new EventEmitter<boolean>();
-  @Output() submitSuccess = new EventEmitter<void>();
-  id: number;
-  form: FormGroup;
-  categories: any[] = [];
-  publications: any[] = [];
-  selectedFile: File | null = null;
-  selectedDocument: File | null = null;
-  uploading = false;
-  loadingImage = false;
-  imageUrl: string | null = null;
-  documentUrl: string | null = null;
+  private fb = inject(FormBuilder);
+  private srv = inject(PublicationsService);
+  private notificationSrv = inject(NotificationService);
+  private categorySrv = inject(PublicationCategoryService);
+  private destroyRef = inject(DestroyRef);
 
-  constructor(
-    private fb: FormBuilder,
-    private srv: PublicationsService,
-    private notificationSrv: NotificationService,
-    private cdr: ChangeDetectorRef,
-    private categorySrv: PublicationCategoryService
-  ) {
+  // Signals para inputs/outputs
+  initialData = input<any>();
+  formValid = output<boolean>();
+  submitSuccess = output<void>();
+  submitError = output<void>();
+
+  // Signals para estado
+  id = signal<number>(0);
+  uploading = signal<boolean>(false);
+  loadingImage = signal<boolean>(false);
+  categories = signal<any[]>([]);
+  selectedFile = signal<File | null>(null);
+  selectedDocument = signal<File | null>(null);
+  imageUrl = signal<string | null>(null);
+
+  // Formulario
+  form: FormGroup;
+
+  // Computed para facilitar acceso en template
+  isFormInvalidComputed = signal<boolean>(false);
+
+  documentIcon = computed(() => {
+    const document = this.selectedDocument();
+    if (!document) return 'pi-file';
+
+    const fileName = document.name.toLowerCase();
+    if (fileName.endsWith('.pdf')) return 'pi-file-pdf';
+    if (fileName.endsWith('.zip')) return 'zip';
+    return 'pi-file';
+  });
+
+  documentIconColor = computed(() => {
+    const document = this.selectedDocument();
+    if (!document) return 'text-gray-400 dark:text-gray-500';
+
+    const fileName = document.name.toLowerCase();
+    if (fileName.endsWith('.pdf')) return 'text-red-500';
+    if (fileName.endsWith('.zip')) return 'text-green-500';
+    return 'text-gray-400 dark:text-gray-500';
+  });
+
+  isZipFile = computed(() => {
+    const document = this.selectedDocument();
+    return document?.name.toLowerCase().endsWith('.zip') || false;
+  });
+
+  constructor() {
     this.form = this.fb.group({
-      title: [
-        '',
-        [Validators.required, Validators.minLength(3)],
-        [this.uniqueTitleValidator()],
-      ],
+      title: ['', [Validators.required, Validators.minLength(3)]],
       publication_category: ['', Validators.required],
       image: [''],
       file: ['', Validators.required],
     });
 
-    this.id = 0;
-
-    this.form.statusChanges.subscribe(() => {
-      this.formValid.emit(this.form.valid);
+    // Effects
+    effect(() => {
+      const data = this.initialData();
+      if (data) {
+        untracked(() => {
+          this.form.patchValue(data);
+          this.id.set(data.id || 0);
+        });
+      }
     });
-  }
 
-  async ngOnInit() {
-    if (this.initialData) {
-      this.form.patchValue(this.initialData);
-    }
+    effect(() => {
+      this.fetchCategories();
+    });
 
-    const initTasks = [this.fetchCategories(), this.fetchPublications()];
-    await Promise.all(initTasks);
-  }
+    effect(() => {
+      const invalid = this.form.invalid || this.uploading();
+      this.isFormInvalidComputed.set(invalid);
+    });
 
-  onFileSelected(file: File) {
-    this.selectedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imageUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    // Suscripción a cambios del formulario
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.formValid.emit(this.form.valid);
+      });
   }
 
   onFileUploaded(files: File[]): void {
-    const file = files[0]; // Only handle the first file since this component supports single file upload
-    this.selectedFile = file;
+    const file = files[0];
+    this.selectedFile.set(file);
     this.form.get('image')?.setValue(file);
+
     const reader = new FileReader();
     reader.onload = () => {
-      this.imageUrl = reader.result as string;
-      this.cdr.detectChanges();
+      this.imageUrl.set(reader.result as string);
     };
     reader.readAsDataURL(file);
   }
 
   onDocumentUploaded(files: File[]): void {
-    const file = files[0]; // Only handle the first file since this component supports single file upload
-    this.selectedDocument = file;
+    const file = files[0];
+    this.selectedDocument.set(file);
     this.form.get('file')?.setValue(file);
-    // For documents, we don't need to preview, just store the file
-    this.cdr.detectChanges();
-  }
-
-  getDocumentIcon(): string {
-    if (!this.selectedDocument) {
-      return 'pi-file';
-    }
-
-    const fileName = this.selectedDocument.name.toLowerCase();
-    if (fileName.endsWith('.pdf')) {
-      return 'pi-file-pdf';
-    } else if (fileName.endsWith('.zip')) {
-      return 'zip';
-    }
-
-    return 'pi-file';
-  }
-
-  getDocumentIconColor(): string {
-    if (!this.selectedDocument) {
-      return 'text-gray-400 dark:text-gray-500';
-    }
-
-    const fileName = this.selectedDocument.name.toLowerCase();
-    if (fileName.endsWith('.pdf')) {
-      return 'text-red-500';
-    } else if (fileName.endsWith('.zip')) {
-      return 'text-green-500';
-    }
-
-    return 'text-gray-400 dark:text-gray-500';
-  }
-
-  isZipFile(): boolean {
-    return this.selectedDocument?.name.toLowerCase().endsWith('.zip') || false;
   }
 
   async onSubmit(): Promise<void> {
@@ -165,6 +161,8 @@ export class CreatePublicationComponent implements DynamicComponent {
         'warning'
       );
       this.form.markAllAsTouched();
+
+      this.submitError.emit();
       return;
     }
 
@@ -175,75 +173,69 @@ export class CreatePublicationComponent implements DynamicComponent {
       this.form.get('publication_category')?.value
     );
 
-    if (this.selectedFile) {
-      formData.append('photo', this.selectedFile, this.selectedFile.name);
+    const selectedFile = this.selectedFile();
+    if (selectedFile) {
+      formData.append('photo', selectedFile, selectedFile.name);
     }
 
-    if (this.selectedDocument) {
-      formData.append(
-        'file',
-        this.selectedDocument,
-        this.selectedDocument.name
-      );
+    const selectedDocument = this.selectedDocument();
+    if (selectedDocument) {
+      formData.append('file', selectedDocument, selectedDocument.name);
     }
 
-    this.uploading = true;
+    this.uploading.set(true);
 
-    this.srv.post(formData).subscribe({
-      next: (response) => {
-        this.uploading = false;
-        // Actualizar la vista previa con la ruta del backend
+    this.srv
+      .post(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.uploading.set(false);
+          this.imageUrl.set(null);
+          this.form.patchValue({ photo: '' });
 
-        this.imageUrl = null;
-        this.form.patchValue({ photo: '' });
+          this.notificationSrv.addNotification(
+            this.transloco.translate(
+              'notifications.publications.success.created'
+            ),
+            'success'
+          );
+          this.submitSuccess.emit();
 
-        this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.publications.success.created'
-          ),
-          'success'
-        );
-        this.submitSuccess.emit();
+          const data = this.initialData();
+          if (data?.onSave) {
+            data.onSave();
+          }
 
-        if (this.initialData?.onSave) {
-          this.initialData.onSave();
-        }
+          if (!data?.closeOnSubmit) {
+            this.resetForm();
+          }
+        },
+        error: (error) => {
+          this.uploading.set(false);
 
-        if (!this.initialData?.closeOnSubmit) {
-          this.form.reset();
-          this.selectedFile = null;
-          this.selectedDocument = null;
-          this.imageUrl = null;
-          this.documentUrl = null;
-        }
-      },
-      error: (error) => {
-        this.uploading = false;
+          if (
+            error.status === 400 &&
+            error.error?.message &&
+            error.error.message.includes(
+              'La imagen que esta intentando subir ya se encuentra en el servidor'
+            )
+          ) {
+            this.notificationSrv.addNotification(error.error.message, 'error');
+          } else {
+            const errorMessage =
+              error.error?.message ||
+              error.error?.detail ||
+              this.transloco.translate(
+                'notifications.publications.error.create'
+              );
 
-        // Verificar si existe el mensaje de error y si contiene el texto específico
-        if (
-          error.status === 400 &&
-          error.error?.message &&
-          error.error.message.includes(
-            'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
-          )
-        ) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
-        } else {
-          // Mostrar el mensaje de error del backend si existe, sino mostrar el mensaje genérico
-          const errorMessage =
-            error.error?.message ||
-            error.error?.detail ||
-            this.transloco.translate('notifications.publications.error.create');
+            this.notificationSrv.addNotification(errorMessage, 'error');
+          }
 
-          this.notificationSrv.addNotification(errorMessage, 'error');
-        }
-      },
-    });
-  }
-
-  get isFormInvalid(): boolean {
-    return this.form.invalid || this.uploading;
+          this.submitError.emit();
+        },
+      });
   }
 
   getFormControl(controlName: string): FormControl {
@@ -251,67 +243,49 @@ export class CreatePublicationComponent implements DynamicComponent {
   }
 
   removeFile(): void {
-    if (this.selectedFile) {
-      this.selectedFile = null;
+    const oldUrl = this.imageUrl();
+    if (oldUrl && oldUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(oldUrl);
     }
-    this.imageUrl = null;
+
+    this.selectedFile.set(null);
+    this.imageUrl.set(null);
     this.form.get('image')?.setValue(null);
     this.form.markAllAsTouched();
     this.form.patchValue({ image: null });
-    this.cdr.detectChanges();
   }
 
   removeDocument(): void {
-    if (this.selectedDocument) {
-      this.selectedDocument = null;
-    }
-    this.documentUrl = null;
+    this.selectedDocument.set(null);
     this.form.get('file')?.setValue(null);
     this.form.markAllAsTouched();
     this.form.patchValue({ file: null });
-    this.cdr.detectChanges();
   }
 
   onFileError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
-    console.error('Error de validación de archivo:"File validation error:"', {
-      type: error.type,
-      message: error.message,
-      fileName: error.file.name,
-      fileSize: error.file.size,
-      fileType: error.file.type,
-    });
-
-    this.selectedFile = null;
+    console.error('Error de validación de archivo:', error);
+    this.selectedFile.set(null);
   }
 
   onDocumentError(error: FileUploadError): void {
     this.notificationSrv.addNotification(error.message, 'error');
-
-    console.error(
-      'Error de validación de documento:"Document validation error:"',
-      {
-        type: error.type,
-        message: error.message,
-        fileName: error.file.name,
-        fileSize: error.file.size,
-        fileType: error.file.type,
-      }
-    );
-
-    this.selectedDocument = null;
+    console.error('Error de validación de documento:', error);
+    this.selectedDocument.set(null);
   }
 
-  fetchCategories(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.categorySrv.get().subscribe({
+  private fetchCategories(): void {
+    this.categorySrv
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (data) => {
-          this.categories = data.map((com: any) => ({
-            value: com.id,
-            label: com.title,
-          }));
-          resolve();
+          this.categories.set(
+            data.map((com: any) => ({
+              value: com.id,
+              label: com.title,
+            }))
+          );
         },
         error: (err) => {
           this.notificationSrv.addNotification(
@@ -320,60 +294,14 @@ export class CreatePublicationComponent implements DynamicComponent {
             ),
             'error'
           );
-          reject(err);
         },
       });
-    });
   }
 
-  fetchPublications(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.srv.get().subscribe({
-        next: (data) => {
-          this.publications = data || [];
-          resolve();
-        },
-        error: (err) => {
-          // Silently fail - validation will work without preloaded data
-          this.publications = [];
-          resolve();
-        },
-      });
-    });
-  }
-
-  uniqueTitleValidator(): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      const title = control.value?.trim().toLowerCase();
-
-      if (!title || title.length < 3) {
-        return of(null);
-      }
-
-      return this.srv.get().pipe(
-        map((publications: any[]) => {
-          const exists = publications.some(
-            (pub: any) => pub.title?.trim().toLowerCase() === title
-          );
-          return exists ? { duplicateTitle: true } : null;
-        }),
-        catchError(() => {
-          // Fallback to local publications array if API call fails
-          const exists = this.publications.some(
-            (pub: any) => pub.title?.trim().toLowerCase() === title
-          );
-          return of(exists ? { duplicateTitle: true } : null);
-        })
-      );
-    };
-  }
-
-  ngOnDestroy() {
-    if (this.imageUrl) {
-      URL.revokeObjectURL(this.imageUrl);
-    }
-    if (this.documentUrl) {
-      URL.revokeObjectURL(this.documentUrl);
-    }
+  private resetForm(): void {
+    this.form.reset();
+    this.selectedFile.set(null);
+    this.selectedDocument.set(null);
+    this.imageUrl.set(null);
   }
 }

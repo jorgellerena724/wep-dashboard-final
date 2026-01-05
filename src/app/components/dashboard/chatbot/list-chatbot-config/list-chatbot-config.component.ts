@@ -1,4 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import {
   TableComponent,
   Column,
@@ -16,334 +24,299 @@ import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
-import { UpdateProductComponent } from '../../products/update-product/update-product.component';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { combineLatest, Subscription, take } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CreateChatbotConfigComponent } from '../create-chatbot-config/create-chatbot-config.component';
+import { UpdateChatbotConfigComponent } from '../update-chatbot-config/update-chatbot-config.component';
 
 @Component({
   selector: 'app-list-chatbot-config',
   imports: [TableComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-chatbot-config.component.html',
   standalone: true,
-  providers: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListChatbotConfigComponent implements OnInit {
+export class ListChatbotConfigComponent {
+  // Servicios
   private transloco = inject(TranslocoService);
-  private subscriptions: Subscription[] = [];
-  data: any[] = [];
-  image: any;
-  loading = false;
-  activeStatus = '';
-  inactiveStatus = '';
+  private modalSrv = inject(ModalService);
+  private notificationSrv = inject(NotificationService);
+  private srv = inject(ChatbotService);
+  private confirmDialogService = inject(ConfirmDialogService);
+  private destroyRef = inject(DestroyRef);
 
-  columns: Column[] = [];
+  // Signals para el estado
+  data = signal<any[]>([]);
+  loading = signal<boolean>(false);
 
-  // Definimos las acciones del encabezado
-  headerActions: TableAction[] = [];
+  // Computed signals para traducciones de estado
+  activeStatus = computed(() =>
+    this.transloco.translate('status.active').trim()
+  );
+  inactiveStatus = computed(() =>
+    this.transloco.translate('status.inactive').trim()
+  );
 
-  // Definimos las acciones de fila
-  rowActions: RowAction[] = [];
+  // Computed signals para traducciones reactivas
+  columns = computed<Column[]>(() => {
+    const userNameTranslation = this.transloco.translate(
+      'components.chatbot_config.list.table.name'
+    );
+    const modelNameTranslation = this.transloco.translate(
+      'components.chatbot_config.list.table.model'
+    );
 
-  constructor(
-    private modalSrv: ModalService,
-    private notificationSrv: NotificationService,
-    private srv: ChatbotService,
-    private confirmDialogService: ConfirmDialogService
-  ) {}
+    return [
+      {
+        field: 'user_name',
+        header: userNameTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'model_name',
+        header: modelNameTranslation,
+        sortable: true,
+        filter: true,
+      },
+    ];
+  });
 
-  ngOnInit() {
-    this.setupTranslations();
+  headerActions = computed<TableAction[]>(() => {
+    const createTranslation = this.transloco.translate('table.buttons.create');
+    return [
+      {
+        label: createTranslation,
+        icon: icons['add'],
+        onClick: () => this.create(),
+        class: 'p-button-primary',
+      },
+    ];
+  });
+
+  rowActions = computed<RowAction[]>(() => {
+    const editTranslation = this.transloco.translate('table.buttons.edit');
+    const deleteTranslation = this.transloco.translate('table.buttons.delete');
+    const enableTranslation = this.transloco.translate('table.buttons.enable');
+    const disableTranslation = this.transloco.translate(
+      'table.buttons.disable'
+    );
+
+    return [
+      {
+        label: editTranslation,
+        icon: icons['edit'],
+        onClick: (data) => this.edit(data),
+        class: buttonVariants.outline.green,
+      },
+      {
+        label: deleteTranslation,
+        icon: icons['delete'],
+        onClick: (data) => this.delete(data),
+        class: buttonVariants.outline.red,
+      },
+      {
+        label: (data) => (data.status ? disableTranslation : enableTranslation),
+        icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
+        onClick: (data) => this.toggleStatus(data),
+        class: (data) =>
+          data.status
+            ? buttonVariants.outline.gray
+            : buttonVariants.outline.neutral,
+      },
+    ];
+  });
+
+  // Computed para traducciones del diálogo de eliminación
+  private deleteTranslations = computed(() => ({
+    title: this.transloco.translate('components.chatbot_config.delete.title'),
+    message: this.transloco.translate(
+      'components.chatbot_config.delete.message'
+    ),
+    confirm: this.transloco.translate(
+      'components.chatbot_config.delete.confirm'
+    ),
+    cancel: this.transloco.translate('components.chatbot_config.delete.cancel'),
+  }));
+
+  constructor() {
+    // Cargar datos iniciales
     this.loadData();
-  }
 
-  private setupTranslations() {
-    const headerActionsSubscription = this.transloco
-      .selectTranslate('table.buttons.create')
-      .subscribe((createTranslation) => {
-        this.headerActions = [
-          {
-            label: createTranslation,
-            icon: icons['add'],
-            onClick: () => this.create(),
-            class: 'p-button-primary',
-          },
-        ];
-      });
-    // Suscribirse a los cambios de idioma para actualizar las columnas
-    const columnsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.products.list.table.name'),
-      this.transloco.selectTranslate(
-        'components.products.list.table.variants.title'
-      ),
-      this.transloco.selectTranslate(
-        'components.products.list.table.description'
-      ),
-      this.transloco.selectTranslate('components.products.list.table.category'),
-      this.transloco.selectTranslate('components.products.list.table.image'),
-    ]);
-
-    const columnsSubscription = columnsTranslation$.subscribe(
-      ([
-        nameTranslation,
-        variantsTranslation,
-        descriptionTranslation,
-        categoryTranslation,
-        imageTranslation,
-      ]) => {
-        this.columns = [
-          {
-            field: 'title',
-            header: nameTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'variants',
-            header: variantsTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'description',
-            header: descriptionTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'categoryName',
-            header: categoryTranslation,
-            sortable: true,
-            filter: true,
-          },
-          {
-            field: 'firstImage',
-            header: imageTranslation,
-            width: '240px',
-          },
-        ];
-      }
-    );
-
-    const rowsTranslation$ = combineLatest([
-      this.transloco.selectTranslate('table.buttons.edit'),
-      this.transloco.selectTranslate('table.buttons.delete'),
-      this.transloco.selectTranslate('table.buttons.disable'),
-      this.transloco.selectTranslate('table.buttons.enable'),
-    ]);
-
-    // Suscribirse a los cambios de idioma para las acciones de fila
-    const rowActionsSubscription = rowsTranslation$.subscribe(
-      ([
-        editTranslation,
-        deleteTranslation,
-        enableTranslation,
-        disableTranslation,
-      ]) => {
-        this.rowActions = [
-          {
-            label: editTranslation,
-            icon: icons['edit'],
-            onClick: (data) => this.edit(data),
-            class: buttonVariants.outline.green,
-          },
-          {
-            label: deleteTranslation,
-            icon: icons['delete'],
-            onClick: (data) => this.delete(data),
-            class: buttonVariants.outline.red,
-          },
-          {
-            label: (data) =>
-              data.status ? disableTranslation : enableTranslation,
-            icon: (data) =>
-              data.status ? icons['activate'] : icons['deactivate'],
-            onClick: (data) => this.toggleStatus(data),
-            class: (data) =>
-              data.status
-                ? buttonVariants.outline.gray
-                : buttonVariants.outline.neutral,
-          },
-        ];
-      }
-    );
-
-    this.subscriptions.push(
-      headerActionsSubscription,
-      columnsSubscription,
-      rowActionsSubscription
-    );
-  }
-
-  loadData() {
-    this.loading = true;
-    this.srv.get().subscribe({
-      next: (data: HomeData[]) => {
-        this.data = data;
-        this.loading = false;
-      },
-      error: (error) => {
-        this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.products.error.load'),
-          'error'
-        );
-        this.loading = false;
-      },
+    // Effect para recargar cuando cambie el idioma
+    effect(() => {
+      this.transloco.selectTranslate('table.buttons.create');
     });
   }
 
-  onRefresh() {
-    // Limpiar URLs de imágenes
-    this.loadData();
-  }
+  loadData(): void {
+    this.loading.set(true);
 
-  create() {
-    this.transloco
-      .selectTranslate('components.products.create.title')
-      .pipe(take(1))
-      .subscribe((translatedTitle) => {
-        const modalConfig: ModalConfig = {
-          title: translatedTitle,
-          component: CreateChatbotConfigComponent,
-          data: {
-            initialData: {
-              onSave: () => {
-                this.loadData();
-              },
-            },
-          },
-        };
-        this.modalSrv.open(modalConfig);
-      });
-  }
+    this.srv
+      .get()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data: HomeData[]) => {
+          const active = this.activeStatus();
+          const inactive = this.inactiveStatus();
 
-  edit(data: any) {
-    this.transloco
-      .selectTranslate('components.products.edit.title')
-      .pipe(take(1))
-      .subscribe((translatedTitle) => {
-        const modalConfig: ModalConfig = {
-          title: translatedTitle,
-          component: UpdateProductComponent,
-          data: {
-            initialData: {
-              ...data,
-              onSave: () => {
-                this.loadData();
-              },
-            },
-          },
-        };
-        this.modalSrv.open(modalConfig);
-      });
-  }
+          const processedData = data.map((item: any) => ({
+            ...item,
+            user_name: item.user.full_name,
+            model_name: item.model.name,
+            statusToShow: item.status ? active : inactive,
+          }));
 
-  async delete(data: any) {
-    const deleteTranslation$ = combineLatest([
-      this.transloco.selectTranslate('components.products.delete.title'),
-      this.transloco.selectTranslate('components.products.delete.message'),
-      this.transloco.selectTranslate('components.products.delete.confirm'),
-      this.transloco.selectTranslate('components.products.delete.cancel'),
-    ]).pipe(take(1));
-
-    const deleteActionsSubscription = deleteTranslation$.subscribe(
-      async ([
-        titleTranslation,
-        messageTranslation,
-        confirmTranslation,
-        cancelTranslation,
-      ]) => {
-        const confirmed = await this.confirmDialogService.confirm({
-          title: titleTranslation,
-          message: messageTranslation,
-          confirmLabel: confirmTranslation,
-          cancelLabel: cancelTranslation,
-        });
-
-        if (confirmed) {
-          this.loading = true;
-          this.srv.delete(data.id).subscribe({
-            next: () => {
-              this.loadData();
-              this.notificationSrv.addNotification(
-                this.transloco.translate(
-                  'notifications.products.success.deleted'
-                ),
-                'success'
-              );
-            },
-            error: (error) => {
-              if (
-                error.error.statusCode === 400 &&
-                error.error.message.includes('No se puede eliminar el producto')
-              ) {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate(
-                    'notifications.products.error.cannotDelete'
-                  ),
-                  'error'
-                );
-              } else {
-                this.notificationSrv.addNotification(
-                  this.transloco.translate(
-                    'notifications.products.error.delete'
-                  ),
-                  'error'
-                );
-              }
-              this.loading = false;
-            },
-          });
-        }
-      }
-    );
-    this.subscriptions.push(deleteActionsSubscription);
-  }
-
-  toggleStatus(data: any) {
-    const newStatus = !data.status;
-    const formData = new FormData();
-    formData.append('id', data.id);
-    formData.append('status', String(newStatus));
-    this.srv.patch(formData, data.id).subscribe({
-      next: () => {
-        data.status = newStatus;
-        const statusText = newStatus ? this.activeStatus : this.inactiveStatus;
-
-        // Notificación de éxito con traducción y parámetros
-        const message = this.transloco.translate(
-          'notifications.news.success.statusUpdated',
-          { status: statusText }
-        );
-        this.notificationSrv.addNotification(message, 'success');
-
-        // Actualizar la propiedad statusToShow para reflejar el cambio en la tabla sin recargar
-        data.statusToShow = statusText;
-      },
-      error: (error) => {
-        if (error?.error?.message && error.error?.statusCode === 400) {
-          this.notificationSrv.addNotification(error.error.message, 'error');
-        } else {
-          // Notificación de error genérico con traducción
-          this.translateAndNotify(
-            'notifications.news.error.statusUpdate',
+          this.data.set(processedData);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.notificationSrv.addNotification(
+            this.transloco.translate('notifications.chatbot_config.error.load'),
             'error'
           );
-        }
-      },
-    });
+          this.loading.set(false);
+        },
+      });
   }
 
-  private translateAndNotify(
-    key: string,
-    severity: 'success' | 'error' | 'warning' | 'info',
-    params?: object
-  ) {
-    this.transloco
-      .selectTranslate(key, params)
-      .pipe(take(1))
-      .subscribe((message) => {
-        this.notificationSrv.addNotification(message, severity);
+  onRefresh(): void {
+    this.loadData();
+  }
+
+  create(): void {
+    const translatedTitle = this.transloco.translate(
+      'components.chatbot_config.create.title'
+    );
+
+    const modalConfig: ModalConfig = {
+      title: translatedTitle,
+      component: CreateChatbotConfigComponent,
+      data: {
+        initialData: {
+          onSave: () => {
+            this.loadData();
+          },
+        },
+      },
+    };
+    this.modalSrv.open(modalConfig);
+  }
+
+  edit(data: any): void {
+    const translatedTitle = this.transloco.translate(
+      'components.chatbot_config.edit.title'
+    );
+
+    const modalConfig: ModalConfig = {
+      title: translatedTitle,
+      component: UpdateChatbotConfigComponent,
+      data: {
+        initialData: {
+          ...data,
+          onSave: () => {
+            this.loadData();
+          },
+        },
+      },
+    };
+    this.modalSrv.open(modalConfig);
+  }
+
+  async delete(data: any): Promise<void> {
+    const translations = this.deleteTranslations();
+
+    const confirmed = await this.confirmDialogService.confirm({
+      title: translations.title,
+      message: translations.message,
+      confirmLabel: translations.confirm,
+      cancelLabel: translations.cancel,
+    });
+
+    if (confirmed) {
+      this.loading.set(true);
+      this.srv
+        .delete(data.user_id) // Usar user_id en lugar de id
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.loadData();
+            this.notificationSrv.addNotification(
+              this.transloco.translate(
+                'notifications.chatbot_config.success.deleted'
+              ),
+              'success'
+            );
+          },
+          error: (error) => {
+            if (
+              error.error?.statusCode === 400 &&
+              error.error?.message?.includes('Cannot delete')
+            ) {
+              this.notificationSrv.addNotification(
+                this.transloco.translate(
+                  'notifications.chatbot_config.error.cannotDelete'
+                ),
+                'error'
+              );
+            } else {
+              this.notificationSrv.addNotification(
+                this.transloco.translate(
+                  'notifications.chatbot_config.error.delete'
+                ),
+                'error'
+              );
+            }
+            this.loading.set(false);
+          },
+        });
+    }
+  }
+
+  toggleStatus(data: any): void {
+    const currentData = this.data();
+    const newStatus = !data.status;
+    const formData = new FormData();
+    formData.append('status', String(newStatus));
+
+    this.srv
+      .patch(formData, data.user_id) // Usar user_id
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          const active = this.activeStatus();
+          const inactive = this.inactiveStatus();
+
+          // Actualizar estado local inmutablemente
+          const updatedData = currentData.map((item) =>
+            item.id === data.id
+              ? {
+                  ...item,
+                  status: newStatus,
+                  statusToShow: newStatus ? active : inactive,
+                }
+              : item
+          );
+
+          this.data.set(updatedData);
+
+          const statusText = newStatus ? active : inactive;
+          const message = this.transloco.translate(
+            'notifications.chatbot_config.success.statusUpdated',
+            { status: statusText }
+          );
+          this.notificationSrv.addNotification(message, 'success');
+        },
+        error: (error) => {
+          if (error?.error?.message && error.error?.statusCode === 400) {
+            this.notificationSrv.addNotification(error.error.message, 'error');
+          } else {
+            const message = this.transloco.translate(
+              'notifications.chatbot_config.error.statusUpdate'
+            );
+            this.notificationSrv.addNotification(message, 'error');
+          }
+        },
       });
   }
 }

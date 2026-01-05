@@ -16,11 +16,7 @@ import {
   ReactiveFormsModule,
   FormArray,
   FormControl,
-  AbstractControl,
-  ValidationErrors,
-  AsyncValidatorFn,
 } from '@angular/forms';
-import { isPlatformBrowser } from '@angular/common';
 import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
 import { TextFieldComponent } from '../../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../../shared/services/system/notification.service';
@@ -31,8 +27,6 @@ import { SelectComponent } from '../../../../shared/components/app-select/app-se
 import { ProductService } from '../../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -74,7 +68,6 @@ export class UpdateProductComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
   private sanitizer = inject(DomSanitizer);
   private destroyRef = inject(DestroyRef);
-  private platformId = inject(PLATFORM_ID);
 
   // Signals para inputs/outputs
   initialData = input<any>();

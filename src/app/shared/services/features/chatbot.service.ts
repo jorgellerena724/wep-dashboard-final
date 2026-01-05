@@ -24,11 +24,11 @@ export class ChatbotService {
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}chat/config/${id}`, formData);
+    return this.http.patch(`${this.apiUrl}chat/config/${id}/`, formData);
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}chat/config/${id}`, {
+    return this.http.delete<any>(`${this.apiUrl}chat/config/${id}/`, {
       body: { id: id },
     });
   }
