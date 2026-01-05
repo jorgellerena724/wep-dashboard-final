@@ -1,10 +1,8 @@
 <div class="h-screen flex items-center justify-center relative">
   <div
     class="absolute inset-0 bg-center bg-no-repeat bg-cover bg-slate-200"
-    style="
-      background-image: url('assets/img/background_login.jpg');
-      background-position: 25% center;
-    "
+    [style.background-image]="'url(' + imgPath + 'background_login.jpg)'"
+    style="background-position: 25% center"
   ></div>
 
   <div class="relative w-full max-w-sm px-4">
@@ -21,17 +19,17 @@
                 (click)="toggleLanguageMenu()"
                 class="inline-flex items-center justify-center w-full rounded-lg border border-gray-600 bg-gray-800 px-2 py-1 text-sm font-semibold text-white hover:bg-gray-700 transition-all duration-300 ease-in-out"
                 id="language-menu-login"
-                [attr.aria-expanded]="languageMenuOpen"
+                [attr.aria-expanded]="languageMenuOpen()"
                 aria-haspopup="true"
               >
                 <img
-                  [src]="currentLanguageIcon"
-                  [alt]="currentLanguage"
+                  [src]="currentLanguageIcon()"
+                  [alt]="currentLanguage()"
                   class="w-5 h-5"
                 />
                 <svg
                   class="h-6 w-6 transition-transform duration-200"
-                  [class.rotate-180]="languageMenuOpen"
+                  [class.rotate-180]="languageMenuOpen()"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -48,11 +46,11 @@
 
             <div
               class="origin-top-right absolute right-0 mt-2 w-28 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none transform transition-all duration-200 ease-out border border-gray-700 z-50"
-              [class.hidden]="!languageMenuOpen"
-              [class.opacity-0]="!languageMenuOpen"
-              [class.scale-95]="!languageMenuOpen"
-              [class.opacity-100]="languageMenuOpen"
-              [class.scale-100]="languageMenuOpen"
+              [class.hidden]="!languageMenuOpen()"
+              [class.opacity-0]="!languageMenuOpen()"
+              [class.scale-95]="!languageMenuOpen()"
+              [class.opacity-100]="languageMenuOpen()"
+              [class.scale-100]="languageMenuOpen()"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="language-menu-login"
@@ -64,7 +62,7 @@
                   role="menuitem"
                 >
                   <img
-                    src="assets/img/españa.ico"
+                    [src]="imgPath + 'españa.ico'"
                     alt="España"
                     class="mr-2 w-4 h-4"
                   />
@@ -76,7 +74,7 @@
                   role="menuitem"
                 >
                   <img
-                    src="assets/img/eeuu.ico"
+                    [src]="imgPath + 'eeuu.ico'"
                     alt="USA"
                     class="mr-2 w-4 h-4"
                   />
@@ -93,13 +91,14 @@
         >
           <div>
             <img
-              src="assets/img/logo-1.ico"
+              [src]="imgPath + 'logo-1.ico'"
               alt="Photo"
               class="h-20 w-22 transition-transform duration-300 ease-in-out hover:scale-110"
               title="Logo"
             />
           </div>
         </div>
+
         <form
           [formGroup]="loginForm"
           (ngSubmit)="onSubmit()"
@@ -121,6 +120,11 @@
             <div class="text-red-600 text-sm">
               {{ "login.email.required" | transloco }}
             </div>
+            } @if ( loginForm.get('email')?.touched &&
+            loginForm.get('email')?.hasError('email') ) {
+            <div class="text-red-600 text-sm">
+              {{ "login.email.invalid" | transloco }}
+            </div>
             }
           </div>
           <div class="w-full flex flex-col gap-2 mt-4">
@@ -131,7 +135,7 @@
               <input
                 id="password"
                 formControlName="password"
-                [type]="showPassword ? 'text' : 'password'"
+                [type]="showPassword() ? 'text' : 'password'"
                 placeholder="{{ 'login.password.placeholder' | transloco }}"
                 class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
               />
@@ -139,10 +143,11 @@
               <button
                 type="button"
                 (click)="togglePasswordVisibility()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 border-none outline-none focus:outline-none"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 border-none outline-none focus:outline-none transition-colors duration-200"
                 style="background: none"
+                aria-label="Toggle password visibility"
               >
-                @if (!showPassword) {
+                @if (!showPassword()) {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -192,10 +197,10 @@
           <div class="mt-4 w-full">
             <button
               type="submit"
-              class="w-full h-[1cm] px-2 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition duration-200 backdrop-blur-sm flex items-center justify-center"
-              [disabled]="isLoading"
+              class="w-full h-[1cm] px-2 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition duration-200 backdrop-blur-sm flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="isLoading()"
             >
-              @if (isLoading) {
+              @if (isLoading()) {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"

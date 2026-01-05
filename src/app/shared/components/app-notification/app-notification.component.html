@@ -1,7 +1,7 @@
 <div
   class="fixed top-4 right-4 z-[9999] space-y-4 sm:space-y-6 sm:top-6 sm:right-6 lg:top-8 lg:right-8"
 >
-  @for (notification of notifications; track notification) {
+  @for (notification of notifications(); track notification) {
   <div
     [ngClass]="{
       'bg-green-50/80 border-green-400 text-green-800':

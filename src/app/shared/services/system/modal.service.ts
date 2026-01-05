@@ -1,5 +1,4 @@
-import { Injectable, ComponentRef, Type } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Injectable, Type, signal, computed } from '@angular/core';
 
 export interface ModalConfig {
   title: string;
@@ -12,16 +11,20 @@ export interface ModalConfig {
   providedIn: 'root',
 })
 export class ModalService {
-  private modalConfig = new Subject<ModalConfig>();
-  private closeSubject = new Subject<void>();
-  modalConfig$ = this.modalConfig.asObservable();
-  close$ = this.closeSubject.asObservable();
+  // Estado principal usando Signals
+  private configSignal = signal<ModalConfig | null>(null);
+  private closeRequestSignal = signal<number>(0); // Contador para disparar cierres
+
+  // Exposición pública
+  modalConfig = computed(() => this.configSignal());
+  closeRequest = computed(() => this.closeRequestSignal());
 
   open(config: ModalConfig) {
-    this.modalConfig.next(config);
+    this.configSignal.set(config);
   }
 
   close() {
-    this.closeSubject.next(); // Emitir un evento para cerrar el modal
+    this.configSignal.set(null);
+    this.closeRequestSignal.update((v) => v + 1);
   }
 }

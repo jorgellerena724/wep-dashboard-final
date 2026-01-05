@@ -25,7 +25,7 @@ export interface MenuItem {
         [ngClass]="{
           'bg-gray-700 text-white': isOpen || isActive()
         }"
-        >
+      >
         <div [innerHTML]="getSafeIcon(icon)"></div>
         <span
           class="ml-2 whitespace-nowrap transition-all duration-500 ease-in-out flex-1"
@@ -33,55 +33,55 @@ export interface MenuItem {
             'opacity-0 w-0': sidebarCollapsed && !isMobileView,
             'opacity-100 w-auto': !sidebarCollapsed || isMobileView
           }"
-          >
+        >
           {{ label | transloco }}
         </span>
         @if ((!sidebarCollapsed || isMobileView) && children?.length) {
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isOpen }"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          }
-        </div>
-    
-        @if (children?.length) {
-          <div
-            class="overflow-hidden transition-all duration-300 ease-in-out"
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 transition-transform duration-300"
+          [ngClass]="{ 'rotate-180': isOpen }"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+        }
+      </div>
+
+      @if (children?.length) {
+      <div
+        class="overflow-hidden transition-all duration-300 ease-in-out"
         [ngClass]="{
           'max-h-0 opacity-0': !isOpen || (sidebarCollapsed && !isMobileView),
           'max-h-96 opacity-100': isOpen && (!sidebarCollapsed || isMobileView)
         }"
+      >
+        <div class="ml-6 mt-1">
+          @for (child of children; track child) {
+          <div>
+            <a
+              [routerLink]="child.route"
+              routerLinkActive="bg-gray-600 text-white"
+              (click)="closeMobileSidebar.emit()"
+              class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-            <div class="ml-6 mt-1">
-              @for (child of children; track child) {
-                <div>
-                  <a
-                    [routerLink]="child.route"
-                    routerLinkActive="bg-gray-600 text-white"
-                    (click)="closeMobileSidebar.emit()"
-                    class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
-                    >
-                    <div [innerHTML]="getSafeIcon(child.icon)"></div>
-                    <span class="ml-2">{{ child.label | transloco }}</span>
-                  </a>
-                </div>
-              }
-            </div>
+              <div [innerHTML]="getSafeIcon(child.icon)"></div>
+              <span class="ml-2">{{ child.label | transloco }}</span>
+            </a>
           </div>
-        }
+          }
+        </div>
       </div>
-    `,
+      }
+    </div>
+  `,
 })
 export class SidebarMenuItemComponent implements OnInit {
   @Input() item!: MenuItem;

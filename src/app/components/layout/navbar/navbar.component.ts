@@ -1,13 +1,14 @@
 import {
   Component,
   inject,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-  Input,
-  Inject,
+  signal,
+  computed,
+  effect,
   PLATFORM_ID,
-  ViewChild,
+  viewChild,
+  input,
+  ChangeDetectionStrategy,
+  DestroyRef,
 } from '@angular/core';
 import {
   RouterModule,
@@ -28,6 +29,8 @@ import { ChangeUserPasswordComponent } from '../../users/change-user-password/ch
 import { BackupService } from '../../../shared/services/system/backup.service';
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { ConfirmDialogComponent } from '../../../shared/components/app-confirm-dialog/app-confirm-dialog.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -41,164 +44,235 @@ import { ConfirmDialogComponent } from '../../../shared/components/app-confirm-d
     ConfirmDialogComponent,
   ],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NavbarComponent implements OnInit, OnChanges {
-  @Input() sessionClient?: string;
-  @ViewChild('confirmDialog') confirmDialog!: ConfirmDialogComponent;
+export class NavbarComponent {
+  // Inputs
+  sessionClient = input<string>();
 
+  // Services
+  private router = inject(Router);
+  private authSrv = inject(AuthService);
+  private modalSrv = inject(ModalService);
+  private backupService = inject(BackupService);
+  private notificationService = inject(NotificationService);
+  private platformId = inject(PLATFORM_ID);
   private transloco = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
 
-  mobileMenuOpen = false;
-  isHomeSubmenuOpen = false;
-  isAboutSubmenuOpen = false;
-  isProductsSubmenuOpen = false;
-  isPublicationsSubmenuOpen = false;
-  isContactSubmenuOpen = false;
-  isHeaderSubmenuOpen = false;
-  isUsersSubmenuOpen = false;
+  // ViewChild
+  confirmDialog = viewChild.required<ConfirmDialogComponent>('confirmDialog');
 
-  languageMenuOpen = false;
-  userMenuOpen = false;
-  currentRoute = '';
-  currentSubRoute = '';
-  currentLanguageIcon: string = 'assets/img/españa.ico';
-  currentLanguage: string = 'Español';
-  currentLanguageCode: string = 'es';
-  userData: any = null;
-  showUsersMenu = true;
-  showBackupButtons = false;
+  // Signals para el estado del menú
+  mobileMenuOpen = signal(false);
+  isHomeSubmenuOpen = signal(false);
+  isAboutSubmenuOpen = signal(false);
+  isProductsSubmenuOpen = signal(false);
+  isPublicationsSubmenuOpen = signal(false);
+  isContactSubmenuOpen = signal(false);
+  isHeaderSubmenuOpen = signal(false);
+  isUsersSubmenuOpen = signal(false);
+  languageMenuOpen = signal(false);
+  userMenuOpen = signal(false);
 
-  constructor(
-    private router: Router,
-    private authSrv: AuthService,
-    private modalSrv: ModalService,
-    private backupService: BackupService,
-    private notificationService: NotificationService,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
+  protected readonly imgPath = environment.imgPath;
+
+  // Signals para idioma
+  currentLanguageIcon = signal<string>(`${this.imgPath}españa.ico`);
+  currentLanguage = signal<string>('Español');
+  currentLanguageCode = signal<string>('es');
+
+  // Signals para usuario
+  userData = signal<any>(null);
+  showUsersMenu = signal(true);
+  showBackupButtons = signal(false);
+
+  // Computed signal para la ruta actual
+  currentUrl = computed(() => this.router.url);
+
+  // Computed signals para rutas activas
+  isHomeRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return url.includes('/carousel') || url.includes('/news');
+  });
+
+  isAboutRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return (
+      url.includes('/company') ||
+      url.includes('/manager-category') ||
+      url.includes('/managers') ||
+      url.includes('/reviews')
+    );
+  });
+
+  isProductsRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return url.includes('/categories') || url.includes('/products');
+  });
+
+  isPublicationsRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return (
+      url.includes('/publication-category') || url.includes('/publications')
+    );
+  });
+
+  isContactRouteActive = computed(() => {
+    return this.currentUrl().includes('/contact');
+  });
+
+  isHeaderRouteActive = computed(() => {
+    return this.currentUrl().includes('/header');
+  });
+
+  isUsersRouteActive = computed(() => {
+    return this.currentUrl().includes('/users');
+  });
+
+  // Computed para cliente
+  userClient = computed(() => {
+    const data = this.userData();
+    if (!data) {
+      const clientStorage = this.getClientFromLocalStorage();
+      return clientStorage ?? '—';
+    }
+    if (typeof data === 'string') {
+      const clientStorage = this.getClientFromLocalStorage();
+      return clientStorage ?? data ?? '—';
+    }
+
+    if (data.client) return String(data.client);
+    if (data.session?.client) return String(data.session.client);
+    if (data.user?.client) return String(data.user.client);
+    if (data.client_name) return String(data.client_name);
+    const clientFromStorage = this.getClientFromLocalStorage();
+    return clientFromStorage ?? '—';
+  });
+
+  constructor() {
+    // Suscribirse a eventos de navegación
     this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.mobileMenuOpen = false;
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.mobileMenuOpen.set(false);
       });
 
+    // Sincronizar con Transloco
     this.syncWithTransloco();
+
+    // Cargar datos del usuario
     this.loadUserData();
-    this.transloco.langChanges$.subscribe((lang) => {
-      this.updateLanguageDisplay(lang);
+
+    // Suscribirse a cambios de idioma
+    this.transloco.langChanges$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((lang) => {
+        this.updateLanguageDisplay(lang);
+      });
+
+    // Effect para inicializar menú de usuarios
+    effect(() => {
+      if (isPlatformBrowser(this.platformId)) {
+        this.initShowUsersMenu();
+      }
     });
-    if (isPlatformBrowser(this.platformId)) {
-      this.initShowUsersMenu();
-    }
-  }
 
-  ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.initShowUsersMenu();
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['sessionClient'] && !changes['sessionClient'].isFirstChange()) {
-      this.initShowUsersMenu();
-    }
+    // Effect para detectar cambios en sessionClient
+    effect(() => {
+      const client = this.sessionClient();
+      if (client !== undefined) {
+        this.initShowUsersMenu();
+      }
+    });
   }
 
   toggleMobileMenu() {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
+    this.mobileMenuOpen.update((v) => !v);
   }
 
   saveInformation(): void {
-    this.userMenuOpen = false;
+    this.userMenuOpen.set(false);
 
-    // Crear notificación con barra de progreso
     const notificationId = this.notificationService.addNotification(
       this.transloco.translate('navbar.backup.generating'),
       'info',
       true
     );
 
-    // Simular progreso durante la generación del backup
     let progress = 0;
     const progressInterval = setInterval(() => {
-      progress += Math.random() * 15; // Incremento aleatorio para simular progreso
+      progress += Math.random() * 15;
       if (progress < 90) {
         this.notificationService.updateProgress(notificationId, progress);
       }
     }, 200);
 
-    this.backupService.downloadBackup().subscribe({
-      next: (blob: Blob) => {
-        // Completar el progreso y remover la notificación
-        clearInterval(progressInterval);
-        this.notificationService.updateProgress(notificationId, 100);
+    this.backupService
+      .downloadBackup()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob: Blob) => {
+          clearInterval(progressInterval);
+          this.notificationService.updateProgress(notificationId, 100);
 
-        // Remover la notificación de progreso después de completarla
-        setTimeout(() => {
+          setTimeout(() => {
+            this.notificationService.removeNotificationById(notificationId);
+          }, 500);
+
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+
+          const date = new Date();
+          const dateStr = date.toISOString().split('T')[0];
+          link.download = `backup_${dateStr}.zip`;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          window.URL.revokeObjectURL(url);
+
+          setTimeout(() => {
+            this.notificationService.addNotification(
+              this.transloco.translate('navbar.backup.download_success'),
+              'success'
+            );
+          }, 1000);
+        },
+        error: (error) => {
+          clearInterval(progressInterval);
           this.notificationService.removeNotificationById(notificationId);
-        }, 500);
 
-        // Crear URL temporal para el blob
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-
-        // Generar nombre de archivo con fecha
-        const date = new Date();
-        const dateStr = date.toISOString().split('T')[0];
-        link.download = `backup_${dateStr}.zip`;
-
-        // Descargar el archivo
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Limpiar URL temporal
-        window.URL.revokeObjectURL(url);
-
-        // Mostrar notificación de éxito después de un breve delay
-        setTimeout(() => {
-          this.notificationService.addNotification(
-            this.transloco.translate('navbar.backup.download_success'),
-            'success'
+          console.error('Error al descargar backup:', error);
+          const errorMessage =
+            error?.error?.detail ||
+            error?.message ||
+            this.transloco.translate('navbar.backup.download_error');
+          const translatedMessage = this.transloco.translate(
+            'navbar.backup.download_error_message',
+            { message: errorMessage }
           );
-        }, 1000);
-      },
-      error: (error) => {
-        // Detener progreso y remover notificación en caso de error
-        clearInterval(progressInterval);
-        this.notificationService.removeNotificationById(notificationId);
-
-        console.error('Error al descargar backup:', error);
-        const errorMessage =
-          error?.error?.detail ||
-          error?.message ||
-          this.transloco.translate('navbar.backup.download_error');
-        const translatedMessage = this.transloco.translate(
-          'navbar.backup.download_error_message',
-          { message: errorMessage }
-        );
-        this.notificationService.addNotification(translatedMessage, 'error');
-      },
-    });
+          this.notificationService.addNotification(translatedMessage, 'error');
+        },
+      });
   }
 
   async restoreInformation(): Promise<void> {
-    this.userMenuOpen = false;
+    this.userMenuOpen.set(false);
 
-    // Crear input file dinámicamente
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.zip';
 
     input.onchange = async (event: any) => {
       const file = event.target.files[0];
-      if (!file) {
-        return;
-      }
+      if (!file) return;
 
-      // Verificar que es un archivo ZIP
       if (!file.name.endsWith('.zip')) {
         this.notificationService.addNotification(
           this.transloco.translate('navbar.backup.invalid_file'),
@@ -207,91 +281,80 @@ export class NavbarComponent implements OnInit, OnChanges {
         return;
       }
 
-      // Configurar el diálogo de confirmación
-      this.confirmDialog.title = this.transloco.translate(
-        'navbar.confirm_restore_title'
-      );
-      this.confirmDialog.message = this.transloco.translate(
-        'navbar.confirm_restore'
-      );
-      this.confirmDialog.confirmLabel = this.transloco.translate(
+      const dialog = this.confirmDialog();
+      dialog.title = this.transloco.translate('navbar.confirm_restore_title');
+      dialog.message = this.transloco.translate('navbar.confirm_restore');
+      dialog.confirmLabel = this.transloco.translate(
         'navbar.confirm_restore_button'
       );
-      this.confirmDialog.cancelLabel = this.transloco.translate(
-        'navbar.cancel_button'
-      );
+      dialog.cancelLabel = this.transloco.translate('navbar.cancel_button');
 
-      // Mostrar el diálogo de confirmación
-      const confirmed = await this.confirmDialog.show();
+      const confirmed = await dialog.show();
+      if (!confirmed) return;
 
-      if (!confirmed) {
-        return;
-      }
-
-      // Crear notificación con barra de progreso
       const notificationId = this.notificationService.addNotification(
         this.transloco.translate('navbar.backup.restoring'),
         'info',
         true
       );
 
-      // Simular progreso durante la restauración del backup
       let progress = 0;
       const progressInterval = setInterval(() => {
-        progress += Math.random() * 12; // Incremento aleatorio para simular progreso
+        progress += Math.random() * 12;
         if (progress < 85) {
           this.notificationService.updateProgress(notificationId, progress);
         }
       }, 300);
 
-      this.backupService.restoreBackup(file).subscribe({
-        next: (response) => {
-          // Completar el progreso y remover la notificación
-          clearInterval(progressInterval);
-          this.notificationService.updateProgress(notificationId, 100);
+      this.backupService
+        .restoreBackup(file)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            clearInterval(progressInterval);
+            this.notificationService.updateProgress(notificationId, 100);
 
-          // Remover la notificación de progreso después de completarla
-          setTimeout(() => {
+            setTimeout(() => {
+              this.notificationService.removeNotificationById(notificationId);
+            }, 500);
+
+            setTimeout(() => {
+              this.notificationService.addNotification(
+                this.transloco.translate('navbar.backup.restore_success'),
+                'success'
+              );
+            }, 1000);
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 3000);
+          },
+          error: (error) => {
+            clearInterval(progressInterval);
             this.notificationService.removeNotificationById(notificationId);
-          }, 500);
 
-          // Mostrar notificación de éxito después de un breve delay
-          setTimeout(() => {
-            this.notificationService.addNotification(
-              this.transloco.translate('navbar.backup.restore_success'),
-              'success'
+            console.error('Error al restaurar backup:', error);
+            const errorMessage =
+              error?.error?.detail ||
+              error?.message ||
+              this.transloco.translate('navbar.backup.restore_error');
+            const translatedMessage = this.transloco.translate(
+              'navbar.backup.restore_error_message',
+              { message: errorMessage }
             );
-          }, 1000);
-
-          // Recargar la página después de 3 segundos
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        },
-        error: (error) => {
-          // Detener progreso y remover notificación en caso de error
-          clearInterval(progressInterval);
-          this.notificationService.removeNotificationById(notificationId);
-
-          console.error('Error al restaurar backup:', error);
-          const errorMessage =
-            error?.error?.detail ||
-            error?.message ||
-            this.transloco.translate('navbar.backup.restore_error');
-          const translatedMessage = this.transloco.translate(
-            'navbar.backup.restore_error_message',
-            { message: errorMessage }
-          );
-          this.notificationService.addNotification(translatedMessage, 'error');
-        },
-      });
+            this.notificationService.addNotification(
+              translatedMessage,
+              'error'
+            );
+          },
+        });
     };
 
     input.click();
   }
 
   changePassword(): void {
-    this.userMenuOpen = false;
+    this.userMenuOpen.set(false);
     const changePasswordTitle = this.transloco.translate('navbar.changepass');
 
     const modalConfig: ModalConfig = {
@@ -299,8 +362,8 @@ export class NavbarComponent implements OnInit, OnChanges {
       component: ChangeUserPasswordComponent,
       data: {
         initialData: {
-          id: this.userData?.id,
-          email: this.userData?.email,
+          id: this.userData()?.id,
+          email: this.userData()?.email,
         },
       },
     };
@@ -308,45 +371,45 @@ export class NavbarComponent implements OnInit, OnChanges {
   }
 
   toggleHomeSubmenu() {
-    this.isHomeSubmenuOpen = !this.isHomeSubmenuOpen;
+    this.isHomeSubmenuOpen.update((v) => !v);
   }
 
   toggleAboutSubmenu(): void {
-    this.isAboutSubmenuOpen = !this.isAboutSubmenuOpen;
+    this.isAboutSubmenuOpen.update((v) => !v);
   }
 
   toggleProductsSubmenu(): void {
-    this.isProductsSubmenuOpen = !this.isProductsSubmenuOpen;
+    this.isProductsSubmenuOpen.update((v) => !v);
   }
 
   togglePublicationsSubmenu(): void {
-    this.isPublicationsSubmenuOpen = !this.isPublicationsSubmenuOpen;
+    this.isPublicationsSubmenuOpen.update((v) => !v);
   }
 
   toggleContactSubmenu(): void {
-    this.isContactSubmenuOpen = !this.isContactSubmenuOpen;
+    this.isContactSubmenuOpen.update((v) => !v);
   }
 
   toggleHeaderSubmenu(): void {
-    this.isHeaderSubmenuOpen = !this.isHeaderSubmenuOpen;
+    this.isHeaderSubmenuOpen.update((v) => !v);
   }
 
   toggleUsersSubmenu(): void {
-    this.isUsersSubmenuOpen = !this.isUsersSubmenuOpen;
+    this.isUsersSubmenuOpen.update((v) => !v);
   }
 
   toggleUserMenu(): void {
-    this.userMenuOpen = !this.userMenuOpen;
+    this.userMenuOpen.update((v) => !v);
   }
 
   private closeOtherSubmenus(except: string | null) {
-    if (except !== 'home') this.isHomeSubmenuOpen = false;
-    if (except !== 'about') this.isAboutSubmenuOpen = false;
-    if (except !== 'products') this.isProductsSubmenuOpen = false;
-    if (except !== 'publications') this.isPublicationsSubmenuOpen = false;
-    if (except !== 'contact') this.isContactSubmenuOpen = false;
-    if (except !== 'header') this.isHeaderSubmenuOpen = false;
-    if (except !== 'users') this.isUsersSubmenuOpen = false;
+    if (except !== 'home') this.isHomeSubmenuOpen.set(false);
+    if (except !== 'about') this.isAboutSubmenuOpen.set(false);
+    if (except !== 'products') this.isProductsSubmenuOpen.set(false);
+    if (except !== 'publications') this.isPublicationsSubmenuOpen.set(false);
+    if (except !== 'contact') this.isContactSubmenuOpen.set(false);
+    if (except !== 'header') this.isHeaderSubmenuOpen.set(false);
+    if (except !== 'users') this.isUsersSubmenuOpen.set(false);
   }
 
   onNavItemClick(parent: string | null) {
@@ -355,7 +418,7 @@ export class NavbarComponent implements OnInit, OnChanges {
     } else {
       this.closeOtherSubmenus(null);
     }
-    this.mobileMenuOpen = false;
+    this.mobileMenuOpen.set(false);
   }
 
   private loadUserData(): void {
@@ -399,95 +462,39 @@ export class NavbarComponent implements OnInit, OnChanges {
           const parsed = JSON.parse(rawData);
           if (parsed && typeof parsed === 'object') {
             if ('user' in parsed && parsed.user) {
-              this.userData = parsed.user;
+              this.userData.set(parsed.user);
             } else {
-              this.userData = parsed;
+              this.userData.set(parsed);
             }
           } else {
-            this.userData = parsed;
+            this.userData.set(parsed);
           }
         } catch (e) {
-          this.userData = rawData;
+          this.userData.set(rawData);
         }
       } else {
-        this.userData = null;
+        this.userData.set(null);
       }
-      if (this.userData && typeof this.userData === 'object') {
-        if (!('client' in this.userData)) {
+
+      const currentData = this.userData();
+      if (currentData && typeof currentData === 'object') {
+        if (!('client' in currentData)) {
           const clientFromStorage = this.getClientFromLocalStorage();
           if (clientFromStorage) {
             try {
-              this.userData.client = clientFromStorage;
+              currentData.client = clientFromStorage;
+              this.userData.set({ ...currentData });
             } catch (e) {}
           }
         }
       }
     } catch (error) {
-      this.userData = null;
+      this.userData.set(null);
     }
   }
 
   getUserClient(): string {
-    if (!this.userData) {
-      const clientStorage = this.getClientFromLocalStorage();
-      return clientStorage ?? '—';
-    }
-    if (typeof this.userData === 'string') {
-      const clientStorage = this.getClientFromLocalStorage();
-      return clientStorage ?? this.userData ?? '—';
-    }
-
-    if (this.userData.client) return String(this.userData.client);
-    if (this.userData.session && this.userData.session.client)
-      return String(this.userData.session.client);
-    if (this.userData.user && this.userData.user.client)
-      return String(this.userData.user.client);
-    if (this.userData.client_name) return String(this.userData.client_name);
-    const clientFromStorage = this.getClientFromLocalStorage();
-    return clientFromStorage ?? '—';
-  }
-
-  isHomeRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return currentUrl.includes('/carousel') || currentUrl.includes('/news');
-  }
-
-  isAboutRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return (
-      currentUrl.includes('/company') ||
-      currentUrl.includes('/manager-category') ||
-      currentUrl.includes('/managers') ||
-      currentUrl.includes('/reviews')
-    );
-  }
-
-  isProductsRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return (
-      currentUrl.includes('/categories') || currentUrl.includes('/products')
-    );
-  }
-
-  isPublicationsRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return (
-      currentUrl.includes('/publication-category') ||
-      currentUrl.includes('/publications')
-    );
-  }
-
-  isContactRouteActive(): boolean {
-    const currentUrl = this.router.url;
-    return currentUrl.includes('/contact');
-  }
-
-  isHeaderRouteActive(): boolean {
-    return this.router.url.includes('/header');
-  }
-
-  isUsersRouteActive(): boolean {
-    return this.router.url.includes('/users');
+    return this.userClient();
   }
 
   logout() {
@@ -495,7 +502,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   }
 
   toggleLanguageMenu() {
-    this.languageMenuOpen = !this.languageMenuOpen;
+    this.languageMenuOpen.update((v) => !v);
   }
 
   private syncWithTransloco() {
@@ -504,48 +511,48 @@ export class NavbarComponent implements OnInit, OnChanges {
   }
 
   private updateLanguageDisplay(lang: string) {
-    this.currentLanguageCode = lang;
+    this.currentLanguageCode.set(lang);
     if (lang === 'es') {
-      this.currentLanguageIcon = 'assets/img/españa.ico';
-      this.currentLanguage = 'Español';
+      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
+      this.currentLanguage.set('Español');
     } else if (lang === 'en') {
-      this.currentLanguageIcon = 'assets/img/eeuu.ico';
-      this.currentLanguage = 'English';
+      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
+      this.currentLanguage.set('English');
     }
   }
 
   selectLanguage(lang: string) {
-    this.currentLanguageCode = lang;
+    this.currentLanguageCode.set(lang);
     this.transloco.setActiveLang(lang);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('selectedLang', lang);
     }
     if (lang === 'es') {
-      this.currentLanguageIcon = 'assets/img/españa.ico';
-      this.currentLanguage = 'Español';
+      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
+      this.currentLanguage.set('Español');
     } else if (lang === 'en') {
-      this.currentLanguageIcon = 'assets/img/eeuu.ico';
-      this.currentLanguage = 'English';
+      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
+      this.currentLanguage.set('English');
     }
-    this.languageMenuOpen = false;
+    this.languageMenuOpen.set(false);
   }
 
   private initShowUsersMenu(): void {
-    const clientFromInput = this.sessionClient;
+    const clientFromInput = this.sessionClient();
     if (clientFromInput !== undefined && clientFromInput !== null) {
-      this.showUsersMenu = this.isClientAllowed(clientFromInput);
-      this.showBackupButtons = this.isClientAllowed(clientFromInput);
+      this.showUsersMenu.set(this.isClientAllowed(clientFromInput));
+      this.showBackupButtons.set(this.isClientAllowed(clientFromInput));
       return;
     }
 
     const clientFromStorage = this.getClientFromLocalStorage();
     if (clientFromStorage !== null) {
-      this.showUsersMenu = this.isClientAllowed(clientFromStorage);
-      this.showBackupButtons = this.isClientAllowed(clientFromStorage);
+      this.showUsersMenu.set(this.isClientAllowed(clientFromStorage));
+      this.showBackupButtons.set(this.isClientAllowed(clientFromStorage));
       return;
     }
-    this.showUsersMenu = true;
-    this.showBackupButtons = false;
+    this.showUsersMenu.set(true);
+    this.showBackupButtons.set(false);
   }
 
   private isClientAllowed(clientValue: string | undefined | null): boolean {

@@ -1,29 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   NotificationService,
   Notification,
 } from '../../services/system/notification.service';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-notification',
   templateUrl: './app-notification.component.html',
-  styleUrls: ['./app-notification.component.css'],
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush, // CRUCIAL para zoneless
 })
-export class NotificationComponent implements OnInit {
-  notifications: Notification[] = [];
+export class NotificationComponent {
+  private notificationService = inject(NotificationService);
 
-  constructor(private notificationService: NotificationService) {}
+  // Usar la señal directamente del servicio
+  notifications = this.notificationService.notifications;
 
-  ngOnInit(): void {
-    this.notificationService.notifications$.subscribe(
-      (notifications: Notification[]) => {
-        this.notifications = notifications;
-      }
-    );
-  }
+  // Computed signal para notificaciones ordenadas (opcional)
+  sortedNotifications = computed(
+    () => [...this.notifications()].reverse() // Mostrar las más recientes primero
+  );
 
   removeNotification(notification: Notification): void {
     this.notificationService.removeNotification(notification);
@@ -32,4 +36,7 @@ export class NotificationComponent implements OnInit {
   roundProgress(progress: number | undefined): number {
     return Math.round(progress || 0);
   }
+
+  // Computed signal para determinar si hay notificaciones
+  hasNotifications = computed(() => this.notifications().length > 0);
 }
