@@ -1,6 +1,6 @@
 <!-- update-header.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
-  <div class="mb-4 grid grid-cols-2 gap-4">
+  <div class="mb-4">
     <app-text-field
       id="name"
       label="{{
@@ -12,6 +12,8 @@
         minlength: ( 'components.chatbot_model.create.fields.name.minlength' | transloco ),
       }"
     ></app-text-field>
+  </div>
+  <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
       id="provider"
       label="{{
@@ -22,8 +24,6 @@
         required: ( 'components.chatbot_model.create.fields.provider.required' | transloco ),
       }"
     ></app-text-field>
-  </div>
-  <div class="mb-4">
     <app-text-field
       id="daily_token_limit"
       label="{{
@@ -38,6 +38,7 @@
       }"
     ></app-text-field>
   </div>
+
   <hr class="border-gray-500 my-1 border-opacity-10" />
 </form>
 <style>

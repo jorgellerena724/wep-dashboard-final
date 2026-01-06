@@ -6,6 +6,8 @@ import {
   inject,
   signal,
   computed,
+  Injector,
+  runInInjectionContext,
 } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
@@ -69,7 +71,8 @@ export class AuthService implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private notificationSrv: NotificationService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private injector: Injector
   ) {
     this.loadInitialState();
     this.setupNavigationTracking();
@@ -324,8 +327,8 @@ export class AuthService implements OnDestroy {
     this.warningTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
         // MODIFICADO: Usar la clave de traducción para la advertencia de inactividad
-        const warningMessage = this.transloco.translate(
-          'notifications.session.inactivityWarning'
+        const warningMessage = runInInjectionContext(this.injector, () =>
+          this.transloco.translate('notifications.session.inactivityWarning')
         );
         this.notificationSrv.addNotification(warningMessage, 'warning');
       }
@@ -396,8 +399,8 @@ export class AuthService implements OnDestroy {
     // Solo mostrar notificación si se solicita explícitamente
     if (showNotification) {
       // MODIFICADO: Usar la clave de traducción para el cierre de sesión
-      const logoutMessage = this.transloco.translate(
-        'notifications.session.logoutSuccess'
+      const logoutMessage = runInInjectionContext(this.injector, () =>
+        this.transloco.translate('notifications.session.logoutSuccess')
       );
       this.notificationSrv.addNotification(logoutMessage, 'success');
     }

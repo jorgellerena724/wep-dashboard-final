@@ -182,7 +182,7 @@ export class TextFieldComponent implements ControlValueAccessor {
 
     // Permitir punto y coma si allowDecimals está activado
     if (this.allowDecimals()) {
-      allowedKeys.push('.', ',');
+      allowedKeys.push('.');
     }
 
     const isDecimal = event.key === '.' || event.key === ',';

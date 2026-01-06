@@ -26,7 +26,7 @@ import { ConfirmDialogService } from '../../../../shared/services/system/confirm
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CreateChatbotConfigComponent } from '../create-chatbot-config/create-chatbot-config.component';
+import { CreateEditChatbotConfigComponent } from '../create-chatbot-config/create-edit-chatbot-config.component';
 import { UpdateChatbotConfigComponent } from '../update-chatbot-config/update-chatbot-config.component';
 
 @Component({
@@ -191,7 +191,7 @@ export class ListChatbotConfigComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateChatbotConfigComponent,
+      component: CreateEditChatbotConfigComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -210,7 +210,7 @@ export class ListChatbotConfigComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateChatbotConfigComponent,
+      component: CreateEditChatbotConfigComponent,
       data: {
         initialData: {
           ...data,
@@ -236,7 +236,7 @@ export class ListChatbotConfigComponent {
     if (confirmed) {
       this.loading.set(true);
       this.srv
-        .delete(data.user_id) // Usar user_id en lugar de id
+        .delete(data.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {

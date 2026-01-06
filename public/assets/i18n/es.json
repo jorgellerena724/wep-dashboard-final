@@ -417,32 +417,17 @@
             "title": "Prompt del Sistema",
             "required": "El prompt del sistema es requerido",
             "minlength": "El prompt debe tener al menos 10 caracteres"
+          },
+          "temperature": {
+            "title": "Temperatura",
+            "required": "La temperatura es requerida",
+            "min": "La temperatura mínima es 0.1",
+            "max": "La temperatura máxima es 1.0"
           }
         }
       },
       "edit": {
-        "title": "Modificar Configuración de IA",
-        "fields": {
-          "user": {
-            "title": "Usuario",
-            "required": "El usuario es requerido",
-            "exists": "Este usuario ya tiene una configuración de IA"
-          },
-          "apiKey": {
-            "title": "API Key",
-            "required": "La API Key es requerida",
-            "minlength": "La API Key debe tener al menos 20 caracteres"
-          },
-          "model": {
-            "title": "Modelo de IA",
-            "required": "El modelo es requerido"
-          },
-          "prompt": {
-            "title": "Prompt del Sistema",
-            "required": "El prompt del sistema es requerido",
-            "minlength": "El prompt debe tener al menos 10 caracteres"
-          }
-        }
+        "title": "Modificar Configuración de IA"
       },
       "delete": {
         "title": "¿Eliminar elemento?",

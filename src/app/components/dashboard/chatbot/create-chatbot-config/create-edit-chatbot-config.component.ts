@@ -25,8 +25,8 @@ import { ChatbotService } from '../../../../shared/services/features/chatbot.ser
 import { UserService } from '../../../../shared/services/users/user.service';
 
 @Component({
-  selector: 'app-create-chatbot-config',
-  templateUrl: './create-chatbot-config.component.html',
+  selector: 'app-create-edit-chatbot-config',
+  templateUrl: './create-edit-chatbot-config.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -36,7 +36,7 @@ import { UserService } from '../../../../shared/services/users/user.service';
     SelectComponent,
   ],
 })
-export class CreateChatbotConfigComponent implements DynamicComponent {
+export class CreateEditChatbotConfigComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private chatbotConfigSrv = inject(ChatbotService);
@@ -53,6 +53,8 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
   users = signal<any[]>([]);
   uploading = signal(false);
   isFormValid = signal(false);
+  configId = signal<number | null>(null); // Para edición
+  isEditing = computed(() => this.configId() !== null);
 
   // Computed
   isSubmitting = signal<boolean>(false);
@@ -64,16 +66,30 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
   constructor() {
     this.form = this.fb.group({
       user_id: ['', [Validators.required]],
-      api_key: ['', [Validators.required, Validators.minLength(20)]],
+      api_key: ['', [Validators.minLength(20)]],
       model_id: ['', [Validators.required]],
       prompt: ['', [Validators.required, Validators.minLength(10)]],
+      temperature: [
+        '',
+        [Validators.required, Validators.min(0.1), Validators.max(1.0)],
+      ],
     });
 
     effect(() => {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          this.form.patchValue(data);
+          // Mapear datos correctamente
+          const formData = {
+            user_id: data.user_id || data.user?.id,
+            model_id: data.model_id || data.model?.id,
+            temperature: data.temperature,
+            prompt: data.prompt || '',
+            api_key: '',
+          };
+
+          this.form.patchValue(formData);
+          this.configId.set(data.id);
         });
       }
     });
@@ -92,11 +108,6 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
     // Suscripción al estado del formulario
     this.form.statusChanges.subscribe(() => {
       this.isFormValid.set(this.form.valid);
-    });
-
-    // Re-validar cuando cambie el usuario
-    this.form.get('user_id')?.valueChanges.subscribe(() => {
-      this.form.get('api_key')?.updateValueAndValidity();
     });
   }
 
@@ -130,7 +141,10 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
           this.models.set(
             data.map((model: any) => ({
               value: model.id,
-              label: model.name,
+              label: `${model.name} (${this.formatTokenLimit(
+                model.daily_token_limit
+              )}/día)`,
+              daily_token_limit: model.daily_token_limit, // Guardamos para referencia
             }))
           );
           resolve();
@@ -145,6 +159,15 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
         },
       });
     });
+  }
+
+  formatTokenLimit(limit: number): string {
+    if (limit >= 1000000) {
+      return `${(limit / 1000000).toFixed(1)}M`;
+    } else if (limit >= 1000) {
+      return `${(limit / 1000).toFixed(0)}K`;
+    }
+    return limit.toString();
   }
 
   async onSubmit(): Promise<void> {
@@ -163,20 +186,48 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    const payload = {
+    // Preparar payload
+    const payload: any = {
       user_id: this.form.get('user_id')?.value,
-      api_key: this.form.get('api_key')?.value.trim(),
       model_id: this.form.get('model_id')?.value,
       prompt: this.form.get('prompt')?.value.trim(),
+      temperature: this.form.get('temperature')?.value,
     };
 
-    this.chatbotConfigSrv.post(payload).subscribe({
+    // Solo incluir api_key si no está vacío (y en creación siempre es requerido)
+    const apiKeyValue = this.form.get('api_key')?.value?.trim();
+    if (apiKeyValue) {
+      payload.api_key = apiKeyValue;
+    } else if (!this.isEditing()) {
+      // Si es creación y no hay API key, mostrar error
+      this.uploading.set(false);
+      this.notificationSrv.addNotification(
+        this.transloco.translate(
+          'notifications.chatbot_config.error.apiKeyRequired'
+        ),
+        'error'
+      );
+      this.submitError.emit();
+      return;
+    }
+
+    // Determinar si es creación o actualización
+    let request$;
+    if (this.isEditing() && this.configId()) {
+      request$ = this.chatbotConfigSrv.patch(payload, this.configId()!);
+    } else {
+      request$ = this.chatbotConfigSrv.post(payload);
+    }
+
+    request$.subscribe({
       next: (response) => {
         this.uploading.set(false);
 
         this.notificationSrv.addNotification(
           this.transloco.translate(
-            'notifications.chatbot_config.success.created'
+            this.isEditing()
+              ? 'notifications.chatbot_config.success.updated'
+              : 'notifications.chatbot_config.success.created'
           ),
           'success'
         );
@@ -186,12 +237,21 @@ export class CreateChatbotConfigComponent implements DynamicComponent {
         if (this.initialData()?.onSave) {
           this.initialData().onSave();
         }
+
+        // Resetear formulario si no es edición
+        if (!this.isEditing()) {
+          this.form.reset({
+            temperature: 0.2,
+          });
+        }
       },
       error: (error) => {
         this.uploading.set(false);
 
         let errorMessage = this.transloco.translate(
-          'notifications.chatbot_config.error.create'
+          this.isEditing()
+            ? 'notifications.chatbot_config.error.update'
+            : 'notifications.chatbot_config.error.create'
         );
 
         // Manejar errores específicos

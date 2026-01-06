@@ -1,6 +1,6 @@
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[520px]">
   <!-- Usuario -->
-  <div class="grid grid-cols-2 mb-4 gap-4">
+  <div class="mb-4">
     <app-select
       [placeholder]="
         'components.chatbot_config.create.fields.user.title' | transloco
@@ -16,6 +16,8 @@
           ('components.chatbot_config.create.fields.user.exists' | transloco)
       }"
     ></app-select>
+  </div>
+  <div class="grid grid-cols-2 mb-4 gap-4">
     <app-select
       [placeholder]="
         'components.chatbot_config.create.fields.model.title' | transloco
@@ -28,9 +30,28 @@
           ('components.chatbot_config.create.fields.model.required' | transloco)
       }"
     ></app-select>
+    <app-text-field
+      id="temperature"
+      label="{{
+        'components.chatbot_config.create.fields.temperature.title' | transloco
+      }}"
+      [control]="getFormControl('temperature')"
+      [maxLength]="3"
+      [numbersOnly]="true"
+      [allowDecimals]="true"
+      [errorMessages]="{
+        required:
+          ('components.chatbot_config.create.fields.temperature.required'
+          | transloco),
+        min:
+          ('components.chatbot_config.create.fields.temperature.min'
+          | transloco),
+        max:
+          ('components.chatbot_config.create.fields.temperature.max'
+          | transloco)
+      }"
+    ></app-text-field>
   </div>
-
-  <hr class="border-gray-500 my-4 border-opacity-10" />
 
   <!-- API Key de Groq -->
   <div class="mb-4">
@@ -40,7 +61,6 @@
         'components.chatbot_config.create.fields.apiKey.title' | transloco
       }}"
       [control]="getFormControl('api_key')"
-      type="password"
       [errorMessages]="{
         required:
           ('components.chatbot_config.create.fields.apiKey.required'
