@@ -401,7 +401,7 @@
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
             'bg-gray-700 text-white':
-              isHeaderSubmenuOpen || isHeaderRouteActive()
+              isHeaderSubmenuOpen() || isHeaderRouteActive()
           }"
         >
           <div>
@@ -425,7 +425,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isHeaderSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isHeaderSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -441,8 +441,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isHeaderSubmenuOpen,
-            'max-h-96 opacity-100': isHeaderSubmenuOpen
+            'max-h-0 opacity-0': !isHeaderSubmenuOpen(),
+            'max-h-96 opacity-100': isHeaderSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -476,7 +476,7 @@
           (click)="toggleHomeSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
-            'bg-gray-700 text-white': isHomeSubmenuOpen || isHomeRouteActive()
+            'bg-gray-700 text-white': isHomeSubmenuOpen() || isHomeRouteActive()
           }"
         >
           <div>
@@ -501,7 +501,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isHomeSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isHomeSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -517,8 +517,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isHomeSubmenuOpen,
-            'max-h-96 opacity-100': isHomeSubmenuOpen
+            'max-h-0 opacity-0': !isHomeSubmenuOpen(),
+            'max-h-96 opacity-100': isHomeSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -576,7 +576,8 @@
           (click)="toggleAboutSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
-            'bg-gray-700 text-white': isAboutSubmenuOpen || isAboutRouteActive()
+            'bg-gray-700 text-white':
+              isAboutSubmenuOpen() || isAboutRouteActive()
           }"
         >
           <div>
@@ -599,7 +600,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isAboutSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isAboutSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -615,8 +616,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isAboutSubmenuOpen,
-            'max-h-96 opacity-100': isAboutSubmenuOpen
+            'max-h-0 opacity-0': !isAboutSubmenuOpen(),
+            'max-h-96 opacity-100': isAboutSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -728,7 +729,7 @@
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
             'bg-gray-700 text-white':
-              isProductsSubmenuOpen || isProductsRouteActive()
+              isProductsSubmenuOpen() || isProductsRouteActive()
           }"
         >
           <div>
@@ -751,7 +752,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isProductsSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isProductsSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -767,8 +768,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isProductsSubmenuOpen,
-            'max-h-96 opacity-100': isProductsSubmenuOpen
+            'max-h-0 opacity-0': !isProductsSubmenuOpen(),
+            'max-h-96 opacity-100': isProductsSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -827,7 +828,7 @@
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
             'bg-gray-700 text-white':
-              isPublicationsSubmenuOpen || isPublicationsRouteActive()
+              isPublicationsSubmenuOpen() || isPublicationsRouteActive()
           }"
         >
           <div>
@@ -850,7 +851,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isPublicationsSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isPublicationsSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -866,8 +867,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isPublicationsSubmenuOpen,
-            'max-h-96 opacity-100': isPublicationsSubmenuOpen
+            'max-h-0 opacity-0': !isPublicationsSubmenuOpen(),
+            'max-h-96 opacity-100': isPublicationsSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -927,7 +928,7 @@
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
             'bg-gray-700 text-white':
-              isContactSubmenuOpen || isContactRouteActive()
+              isContactSubmenuOpen() || isContactRouteActive()
           }"
         >
           <div>
@@ -950,7 +951,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isContactSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isContactSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -966,8 +967,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isContactSubmenuOpen,
-            'max-h-96 opacity-100': isContactSubmenuOpen
+            'max-h-0 opacity-0': !isContactSubmenuOpen(),
+            'max-h-96 opacity-100': isContactSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -1005,7 +1006,8 @@
           (click)="toggleUsersSubmenu()"
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
-            'bg-gray-700 text-white': isUsersSubmenuOpen || isUsersRouteActive()
+            'bg-gray-700 text-white':
+              isUsersSubmenuOpen() || isUsersRouteActive()
           }"
         >
           <div>
@@ -1028,7 +1030,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isUsersSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isUsersSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1044,8 +1046,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isUsersSubmenuOpen,
-            'max-h-96 opacity-100': isUsersSubmenuOpen
+            'max-h-0 opacity-0': !isUsersSubmenuOpen(),
+            'max-h-96 opacity-100': isUsersSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
@@ -1082,7 +1084,7 @@
           class="flex items-center p-2 rounded-lg border border-gray-600 hover:bg-gray-700 hover:text-white cursor-pointer"
           [ngClass]="{
             'bg-gray-700 text-white':
-              isChatbotSubmenuOpen || isChatbotRouteActive()
+              isChatbotSubmenuOpen() || isChatbotRouteActive()
           }"
         >
           <div>
@@ -1108,7 +1110,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4 transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': isChatbotSubmenuOpen }"
+            [ngClass]="{ 'rotate-180': isChatbotSubmenuOpen() }"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -1124,8 +1126,8 @@
         <div
           class="overflow-hidden transition-all duration-300 ease-in-out"
           [ngClass]="{
-            'max-h-0 opacity-0': !isChatbotSubmenuOpen,
-            'max-h-96 opacity-100': isChatbotSubmenuOpen
+            'max-h-0 opacity-0': !isChatbotSubmenuOpen(),
+            'max-h-96 opacity-100': isChatbotSubmenuOpen()
           }"
         >
           <div class="ml-6 mt-1">
