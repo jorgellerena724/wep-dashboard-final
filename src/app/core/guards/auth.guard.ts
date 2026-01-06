@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -9,8 +10,10 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    // Verificar si el usuario está autenticado (basado solo en la existencia del token)
-    if (!this.authService.isLoggedIn()) {
+    // Usar signals para verificar estado de autenticación
+    const isLoggedIn = this.authService.isLoggedInSignal();
+
+    if (!isLoggedIn) {
       this.router.navigate(['/login'], { replaceUrl: true });
       return false;
     }

@@ -4,11 +4,13 @@ import {
   PLATFORM_ID,
   OnDestroy,
   inject,
+  signal,
+  computed,
 } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, Observable, throwError, Subscription } from 'rxjs';
-import { catchError, filter, map, distinctUntilChanged } from 'rxjs/operators';
+import { Observable, throwError, Subscription } from 'rxjs';
+import { catchError, map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { isPlatformBrowser } from '@angular/common';
 import { NotificationService } from '../../shared/services/system/notification.service';
@@ -32,12 +34,21 @@ interface LoginResponse {
 })
 export class AuthService implements OnDestroy {
   private redirectExecuted = false;
-  private initialNavigationChecked = new BehaviorSubject<boolean>(false);
-  public initialNavigationChecked$ =
-    this.initialNavigationChecked.asObservable();
 
-  private tokenSubject = new BehaviorSubject<string | null>(null);
-  private userSubject = new BehaviorSubject<User | null>(null);
+  // Signals para estado reactivo
+  private tokenSignal = signal<string | null>(null);
+  private userSignal = signal<User | null>(null);
+  private initialNavigationCheckedSignal = signal<boolean>(false);
+
+  // Computed properties para observables externos
+  public initialNavigationChecked$ = computed(() =>
+    this.initialNavigationCheckedSignal()
+  );
+  public token$ = computed(() => this.tokenSignal());
+  public user$ = computed(() => this.userSignal());
+  public isLoggedInSignal = computed(
+    () => !!this.userSignal() && !this.checkTokenExpiration()
+  );
 
   private inactivityTimer: any;
   private tokenExpirationTimer: any;
@@ -217,12 +228,12 @@ export class AuthService implements OnDestroy {
 
           if (user.exp && Date.now() >= user.exp) {
             this.logout(false); // No mostrar notificación al iniciar la app
-            this.initialNavigationChecked.next(true);
+            this.initialNavigationCheckedSignal.set(true);
             return;
           }
 
-          this.tokenSubject.next(sessionToken);
-          this.userSubject.next(user);
+          this.tokenSignal.set(sessionToken);
+          this.userSignal.set(user);
           this.setupExpirationTimer(user.exp);
           this.setupActivityListeners();
           this.resetInactivityTimer();
@@ -232,15 +243,15 @@ export class AuthService implements OnDestroy {
             this.redirectAfterLogin();
           }
         } else {
-          this.initialNavigationChecked.next(true);
+          this.initialNavigationCheckedSignal.set(true);
         }
       } catch (error) {
         console.error('Error loading initial state:', error);
         this.logout(false); // No mostrar notificación al iniciar la app
-        this.initialNavigationChecked.next(true);
+        this.initialNavigationCheckedSignal.set(true);
       }
     } else {
-      this.initialNavigationChecked.next(true);
+      this.initialNavigationCheckedSignal.set(true);
     }
   }
 
@@ -275,7 +286,7 @@ export class AuthService implements OnDestroy {
   }
 
   public checkTokenExpiration(): boolean {
-    const user = this.userSubject.value;
+    const user = this.userSignal();
     if (user?.exp) {
       const currentTime = Date.now();
       return currentTime >= user.exp;
@@ -328,7 +339,7 @@ export class AuthService implements OnDestroy {
   }
 
   isLoggedIn(): boolean {
-    return !!this.user && !this.checkTokenExpiration();
+    return this.isLoggedInSignal();
   }
 
   public login(email: string, password: string): Observable<boolean> {
@@ -348,8 +359,8 @@ export class AuthService implements OnDestroy {
                 localStorage.setItem('token', response.access_token);
                 localStorage.setItem('user', JSON.stringify(decodedToken));
               }
-              this.tokenSubject.next(response.access_token);
-              this.userSubject.next(decodedToken);
+              this.tokenSignal.set(response.access_token);
+              this.userSignal.set(decodedToken);
               this.setupExpirationTimer(decodedToken.exp);
               this.setupActivityListeners();
               this.resetInactivityTimer();
@@ -369,8 +380,8 @@ export class AuthService implements OnDestroy {
     if (this.isLoggingOut) return;
     this.isLoggingOut = true;
     this.clearAllTimers();
-    this.tokenSubject.next(null);
-    this.userSubject.next(null);
+    this.tokenSignal.set(null);
+    this.userSignal.set(null);
     this.cleanupAndRedirect();
   }
 
@@ -379,8 +390,8 @@ export class AuthService implements OnDestroy {
 
     this.isLoggingOut = true;
     this.clearAllTimers();
-    this.tokenSubject.next(null);
-    this.userSubject.next(null);
+    this.tokenSignal.set(null);
+    this.userSignal.set(null);
 
     // Solo mostrar notificación si se solicita explícitamente
     if (showNotification) {
@@ -414,12 +425,12 @@ export class AuthService implements OnDestroy {
   }
 
   public updateUser(newUserData: Partial<User>): void {
-    const currentUser = this.userSubject.value;
+    const currentUser = this.userSignal();
     if (currentUser && isPlatformBrowser(this.platformId)) {
       try {
         const updatedUser = { ...currentUser, ...newUserData };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        this.userSubject.next(updatedUser);
+        this.userSignal.set(updatedUser);
       } catch (error) {
         console.warn('Error updating user:', error);
       }
@@ -427,11 +438,24 @@ export class AuthService implements OnDestroy {
   }
 
   public get user(): User | null {
-    return this.userSubject.value;
+    return this.userSignal();
   }
 
   public get token(): string | null {
-    return this.tokenSubject.value;
+    return this.tokenSignal();
+  }
+
+  // Métodos adicionales para compatibilidad con código existente
+  public getUserSignal() {
+    return this.userSignal;
+  }
+
+  public getTokenSignal() {
+    return this.tokenSignal;
+  }
+
+  public getInitialNavigationCheckedSignal() {
+    return this.initialNavigationCheckedSignal;
   }
 
   public redirectAfterLogin(): void {
@@ -448,10 +472,10 @@ export class AuthService implements OnDestroy {
         } else {
           this.router.navigate(['/admin'], { replaceUrl: true });
         }
-        this.initialNavigationChecked.next(true);
+        this.initialNavigationCheckedSignal.set(true);
       }, 100);
     } else {
-      this.initialNavigationChecked.next(true);
+      this.initialNavigationCheckedSignal.set(true);
     }
   }
 
