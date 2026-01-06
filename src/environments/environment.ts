@@ -1,5 +1,6 @@
 const apiUrl = 'http://localhost:3002/api/';
 const imgUrl = `${apiUrl}images/`;
+const imgPath = `/assets/img/`;
 
 export const environment = {
   use_minio: false,
@@ -8,4 +9,5 @@ export const environment = {
   api_users: `${apiUrl}users/`,
   api_security: `${apiUrl}auth/`,
   api_img: `${imgUrl}`,
+  imgPath: imgPath,
 };

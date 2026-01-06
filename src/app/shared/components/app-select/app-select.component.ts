@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
+  viewChild,
   forwardRef,
-  OnInit,
+  signal,
+  computed,
+  effect,
   HostListener,
   ElementRef,
-  ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -33,6 +35,7 @@ interface SelectOption {
   imports: [CommonModule, ReactiveFormsModule, FormsModule, FloatLabelModule],
   templateUrl: './app-select.component.html',
   styleUrl: './app-select.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -41,191 +44,232 @@ interface SelectOption {
     },
   ],
 })
-export class SelectComponent implements ControlValueAccessor, OnInit {
-  @Input() options: SelectOption[] = [];
-  @Input() multiple: boolean = false;
-  @Input() validCombinations?: string[][] = undefined;
-  @Input() placeholder: string = 'Select...';
-  @Input() label?: string;
-  @Input() isLoading: boolean = false;
-  @Input() isAllDataLoaded: boolean = false;
-  @Input() allowCustomEntries: boolean = false;
-  @Input() value: any;
-  @Input() formGroup!: FormGroup;
-  @Input() isSearchable: boolean = false;
-  @Input() itemsPerPage: number = 10;
-  @Output() selectionChange = new EventEmitter<any>();
-  @Output() search = new EventEmitter<string>();
-  @Input() control: any;
-  @Input() usePagination: boolean = false;
-  @Input() disabled = false;
-  @Input() errorMessages: { [key: string]: string } = {
+export class SelectComponent implements ControlValueAccessor {
+  // Inputs usando signal inputs
+  options = input<SelectOption[]>([]);
+  multiple = input<boolean>(false);
+  validCombinations = input<string[][] | undefined>(undefined);
+  placeholder = input<string>('Select...');
+  label = input<string | undefined>(undefined);
+  isLoading = input<boolean>(false);
+  isAllDataLoaded = input<boolean>(false);
+  allowCustomEntries = input<boolean>(false);
+  formGroup = input<FormGroup | undefined>(undefined);
+  isSearchable = input<boolean>(false);
+  itemsPerPage = input<number>(10);
+  control = input<FormControl | undefined>(undefined);
+  usePagination = input<boolean>(false);
+  disabled = input<boolean>(false);
+  errorMessages = input<{ [key: string]: string }>({
     required: 'Este campo es requerido',
-  };
-  @Input() preserveSearchOnLoad: boolean = false;
-  @ViewChild('filterInput') filterInput!: ElementRef;
-  private searchTermChanged: boolean = false;
-  isOpen = false;
-  searchTerm: string = '';
-  currentPage: number = 1;
-  onChange = (_: any) => {};
-  onTouched = () => {};
+  });
+  preserveSearchOnLoad = input<boolean>(false);
 
-  constructor(
-    private elementRef: ElementRef,
-    private themeService: ThemeService
-  ) {}
+  // Outputs
+  selectionChange = output<any>();
+  search = output<string>();
 
-  ngOnInit() {
-    this.value = this.multiple ? [] : null;
-    // Si el control no está definido pero estamos en un FormGroup
-    if (!this.control && this.formGroup && this.label) {
-      this.control = this.formGroup.get(this.label) as FormControl;
+  // ViewChild
+  filterInput = viewChild<ElementRef>('filterInput');
+
+  // Signals internos
+  private _value = signal<any>(null);
+  isOpen = signal<boolean>(false);
+  searchTerm = signal<string>('');
+  currentPage = signal<number>(1);
+  private searchTermChanged = signal<boolean>(false);
+
+  // Computed signals
+  value = computed(() => this._value());
+
+  actualControl = computed(() => {
+    const ctrl = this.control();
+    if (ctrl) return ctrl;
+
+    const fg = this.formGroup();
+    const lbl = this.label();
+    if (fg && lbl) {
+      return fg.get(lbl) as FormControl;
     }
-  }
+    return undefined;
+  });
 
-  ngOnChanges() {
-    // Resetear paginación cuando las opciones cambian
-    this.currentPage = 1;
+  shouldShowError = computed(() => {
+    const ctrl = this.actualControl();
+    return ctrl?.invalid && (ctrl?.dirty || ctrl?.touched);
+  });
 
-    // Solo resetear searchTerm si no queremos preservarlo o si no se ha modificado aún
-    if (!this.preserveSearchOnLoad || !this.searchTermChanged) {
-      this.searchTerm = '';
-    }
-  }
+  displayValue = computed(() => {
+    const val = this._value();
+    const opts = this.options();
+    const isMultiple = this.multiple();
+    const ph = this.placeholder();
 
-  get shouldShowError(): boolean {
-    return (
-      this.control?.invalid && (this.control?.dirty || this.control?.touched)
-    );
-  }
-
-  normalizeText(text: string): string {
-    return text
-      .normalize('NFD') // Descompone los caracteres con acentos en su forma base
-      .replace(/[\u0300-\u036f]/g, '') // Elimina los caracteres diacríticos
-      .toLowerCase(); // Convierte todo a minúsculas para asegurar la insensibilidad a mayúsculas/minúsculas
-  }
-
-  getDisplayValue(): string {
-    if (!this.value || (Array.isArray(this.value) && this.value.length === 0)) {
-      return this.placeholder;
+    if (!val || (Array.isArray(val) && val.length === 0)) {
+      return ph;
     }
 
-    if (this.multiple) {
-      if (!Array.isArray(this.value)) {
-        this.value = [];
-      }
-      const selectedLabels = this.options
-        .filter((option) => this.value.includes(option.value))
+    if (isMultiple) {
+      const values = Array.isArray(val) ? val : [];
+      const selectedLabels = opts
+        .filter((option) => values.includes(option.value))
         .map((option) => option.label);
 
-      // Si alguna opción no se encuentra, se puede agregar el valor custom
       if (selectedLabels.length === 0) {
-        return this.value.toString();
+        return values.toString();
       }
       return selectedLabels.join(', ');
     }
 
-    const selectedOption = this.options.find((opt) => opt.value === this.value);
-    return selectedOption ? selectedOption.label : this.value;
-  }
+    const selectedOption = opts.find((opt) => opt.value === val);
+    return selectedOption ? selectedOption.label : val;
+  });
 
-  getErrorMessages(): string[] {
-    if (!this.control?.errors) return [];
+  getErrorMessages = computed(() => {
+    const ctrl = this.actualControl();
+    if (!ctrl?.errors) return [];
+
+    const customErrors = this.errorMessages();
     const defaultMessages: { [key: string]: string } = {
       required: 'Este campo es requerido',
       email: 'Email inválido',
-      minlength: `Mínimo ${this.control.errors?.['minlength']?.requiredLength} caracteres`,
-      maxlength: `Máximo ${this.control.errors?.['maxlength']?.requiredLength} caracteres`,
+      minlength: `Mínimo ${ctrl.errors?.['minlength']?.requiredLength} caracteres`,
+      maxlength: `Máximo ${ctrl.errors?.['maxlength']?.requiredLength} caracteres`,
       pattern: 'Formato inválido',
       warning: 'Este campo es necesario para que tenga código del sistema',
     };
-    return Object.keys(this.control.errors).map((errorKey) => {
+
+    return Object.keys(ctrl.errors).map((errorKey) => {
       return (
-        this.errorMessages[errorKey] ||
-        defaultMessages[errorKey] ||
-        'Campo inválido'
+        customErrors[errorKey] || defaultMessages[errorKey] || 'Campo inválido'
       );
     });
-  }
+  });
 
-  getFilteredOptions(): SelectOption[] {
-    if (!this.searchTerm) return this.options;
+  filteredOptions = computed(() => {
+    const opts = this.options();
+    const term = this.searchTerm();
 
-    const normalizedSearchTerm = this.normalizeText(this.searchTerm);
+    if (!term) return opts;
 
-    return this.options.filter((option) =>
+    const normalizedSearchTerm = this.normalizeText(term);
+    return opts.filter((option) =>
       this.normalizeText(option.label).includes(normalizedSearchTerm)
     );
-  }
+  });
 
-  getPaginatedOptions(): SelectOption[] {
-    let filteredOptions = this.getFilteredOptions();
+  paginatedOptions = computed(() => {
+    let filtered = this.filteredOptions();
+    const term = this.searchTerm();
+    const allowCustom = this.allowCustomEntries();
 
     // Añadir opción custom si se permite y hay término de búsqueda
-    if (
-      this.allowCustomEntries &&
-      this.searchTerm &&
-      !filteredOptions.some((o) => o.value === this.searchTerm)
-    ) {
-      filteredOptions = [
+    if (allowCustom && term && !filtered.some((o) => o.value === term)) {
+      filtered = [
         {
-          label: `${this.searchTerm} (nuevo)`,
-          value: this.searchTerm,
-          custom: true, // <-- la marcamos
+          label: `${term} (nuevo)`,
+          value: term,
+          custom: true,
         },
-        ...filteredOptions,
+        ...filtered,
       ];
     }
 
-    if (!this.usePagination) {
-      return filteredOptions;
+    if (!this.usePagination()) {
+      return filtered;
     }
 
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return filteredOptions.slice(startIndex, endIndex);
-  }
+    const page = this.currentPage();
+    const perPage = this.itemsPerPage();
+    const startIndex = (page - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    return filtered.slice(startIndex, endIndex);
+  });
 
-  getRegularOptions(): SelectOption[] {
-    // Se muestran todas las paginadas, salvo las que sean custom
-    return this.getPaginatedOptions().filter((option) => !option.custom);
-  }
+  regularOptions = computed(() => {
+    return this.paginatedOptions().filter((option) => !option.custom);
+  });
 
-  getTotalPages(): number {
-    if (!this.usePagination) {
-      return 1; // Solo una página si la paginación está deshabilitada
+  totalPages = computed(() => {
+    if (!this.usePagination()) {
+      return 1;
     }
 
-    const filteredOptions = this.getFilteredOptions();
-    return Math.ceil(filteredOptions.length / this.itemsPerPage);
+    const filtered = this.filteredOptions();
+    const perPage = this.itemsPerPage();
+    return Math.ceil(filtered.length / perPage);
+  });
+
+  hasSelectedValues = computed(() => {
+    const val = this._value();
+    if (this.multiple()) {
+      return val && val.length > 0;
+    }
+    return !!val;
+  });
+
+  showCustomOption = computed(() => {
+    const term = this.searchTerm();
+    const opts = this.options();
+    return (
+      this.allowCustomEntries() &&
+      term !== '' &&
+      !opts.some((o) => o.value === term)
+    );
+  });
+
+  // Callbacks para ControlValueAccessor
+  private onChange = (_: any) => {};
+  private onTouched = () => {};
+
+  constructor(
+    private elementRef: ElementRef,
+    private themeService: ThemeService
+  ) {
+    // Effect para inicializar valor
+    effect(() => {
+      const isMultiple = this.multiple();
+      if (this._value() === null || this._value() === undefined) {
+        this._value.set(isMultiple ? [] : null);
+      }
+    });
+
+    // Effect para resetear paginación cuando cambian las opciones
+    effect(() => {
+      this.options(); // Track options changes
+      this.currentPage.set(1);
+
+      // Solo resetear searchTerm si no queremos preservarlo o si no se ha modificado aún
+      if (!this.preserveSearchOnLoad() || !this.searchTermChanged()) {
+        this.searchTerm.set('');
+      }
+    });
+  }
+
+  normalizeText(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   }
 
   handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && this.isSearchable) {
+    if (event.key === 'Enter' && this.isSearchable()) {
       event.preventDefault();
-      const filteredOptions = this.getFilteredOptions();
-      if (filteredOptions.length > 0) {
-        this.selectOption(filteredOptions[0]);
+      const filtered = this.filteredOptions();
+      if (filtered.length > 0) {
+        this.selectOption(filtered[0]);
       }
     }
   }
 
-  hasSelectedValues(): boolean {
-    if (this.multiple) {
-      return this.value && this.value.length > 0;
-    } else {
-      return !!this.value;
-    }
-  }
-
   isOptionDisabled(option: SelectOption): boolean {
-    if (!this.validCombinations || !this.multiple) {
+    const validCombos = this.validCombinations();
+    if (!validCombos || !this.multiple()) {
       return false;
     }
 
-    const currentSelection = Array.isArray(this.value) ? this.value : [];
+    const currentSelection = Array.isArray(this._value()) ? this._value() : [];
 
     if (currentSelection.length === 0) {
       return false;
@@ -237,27 +281,35 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
 
     const hypotheticalSelection = [...currentSelection, option.value];
 
-    return !this.validCombinations.some((combination) => {
+    return !validCombos.some((combination) => {
       const allSelected = hypotheticalSelection.every((selected) =>
         combination.includes(selected)
       );
-
       const withinLimit = hypotheticalSelection.length <= combination.length;
-
       return allSelected && withinLimit;
     });
   }
 
   isSelected(option: SelectOption): boolean {
-    if (this.multiple) {
-      return Array.isArray(this.value) && this.value.includes(option.value);
+    const val = this._value();
+    if (this.multiple()) {
+      return Array.isArray(val) && val.includes(option.value);
     }
-    return this.value === option.value;
+    return val === option.value;
   }
 
   nextPage() {
-    if (this.currentPage < this.getTotalPages()) {
-      this.currentPage++;
+    const total = this.totalPages();
+    const current = this.currentPage();
+    if (current < total) {
+      this.currentPage.set(current + 1);
+    }
+  }
+
+  previousPage() {
+    const current = this.currentPage();
+    if (current > 1) {
+      this.currentPage.set(current - 1);
     }
   }
 
@@ -265,137 +317,114 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   onClickOutside(event: MouseEvent): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
     if (!clickedInside) {
-      this.isOpen = false;
+      this.isOpen.set(false);
     }
   }
 
   onCustomOptionClick() {
+    const term = this.searchTerm();
     const customOption: SelectOption = {
-      label: this.searchTerm,
-      value: this.searchTerm,
+      label: term,
+      value: term,
     };
 
-    this.value = customOption.value;
-    this.onChange(this.value);
-    this.selectionChange.emit(this.value);
-    this.isOpen = false;
-    this.searchTerm = '';
+    this._value.set(customOption.value);
+    this.onChange(customOption.value);
+    this.selectionChange.emit(customOption.value);
+    this.isOpen.set(false);
+    this.searchTerm.set('');
   }
 
   onInputChange(event: Event) {
-    const previousSearch = this.searchTerm;
+    const previousSearch = this.searchTerm();
     const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value;
-    this.searchTermChanged = true;
+    this.searchTerm.set(target.value);
+    this.searchTermChanged.set(true);
 
-    if (previousSearch !== this.searchTerm) {
-      this.search.emit(this.searchTerm);
+    if (previousSearch !== this.searchTerm()) {
+      this.search.emit(this.searchTerm());
+
       // Si permitimos entradas personalizadas, actualizar el valor
-      if (this.allowCustomEntries && this.searchTerm) {
-        this.value = this.searchTerm;
-        this.onChange(this.value);
-        this.selectionChange.emit(this.value);
+      if (this.allowCustomEntries() && this.searchTerm()) {
+        this._value.set(this.searchTerm());
+        this.onChange(this.searchTerm());
+        this.selectionChange.emit(this.searchTerm());
       }
     }
 
-    this.currentPage = 1;
+    this.currentPage.set(1);
   }
 
   onOptionClick(option: SelectOption) {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
     // Si es una opción custom
-    if (this.allowCustomEntries && option.value === this.searchTerm) {
-      // Emitir el objeto completo de la opción en lugar del string
+    if (this.allowCustomEntries() && option.value === this.searchTerm()) {
       const customOption: SelectOption = {
-        label: this.searchTerm,
-        value: this.searchTerm,
+        label: this.searchTerm(),
+        value: this.searchTerm(),
       };
 
-      this.value = customOption.value;
-      this.onChange(this.value);
-      this.selectionChange.emit(this.value);
-      this.isOpen = false;
-
-      // Limpiar el searchTerm después de seleccionar
-      this.searchTerm = '';
+      this._value.set(customOption.value);
+      this.onChange(customOption.value);
+      this.selectionChange.emit(customOption.value);
+      this.isOpen.set(false);
+      this.searchTerm.set('');
       return;
     }
 
     // Lógica normal de selección
-    if (this.multiple) {
+    if (this.multiple()) {
       this.toggleOption(option);
     } else {
       this.selectOption(option);
     }
   }
 
-  previousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  registerOnChange(fn: any): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: any): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
   selectOption(option: SelectOption) {
-    if (this.multiple) {
+    if (this.multiple()) {
       this.toggleOption(option);
       return;
     }
-    this.value = option.value;
-    this.onChange(this.value);
-    this.onTouched(); // Agregar esta línea
-    this.selectionChange.emit(this.value);
-    this.isOpen = false;
-  }
-
-  showCustomOption(): boolean {
-    return (
-      this.allowCustomEntries &&
-      this.searchTerm !== '' &&
-      !this.options.some((o) => o.value === this.searchTerm)
-    );
+    this._value.set(option.value);
+    this.onChange(option.value);
+    this.onTouched();
+    this.selectionChange.emit(option.value);
+    this.isOpen.set(false);
   }
 
   toggleOption(option: SelectOption) {
     if (this.isOptionDisabled(option)) return;
+    if (!this.multiple()) return;
 
-    if (!this.multiple) return;
-
-    if (!Array.isArray(this.value)) {
-      this.value = [];
+    let currentValue = this._value();
+    if (!Array.isArray(currentValue)) {
+      currentValue = [];
     }
 
-    const index = this.value.indexOf(option.value);
+    const index = currentValue.indexOf(option.value);
+    let newValue: any[];
+
     if (index === -1) {
-      this.value = [...this.value, option.value];
+      newValue = [...currentValue, option.value];
     } else {
-      this.value = this.value.filter((v: any) => v !== option.value);
+      newValue = currentValue.filter((v: any) => v !== option.value);
     }
 
-    this.onChange(this.value);
-    this.onTouched(); // Agregar esta línea
-    this.selectionChange.emit(this.value);
+    this._value.set(newValue);
+    this.onChange(newValue);
+    this.onTouched();
+    this.selectionChange.emit(newValue);
   }
 
   toggleDropdown() {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
-    this.isOpen = !this.isOpen;
-    if (this.isOpen && this.isSearchable) {
+    this.isOpen.update((v) => !v);
+
+    if (this.isOpen() && this.isSearchable()) {
       setTimeout(() => {
-        this.filterInput?.nativeElement.focus();
+        this.filterInput()?.nativeElement?.focus();
       });
     }
     this.onTouched();
@@ -405,6 +434,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
     return option.value;
   }
 
+  // ControlValueAccessor methods
   writeValue(value: any): void {
     if (
       value === null ||
@@ -412,10 +442,17 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       value === '' ||
       (Array.isArray(value) && value.length === 0)
     ) {
-      this.value = this.multiple ? [] : null;
+      this._value.set(this.multiple() ? [] : null);
     } else {
-      this.value = value;
+      this._value.set(value);
     }
-    this.onChange(this.value);
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
   }
 }

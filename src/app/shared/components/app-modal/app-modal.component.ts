@@ -3,153 +3,152 @@ import {
   ViewChild,
   ViewContainerRef,
   ComponentRef,
-  OnDestroy,
   inject,
+  effect,
+  ChangeDetectionStrategy,
+  signal,
+  DestroyRef,
+  computed,
 } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { ModalService, ModalConfig } from '../../services/system/modal.service';
-import { DynamicComponent } from '../../interfaces/dynamic.interface';
 import { NotificationService } from '../../services/system/notification.service';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-modal',
   templateUrl: './app-modal.component.html',
   standalone: true,
   imports: [DialogModule, ButtonModule, CommonModule, TranslocoModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ModalComponent implements OnDestroy {
+export class ModalComponent {
+  // Servicios
   private transloco = inject(TranslocoService);
-  
+  private notificationSrv = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
+  modalSrv = inject(ModalService);
+
   @ViewChild('dynamicContent', { read: ViewContainerRef })
   container!: ViewContainerRef;
-  
-  visible = false;
-  title = '';
-  isFormValid = false;
+
+  // Signals para estado
+  visible = signal(false);
+  title = signal('');
+  currentConfig = signal<ModalConfig | null>(null);
   componentRef: ComponentRef<any> | null = null;
-  loading = false;
-  currentConfig: ModalConfig | null = null;
-  isProcessing = false; // Nueva propiedad para controlar el estado de procesamiento
 
-  constructor(
-    private modalService: ModalService,
-    private notificationSrv: NotificationService
-  ) {
-    this.modalService.close$.subscribe(() => {
-      this.closeModal();
+  isFormValid = signal(false);
+  loading = signal(false);
+  isProcessing = signal(false);
+
+  // Computed para clases CSS
+  modalButtonsVisible = computed(() => {
+    const config = this.currentConfig();
+    return config?.showButtons ?? true;
+  });
+
+  constructor() {
+    // Effect para manejar cambios en la configuración del modal
+    effect(() => {
+      const config = this.modalSrv.modalConfig();
+      if (config) {
+        this.title.set(config.title);
+        this.currentConfig.set(config);
+        this.loadComponent(config);
+        this.visible.set(true);
+        this.isProcessing.set(false);
+        this.loading.set(false);
+      } else {
+        this.visible.set(false);
+      }
     });
   }
 
-  ngAfterViewInit() {
-    this.modalService.modalConfig$.subscribe((config) => {
-      this.title = config.title;
-      this.currentConfig = config;
-      this.loadComponent(config);
-      this.visible = true;
-      this.isProcessing = false; // Resetear el estado al abrir un nuevo modal
-    });
-  }
-
-  loadComponent(config: ModalConfig) {
+  private loadComponent(config: ModalConfig) {
+    // Limpiar componente anterior
     if (this.componentRef) {
       this.componentRef.destroy();
+      this.componentRef = null;
     }
+
     this.container.clear();
-    this.componentRef = this.container.createComponent(config.component);
-    
-    if (config.data) {
-      for (const key in config.data) {
-        if (config.data.hasOwnProperty(key)) {
-          this.componentRef.instance[key] = config.data[key];
-        }
+
+    try {
+      this.componentRef = this.container.createComponent(config.component);
+
+      // Pasar datos de entrada al componente
+      if (config.data) {
+        Object.keys(config.data).forEach((key) => {
+          this.componentRef?.setInput(key, config.data[key]);
+        });
       }
-    }
 
-    // Escuchar el estado del formulario
-    if (this.componentRef.instance.formValid) {
-      this.componentRef.instance.formValid.subscribe((isValid: boolean) => {
-        this.isFormValid = isValid;
-      });
-    }
+      const instance = this.componentRef.instance;
 
-    // Escuchar el evento de éxito del formulario
-    if (this.componentRef.instance.submitSuccess) {
-      this.componentRef.instance.submitSuccess.subscribe(() => {
-        this.isProcessing = false; // Resetear el estado cuando termine exitosamente
-        this.closeModal(); // Cerrar el modal solo si el envío fue exitoso
-      });
-    }
+      // Suscripciones a los outputs del componente hijo
+      instance.formValid?.subscribe((valid: boolean) =>
+        this.isFormValid.set(valid)
+      );
 
-    // Escuchar errores del formulario (opcional)
-    if (this.componentRef.instance.submitError) {
-      this.componentRef.instance.submitError.subscribe(() => {
-        this.isProcessing = false; // Resetear el estado en caso de error
-        this.loading = false;
+      instance.submitSuccess?.subscribe(() => {
+        this.handleSubmitSuccess();
       });
+
+      instance.submitError?.subscribe(() => {
+        this.handleSubmitError();
+      });
+    } catch (error) {
+      console.error('Error al cargar el componente modal:', error);
+      this.visible.set(false);
     }
+  }
+
+  private handleSubmitSuccess() {
+    this.isProcessing.set(false);
+    this.loading.set(false);
+    this.modalSrv.close();
+  }
+
+  private handleSubmitError() {
+    this.isProcessing.set(false);
+    this.loading.set(false);
   }
 
   closeModal() {
-    this.visible = false;
-    this.isProcessing = false; // Resetear el estado al cerrar
-    this.loading = false;
-    
+    this.visible.set(false);
+    this.isProcessing.set(false);
+    this.loading.set(false);
+
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null;
     }
   }
 
-  ngOnDestroy() {
-    if (this.componentRef) {
-      this.componentRef.destroy();
-    }
-  }
-
   onAccept() {
-    // Prevenir múltiples clics
-    if (this.isProcessing) {
-      return;
-    }
+    if (this.isProcessing() || !this.componentRef) return;
 
-    if (
-      !this.componentRef ||
-      !this.isDynamicComponent(this.componentRef.instance)
-    ) {
-      return;
-    }
+    const instance = this.componentRef.instance;
 
-    // Marcar todos los campos como tocados
-    this.componentRef.instance['form'].markAllAsTouched();
-    
-    // Verificar si el formulario es válido
-    if (!this.componentRef.instance['form'].valid) {
-      this.notificationSrv.addNotification(
-        this.transloco.translate('notifications.products.error.formInvalid'),
-        'warning'
+    // Marcar todos los campos como tocados para mostrar errores
+    instance.form?.markAllAsTouched();
+
+    if (!instance.form?.valid) {
+      const translated = this.transloco.translate(
+        'notifications.products.error.formInvalid'
       );
+      this.notificationSrv.addNotification(translated, 'warning');
       return;
     }
 
-    // Activar estados de carga y procesamiento
-    this.isProcessing = true;
-    this.loading = true;
+    this.isProcessing.set(true);
+    this.loading.set(true);
 
-    try {
-      // Llamar al método onSubmit del componente dinámico
-      this.componentRef.instance.onSubmit();
-    } catch (error) {
-      // En caso de error sincrónico, resetear los estados
-      this.isProcessing = false;
-      this.loading = false;
-      console.error('Error en onSubmit:', error);
-    }
-  }
-
-  private isDynamicComponent(instance: any): instance is DynamicComponent {
-    return typeof instance?.onSubmit === 'function';
+    // Llamar al método onSubmit del componente hijo
+    instance.onSubmit?.();
   }
 }

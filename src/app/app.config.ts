@@ -1,6 +1,6 @@
 import {
   ApplicationConfig,
-  provideZoneChangeDetection,
+  provideZonelessChangeDetection,
   isDevMode,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -23,7 +23,7 @@ import { provideTransloco } from '@jsverse/transloco';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor]), withFetch()),
     provideClientHydration(withEventReplay()),

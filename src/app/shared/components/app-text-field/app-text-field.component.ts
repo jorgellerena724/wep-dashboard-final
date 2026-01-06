@@ -1,24 +1,32 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  Input,
+  input,
   forwardRef,
-  OnInit,
-  AfterViewInit,
-  ChangeDetectorRef,
+  signal,
+  computed,
+  effect,
+  viewChild,
+  ElementRef,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  inject,
 } from '@angular/core';
 import {
   ControlValueAccessor,
   FormGroup,
+  FormControl,
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-text-field',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './app-text-field.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -27,91 +35,138 @@ import {
     },
   ],
 })
-export class TextFieldComponent
-  implements ControlValueAccessor, OnInit, AfterViewInit
-{
-  @Input() id: string = '';
-  @Input() formatCard: boolean = false;
-  @Input() preventNegative: boolean = false;
-  @Input() label: string = '';
-  @Input() type: string = 'text';
-  @Input() numbersOnly: boolean = false;
-  @Input() allowDecimals: boolean = false;
-  @Input() maxLength: number | undefined; // Límite de caracteres
-  @Input() placeholder: string = '';
-  @Input() errorMessages: { [key: string]: string } = {};
-  @Input() formGroup!: FormGroup;
-  @Input() control: any;
-  @Input() disabled = false;
-  @Input() errorMessage: string = '';
-  @Input() isTextArea: boolean = false; // Nueva propiedad para comportarse como textarea
-  @Input() textAreaHeight: string = 'h-28'; // Altura por defecto del textarea
+export class TextFieldComponent implements ControlValueAccessor {
+  // Inputs usando signal inputs
+  id = input<string>('');
+  formatCard = input<boolean>(false);
+  preventNegative = input<boolean>(false);
+  label = input<string>('');
+  type = input<string>('text');
+  numbersOnly = input<boolean>(false);
+  allowDecimals = input<boolean>(false);
+  maxLength = input<number | undefined>(undefined);
+  placeholder = input<string>('');
+  errorMessages = input<{ [key: string]: string }>({});
+  formGroup = input<FormGroup | undefined>(undefined);
+  control = input<FormControl | undefined>(undefined);
+  disabled = input<boolean>(false);
+  errorMessage = input<string>('');
+  isTextArea = input<boolean>(false);
+  textAreaHeight = input<string>('h-28');
 
-  value: any = '';
-  showPassword: boolean = false;
-  hadError: boolean = false; // Propiedad para rastrear si hubo un error previo
-  private onChange: (value: any) => void = () => {};
-  private onTouched: () => void = () => {};
+  // ViewChild para acceder a los elementos del DOM
+  inputElement = viewChild<ElementRef<HTMLInputElement>>('input');
+  textareaElement = viewChild<ElementRef<HTMLTextAreaElement>>('textarea');
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  // Signals internos
+  private _value = signal<any>('');
+  showPassword = signal<boolean>(false);
+  hadError = signal<boolean>(false);
+  private errorTracker = signal<number>(0);
 
-  ngOnInit(): void {
-    // Sincronizar el estado inicial
-    if (this.control && this.disabled) {
-      // Deferimos la actualización del control para evitar ExpressionChangedAfterItHasBeenCheckedError
-      Promise.resolve().then(() => {
-        this.control.disable();
-      });
+  // Computed signals
+  value = computed(() => this._value());
+
+  actualControl = computed(() => {
+    const ctrl = this.control();
+    if (ctrl) return ctrl;
+
+    const fg = this.formGroup();
+    const lbl = this.label();
+    if (fg && lbl) {
+      return fg.get(lbl) as FormControl;
+    }
+    return undefined;
+  });
+
+  shouldShowError = computed(() => {
+    this.errorTracker();
+
+    const ctrl = this.actualControl();
+    return ctrl?.invalid && (ctrl?.dirty || ctrl?.touched);
+  });
+
+  wasFixedError = computed(() => {
+    this.errorTracker();
+
+    const ctrl = this.actualControl();
+    return this.hadError() && ctrl?.valid && ctrl?.touched;
+  });
+
+  getErrorMessages = computed(() => {
+    this.errorTracker();
+
+    const customError = this.errorMessage();
+    if (customError) {
+      return [customError];
     }
 
-    // Verificar si el control ya tiene errores al iniciar
-    if (this.control?.invalid && this.control?.touched) {
-      this.hadError = true;
-    }
+    const ctrl = this.actualControl();
+    if (!ctrl?.errors) return [];
 
-    // Si es un textarea, asegurarse de que el tipo sea texto
-    if (this.isTextArea) {
-      this.type = 'text';
-    }
-  }
-
-  ngAfterViewInit(): void {
-    // Aseguramos que los cambios están sincronizados
-    this.cdr.detectChanges();
-  }
-
-  getErrorMessages(): string[] {
-    if (this.errorMessage) {
-      return [this.errorMessage];
-    }
-
-    if (!this.control?.errors) return [];
+    const customErrors = this.errorMessages();
     const defaultMessages: { [key: string]: string } = {
       required: 'Este campo es requerido',
       email: 'Email inválido',
-      minlength: `Mínimo ${this.control.errors?.['minlength']?.requiredLength} caracteres`,
-      maxlength: `Máximo ${this.control.errors?.['maxlength']?.requiredLength} caracteres`,
+      minlength: `Mínimo ${ctrl.errors?.['minlength']?.requiredLength} caracteres`,
+      maxlength: `Máximo ${ctrl.errors?.['maxlength']?.requiredLength} caracteres`,
       pattern: 'Formato inválido',
       passwordMismatch: 'Las contraseñas no coinciden',
     };
-    return Object.keys(this.control.errors).map((errorKey) => {
+
+    return Object.keys(ctrl.errors).map((errorKey) => {
       return (
-        this.errorMessages[errorKey] ||
-        defaultMessages[errorKey] ||
-        'Campo inválido'
+        customErrors[errorKey] || defaultMessages[errorKey] || 'Campo inválido'
       );
     });
-  }
+  });
 
-  get shouldShowError(): boolean {
-    return (
-      this.control?.invalid && (this.control?.dirty || this.control?.touched)
-    );
-  }
+  effectiveType = computed(() => {
+    if (this.isTextArea()) return 'text';
+    if (this.type() === 'password' && this.showPassword()) return 'text';
+    return this.type();
+  });
 
-  // Propiedad para controlar si debemos mostrar el borde verde
-  get wasFixedError(): boolean {
-    return this.hadError && this.control?.valid && this.control?.touched;
+  // Callbacks para ControlValueAccessor
+  private onChange: (value: any) => void = () => {};
+  private onTouched: () => void = () => {};
+  private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    // Effect para sincronizar el estado disabled
+    effect(() => {
+      const ctrl = this.actualControl();
+      const isDisabled = this.disabled();
+
+      if (ctrl && isDisabled) {
+        Promise.resolve().then(() => {
+          ctrl.disable();
+        });
+      }
+    });
+
+    // Effect para verificar errores iniciales y suscribirse a cambios
+    effect(() => {
+      const ctrl = this.actualControl();
+      if (!ctrl) return;
+
+      // Verificar estado inicial
+      if (ctrl.invalid && ctrl.touched) {
+        this.hadError.set(true);
+      }
+
+      // Suscribirse a cambios de estado
+      ctrl.statusChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          this.errorTracker.update((v) => v + 1);
+
+          // Actualizar hadError
+          if (ctrl.invalid && ctrl.touched) {
+            this.hadError.set(true);
+          }
+        });
+    });
   }
 
   numberValidation(event: KeyboardEvent) {
@@ -126,11 +181,10 @@ export class TextFieldComponent
     ];
 
     // Permitir punto y coma si allowDecimals está activado
-    if (this.allowDecimals) {
+    if (this.allowDecimals()) {
       allowedKeys.push('.', ',');
     }
 
-    // Variables de tu lógica original
     const isDecimal = event.key === '.' || event.key === ',';
     const isNumber = !isNaN(Number(event.key));
 
@@ -177,14 +231,15 @@ export class TextFieldComponent
     this.onTouched();
 
     // Actualizar hadError si hay un error después de tocar el campo
-    if (this.control?.invalid && this.control?.touched) {
-      this.hadError = true;
+    const ctrl = this.actualControl();
+    if (ctrl?.invalid && ctrl?.touched) {
+      this.hadError.set(true);
     }
   }
 
   onCardInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/[^0-9]/g, ''); // Eliminar caracteres no numéricos
+    let value = input.value.replace(/[^0-9]/g, '');
 
     // Limitar a 16 dígitos
     if (value.length > 16) {
@@ -209,7 +264,7 @@ export class TextFieldComponent
     const input = event.target as HTMLInputElement | HTMLTextAreaElement;
     let newValue = input.value;
 
-    if (this.allowDecimals) {
+    if (this.allowDecimals()) {
       // Reemplazar comas por puntos para consistencia interna
       newValue = newValue.replace(/,/g, '.');
 
@@ -225,25 +280,59 @@ export class TextFieldComponent
       }
     }
 
-    if (this.numbersOnly) {
+    if (this.numbersOnly()) {
       newValue = newValue.replace(/[^0-9]/g, '');
     }
 
-    if (this.maxLength && newValue.length > this.maxLength) {
-      newValue = newValue.substring(0, this.maxLength);
-      input.value = newValue; // Update the visible input
+    const maxLen = this.maxLength();
+    if (maxLen && newValue.length > maxLen) {
+      newValue = newValue.substring(0, maxLen);
+      input.value = newValue;
 
-      // Important: Manually trigger change detection to update validation
+      const ctrl = this.actualControl();
       setTimeout(() => {
-        this.control.updateValueAndValidity();
-        this.cdr.detectChanges();
+        ctrl?.updateValueAndValidity();
       });
     }
 
-    if (this.formatCard) {
+    if (this.formatCard()) {
       this.onCardInput(event);
     } else {
       this.onChange(newValue);
+    }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((v) => !v);
+  }
+
+  // ControlValueAccessor methods
+  writeValue(value: any): void {
+    let processedValue = value;
+
+    if (this.numbersOnly() && value) {
+      processedValue = value.toString().replace(/[^0-9]/g, '');
+    }
+
+    const maxLen = this.maxLength();
+    if (maxLen && processedValue?.length > maxLen) {
+      processedValue = processedValue.substring(0, maxLen);
+    }
+
+    if (this.allowDecimals() && value) {
+      processedValue = String(value).replace(/,/g, '.');
+    }
+
+    if (this.formatCard() && processedValue) {
+      const cleaned = processedValue.replace(/[^0-9]/g, '');
+      let formatted = '';
+      for (let i = 0; i < cleaned.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += '-';
+        formatted += cleaned[i];
+      }
+      this._value.set(formatted);
+    } else {
+      this._value.set(processedValue);
     }
   }
 
@@ -253,42 +342,5 @@ export class TextFieldComponent
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  writeValue(value: any): void {
-    let processedValue = value;
-
-    if (this.numbersOnly && value) {
-      processedValue = value.toString().replace(/[^0-9]/g, '');
-    }
-
-    if (this.maxLength && processedValue?.length > this.maxLength) {
-      processedValue = processedValue.substring(0, this.maxLength);
-    }
-
-    if (this.allowDecimals && value) {
-      // Convertir a string y reemplazar comas por puntos
-      processedValue = String(value).replace(/,/g, '.');
-    }
-
-    if (this.formatCard && processedValue) {
-      const cleaned = processedValue.replace(/[^0-9]/g, '');
-      let formatted = '';
-      for (let i = 0; i < cleaned.length; i++) {
-        if (i > 0 && i % 4 === 0) formatted += '-';
-        formatted += cleaned[i];
-      }
-      this.value = formatted;
-    } else {
-      this.value = processedValue;
-    }
   }
 }

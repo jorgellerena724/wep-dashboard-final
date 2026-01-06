@@ -1,17 +1,23 @@
+<!-- app.component.html -->
 <app-modal></app-modal>
 <app-notification></app-notification>
-@if (showLayout) {
-  @defer {
-  <div class="flex flex-col min-h-screen relative">
-    <app-sidebar></app-sidebar>
-    <main [ngClass]="{'ml-0': isMobile, 'ml-20': isCollapsed && !isMobile, 'ml-64': !isCollapsed && !isMobile}" class="flex-1 p-4 transition-all duration-300 overflow-x-hidden">
-      <div class="h-full w-full mx-auto lg:max-w-[90%] xl:max-w-[95%]">
-        <router-outlet></router-outlet>
-      </div>
-    </main>
-    <app-footer [ngClass]="{'ml-0': isMobile, 'ml-20': isCollapsed && !isMobile, 'ml-64': !isCollapsed && !isMobile}" class="transition-all duration-300"></app-footer>
-  </div>
-}
-} @else {
-  <router-outlet></router-outlet>
+
+@if (showLayout()) { @defer {
+<div class="flex flex-col min-h-screen relative">
+  <app-sidebar></app-sidebar>
+  <main
+    [ngClass]="mainClasses()"
+    class="flex-1 p-4 transition-all duration-300 overflow-x-hidden"
+  >
+    <div class="h-full w-full mx-auto lg:max-w-[90%] xl:max-w-[95%]">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+  <app-footer
+    [ngClass]="footerClasses()"
+    class="transition-all duration-300"
+  ></app-footer>
+</div>
+} } @else {
+<router-outlet></router-outlet>
 }

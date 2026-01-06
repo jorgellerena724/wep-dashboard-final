@@ -4,35 +4,43 @@
   <!-- Sidebar (Aside) -->
   <aside
     [ngClass]="[
-      isMobileView ? (showSidebar ? 'translate-x-0' : '-translate-x-full') : '',
-      sidebarCollapsed && !isMobileView ? collapsedWidth : expandedWidth
+      isMobileView()
+        ? showSidebar()
+          ? 'translate-x-0'
+          : '-translate-x-full'
+        : '',
+      sidebarCollapsed() && !isMobileView() ? collapsedWidth() : expandedWidth()
     ]"
     class="bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.2),_0_0_40px_rgba(0,0,0,0.15),_0_0_60px_rgba(0,0,0,0.1),_0_0_80px_rgba(0,0,0,0.05)] text-gray-300 transition-all duration-300 ease-in-out h-screen fixed z-20 flex flex-col"
-    >
+  >
     <!-- Toggle button -->
-    @if (showSidebar) {
-      <div
-        (click)="toggleSidebar()"
-        class="absolute -right-4 top-0 bg-gray-800 rounded-full w-8 h-8 flex justify-center items-center hover:bg-gray-700 hover:text-white transition-colors duration-300 cursor-pointer border border-white"
-        [pTooltip]="sidebarCollapsed && !isMobileView ? ('sidebar.expand' | transloco) : ('sidebar.collapse' | transloco)"
-        tooltipPosition="right"
-        >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          [ngClass]="{ 'rotate-180': sidebarCollapsed && !isMobileView }"
-          class="transition-transform duration-300"
-          >
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </div>
+    @if (showSidebar()) {
+    <div
+      (click)="toggleSidebar()"
+      class="absolute -right-4 top-0 bg-gray-800 rounded-full w-8 h-8 flex justify-center items-center hover:bg-gray-700 hover:text-white transition-colors duration-300 cursor-pointer border border-white"
+      [pTooltip]="
+        sidebarCollapsed() && !isMobileView()
+          ? ('sidebar.expand' | transloco)
+          : ('sidebar.collapse' | transloco)
+      "
+      tooltipPosition="right"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        [ngClass]="{ 'rotate-180': sidebarCollapsed() && !isMobileView() }"
+        class="transition-transform duration-300"
+      >
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </div>
     }
 
     <!-- Scrollable Sidebar content -->
@@ -40,69 +48,14 @@
       <div class="p-4">
         <!-- Menu items -->
         <nav>
+          @for (item of visibleMenuItems(); track item.label) {
           <app-sidebar-menu-item
-            [item]="menuItems[0]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
+            [item]="item"
+            [sidebarCollapsed]="sidebarCollapsed()"
+            [isMobileView]="isMobileView()"
             [router]="router"
             (closeMobileSidebar)="closeMobileSidebar()"
           ></app-sidebar-menu-item>
-          <app-sidebar-menu-item
-            [item]="menuItems[1]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          <app-sidebar-menu-item
-            [item]="menuItems[2]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          <app-sidebar-menu-item
-            [item]="menuItems[3]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          <app-sidebar-menu-item
-            [item]="menuItems[4]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          <app-sidebar-menu-item
-            [item]="menuItems[5]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          <app-sidebar-menu-item
-            [item]="menuItems[6]"
-            [sidebarCollapsed]="sidebarCollapsed"
-            [isMobileView]="isMobileView"
-            [router]="router"
-            (closeMobileSidebar)="closeMobileSidebar()"
-          ></app-sidebar-menu-item>
-
-          @if (showUsersMenu) {
-            <app-sidebar-menu-item
-              [item]="menuItems[7]"
-              [sidebarCollapsed]="sidebarCollapsed"
-              [isMobileView]="isMobileView"
-              [router]="router"
-              (closeMobileSidebar)="closeMobileSidebar()"
-            ></app-sidebar-menu-item>
           }
 
           <div class="border-t border-gray-800 p-4 mt-auto mb-4">

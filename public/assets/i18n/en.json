@@ -219,6 +219,37 @@
         "formInvalid": "Check the form fields.",
         "duplicateName": "A category with this name already exists."
       }
+    },
+    "chatbot_config": {
+      "success": {
+        "created": "Chatbot configuration created successfully",
+        "updated": "Chatbot configuration updated successfully",
+        "deleted": "Chatbot configuration deleted successfully"
+      },
+      "error": {
+        "formInvalid": "Please fill in all required fields",
+        "create": "Error creating chatbot configuration",
+        "update": "Error updating chatbot configuration",
+        "delete": "Error deleting chatbot configuration",
+        "load": "Error loading chatbot configurations",
+        "duplicateName": "A model with this name already exists.",
+        "cannotDelete": "The model cannot be deleted; it is being used in a configuration."
+      }
+    },
+    "chatbot_model": {
+      "success": {
+        "created": "Chatbot configuration created successfully",
+        "updated": "Chatbot configuration updated successfully",
+        "deleted": "Chatbot configuration deleted successfully"
+      },
+      "error": {
+        "formInvalid": "Please fill in all required fields",
+        "create": "Error creating chatbot configuration",
+        "update": "Error updating chatbot configuration",
+        "delete": "Error deleting chatbot configuration",
+        "load": "Error loading chatbot configurations",
+        "duplicateName": "A model with this name already exists."
+      }
     }
   },
   "language": {
@@ -238,16 +269,18 @@
   "login": {
     "email": {
       "title": "Email",
-      "placeholder": "Write your email here",
-      "required": "The email is required."
+      "placeholder": "Email",
+      "required": "The email is required.",
+      "Invalid": "The email address has an invalid format."
     },
     "password": {
       "title": "Password",
-      "placeholder": "Write your password here",
+      "placeholder": "Password",
       "required": "The password is required."
     },
     "loading": "Accessing...",
-    "load": "Login →"
+    "load": "Login →",
+    "notfound": "No user was found with the credentials provided."
   },
   "navbar": {
     "title": "Professional Business Website",
@@ -303,6 +336,9 @@
     "news": "News",
     "about": "About",
     "company": "Company",
+    "chatbot": "Chatbot",
+    "chatbot_models": "Manage AI models",
+    "chatbot_config": "Manage chatbot configuration",
     "manager": "Managers",
     "manager-category": "Categories",
     "review": "Reviews",
@@ -350,6 +386,69 @@
     "footer": "Real-time changes without technical knowledge"
   },
   "components": {
+    "chatbot_config": {
+      "create": {
+        "title": "Register Chatbot Configuration",
+        "fields": {
+          "user": {
+            "title": "User",
+            "required": "User is required",
+            "exists": "This user already has a chatbot configuration"
+          },
+          "apikey": {
+            "title": "API Key",
+            "required": "API key is required",
+            "minlength": "API key must be at least 20 characters"
+          },
+          "model": {
+            "title": "AI Model",
+            "required": "Model is required"
+          },
+          "immediate": {
+            "title": "System Message",
+            "required": "System message is required",
+            "minlength": "Message must be at least 10 characters"
+          }
+        }
+      }
+    },
+    "chatbot_model": {
+      "list": {
+        "title": "AI Models",
+        "table": {
+          "name": "Model Name",
+          "provider": "Provider"
+        }
+      },
+      "create": {
+        "title": "Register AI Model",
+        "fields": {
+          "name": {
+            "title": "Model Name",
+            "required": "AI Model is required",
+            "minlength": "Name must be at least 3 characters."
+          },
+          "provider": {
+            "title": "Provider",
+            "required": "Provider name is required"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modify AI Model",
+        "fields": {
+          "name": {
+            "title": "Model Name",
+            "required": "AI model is required",
+            "minlength": "Name must be at least 3 characters."
+          },
+          "provider": {
+            "title": "Provider",
+            "required": "Provider name is required"
+          }
+        }
+      }
+    },
     "header": {
       "list": {
         "title": "Header",

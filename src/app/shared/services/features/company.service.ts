@@ -11,7 +11,6 @@ import { AuthService } from '../../../core/services/auth.service';
 export class CompanyService {
   private apiUrl = environment.api;
   private imgUrl = environment.api_img;
-  private use_minio = environment.use_minio;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -24,11 +23,7 @@ export class CompanyService {
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = this.use_minio ? `${
-      this.imgUrl
-        }${this.authService.getClient()}/${name}?no-cache=${timestamp}` : `${
-      this.imgUrl
-        }${name}?no-cache=${timestamp}`;
+    const url = `${this.imgUrl}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });

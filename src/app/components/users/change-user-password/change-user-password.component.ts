@@ -1,41 +1,78 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  output,
+  signal,
+  computed,
+  effect,
+  untracked,
+  ChangeDetectionStrategy,
+  DestroyRef,
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormControl,
 } from '@angular/forms';
-
 import { DynamicComponent } from '../../../shared/interfaces/dynamic.interface';
 import { UserService } from '../../../shared/services/users/user.service';
 import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { passwordValidator } from '../../../core/validators/password.validator';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-change-user-password',
   templateUrl: './change-user-password.component.html',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    TextFieldComponent,
-    TranslocoModule
-],
+  imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChangeUserPasswordComponent implements DynamicComponent {
+  // Servicios
+  private fb = inject(FormBuilder);
+  private userSrv = inject(UserService);
+  private notificationSrv = inject(NotificationService);
   private transloco = inject(TranslocoService);
-  @Input() initialData?: any;
-  @Output() formValid = new EventEmitter<boolean>();
+  private destroyRef = inject(DestroyRef);
 
+  // Signals para inputs/outputs
+  initialData = input<any>();
+  formValid = output<boolean>();
+  submitSuccess = output<void>();
+  submitError = output<void>();
+
+  // Signals para estado
+  uploading = signal<boolean>(false);
+
+  // Formulario
   form: FormGroup;
-  @Output() submitSuccess = new EventEmitter<void>();
 
-  constructor(
-    private fb: FormBuilder,
-    private userSrv: UserService,
-    private notificationSrv: NotificationService
-  ) {
+  // Computed para validación
+  isFormInvalid = computed(() => this.form.invalid || this.uploading());
+
+  // Computed para traducciones de error
+  formInvalidMessage = computed(() =>
+    this.transloco.translate('notifications.users.error.formInvalid')
+  );
+
+  passwordChangedMessage = computed(() =>
+    this.transloco.translate('notifications.users.success.passwordChanged')
+  );
+
+  changePasswordErrorMessage = computed(() =>
+    this.transloco.translate('notifications.users.error.changePassword')
+  );
+
+  emailText = computed(() =>
+    this.transloco.translate('components.users.password.email')
+  );
+
+  constructor() {
     this.form = this.fb.group(
       {
         id: [''],
@@ -56,19 +93,30 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
       }
     );
 
-    this.form.statusChanges.subscribe(() => {
+    // Effect para inicializar datos
+    effect(() => {
+      const data = this.initialData();
+      if (data?.email) {
+        untracked(() => {
+          this.form.patchValue({
+            id: data.id,
+            email: data.email,
+          });
+        });
+      }
+    });
+
+    // Effect para emitir validez del formulario
+    effect(() => {
       this.formValid.emit(this.form.valid);
     });
-  }
 
-  ngOnInit() {
-    if (this.initialData?.email) {
-      this.form.patchValue({
-        id: this.initialData.id,
-        email: this.initialData.email,
+    // Suscripción a cambios del formulario
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.formValid.emit(this.form.valid);
       });
-    }
-    this.formValid.emit(this.form.valid);
   }
 
   private passwordMatchValidator(form: FormGroup) {
@@ -86,10 +134,12 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
 
   onSubmit(): void {
     if (this.form.invalid) {
-      this.transloco.selectTranslate('notifications.users.error.formInvalid').subscribe(message => {
-        this.notificationSrv.addNotification(message, 'warning');
-      });
+      this.notificationSrv.addNotification(
+        this.formInvalidMessage(),
+        'warning'
+      );
       this.form.markAllAsTouched();
+      this.submitError.emit();
       return;
     }
 
@@ -98,34 +148,41 @@ export class ChangeUserPasswordComponent implements DynamicComponent {
       newPassword: this.form.get('newPassword')?.value,
     };
 
-    this.userSrv.changePassword(formData).subscribe({
-      next: (response) => {
-        this.transloco.selectTranslate('notifications.users.success.passwordChanged').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'success');
-        });
-        this.submitSuccess.emit();
-        this.form.reset();
+    this.uploading.set(true);
 
-        if (
-          this.initialData?.onSave &&
-          typeof this.initialData.onSave === 'function'
-        ) {
-          this.initialData.onSave();
-        }
+    this.userSrv
+      .changePassword(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.uploading.set(false);
+          this.notificationSrv.addNotification(
+            this.passwordChangedMessage(),
+            'success'
+          );
+          this.submitSuccess.emit();
 
-        if (!this.initialData?.closeOnSubmit) {
-          this.form.reset();
-        }
-      },
-      error: (error) => {
-        this.transloco.selectTranslate('notifications.users.error.changePassword').subscribe(message => {
-          this.notificationSrv.addNotification(message, 'error');
-        });
-      },
-    });
+          const data = this.initialData();
+          if (data?.onSave && typeof data.onSave === 'function') {
+            data.onSave();
+          }
+
+          if (!data?.closeOnSubmit) {
+            this.form.reset();
+          }
+        },
+        error: (error) => {
+          this.uploading.set(false);
+          this.notificationSrv.addNotification(
+            this.changePasswordErrorMessage(),
+            'error'
+          );
+          this.submitError.emit();
+        },
+      });
   }
 
-  get isFormInvalid(): boolean {
-    return this.form.invalid;
+  getFormControl(controlName: string): FormControl {
+    return this.form.get(controlName) as FormControl;
   }
 }

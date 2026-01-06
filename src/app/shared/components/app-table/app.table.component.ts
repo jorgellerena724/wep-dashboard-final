@@ -1,16 +1,16 @@
 import {
   Component,
-  Input,
-  OnInit,
-  ViewChild,
-  Output,
-  EventEmitter,
-  ChangeDetectorRef,
-  ViewEncapsulation,
+  input,
+  output,
   inject,
-  SimpleChanges,
+  signal,
+  computed,
+  effect,
+  viewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -52,7 +52,7 @@ export interface RowAction {
 @Component({
   selector: 'app-table',
   standalone: true,
-  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     TableModule,
@@ -66,131 +66,190 @@ export interface RowAction {
   ],
   templateUrl: './app-table.component.html',
 })
-export class TableComponent implements OnInit {
+export class TableComponent {
   private transloco = inject(TranslocoService);
-  isDark: boolean = false;
-  @ViewChild('dt') dt!: Table;
-  private _data: any[] = [];
-  private filteredData: any[] = [];
-  private originalData: any[] = [];
-  @Input() defaultSortField: string = '';
-  @Input() defaultSortOrder: number = 1;
-  @Input()
-  set data(value: any[]) {
-    this._data = value || [];
-    this.originalData = [...this._data]; // Mantener copia de los datos originales
-    this.applyFilters(); // Aplicar filtros cuando cambian los datos
-  }
-  get data(): any[] {
-    return this._data;
-  }
-  @Input() columns: Column[] = [];
-  @Input() rowsPerPage = 10;
-  @Input() loading = false;
-  @Input() customTemplates: { [key: string]: any } = {};
-  @Input() headerActions: TableAction[] = [];
-  @Input() rowActions: RowAction[] = [];
-  @Output() refresh = new EventEmitter();
+  private themeService = inject(ThemeService);
+  private fb = inject(FormBuilder);
 
-  totalRecords: number = 0;
-  displayedData: any[] = [];
-  first: number = 0;
-  columnFiltersForm!: FormGroup;
-  showFilterInput: { [key: string]: boolean } = {};
-  columnsWithActions: Column[] = [];
-  rows: unknown;
+  // --- SOLUCIÓN TRADUCCIONES ---
+  // Convertimos el stream de traducción en una Signal.
+  // Cuando carga el idioma o cambia, esta signal se actualiza.
+  private actionsHeaderLabel = toSignal(
+    this.transloco.selectTranslate('table.actions'),
+    { initialValue: 'Actions' } // Valor temporal mientras carga
+  );
 
-  constructor(
-    private themeService: ThemeService,
-    private fb: FormBuilder,
-    private cd: ChangeDetectorRef
-  ) {
-    this.initializeForms();
-  }
+  // --- SOLUCIÓN TEMA OSCURO ---
+  // Optimización: Usar toSignal en lugar de .subscribe dentro de un effect
+  // Asumiendo que themeService.darkMode$ es un Observable<boolean>
+  isDark = toSignal(this.themeService.darkMode$, { initialValue: false });
 
-  private initializeForms() {
+  // Inputs
+  data = input<any[]>([]);
+  columns = input<Column[]>([]);
+  rowsPerPage = input<number>(10);
+  loading = input<boolean>(false);
+  customTemplates = input<{ [key: string]: any }>({});
+  headerActions = input<TableAction[]>([]);
+  rowActions = input<RowAction[]>([]);
+  defaultSortField = input<string>('');
+  defaultSortOrder = input<number>(1);
+
+  refresh = output<void>();
+
+  dt = viewChild<Table>('dt');
+
+  // State signals (isDark ya no está aquí porque es un toSignal arriba)
+  originalData = signal<any[]>([]);
+  filteredData = signal<any[]>([]);
+  displayedData = signal<any[]>([]);
+  totalRecords = signal<number>(0);
+  first = signal<number>(0);
+  showFilterInput = signal<{ [key: string]: boolean }>({});
+
+  columnFiltersForm: FormGroup;
+
+  // Computed signals
+  columnsWithActions = computed<Column[]>(() => {
+    const rowActionsArray = this.rowActions();
+    const columnsArray = this.columns();
+
+    // AHORA LEEMOS LA SIGNAL DE TRADUCCIÓN
+    // Al leer actionsHeaderLabel(), Angular crea una dependencia.
+    // Cuando Transloco termine de cargar, esta signal cambia y el computed se re-ejecuta solo.
+    const translatedHeader = this.actionsHeaderLabel();
+
+    if (rowActionsArray.length > 0) {
+      return [
+        {
+          field: 'actions',
+          header: translatedHeader || 'Actions', // Fallback seguro
+          width: '150px',
+          defaultSort: true,
+        },
+        ...columnsArray,
+      ];
+    }
+    return [...columnsArray];
+  });
+
+  // ... Resto de computed signals ...
+
+  constructor() {
     this.columnFiltersForm = this.fb.group({});
+
+    // NOTA: He eliminado el effect del darkMode porque lo sustituí por toSignal arriba.
+    // Es mucho más limpio y "Zoneless friendly".
+
+    // Effect para actualizar datos
+    effect(() => {
+      const newData = this.data();
+      // Usamos untracked si no queremos que applyFilters cree dependencias circulares,
+      // aunque aquí está bien.
+      this.originalData.set([...newData]);
+      this.applyFilters();
+    });
+
+    // Effect para configurar filtros
+    effect(() => {
+      const cols = this.columns();
+      this.setupColumnFilters(cols);
+    });
+
+    // Effect para sort
+    effect(() => {
+      const sortField = this.defaultSortField();
+      const sortOrder = this.defaultSortOrder();
+      const tableRef = this.dt();
+
+      if (sortField && tableRef) {
+        // setTimeout a veces es necesario para PrimeNG al inicio,
+        // pero intenta evitarlo si puedes. En zoneless a veces requestAnimationFrame es mejor.
+        setTimeout(() => {
+          tableRef.sortField = sortField;
+          tableRef.sortOrder = sortOrder;
+          tableRef.sortSingle();
+        });
+      }
+    });
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    // Detectar cambios en las columnas y re-inicializar si es necesario
-    if (changes['columns'] && !changes['columns'].firstChange) {
-      this.updateColumnsWithActions();
-      this.setupColumnFilters();
-    }
+  // ... El resto de tus métodos privados y públicos se mantienen igual ...
 
-    if (changes['rowActions'] && !changes['rowActions'].firstChange) {
-      this.updateColumnsWithActions();
-    }
-  }
-
-  private updateColumnsWithActions() {
-    this.transloco
-      .selectTranslate('table.actions')
-      .subscribe((translatedHeader) => {
-        this.columnsWithActions =
-          this.rowActions.length > 0
-            ? [
-                {
-                  field: 'actions',
-                  header: translatedHeader,
-                  width: '150px',
-                  defaultSort: true,
-                },
-                ...this.columns,
-              ]
-            : [...this.columns];
-        this.cd.detectChanges();
-      });
-  }
-
-  private setupColumnFilters() {
+  private setupColumnFilters(cols: Column[]) {
+    // ... tu código ...
     const filterControls: any = {};
-    this.columns.forEach((col) => {
+    const filterVisibility: { [key: string]: boolean } = {};
+
+    cols.forEach((col) => {
       if (col.filter) {
         filterControls[col.field] = [''];
-        this.showFilterInput[col.field] = false;
+        filterVisibility[col.field] = false;
       }
     });
 
     this.columnFiltersForm = this.fb.group(filterControls);
+    this.showFilterInput.set(filterVisibility);
 
-    // Aplicar filtros cuando cambian
     Object.keys(this.columnFiltersForm.controls).forEach((field) => {
       this.columnFiltersForm.get(field)?.valueChanges.subscribe(() => {
-        this.first = 0;
+        this.first.set(0);
         this.applyFilters();
       });
     });
   }
 
-  // Nuevo método para aplicar filtros
   private applyFilters() {
-    // Copiar datos originales
-    this.filteredData = [...this.originalData];
+    // ... tu código ...
+    const original = this.originalData();
+    let filtered = [...original];
 
-    // Aplicar filtros de columnas
-    this.columns.forEach((col) => {
+    this.columns().forEach((col) => {
       if (col.filter && this.columnFiltersForm.get(col.field)?.value) {
         const searchTerm = this.columnFiltersForm
           .get(col.field)
           ?.value.toLowerCase();
-        this.filteredData = this.filteredData.filter((item) =>
+        filtered = filtered.filter((item) =>
           String(item[col.field]).toLowerCase().includes(searchTerm)
         );
       }
     });
 
-    // Actualizar métricas
-    this.totalRecords = this.filteredData.length;
+    this.filteredData.set(filtered);
+    this.totalRecords.set(filtered.length);
     this.updateDisplayedData();
   }
 
+  private updateDisplayedData() {
+    const filtered = this.filteredData();
+    const firstIndex = this.first();
+    const rows = this.rowsPerPage();
+    const displayed = filtered.slice(firstIndex, firstIndex + rows);
+    this.displayedData.set(displayed);
+  }
+
+  // ... Resto de métodos (clearFilter, toggleFilter, onPageChange, etc) ...
+  // Asegúrate de copiarlos tal cual los tenías
   clearFilter(field: string) {
     if (this.columnFiltersForm.get(field)) {
       this.columnFiltersForm.get(field)?.setValue('');
     }
-    this.showFilterInput[field] = false;
+    const visibility = this.showFilterInput();
+    this.showFilterInput.set({ ...visibility, [field]: false });
+  }
+
+  toggleFilter(field: string) {
+    const visibility = this.showFilterInput();
+    this.showFilterInput.set({ ...visibility, [field]: !visibility[field] });
+  }
+
+  onPageChange(event: any) {
+    this.first.set(event.first);
+    this.updateDisplayedData();
+  }
+
+  refreshData() {
+    this.refresh.emit();
   }
 
   getRowActionLabel(action: RowAction, rowData: any): string {
@@ -198,9 +257,7 @@ export class TableComponent implements OnInit {
       ? action.label(rowData)
       : action.label;
   }
-  isDarkMode() {
-    return this.themeService.isDarkMode();
-  }
+
   getRowActionIcon(action: RowAction, rowData: any): string {
     return typeof action.icon === 'function'
       ? action.icon(rowData)
@@ -214,24 +271,12 @@ export class TableComponent implements OnInit {
       : action.class;
   }
 
-  get globalFilterFields(): string[] {
-    return this.columns.map((col) => col.field);
-  }
-
-  isFirstPage(): boolean {
-    return this.first === 0;
-  }
-
   isHeaderActionDisabled(action: TableAction): boolean {
     return action.isDisabled ? action.isDisabled() : false;
   }
 
   isHeaderActionVisible(action: TableAction): boolean {
     return action.isVisible ? action.isVisible() : true;
-  }
-
-  isLastPage(): boolean {
-    return this.first + this.rowsPerPage >= this.data.length;
   }
 
   isRowActionDisabled(action: RowAction, rowData: any): boolean {
@@ -242,104 +287,6 @@ export class TableComponent implements OnInit {
     return action.isVisible ? action.isVisible(rowData) : true;
   }
 
-  next() {
-    this.first += this.rowsPerPage;
-
-    if (this.first >= this.data.length) {
-      this.first = this.data.length - this.rowsPerPage;
-    }
-  }
-
-  ngOnInit() {
-    // Escuchar cambios en el modo oscuro
-    this.themeService.darkMode$.subscribe((mode) => {
-      this.isDark = mode;
-      this.cd.detectChanges(); // Forzar actualización de Angular
-    });
-
-    // Lógica de inicialización del paginador
-    this.transloco
-      .selectTranslate('table.actions')
-      .subscribe((translatedHeader) => {
-        this.columnsWithActions = [
-          {
-            field: 'actions',
-            header: translatedHeader,
-            width: '150px',
-            defaultSort: true,
-          },
-          ...this.columns,
-        ];
-        this.cd.detectChanges();
-      });
-
-    if (this.defaultSortField) {
-      setTimeout(() => {
-        this.dt.sortField = this.defaultSortField;
-        this.dt.sortOrder = this.defaultSortOrder;
-        this.dt.sortSingle();
-      });
-    }
-
-    // Inicializar filtros de columnas
-    const filterControls: any = {};
-    this.columns.forEach((col) => {
-      if (col.filter) {
-        filterControls[col.field] = [''];
-        this.showFilterInput[col.field] = false;
-      }
-    });
-    this.columnFiltersForm = this.fb.group(filterControls);
-
-    // Aplicar filtros cuando cambian
-    Object.keys(this.columnFiltersForm.controls).forEach((field) => {
-      this.columnFiltersForm.get(field)?.valueChanges.subscribe(() => {
-        this.first = 0;
-        this.applyFilters();
-      });
-    });
-  }
-
-  onPageChange(event: any) {
-    this.first = event.first; // Actualiza el índice del primer elemento
-    this.rowsPerPage = event.rows; // Actualiza el número de filas por página
-    this.updateDisplayedData(); // Recorta los datos para mostrar solo los de la página actual
-  }
-
-  pageChange(event: any) {
-    this.first = event.first;
-    this.rowsPerPage = event.rows;
-  }
-
-  prev() {
-    this.first -= this.rowsPerPage;
-
-    if (this.first < 0) {
-      this.first = 0;
-    }
-  }
-
-  refreshData() {
-    this.loading = true;
-    this.refresh.emit();
-  }
-
-  reset() {
-    this.first = 0;
-  }
-
-  toggleFilter(field: string) {
-    this.showFilterInput[field] = !this.showFilterInput[field];
-  }
-
-  private updateDisplayedData() {
-    this.displayedData = this.filteredData.slice(
-      this.first,
-      this.first + this.rowsPerPage
-    );
-  }
-
-  // Trunca cadenas a un máximo de 'limit' caracteres
   truncate(value: any, limit: number = 30): string {
     if (value === null || value === undefined) return '';
     const str = String(value);

@@ -1,11 +1,13 @@
-const apiUrl = 'https://wep-backend.shirkasoft.net/api/';
-const imgUrl = `https://api-minio.shirkasoft.net/wep/`;
+const apiUrl = 'https://api.shirkasoft.net/api/';
+const imgUrl = `${apiUrl}images/`;
+const imgPath = `assets/img/`;
 
 export const environment = {
-  use_minio: true,
+  use_minio: false,
   production: true,
   api: `${apiUrl}`,
   api_users: `${apiUrl}users/`,
   api_security: `${apiUrl}auth/`,
   api_img: `${imgUrl}`,
+  imgPath: imgPath,
 };

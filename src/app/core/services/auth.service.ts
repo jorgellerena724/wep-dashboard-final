@@ -1,4 +1,10 @@
-import { Injectable, Inject, PLATFORM_ID, OnDestroy, inject } from '@angular/core';
+import {
+  Injectable,
+  Inject,
+  PLATFORM_ID,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, Subscription } from 'rxjs';
@@ -27,7 +33,8 @@ interface LoginResponse {
 export class AuthService implements OnDestroy {
   private redirectExecuted = false;
   private initialNavigationChecked = new BehaviorSubject<boolean>(false);
-  public initialNavigationChecked$ = this.initialNavigationChecked.asObservable();
+  public initialNavigationChecked$ =
+    this.initialNavigationChecked.asObservable();
 
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private userSubject = new BehaviorSubject<User | null>(null);
@@ -43,7 +50,7 @@ export class AuthService implements OnDestroy {
 
   private readonly INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutos
   private readonly WARNING_BEFORE_TIMEOUT = 1 * 60 * 1000; // 1 minuto
-  
+
   // ---> AÑADIDO: Inyección de TranslocoService usando 'inject'
   private transloco = inject(TranslocoService);
 
@@ -56,7 +63,7 @@ export class AuthService implements OnDestroy {
     this.loadInitialState();
     this.setupNavigationTracking();
   }
-  
+
   // ... (el resto de los métodos hasta resetInactivityTimer se mantienen igual)
   private setupNavigationTracking(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -292,12 +299,12 @@ export class AuthService implements OnDestroy {
       }, timeUntilExpiration);
     }
   }
-  
+
   private resetInactivityTimer(): void {
     if (this.isLoggingOut) {
       return;
     }
-    
+
     if (this.inactivityTimer) clearTimeout(this.inactivityTimer);
     if (this.warningTimer) clearTimeout(this.warningTimer);
 
@@ -306,7 +313,9 @@ export class AuthService implements OnDestroy {
     this.warningTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
         // MODIFICADO: Usar la clave de traducción para la advertencia de inactividad
-        const warningMessage = this.transloco.translate('notifications.session.inactivityWarning');
+        const warningMessage = this.transloco.translate(
+          'notifications.session.inactivityWarning'
+        );
         this.notificationSrv.addNotification(warningMessage, 'warning');
       }
     }, this.INACTIVITY_TIMEOUT - this.WARNING_BEFORE_TIMEOUT);
@@ -376,7 +385,9 @@ export class AuthService implements OnDestroy {
     // Solo mostrar notificación si se solicita explícitamente
     if (showNotification) {
       // MODIFICADO: Usar la clave de traducción para el cierre de sesión
-      const logoutMessage = this.transloco.translate('notifications.session.logoutSuccess');
+      const logoutMessage = this.transloco.translate(
+        'notifications.session.logoutSuccess'
+      );
       this.notificationSrv.addNotification(logoutMessage, 'success');
     }
 
@@ -427,7 +438,12 @@ export class AuthService implements OnDestroy {
     if (isPlatformBrowser(this.platformId) && this.isLoggedIn()) {
       setTimeout(() => {
         const lastPath = this.getLastPath();
-        if (lastPath && lastPath !== '/login' && lastPath !== '/' && !lastPath.includes('login')) {
+        if (
+          lastPath &&
+          lastPath !== '/login' &&
+          lastPath !== '/' &&
+          !lastPath.includes('login')
+        ) {
           this.router.navigateByUrl(lastPath, { replaceUrl: true });
         } else {
           this.router.navigate(['/admin'], { replaceUrl: true });

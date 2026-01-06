@@ -3,7 +3,7 @@
     <app-text-field
       id="full_name"
       label="{{ 'components.users.create.fields.name.title' | transloco }}"
-      [control]="form.get('full_name')"
+      [control]="getFormControl('full_name')"
       [errorMessages]="{
         required: ( 'components.users.create.fields.name.required' | transloco ),
         minlength: ( 'components.users.create.fields.name.minlength' | transloco ),
@@ -13,18 +13,18 @@
     <app-text-field
       id="email"
       label="{{ 'components.users.create.fields.email.title' | transloco }}"
-      [control]="form.get('email')"
+      [control]="getFormControl('email')"
       [errorMessages]="{
         required: ( 'components.users.create.fields.email.required' | transloco ),
         email: ( 'components.users.create.fields.email.email' | transloco ),
       }"
     ></app-text-field>
   </div>
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-2 gap-4 w-[750px]">
     <app-text-field
       id="password"
       label="{{ 'components.users.create.fields.password.title' | transloco }}"
-      [control]="form.get('password')"
+      [control]="getFormControl('password')"
       [type]="'password'"
       [errorMessages]="{
         required: ( 'components.users.create.fields.password.required' | transloco ),
@@ -40,7 +40,7 @@
     <app-text-field
       id="client"
       label="{{ 'components.users.create.fields.client.title' | transloco }}"
-      [control]="form.get('client')"
+      [control]="getFormControl('client')"
       [errorMessages]="{
         required: ( 'components.users.create.fields.name.required' | transloco ),
         minlength: ( 'components.users.create.fields.name.minlength' | transloco ),

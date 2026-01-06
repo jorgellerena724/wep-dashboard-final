@@ -27,8 +27,8 @@ export class PublicationsService {
     const url = this.use_minio
       ? `${
           this.imgUrl
-        }${this.authService.getClient()}/${name}?no-cache=${timestamp}`
-      : `${this.imgUrl}${name}?no-cache=${timestamp}`;
+        }${this.authService.getClient()}/${name}/?no-cache=${timestamp}`
+      : `${this.imgUrl}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });

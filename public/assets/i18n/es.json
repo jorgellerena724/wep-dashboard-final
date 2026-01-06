@@ -8,7 +8,8 @@
         "invalidCredentials": "Credenciales inválidas. Por favor, verifica tu correo y contraseña.",
         "serverError": "Error interno del servidor. Inténtelo nuevamente más tarde.",
         "connectionError": "No se pudo conectar con el servidor. Verifique su conexión e inténtelo más tarde.",
-        "invalidForm": "Formulario no válido. Por favor, complete todos los campos requeridos."
+        "invalidForm": "Formulario no válido. Por favor, complete todos los campos requeridos.",
+        "notfound": "No se ha encontrado un usuario con las credenciales enviadas."
       }
     },
     "session": {
@@ -219,6 +220,37 @@
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateName": "Ya existe una categoría con este nombre."
       }
+    },
+    "chatbot_config": {
+      "success": {
+        "created": "Configuración de chatbot creada exitosamente",
+        "updated": "Configuración de chatbot actualizada exitosamente",
+        "deleted": "Configuración de chatbot eliminada exitosamente"
+      },
+      "error": {
+        "formInvalid": "Por favor completa todos los campos requeridos",
+        "create": "Error al crear la configuración del chatbot",
+        "update": "Error al actualizar la configuración del chatbot",
+        "delete": "Error al eliminar la configuración del chatbot",
+        "load": "Error al cargar las configuraciones del chatbot",
+        "duplicateName": "Ya existe un modelo con este nombre."
+      }
+    },
+    "chatbot_model": {
+      "success": {
+        "created": "Configuración de chatbot creada exitosamente",
+        "updated": "Configuración de chatbot actualizada exitosamente",
+        "deleted": "Configuración de chatbot eliminada exitosamente"
+      },
+      "error": {
+        "formInvalid": "Por favor completa todos los campos requeridos",
+        "create": "Error al crear la configuración del chatbot",
+        "update": "Error al actualizar la configuración del chatbot",
+        "delete": "Error al eliminar la configuración del chatbot",
+        "load": "Error al cargar las configuraciones del chatbot",
+        "duplicateName": "Ya existe un modelo con este nombre.",
+        "cannotDelete": "No se puede eliminar el modelo, está siendo usado en una configuración."
+      }
     }
   },
   "language": {
@@ -238,12 +270,13 @@
   "login": {
     "email": {
       "title": "Correo",
-      "placeholder": "Escriba su correo aquí",
-      "required": "El correo es obligatorio."
+      "placeholder": "Correo",
+      "required": "El correo es obligatorio.",
+      "invalid": "EL correo electrónico tiene un formato inválido."
     },
     "password": {
       "title": "Contraseña",
-      "placeholder": "Escriba su contraseña aquí",
+      "placeholder": "Contraseña",
       "required": "La contraseña es obligatoria."
     },
     "loading": "Accediendo...",
@@ -303,6 +336,9 @@
     "news": "Novedades",
     "about": "Quiénes Somos",
     "company": "Empresa",
+    "chatbot": "Chatbot",
+    "chatbot_models": "Gestionar modelos de IA",
+    "chatbot_config": "Gestionar configuración de chatbots",
     "manager": "Directivos",
     "manager-category": "Categorías",
     "review": "Reseñas",
@@ -350,6 +386,102 @@
     "footer": "Cambios en tiempo real sin conocimientos técnicos"
   },
   "components": {
+    "chatbot_config": {
+      "list": {
+        "title": "Configuraciones de Chatbot",
+        "table": {
+          "name": "Nombre de usuario",
+          "model": "Nombre del modelo de IA",
+          "status": "Estado"
+        },
+        "errors": {}
+      },
+      "create": {
+        "title": "Registrar Configuración de IA",
+        "fields": {
+          "user": {
+            "title": "Usuario",
+            "required": "El usuario es requerido",
+            "exists": "Este usuario ya tiene una configuración de IA"
+          },
+          "apiKey": {
+            "title": "API Key",
+            "required": "La API Key es requerida",
+            "minlength": "La API Key debe tener al menos 20 caracteres"
+          },
+          "model": {
+            "title": "Modelo de IA",
+            "required": "El modelo es requerido"
+          },
+          "prompt": {
+            "title": "Prompt del Sistema",
+            "required": "El prompt del sistema es requerido",
+            "minlength": "El prompt debe tener al menos 10 caracteres"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar Configuración de IA",
+        "fields": {
+          "user": {
+            "title": "Usuario",
+            "required": "El usuario es requerido",
+            "exists": "Este usuario ya tiene una configuración de IA"
+          },
+          "apiKey": {
+            "title": "API Key",
+            "required": "La API Key es requerida",
+            "minlength": "La API Key debe tener al menos 20 caracteres"
+          },
+          "model": {
+            "title": "Modelo de IA",
+            "required": "El modelo es requerido"
+          },
+          "prompt": {
+            "title": "Prompt del Sistema",
+            "required": "El prompt del sistema es requerido",
+            "minlength": "El prompt debe tener al menos 10 caracteres"
+          }
+        }
+      }
+    },
+    "chatbot_model": {
+      "list": {
+        "title": "Modelos de IA",
+        "table": {
+          "name": "Nombre del modelo",
+          "provider": "Proveedor"
+        }
+      },
+      "create": {
+        "title": "Registrar Modelo de IA",
+        "fields": {
+          "name": {
+            "title": "Nombre del modelo",
+            "required": "El modelo de IA es requerido",
+            "minlength": "El nombre debe de tener al menos 3 caracteres."
+          },
+          "provider": {
+            "title": "Proveedor",
+            "required": "El nombre del proveedor es requerido"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar Modelo de IA",
+        "fields": {
+          "name": {
+            "title": "Nombre del modelo",
+            "required": "El modelo de IA es requerido",
+            "minlength": "El nombre debe de tener al menos 3 caracteres."
+          },
+          "provider": {
+            "title": "Proveedor",
+            "required": "El nombre del proveedor es requerido"
+          }
+        }
+      }
+    },
     "header": {
       "list": {
         "title": "Encabezado",
@@ -405,7 +537,7 @@
           "image": {
             "title": "Imagen del carrusel",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -449,7 +581,7 @@
           },
           "image": {
             "title": "Archivo de la novedad",
-            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+            "recommendation": "Formato recomendado: WEBP, MP4. Tamaño máximo 20Mb"
           }
         }
       },
@@ -474,7 +606,7 @@
           },
           "image": {
             "title": "Archivo de la novedad",
-            "recommendation": "Formato recomendado: JPG, PNG, MP4, MOV. Tamaño máximo 20Mb"
+            "recommendation": "Formato recomendado: WEBP, MP4. Tamaño máximo 20Mb"
           }
         }
       },
@@ -514,7 +646,7 @@
           "image": {
             "title": "Imagen de la empresa",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -559,7 +691,7 @@
           "image": {
             "title": "Imagen del directivo",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -593,7 +725,7 @@
           "image": {
             "title": "Imagen del directivo",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -637,7 +769,7 @@
           "image": {
             "title": "Logo del cliente",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -665,7 +797,7 @@
           "image": {
             "title": "Logo del cliente",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -780,7 +912,7 @@
           "image": {
             "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "uploadInfo": "Puede agregar una o más imágenes y videos. Si lo desea, puede agregar un título a cada archivo.",
             "mainImageInfo": "El primer archivo en el listado será la imagen o video principal del producto. Usa las flechas para reordenar los archivos.",
@@ -846,7 +978,7 @@
           "image": {
             "title": "Archivos de los productos o servicios",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "uploadInfo": "Puede agregar una o más imágenes y videos. Si lo desea, puede agregar un título a cada archivo.",
             "mainImageInfo": "El primer archivo en el listado será la imagen o video principal del producto. Usa las flechas para reordenar los archivos.",
@@ -980,7 +1112,7 @@
           "image": {
             "title": "Imagen de la publicación",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {
@@ -1019,7 +1151,7 @@
           "image": {
             "title": "Imagen de la publicación",
             "select": "Seleccionar imagen",
-            "recommendation": "Formato recomendado: JPG, PNG. Tamaño máximo 1Mb",
+            "recommendation": "Formato recomendado: WEBP. Tamaño máximo 1Mb",
             "info": "Puede cambiar la imagen seleccionando una nueva.",
             "required": "• La imagen es requerida",
             "nodata": {

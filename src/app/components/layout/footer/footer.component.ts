@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
-import { Router, NavigationEnd, RouterModule } from '@angular/router';
-
-import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { Component, ChangeDetectionStrategy, computed } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { TranslocoModule } from '@jsverse/transloco';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
@@ -9,9 +8,9 @@ import { TooltipModule } from 'primeng/tooltip';
   standalone: true,
   imports: [RouterModule, TranslocoModule, TooltipModule],
   templateUrl: './footer.component.html',
-  styleUrls: ['./footer.component.css']
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FooterComponent {
-  currentYear: number = new Date().getFullYear();
-  currentRoute = '';
+  // Computed signal para el año actual
+  currentYear = computed(() => new Date().getFullYear());
 }

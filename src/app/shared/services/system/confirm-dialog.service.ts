@@ -4,6 +4,9 @@ import {
   ApplicationRef,
   createComponent,
   EnvironmentInjector,
+  signal,
+  DestroyRef,
+  inject,
 } from '@angular/core';
 import { ConfirmDialogComponent } from '../../components/app-confirm-dialog/app-confirm-dialog.component';
 
@@ -19,10 +22,11 @@ export interface ConfirmConfig {
 })
 export class ConfirmDialogService {
   private dialogRef: ComponentRef<ConfirmDialogComponent> | null = null;
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private appRef: ApplicationRef,
-    private injector: EnvironmentInjector,
+    private injector: EnvironmentInjector
   ) {}
 
   async confirm(config: ConfirmConfig): Promise<boolean> {
@@ -37,12 +41,14 @@ export class ConfirmDialogService {
       environmentInjector: this.injector,
     });
 
-    // Configurar el componente
+    // Configurar el componente usando setInput para signals
     const instance = this.dialogRef.instance;
-    instance.title = config.title ?? 'Confirmar acción';
-    instance.message = config.message;
-    instance.confirmLabel = config.confirmLabel ?? 'Confirmar';
-    instance.cancelLabel = config.cancelLabel ?? 'Cancelar';
+
+    // Establecer los inputs usando setInput
+    this.dialogRef.setInput('title', config.title ?? 'Confirmar acción');
+    this.dialogRef.setInput('message', config.message);
+    this.dialogRef.setInput('confirmLabel', config.confirmLabel ?? 'Confirmar');
+    this.dialogRef.setInput('cancelLabel', config.cancelLabel ?? 'Cancelar');
 
     // Adjuntar al DOM
     document.body.appendChild(this.dialogRef.location.nativeElement);
@@ -54,9 +60,20 @@ export class ConfirmDialogService {
       return result;
     } finally {
       // Limpiar
+      this.cleanupDialog();
+    }
+  }
+
+  private cleanupDialog(): void {
+    if (this.dialogRef) {
       this.appRef.detachView(this.dialogRef.hostView);
       this.dialogRef.destroy();
       this.dialogRef = null;
     }
+  }
+
+  // Método para limpiar en caso de que el servicio se destruya
+  ngOnDestroy(): void {
+    this.cleanupDialog();
   }
 }

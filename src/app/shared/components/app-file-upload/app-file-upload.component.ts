@@ -1,77 +1,118 @@
-// app-file-upload.component.ts
 import {
   Component,
-  EventEmitter,
-  Input,
-  Output,
-  OnChanges,
+  input,
+  output,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  effect,
+  untracked,
 } from '@angular/core';
-
 import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadError } from '../../interfaces/fileUpload.interface';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-file-upload',
   templateUrl: './app-file-upload.component.html',
   standalone: true,
   imports: [
+    CommonModule,
     FileUploadModule,
     ImageModule,
     ButtonModule,
-    TooltipModule
-],
+    TooltipModule,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppFileUploadComponent implements OnChanges {
-  @Input() label: string = 'Cargar archivo';
-  @Input() accept: string = 'image/*';
-  @Input() maxFileSize: number = 2000000; // 2MB por defecto
-  @Input() fileUploadText: string = 'Seleccionar archivo';
-  @Input() fileRecommendation: string =
-    'Formato recomendado: PNG o JPG, tamaño máximo 2MB';
-  @Input() multiple: boolean = false; // Nueva propiedad para múltiples archivos
-  @Input() allowedExtensions?: string[]; // Nueva propiedad para extensiones permitidas personalizadas
+export class AppFileUploadComponent {
+  // Inputs
+  label = input<string>('Cargar archivo');
+  accept = input<string>('image/*');
+  maxFileSize = input<number>(2000000);
+  fileUploadText = input<string>('Seleccionar archivo');
+  fileRecommendation = input<string>(
+    'Formato recomendado: PNG o JPG, tamaño máximo 2MB'
+  );
+  multiple = input<boolean>(false);
+  allowedExtensions = input<string[] | undefined>(undefined);
 
-  @Output() fileSelected = new EventEmitter<File[]>(); // Ahora emite un array de archivos
-  @Output() fileRemoved = new EventEmitter<void>();
-  @Output() fileError = new EventEmitter<FileUploadError>();
+  // Outputs
+  fileSelected = output<File[]>();
+  fileRemoved = output<void>();
+  fileError = output<FileUploadError>();
 
-  selectedFiles: File[] = []; // Cambiamos a array para soportar múltiples
+  // Signals para estado
+  selectedFiles = signal<File[]>([]);
 
+  // Mapeo de tipos MIME a extensiones
   private readonly mimeTypeToExtensions: { [key: string]: string[] } = {
     'image/*': ['.jpg', '.jpeg', '.png', '.ico', '.webp'],
     'video/mp4': ['.mp4'],
     'video/quicktime': ['.mov'],
   };
 
-  ngOnInit() {
-    // Asegurarnos de que accept tiene un formato válido
-    if (this.accept && !this.accept.includes('/') && this.accept !== '*') {
-      if (this.accept === 'image') {
-        this.accept = 'image/*';
-      } else if (this.accept === 'video') {
-        this.accept = 'video/*';
-      } else if (this.accept === 'audio') {
-        this.accept = 'audio/*';
+  // Computed para el valor ajustado de accept
+  adjustedAccept = computed(() => {
+    const acceptValue = this.accept();
+    if (!acceptValue.includes('/') && acceptValue !== '*') {
+      if (acceptValue === 'image') {
+        return 'image/*';
+      } else if (acceptValue === 'video') {
+        return 'video/*';
+      } else if (acceptValue === 'audio') {
+        return 'audio/*';
       }
     }
+    return acceptValue;
+  });
+
+  // Computed para obtener extensiones permitidas
+  allowedExtensionsList = computed(() => {
+    const customExts = this.allowedExtensions();
+    if (customExts && customExts.length > 0) {
+      return customExts;
+    }
+
+    const acceptTypes = this.adjustedAccept()
+      .split(',')
+      .map((t) => t.trim());
+    const extensions: string[] = [];
+
+    for (const type of acceptTypes) {
+      if (this.mimeTypeToExtensions[type]) {
+        extensions.push(...this.mimeTypeToExtensions[type]);
+      }
+    }
+
+    return [...new Set(extensions)];
+  });
+
+  constructor() {
+    // Effect para resetear archivos cuando cambian los inputs
+    effect(() => {
+      // Observar cambios en inputs que deberían resetear los archivos
+      this.accept();
+      this.maxFileSize();
+      this.allowedExtensions();
+
+      untracked(() => {
+        this.selectedFiles.set([]);
+      });
+    });
   }
 
-  ngOnChanges(changes: any) {
-    this.selectedFiles = [];
-  }
-
-  // ✅ Cambiar de uploadHandler a onSelect
   onFileSelect(event: any): void {
     if (event.files && event.files.length > 0) {
       const files: File[] = event.files;
 
       // Validar cada archivo
       for (const file of files) {
-        if (file.size > this.maxFileSize) {
-          const formattedMaxSize = this.formatFileSize(this.maxFileSize);
+        if (file.size > this.maxFileSize()) {
+          const formattedMaxSize = this.formatFileSize(this.maxFileSize());
           const formattedFileSize = this.formatFileSize(file.size);
 
           const error: FileUploadError = {
@@ -86,10 +127,10 @@ export class AppFileUploadComponent implements OnChanges {
         }
 
         if (!this.isFileTypeValid(file)) {
-          const allowedExtensions = this.getAllowedExtensions();
+          const allowedExts = this.allowedExtensionsList();
           const error: FileUploadError = {
             type: 'type',
-            message: `Tipo de archivo no válido. Extensiones permitidas: ${allowedExtensions.join(
+            message: `Tipo de archivo no válido. Extensiones permitidas: ${allowedExts.join(
               ', '
             )}`,
             file: file,
@@ -101,16 +142,14 @@ export class AppFileUploadComponent implements OnChanges {
         }
       }
 
-      this.selectedFiles = files;
+      this.selectedFiles.set(files);
       this.fileSelected.emit(files);
     }
   }
 
   private formatFileSize(bytes: number): string {
     if (bytes < 1024 * 1024) {
-      // Menor a 1 MB
       const kb = bytes / 1024;
-      // Mostrar sin decimales si es entero, con 1 decimal si no
       return kb % 1 === 0 ? `${kb} KB` : `${kb.toFixed(1)} KB`;
     } else {
       const mb = bytes / (1024 * 1024);
@@ -120,12 +159,15 @@ export class AppFileUploadComponent implements OnChanges {
 
   private isFileTypeValid(file: File): boolean {
     // Si se especifican extensiones personalizadas, validar solo contra ellas
-    if (this.allowedExtensions && this.allowedExtensions.length > 0) {
+    const customExts = this.allowedExtensions();
+    if (customExts && customExts.length > 0) {
       const fileExtension = this.getFileExtension(file.name).toLowerCase();
-      return this.allowedExtensions.includes(`.${fileExtension}`);
+      return customExts.includes(`.${fileExtension}`);
     }
 
-    const acceptTypes = this.accept.split(',').map((t) => t.trim());
+    const acceptTypes = this.adjustedAccept()
+      .split(',')
+      .map((t) => t.trim());
     const fileExtension = this.getFileExtension(file.name).toLowerCase();
 
     // Verificar si la extensión está permitida
@@ -152,37 +194,12 @@ export class AppFileUploadComponent implements OnChanges {
       .toLowerCase();
   }
 
-  private getAllowedExtensions(): string[] {
-    // Si se especifican extensiones personalizadas, usarlas
-    if (this.allowedExtensions && this.allowedExtensions.length > 0) {
-      return this.allowedExtensions;
-    }
-
-    const acceptTypes = this.accept.split(',').map((t) => t.trim());
-    const extensions: string[] = [];
-
-    for (const type of acceptTypes) {
-      if (this.mimeTypeToExtensions[type]) {
-        extensions.push(...this.mimeTypeToExtensions[type]);
-      }
-    }
-
-    // Eliminar duplicados y devolver
-    return [...new Set(extensions)];
-  }
-
   removeFile(): void {
-    this.selectedFiles = [];
+    this.selectedFiles.set([]);
     this.fileRemoved.emit();
   }
 
-  onError(event: any): void {
-    console.warn('Error en la carga del archivo:', event);
-  }
-
-  // ✅ Método adicional para limpiar archivos si es necesario
-  onClear(event: any): void {
-    console.log('Archivos limpiados:', event);
-    this.selectedFiles = [];
+  onClear(): void {
+    this.selectedFiles.set([]);
   }
 }

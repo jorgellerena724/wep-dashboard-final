@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 export interface Notification {
   id: string;
   message: string;
-  type: string;
+  type: 'success' | 'error' | 'warning' | 'info';
   progress?: number;
   showProgress?: boolean;
 }
@@ -13,60 +12,76 @@ export interface Notification {
   providedIn: 'root',
 })
 export class NotificationService {
-  private notificationsSubject = new BehaviorSubject<Notification[]>([]);
-  notifications$ = this.notificationsSubject.asObservable();
-  private notifications: Notification[] = [];
+  // Signal para las notificaciones
+  private notificationsSignal = signal<Notification[]>([]);
+  private currentId = 0;
+
+  // Exponer señal de solo lectura
+  notifications = this.notificationsSignal.asReadonly();
 
   addNotification(
     message: string,
-    type: string,
-    showProgress: boolean = false
+    type: Notification['type'] = 'info',
+    showProgress: boolean = false,
+    duration: number = 5000
   ): string {
+    const id = (++this.currentId).toString();
     const notification: Notification = {
-      id: this.generateId(),
+      id,
       message,
       type,
       progress: showProgress ? 0 : undefined,
       showProgress,
     };
-    this.notifications.push(notification);
-    this.notificationsSubject.next(this.notifications);
 
-    if (!showProgress) {
-      setTimeout(() => this.removeNotification(notification), 5000);
+    // Agregar nueva notificación de forma inmutable
+    this.notificationsSignal.update((notifications) => [
+      ...notifications,
+      notification,
+    ]);
+
+    // Auto-remover si tiene duración (usar setTimeout para no bloquear)
+    if (duration > 0 && !showProgress) {
+      setTimeout(() => this.removeNotificationById(id), duration);
     }
 
-    return notification.id;
+    return id;
   }
 
   updateProgress(notificationId: string, progress: number) {
-    const notification = this.notifications.find(
+    const currentNotifications = this.notificationsSignal();
+    const index = currentNotifications.findIndex(
       (n) => n.id === notificationId
     );
-    if (notification && notification.showProgress) {
-      notification.progress = Math.min(100, Math.max(0, progress));
-      this.notificationsSubject.next(this.notifications);
 
-      // Auto-remove when progress reaches 100%
+    if (index > -1 && currentNotifications[index].showProgress) {
+      const updatedProgress = Math.min(100, Math.max(0, progress));
+
+      // Actualizar de forma inmutable
+      this.notificationsSignal.update((notifications) =>
+        notifications.map((n, i) =>
+          i === index ? { ...n, progress: updatedProgress } : n
+        )
+      );
+
+      // Auto-remover cuando llega al 100%
       if (progress >= 100) {
         setTimeout(() => this.removeNotificationById(notificationId), 2000);
       }
     }
   }
 
-  removeNotification(notification: Notification) {
-    this.notifications = this.notifications.filter((n) => n !== notification);
-    this.notificationsSubject.next(this.notifications);
+  removeNotification(notification: Notification): void {
+    this.removeNotificationById(notification.id);
   }
 
-  removeNotificationById(notificationId: string) {
-    this.notifications = this.notifications.filter(
-      (n) => n.id !== notificationId
+  removeNotificationById(notificationId: string): void {
+    this.notificationsSignal.update((notifications) =>
+      notifications.filter((n) => n.id !== notificationId)
     );
-    this.notificationsSubject.next(this.notifications);
   }
 
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  clearAll(): void {
+    this.notificationsSignal.set([]);
   }
 }

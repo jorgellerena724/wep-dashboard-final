@@ -6,7 +6,7 @@
   >
     <!-- Contenedor para los botones de acción a la izquierda -->
     <div class="flex items-center gap-2">
-      @for (action of headerActions; track action) { @if
+      @for (action of headerActions(); track action) { @if
       (isHeaderActionVisible(action)) {
       <button
         pButton
@@ -50,8 +50,8 @@
 
   <p-table
     #dt
-    [value]="displayedData"
-    [columns]="columnsWithActions"
+    [value]="displayedData()"
+    [columns]="columnsWithActions()"
     styleClass="p-datatable-sm "
     [resizableColumns]="true"
     responsiveLayout="scroll "
@@ -60,7 +60,7 @@
   >
     <ng-template pTemplate="header">
       <tr>
-        @for (col of columnsWithActions; track col) {
+        @for (col of columnsWithActions(); track col) {
         <th
           [pSortableColumn]="
             col.field !== 'actions' && col.sortable ? col.field : undefined
@@ -94,7 +94,7 @@
             </div>
             }
           </div>
-          @if (col.filter && showFilterInput[col.field]) {
+          @if (col.filter && showFilterInput()[col.field]) {
           <div
             class="mt-2"
             [formGroup]="columnFiltersForm"
@@ -130,21 +130,21 @@
       <tr
         class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200"
       >
-        @for (col of columnsWithActions; track col) {
+        @for (col of columnsWithActions(); track col) {
         <td
           class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-gray-400 dark:border-gray-600"
         >
           @if (col.field !== 'actions') {
           <ng-container
             *ngTemplateOutlet="
-              customTemplates[col.field] || defaultTemplate;
+              customTemplates()[col.field] || defaultTemplate;
               context: { $implicit: rowData, field: col.field }
             "
           >
           </ng-container>
           } @else {
           <div class="flex items-center gap-2">
-            @for (action of rowActions; track action) { @if
+            @for (action of rowActions(); track action) { @if
             (isRowActionVisible(action, rowData)) {
             <button
               pButton
@@ -170,7 +170,7 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td
-          [attr.colspan]="columnsWithActions.length"
+          [attr.colspan]="columnsWithActions().length"
           class="text-center py-4 text-gray-500 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] italic"
         >
           {{ "table.nodata" | transloco }}
@@ -180,8 +180,9 @@
   </p-table>
   <div class="p-2 w-full">
     <p-paginator
-      [rows]="rowsPerPage"
-      [totalRecords]="totalRecords"
+      [rows]="rowsPerPage()"
+      [totalRecords]="totalRecords()"
+      [first]="first()"
       (onPageChange)="onPageChange($event)"
       [rowsPerPageOptions]="[7, 10, 15, 25]"
       currentPageReportTemplate="{{
@@ -195,6 +196,7 @@
   </div>
 </div>
 <style>
+  /* Inputs y Labels (Estilos generales HTML) - No necesitan ng-deep si están en tu template directo */
   input:focus,
   label:focus {
     outline: 1px solid #1f2937;
@@ -203,11 +205,14 @@
   label:focus {
     outline: 1px solid #e5e7eb;
   }
-
   input[type="text"] {
     font-weight: normal !important;
   }
-  .p-paginator {
+
+  /* --- PRIMENG OVERRIDES (Usamos ::ng-deep) --- */
+
+  /* Contenedor del Paginator */
+  :host ::ng-deep .p-paginator {
     min-height: 100px;
     display: flex;
     align-items: center;
@@ -220,139 +225,85 @@
     gap: var(--p-paginator-gap);
   }
 
-  .dark .p-paginator {
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
+  :host ::ng-deep .dark .p-paginator {
     background: #18181b;
-    color: var(--p-paginator-color);
-    padding: var(--p-paginator-padding);
-    border-radius: var(--p-paginator-border-radius);
-    gap: var(--p-paginator-gap);
   }
 
-  .dark .p-paginator-page.p-paginator-page-selected {
-    background: #1f2937;
+  /* Botón de página SELECCIONADA (Aquí estaba tu problema del verde) */
+  :host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+    background: #9ca3af !important; /* !important para asegurar que pise el tema default */
     pointer-events: none;
     color: white !important;
   }
 
-  .rotate-on-hover:hover {
-    animation: rotate 0.5s linear;
-  }
-
-  .p-paginator-page.p-paginator-page-selected {
-    background: #9ca3af;
-    pointer-events: none;
+  :host ::ng-deep .dark .p-paginator-page.p-paginator-page-selected {
+    background: #1f2937 !important;
     color: white !important;
   }
 
-  .dark .p-paginator-current {
-    color: #d1d5db;
+  /* Hover en botones */
+  :host ::ng-deep .p-paginator-page:hover,
+  :host ::ng-deep .p-paginator-next:hover,
+  :host ::ng-deep .p-paginator-last:hover,
+  :host ::ng-deep .p-paginator-first:hover,
+  :host ::ng-deep .p-paginator-prev:hover {
+    background: #d1d5db !important;
+    color: #343b46 !important;
   }
 
-  .p-paginator-current {
+  :host ::ng-deep .dark .p-paginator-page:hover,
+  :host ::ng-deep .dark .p-paginator-next:hover,
+  :host ::ng-deep .dark .p-paginator-last:hover,
+  :host ::ng-deep .dark .p-paginator-first:hover,
+  :host ::ng-deep .dark .p-paginator-prev:hover {
+    background: #343b46 !important;
+    color: #d1d5db !important;
+  }
+
+  /* Color de texto base de los botones */
+  :host ::ng-deep .p-paginator-page,
+  :host ::ng-deep .p-paginator-next,
+  :host ::ng-deep .p-paginator-last,
+  :host ::ng-deep .p-paginator-first,
+  :host ::ng-deep .p-paginator-prev,
+  :host ::ng-deep .p-paginator-current {
     color: #343b46;
   }
 
-  .dark .p-icon {
-    display: inline-block;
-    vertical-align: baseline;
+  :host ::ng-deep .dark .p-paginator-page,
+  :host ::ng-deep .dark .p-paginator-next,
+  :host ::ng-deep .dark .p-paginator-last,
+  :host ::ng-deep .dark .p-paginator-first,
+  :host ::ng-deep .dark .p-paginator-prev,
+  :host ::ng-deep .dark .p-paginator-current {
     color: #d1d5db;
   }
 
-  .p-icon {
-    display: inline-block;
-    vertical-align: baseline;
+  /* Iconos */
+  :host ::ng-deep .p-icon {
     color: #343b46;
   }
+  :host ::ng-deep .dark .p-icon {
+    color: #d1d5db;
+  }
 
-  .p-paginator-page:hover,
-  .p-paginator-next:hover,
-  .p-paginator-last:hover,
-  .p-paginator-first:hover,
-  .p-paginator-prev:hover {
+  /* Dropdown de opciones (Select) */
+  :host ::ng-deep .p-select-option.p-select-option-selected {
+    background: #9ca3af !important;
+    color: white !important;
+  }
+  :host ::ng-deep .dark .p-select-option.p-select-option-selected {
+    background: #1f2937 !important;
+    color: white !important;
+  }
+  :host ::ng-deep .p-select-option:hover {
     background: #d1d5db !important;
   }
-
-  .dark .p-paginator-page:hover,
-  .dark .p-paginator-next:hover,
-  .dark .p-paginator-last:hover,
-  .dark .p-paginator-first:hover,
-  .dark .p-paginator-prev:hover {
+  :host ::ng-deep .dark .p-select-option:hover {
     background: #343b46 !important;
   }
 
-  .p-select-option.p-select-option-selected {
-    background: #9ca3af;
-    color: white;
-  }
-
-  .p-select-option.p-select-option-selected:hover {
-    background: #9ca3af;
-    color: white;
-  }
-
-  .dark .p-select-option.p-select-option-selected {
-    background: #1f2937;
-    pointer-events: none;
-    color: white;
-  }
-
-  .dark .p-select-option.p-select-option-selected:hover {
-    background: #1f2937;
-    pointer-events: none;
-    color: white;
-  }
-
-  :root {
-    --p-select-focus-border-color: #1f2937 !important;
-  }
-
-  .dark {
-    --p-select-focus-border-color: #ffffff !important;
-  }
-
-  .p-select-option:hover {
-    background: #d1d5db;
-  }
-
-  .dark .p-select-option:hover {
-    background: #343b46;
-  }
-
-  .p-select-option {
-    color: #343b46;
-  }
-
-  .dark .p-select-option {
-    color: #d1d5db;
-  }
-
-  .p-paginator-page,
-  .p-paginator-next,
-  .p-paginator-last,
-  .p-paginator-first,
-  .p-paginator-prev {
-    color: #343b46;
-  }
-
-  .dark {
-    .p-paginator-page,
-    .p-paginator-next,
-    .p-paginator-last,
-    .p-paginator-first,
-    .p-paginator-prev {
-      color: #d1d5db;
-    }
-  }
-
-  .p-select-list {
-    flex-direction: row;
-  }
-
+  /* Animación custom */
   @keyframes rotate {
     from {
       transform: rotate(0deg);
@@ -361,19 +312,13 @@
       transform: rotate(360deg);
     }
   }
-
   .rotate-on-hover:hover {
     animation: rotate 0.5s linear;
   }
 
+  /* Media Queries */
   @media (max-width: 660px) {
-    .p-paginator {
-      min-height: 200px;
-    }
-  }
-
-  @media (max-width: 660px) {
-    .dark .p-paginator {
+    :host ::ng-deep .p-paginator {
       min-height: 200px;
     }
   }

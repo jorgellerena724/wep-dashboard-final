@@ -1,10 +1,13 @@
 import {
   Component,
   HostListener,
-  Inject,
-  OnInit,
-  OnDestroy,
   PLATFORM_ID,
+  DestroyRef,
+  inject,
+  signal,
+  computed,
+  effect,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   Router,
@@ -13,14 +16,14 @@ import {
   ActivatedRoute,
 } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { ModalComponent } from './shared/components/app-modal/app-modal.component';
 import { NotificationComponent } from './shared/components/app-notification/app-notification.component';
 import { ModalService } from './shared/services/system/modal.service';
 import { SidebarComponent } from '../app/components/layout/sidebar/sidebar.component';
 import { FooterComponent } from '../app/components/layout/footer/footer.component';
 import { CollapsedService } from '../app/shared/services/system/collapsed.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -35,80 +38,115 @@ import { CollapsedService } from '../app/shared/services/system/collapsed.servic
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit, OnDestroy {
-  title = 'wici-front';
-  showLayout = true;
-  isCollapsed = false;
-  isMobile = false;
-  private destroy$ = new Subject<void>();
+export class AppComponent {
+  // Inyección de servicios
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private modalService = inject(ModalService);
+  private collapsedService = inject(CollapsedService);
+  private destroyRef = inject(DestroyRef);
+  private platformId = inject(PLATFORM_ID);
 
-  constructor(
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private modalService: ModalService,
-    private collapsedService: CollapsedService,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        // Verificar si la ruta actual es la página de login
-        if (event.url.includes('/login')) {
-          // Cerrar el modal globalmente
-          this.modalService.close();
-        }
-      }
+  // Signals para estado
+  showLayout = signal<boolean>(true);
+  isCollapsed = signal<boolean>(false);
+  isMobile = signal<boolean>(false);
+
+  // Computed para clases dinámicas
+  mainClasses = computed(() => {
+    if (this.isMobile()) {
+      return 'ml-0';
+    } else if (this.isCollapsed()) {
+      return 'ml-20';
+    } else {
+      return 'ml-64';
+    }
+  });
+
+  footerClasses = computed(() => {
+    if (this.isMobile()) {
+      return 'ml-0';
+    } else if (this.isCollapsed()) {
+      return 'ml-20';
+    } else {
+      return 'ml-64';
+    }
+  });
+
+  constructor() {
+    // Effect para manejar cambios de ruta y showLayout
+    effect(() => {
+      const subscription = this.router.events
+        .pipe(
+          filter((event) => event instanceof NavigationEnd),
+          map(() => {
+            let route = this.activatedRoute;
+            while (route.firstChild) {
+              route = route.firstChild;
+            }
+            return route;
+          }),
+          mergeMap((route) => route.data),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe((data) => {
+          this.showLayout.set(data['layout'] !== false);
+        });
+
+      return () => subscription.unsubscribe();
     });
-  }
 
-  ngOnInit(): void {
-    this.checkScreenSize();
-
-    // Suscribirse al estado del sidebar para actualizar isCollapsed
-    this.collapsedService.sidebarCollapsed$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((collapsed) => {
-        this.isCollapsed = collapsed;
-      });
-
-    // Suscribirse al estado móvil
-    this.collapsedService.isMobile$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((isMobile) => {
-        this.isMobile = isMobile;
-        // Si cambia a móvil, asegurarse que el layout se ajusta correctamente
-        if (isMobile && this.showLayout) {
-          // Forzar el colapso del sidebar en móvil
-          this.collapsedService.setSidebarState(true);
-        }
-      });
-
-    // Detectar cambios en la ruta activa
-    this.router.events
-      .pipe(
-        takeUntil(this.destroy$),
-        filter((event) => event instanceof NavigationEnd),
-        map(() => {
-          let route = this.activatedRoute;
-          while (route.firstChild) {
-            route = route.firstChild;
+    // Effect para cerrar modal en login
+    effect(() => {
+      const subscription = this.router.events
+        .pipe(
+          filter((event) => event instanceof NavigationEnd),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe((event: NavigationEnd) => {
+          if (event.url.includes('/login')) {
+            this.modalService.close();
           }
-          return route;
-        }),
-        mergeMap((route) => route.data)
-      )
-      .subscribe((data) => {
-        this.showLayout = data['layout'] !== false;
-      });
+        });
+
+      return () => subscription.unsubscribe();
+    });
+
+    // Effect para suscribirse al estado del sidebar
+    effect(() => {
+      const subscription = this.collapsedService.sidebarCollapsed$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((collapsed) => {
+          this.isCollapsed.set(collapsed);
+        });
+
+      return () => subscription.unsubscribe();
+    });
+
+    // Effect para suscribirse al estado móvil
+    effect(() => {
+      const subscription = this.collapsedService.isMobile$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((mobile) => {
+          this.isMobile.set(mobile);
+
+          // Si cambia a móvil, asegurarse que el layout se ajusta correctamente
+          if (mobile && this.showLayout()) {
+            // Forzar el colapso del sidebar en móvil
+            this.collapsedService.setSidebarState(true);
+          }
+        });
+
+      return () => subscription.unsubscribe();
+    });
+
+    // Inicializar tamaño de pantalla
+    this.checkScreenSize();
   }
 
-  ngOnDestroy(): void {
-    // Limpiar todas las suscripciones cuando el componente se destruye
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.checkScreenSize();
   }
@@ -118,12 +156,12 @@ export class AppComponent implements OnInit, OnDestroy {
       const newIsMobile = window.innerWidth <= 768;
 
       // Actualizar el estado móvil solo si ha cambiado
-      if (this.isMobile !== newIsMobile) {
-        this.isMobile = newIsMobile;
-        this.collapsedService.setMobileState(this.isMobile);
+      if (this.isMobile() !== newIsMobile) {
+        this.isMobile.set(newIsMobile);
+        this.collapsedService.setMobileState(this.isMobile());
 
         // En móvil, asegurarse de que el sidebar esté colapsado
-        if (this.isMobile) {
+        if (this.isMobile()) {
           this.collapsedService.setSidebarState(true);
         }
       }

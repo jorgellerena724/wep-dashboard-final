@@ -1,8 +1,17 @@
-import { Component, inject, Inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  inject,
+  PLATFORM_ID,
+  signal,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  computed,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -11,40 +20,45 @@ import { NotificationService } from '../../../shared/services/system/notificatio
 import { HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { take } from 'rxjs/operators';
-
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
   imports: [ReactiveFormsModule, TranslocoModule],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  // --- Inyección de dependencias ---
-  // Se mantiene la inyección de TranslocoService que ya tenías
+  // Servicios
   private transloco = inject(TranslocoService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private notificationSrv = inject(NotificationService);
+  private destroyRef = inject(DestroyRef);
+  private platformId = inject(PLATFORM_ID);
 
-  // --- Propiedades del componente ---
+  protected readonly imgPath = environment.imgPath;
+
+  // Signals
+  isLoading = signal<boolean>(false);
+  languageMenuOpen = signal<boolean>(false);
+  currentLanguageIcon = signal<string>(`${this.imgPath}españa.ico`);
+  currentLanguage = signal<string>('Español');
+  currentLanguageCode = signal<string>('es');
+  showPassword = signal<boolean>(false);
+
+  // Formulario
   loginForm: FormGroup;
-  showPassword = false;
-  isLoading = false;
-  languageMenuOpen = false;
-  currentLanguageIcon: string = 'assets/img/españa.ico';
-  currentLanguage: string = 'Español';
-  currentLanguageCode: string = 'es';
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor() {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
 
-    // Sincronizar el idioma al iniciar el componente y respetar el guardado en localStorage
+    // Sincronizar el idioma al iniciar el componente
     if (isPlatformBrowser(this.platformId)) {
       const savedLang = localStorage.getItem('selectedLang');
       const active = this.transloco.getActiveLang();
@@ -54,17 +68,21 @@ export class LoginComponent {
     }
 
     this.syncWithTransloco();
-    this.transloco.langChanges$.subscribe((lang) => {
-      this.updateLanguageDisplay(lang);
-    });
-  }
 
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
+    // Suscripción a cambios de idioma
+    this.transloco.langChanges$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((lang) => {
+        this.updateLanguageDisplay(lang);
+      });
   }
 
   toggleLanguageMenu() {
-    this.languageMenuOpen = !this.languageMenuOpen;
+    this.languageMenuOpen.update((v) => !v);
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword.update((v) => !v);
   }
 
   private syncWithTransloco() {
@@ -73,92 +91,113 @@ export class LoginComponent {
   }
 
   private updateLanguageDisplay(lang: string) {
-    this.currentLanguageCode = lang;
+    this.currentLanguageCode.set(lang);
+
     if (lang === 'es') {
-      this.currentLanguageIcon = 'assets/img/españa.ico';
+      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
       this.transloco
         .selectTranslate('language.es')
-        .pipe(take(1))
-        .subscribe((t) => (this.currentLanguage = t));
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((t) => this.currentLanguage.set(t));
     } else if (lang === 'en') {
-      this.currentLanguageIcon = 'assets/img/eeuu.ico';
+      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
       this.transloco
         .selectTranslate('language.en')
-        .pipe(take(1))
-        .subscribe((t) => (this.currentLanguage = t));
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((t) => this.currentLanguage.set(t));
     }
   }
 
   selectLanguage(lang: string) {
-    this.currentLanguageCode = lang;
+    this.currentLanguageCode.set(lang);
     this.transloco.setActiveLang(lang);
+
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('selectedLang', lang);
     }
+
     this.updateLanguageDisplay(lang);
-    this.languageMenuOpen = false;
+    this.languageMenuOpen.set(false);
   }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      this.isLoading = true;
+      this.isLoading.set(true);
       const { email, password } = this.loginForm.value;
 
-      this.authService.login(email, password).subscribe({
-        next: (success) => {
-          if (success) {
-            this.transloco
-              .selectTranslate('notifications.login.success')
-              .pipe(take(1))
-              .subscribe((successMessage) => {
-                this.notificationSrv.addNotification(successMessage, 'success');
-                this.router.navigate(['/admin']);
-              });
-          }
-          this.isLoading = false;
-        },
-        error: (errorResponse: HttpErrorResponse) => {
-          this.isLoading = false;
-          const serverErrorMessage = errorResponse?.error?.message;
-          const statusCode = errorResponse?.status || 500;
-          let notificationMessage: string;
+      this.authService
+        .login(email, password)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (success) => {
+            if (success) {
+              this.transloco
+                .selectTranslate('notifications.login.success')
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe((successMessage) => {
+                  this.notificationSrv.addNotification(
+                    successMessage,
+                    'success'
+                  );
+                  this.router.navigate(['/admin']);
+                });
+            }
+            this.isLoading.set(false);
+          },
+          error: (errorResponse: HttpErrorResponse) => {
+            this.isLoading.set(false);
+            const serverErrorMessage = errorResponse?.error?.message;
+            const statusCode = errorResponse?.status || 500;
+            let notificationMessage: string;
 
-          // Lógica para seleccionar el mensaje traducido según el código de estado
-          switch (statusCode) {
-            case 400:
-              notificationMessage = serverErrorMessage || 'notifications.login.error.badRequest';
-              break;
-            case 401:
-              notificationMessage = serverErrorMessage || 'notifications.login.error.invalidCredentials';
-              break;
-            case 500:
-              notificationMessage = 'notifications.login.error.serverError';
-              break;
-            case 502:
-            case 0: // El status 0 suele indicar un error de conexión
-              notificationMessage = 'notifications.login.error.connectionError';
-              break;
-            default:
-              notificationMessage = serverErrorMessage || 'notifications.login.error.unexpected';
-              break;
-          }
+            switch (statusCode) {
+              case 400:
+                notificationMessage =
+                  serverErrorMessage || 'notifications.login.error.badRequest';
+                break;
+              case 401:
+                notificationMessage =
+                  serverErrorMessage ||
+                  'notifications.login.error.invalidCredentials';
+                break;
+              case 404:
+                notificationMessage =
+                  serverErrorMessage ||
+                  'notifications.login.error.invalidCredentials';
+                break;
+              case 500:
+                notificationMessage = 'notifications.login.error.serverError';
+                break;
+              case 502:
+              case 0:
+                notificationMessage =
+                  'notifications.login.error.connectionError';
+                break;
+              default:
+                notificationMessage =
+                  serverErrorMessage || 'notifications.login.error.unexpected';
+                break;
+            }
 
-          if (serverErrorMessage) {
-            this.notificationSrv.addNotification(serverErrorMessage, 'error');
-          } else {
-            this.transloco
-              .selectTranslate(notificationMessage)
-              .pipe(take(1))
-              .subscribe((msg) => this.notificationSrv.addNotification(msg, 'error'));
-          }
-        },
-      });
+            if (serverErrorMessage) {
+              this.notificationSrv.addNotification(serverErrorMessage, 'error');
+            } else {
+              this.transloco
+                .selectTranslate(notificationMessage)
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe((msg) =>
+                  this.notificationSrv.addNotification(msg, 'error')
+                );
+            }
+          },
+        });
     } else {
-      // Usar traducción reactiva para evitar condiciones de carrera
       this.transloco
         .selectTranslate('notifications.login.error.invalidForm')
-        .pipe(take(1))
-        .subscribe((invalidFormMessage) => this.notificationSrv.addNotification(invalidFormMessage, 'error'));
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((invalidFormMessage) =>
+          this.notificationSrv.addNotification(invalidFormMessage, 'error')
+        );
       this.loginForm.markAllAsTouched();
     }
   }
