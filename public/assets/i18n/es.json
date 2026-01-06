@@ -450,7 +450,8 @@
         "title": "Modelos de IA",
         "table": {
           "name": "Nombre del modelo",
-          "provider": "Proveedor"
+          "provider": "Proveedor",
+          "daily_token_limit": "Límite diario de tokens"
         }
       },
       "create": {
@@ -464,6 +465,11 @@
           "provider": {
             "title": "Proveedor",
             "required": "El nombre del proveedor es requerido"
+          },
+          "daily_token_limit": {
+            "title": "Límite diario de tokens",
+            "required": "El límite diario de tokens es requerido",
+            "min": "El límite debe ser al menos 1"
           }
         }
       },

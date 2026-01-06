@@ -23,6 +23,21 @@
       }"
     ></app-text-field>
   </div>
+  <div class="mb-4">
+    <app-text-field
+      id="daily_token_limit"
+      label="{{
+        'components.chatbot_model.create.fields.daily_token_limit.title'
+          | transloco
+      }}"
+      type="number"
+      [control]="getFormControl('daily_token_limit')"
+      [errorMessages]="{
+        required: ( 'components.chatbot_model.create.fields.daily_token_limit.required' | transloco ),
+        min: ( 'components.chatbot_model.create.fields.daily_token_limit.min' | transloco ),
+      }"
+    ></app-text-field>
+  </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
 </form>
 <style>

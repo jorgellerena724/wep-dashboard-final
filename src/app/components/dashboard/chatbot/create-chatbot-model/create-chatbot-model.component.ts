@@ -47,6 +47,7 @@ export class CreateChatbotModelComponent {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       provider: ['', Validators.required],
+      daily_token_limit: ['', [Validators.required, Validators.min(1)]],
     });
 
     effect(() => {
@@ -75,6 +76,7 @@ export class CreateChatbotModelComponent {
     const body = {
       name: this.form.get('name')?.value,
       provider: this.form.get('provider')?.value,
+      daily_token_limit: this.form.get('daily_token_limit')?.value,
     };
 
     this.srv.postModel(body).subscribe({

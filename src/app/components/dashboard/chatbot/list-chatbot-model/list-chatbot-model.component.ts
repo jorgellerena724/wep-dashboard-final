@@ -57,6 +57,9 @@ export class ListChatbotModelComponent {
     const providerTranslation = this.transloco.translate(
       'components.chatbot_model.list.table.provider'
     );
+    const tokenLimitTranslation = this.transloco.translate(
+      'components.chatbot_model.list.table.daily_token_limit'
+    );
 
     return [
       {
@@ -68,6 +71,12 @@ export class ListChatbotModelComponent {
       {
         field: 'provider',
         header: providerTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'daily_token_limit',
+        header: tokenLimitTranslation,
         sortable: true,
         filter: true,
       },
