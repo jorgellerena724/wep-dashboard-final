@@ -72,6 +72,7 @@ export class NavbarComponent {
   isContactSubmenuOpen = signal(false);
   isHeaderSubmenuOpen = signal(false);
   isUsersSubmenuOpen = signal(false);
+  isChatbotSubmenuOpen = signal(false);
   languageMenuOpen = signal(false);
   userMenuOpen = signal(false);
 
@@ -128,6 +129,11 @@ export class NavbarComponent {
 
   isUsersRouteActive = computed(() => {
     return this.currentUrl().includes('/users');
+  });
+
+  isChatbotRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return url.includes('/chatbot-models') || url.includes('/chatbot-config');
   });
 
   // Computed para cliente
@@ -398,6 +404,10 @@ export class NavbarComponent {
     this.isUsersSubmenuOpen.update((v) => !v);
   }
 
+  toggleChatbotSubmenu(): void {
+    this.isChatbotSubmenuOpen.update((v) => !v);
+  }
+
   toggleUserMenu(): void {
     this.userMenuOpen.update((v) => !v);
   }
@@ -410,6 +420,7 @@ export class NavbarComponent {
     if (except !== 'contact') this.isContactSubmenuOpen.set(false);
     if (except !== 'header') this.isHeaderSubmenuOpen.set(false);
     if (except !== 'users') this.isUsersSubmenuOpen.set(false);
+    if (except !== 'chatbot') this.isChatbotSubmenuOpen.set(false);
   }
 
   onNavItemClick(parent: string | null) {
