@@ -480,18 +480,7 @@
         }
       },
       "edit": {
-        "title": "Modificar Modelo de IA",
-        "fields": {
-          "name": {
-            "title": "Nombre del modelo",
-            "required": "El modelo de IA es requerido",
-            "minlength": "El nombre debe de tener al menos 3 caracteres."
-          },
-          "provider": {
-            "title": "Proveedor",
-            "required": "El nombre del proveedor es requerido"
-          }
-        }
+        "title": "Modificar Modelo de IA"
       }
     },
     "header": {

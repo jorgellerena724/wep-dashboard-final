@@ -474,18 +474,7 @@
         }
       },
       "edit": {
-        "title": "Modify AI Model",
-        "fields": {
-          "name": {
-            "title": "Model Name",
-            "required": "AI model is required",
-            "minlength": "Name must be at least 3 characters."
-          },
-          "provider": {
-            "title": "Provider",
-            "required": "Provider name is required"
-          }
-        }
+        "title": "Modify AI Model"
       }
     },
     "header": {

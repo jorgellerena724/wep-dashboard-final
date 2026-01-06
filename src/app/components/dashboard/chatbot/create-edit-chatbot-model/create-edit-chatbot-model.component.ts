@@ -22,13 +22,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 
 @Component({
-  selector: 'app-create-chatbot-model',
-  templateUrl: './create-chatbot-model.component.html',
+  selector: 'app-create-edit-chatbot-model',
+  templateUrl: './create-edit-chatbot-model.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateChatbotModelComponent {
+export class CreateEditChatbotModelComponent {
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private srv = inject(ChatbotService);
@@ -54,7 +54,11 @@ export class CreateChatbotModelComponent {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          this.form.patchValue(data);
+          this.form.patchValue({
+            name: data.name,
+            provider: data.provider,
+            daily_token_limit: data.daily_token_limit, // Agregar este campo
+          });
           this.id.set(data.id || 0);
         });
       }
@@ -79,11 +83,18 @@ export class CreateChatbotModelComponent {
       daily_token_limit: this.form.get('daily_token_limit')?.value,
     };
 
-    this.srv.postModel(body).subscribe({
+    const request$ =
+      this.id() > 0
+        ? this.srv.patchModel(body, this.id())
+        : this.srv.postModel(body);
+
+    request$.subscribe({
       next: () => {
         this.notificationSrv.addNotification(
           this.transloco.translate(
-            'notifications.chatbot_model.success.created'
+            this.id() > 0
+              ? 'notifications.chatbot_model.success.updated'
+              : 'notifications.chatbot_model.success.created'
           ),
           'success'
         );

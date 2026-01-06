@@ -25,9 +25,8 @@ import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
-import { CreateChatbotModelComponent } from '../create-chatbot-model/create-chatbot-model.component';
+import { CreateEditChatbotModelComponent } from '../create-edit-chatbot-model/create-edit-chatbot-model.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UpdateChatbotModelComponent } from '../update-chatbot-model/update-chatbot-model.component';
 
 @Component({
   selector: 'app-list-chatbot-model',
@@ -161,7 +160,7 @@ export class ListChatbotModelComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateChatbotModelComponent,
+      component: CreateEditChatbotModelComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -180,7 +179,7 @@ export class ListChatbotModelComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateChatbotModelComponent,
+      component: CreateEditChatbotModelComponent,
       data: {
         initialData: {
           ...data,
