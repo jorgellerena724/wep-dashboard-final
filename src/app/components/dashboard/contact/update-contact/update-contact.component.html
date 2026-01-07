@@ -43,7 +43,7 @@
 
     @if (socialNetworks().length > 0) {
     <div class="space-y-3">
-      @for (network of socialNetworks(); track network; let i = $index) {
+      @for (network of socialNetworks(); track $index; let i = $index) {
       <div
         class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
       >

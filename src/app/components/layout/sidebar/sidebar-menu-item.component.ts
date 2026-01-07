@@ -64,7 +64,7 @@ export interface MenuItem {
         }"
       >
         <div class="ml-6 mt-1">
-          @for (child of children; track child) {
+          @for (child of children; track child.label) {
           <div>
             <a
               [routerLink]="child.route"

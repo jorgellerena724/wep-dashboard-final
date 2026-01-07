@@ -60,7 +60,7 @@
     <!-- Lista de variantes existentes -->
     @if (variants().length > 0) {
     <div class="space-y-3">
-      @for (variant of variants(); track variant; let i = $index) {
+      @for (variant of variants(); track $index; let i = $index) {
       <div
         class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
       >
@@ -183,7 +183,7 @@
     <!-- Lista de archivos cargados -->
     @if (productFiles().length > 0) {
     <div class="space-y-4">
-      @for (productFile of productFiles(); track productFile; let i = $index) {
+      @for (productFile of productFiles(); track $index; let i = $index) {
       <div
         class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black relative"
       >
