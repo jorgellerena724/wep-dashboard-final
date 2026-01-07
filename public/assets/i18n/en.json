@@ -392,7 +392,9 @@
         "table": {
           "name": "User Name",
           "model": "AI Model Name",
-          "status": "Status"
+          "status": "Status",
+          "tokens_remaining": "Tokens Remaining",
+          "tokens_limit": "Token Limit"
         },
         "errors": {}
       },
@@ -443,7 +445,8 @@
         "title": "AI Models",
         "table": {
           "name": "Model Name",
-          "provider": "Provider"
+          "provider": "Provider",
+          "daily_token_limit": "Daily Token Limit"
         }
       },
       "create": {
@@ -457,6 +460,11 @@
           "provider": {
             "title": "Provider",
             "required": "Provider name is required"
+          },
+          "daily_token_limit": {
+            "title": "Daily Token Limit",
+            "required": "Daily token limit is required",
+            "min": "Limit must be at least 1"
           }
         }
       },

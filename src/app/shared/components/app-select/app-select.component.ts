@@ -22,6 +22,7 @@ import {
 } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ThemeService } from '../../../core/services/theme.service';
+import { TranslocoModule } from '@jsverse/transloco';
 
 interface SelectOption {
   label: string;
@@ -32,7 +33,13 @@ interface SelectOption {
 @Component({
   selector: 'app-select',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, FloatLabelModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    FloatLabelModule,
+    TranslocoModule,
+  ],
   templateUrl: './app-select.component.html',
   styleUrl: './app-select.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
