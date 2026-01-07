@@ -1180,7 +1180,6 @@
         "title": "Contact",
         "table": {
           "email": "Email",
-          "phone": "Phone",
           "address": "Address"
         }
       },
@@ -1193,11 +1192,15 @@
             "minlength": "Email must be at least 3 characters",
             "maxlength": "Email must be up to 20 characters"
           },
-          "phone": {
-            "title": "Phone",
-            "required": "Phone is required",
-            "minlength": "Phone must be at least 6 characters",
-            "maxlength": "Phone must be up to 20 characters"
+          "socialNetworks": {
+            "title": "Social Media",
+            "network": "Red Social",
+            "copyUrl": "Copy URL",
+            "delete": "Delete",
+            "url": "Social Media Url",
+            "username": "username",
+            "activate": "Activate",
+            "deactivate": "Deactivate"
           },
           "address": {
             "title": "Address",

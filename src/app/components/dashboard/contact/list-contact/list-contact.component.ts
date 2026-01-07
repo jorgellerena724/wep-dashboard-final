@@ -3,6 +3,7 @@ import {
   inject,
   signal,
   computed,
+  effect,
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
@@ -24,7 +25,7 @@ import { ContactService } from '../../../../shared/services/features/contact.ser
 import { UpdateContactComponent } from '../update-contact/update-contact.component';
 import { ContactData } from '../../../../shared/interfaces/contact.interface';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-contact',
@@ -45,38 +46,34 @@ export class ListContactComponent {
   data = signal<ContactData[]>([]);
   loading = signal<boolean>(false);
 
-  // Signals reactivos para traducciones de columnas
-  private emailTranslation = toSignal(
-    this.transloco.selectTranslate('components.contact.list.table.email'),
-    { initialValue: '' }
-  );
-  private phoneTranslation = toSignal(
-    this.transloco.selectTranslate('components.contact.list.table.phone'),
-    { initialValue: '' }
-  );
-  private addressTranslation = toSignal(
-    this.transloco.selectTranslate('components.contact.list.table.address'),
-    { initialValue: '' }
-  );
-
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
+    const emailTranslation = this.transloco.translate(
+      'components.contact.list.table.email'
+    );
+    const phoneTranslation = this.transloco.translate(
+      'components.contact.list.table.phone'
+    );
+    const addressTranslation = this.transloco.translate(
+      'components.contact.list.table.address'
+    );
+
     return [
       {
         field: 'email',
-        header: this.emailTranslation(),
+        header: emailTranslation,
         sortable: true,
         filter: true,
       },
       {
         field: 'phone',
-        header: this.phoneTranslation(),
+        header: phoneTranslation,
         sortable: true,
         filter: true,
       },
       {
         field: 'address',
-        header: this.addressTranslation(),
+        header: addressTranslation,
         sortable: true,
         filter: true,
       },
@@ -85,16 +82,12 @@ export class ListContactComponent {
 
   headerActions = computed<TableAction[]>(() => []);
 
-  // Signal reactivo para traducción de acción
-  private editTranslation = toSignal(
-    this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
-  );
-
   rowActions = computed<RowAction[]>(() => {
+    const editTranslation = this.transloco.translate('table.buttons.edit');
+
     return [
       {
-        label: this.editTranslation(),
+        label: editTranslation,
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
@@ -114,6 +107,13 @@ export class ListContactComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
+
+    // Effect para recargar cuando cambie el idioma
+    effect(() => {
+      // Acceder a las computed properties para que se activen las dependencias
+      this.columns();
+      this.rowActions();
+    });
   }
 
   loadData(): void {

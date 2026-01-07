@@ -1172,13 +1172,18 @@
             "title": "Correo",
             "required": "El correo es requerido",
             "minlength": "El correo debe tener al menos 3 caracteres",
-            "maxlength": "El correo debe tener hasta 20 caracteres"
+            "maxlength": "El correo debe tener hasta 20 caracteres",
+            "email": "El correo electrónico no es válido"
           },
-          "phone": {
-            "title": "Teléfono",
-            "required": "El teléfono es requerido",
-            "minlength": "El teléfono debe tener al menos 6 caracteres",
-            "maxlength": "El teléfono debe tener hasta 20 caracteres"
+          "socialNetworks": {
+            "title": "Redes Sociales",
+            "network": "Red Social",
+            "copyUrl": "Copiar URL",
+            "delete": "Eliminar",
+            "url": "Url de la red social",
+            "username": "Nombre de usuario",
+            "activate": "Activar",
+            "deactivate": "Desactivar"
           },
           "address": {
             "title": "Dirección",
