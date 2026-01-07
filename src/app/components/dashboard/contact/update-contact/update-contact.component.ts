@@ -25,6 +25,10 @@ import { ContactService } from '../../../../shared/services/features/contact.ser
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TooltipModule } from 'primeng/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { buttonVariants } from '../../../../core/constants/button-variant.constant';
+import { icons } from '../../../../core/constants/icons.constant';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 interface SocialNetwork {
   network: string;
@@ -42,6 +46,7 @@ interface SocialNetwork {
     TextFieldComponent,
     TranslocoModule,
     TooltipModule,
+    ButtonModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -86,6 +91,16 @@ export class UpdateContactComponent implements DynamicComponent {
 
   updateErrorMessage = computed(() =>
     this.transloco.translate('notifications.contact.error.update')
+  );
+
+  // Signals reactivos para traducciones de botones
+  private disableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
+    { initialValue: '' }
+  );
+  private enableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' }
   );
 
   constructor() {
@@ -136,7 +151,7 @@ export class UpdateContactComponent implements DynamicComponent {
     this.socialNetworks.set([]);
     this.socialNetworksFormArray.clear();
 
-    socialNetworksData.forEach((network: SocialNetwork) => {
+    socialNetworksData.forEach((network: SocialNetwork, index: number) => {
       const networkGroup = this.fb.group({
         network: [network.network || '', Validators.required],
         url: [network.url || '', Validators.required],
@@ -149,6 +164,16 @@ export class UpdateContactComponent implements DynamicComponent {
 
       this.socialNetworksFormArray.push(networkGroup);
       this.socialNetworks.update((networks) => [...networks, network]);
+
+      // Suscribirse a cambios del control de URL después de agregar al array
+      const urlControl = networkGroup.get('url') as FormControl;
+      if (urlControl) {
+        urlControl.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => {
+            this.onUrlChange(index);
+          });
+      }
     });
   }
 
@@ -165,6 +190,18 @@ export class UpdateContactComponent implements DynamicComponent {
     this.updateUsernameValidation(networkGroup);
 
     this.socialNetworksFormArray.push(networkGroup);
+    const currentIndex = this.socialNetworksFormArray.length - 1;
+
+    // Suscribirse a cambios del control de URL después de agregar al array
+    const urlControl = networkGroup.get('url') as FormControl;
+    if (urlControl) {
+      urlControl.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          this.onUrlChange(currentIndex);
+        });
+    }
+
     this.socialNetworks.update((networks) => [
       ...networks,
       {
@@ -442,5 +479,42 @@ export class UpdateContactComponent implements DynamicComponent {
     }
 
     return '';
+  }
+
+  // Obtener label del campo username con asterisco si es requerido
+  getUsernameLabel(index: number): string {
+    const baseLabel = this.transloco.translate(
+      'components.contact.edit.fields.socialNetworks.username'
+    );
+    return this.isUsernameRequired(index) ? `${baseLabel} *` : baseLabel;
+  }
+
+  // Obtener placeholder del campo username
+  getUsernamePlaceholder(index: number): string {
+    const activeControl = this.getSocialNetworkControl(index, 'active');
+    const key = activeControl.value
+      ? 'components.contact.edit.fields.socialNetworks.usernamePlaceholderActive'
+      : 'components.contact.edit.fields.socialNetworks.usernamePlaceholderInactive';
+    return this.transloco.translate(key);
+  }
+
+  // Métodos para el botón de activar/desactivar
+  getToggleIcon(index: number): string {
+    const activeControl = this.getSocialNetworkControl(index, 'active');
+    return activeControl.value ? icons['activate'] : icons['deactivate'];
+  }
+
+  getToggleTooltip(index: number): string {
+    const activeControl = this.getSocialNetworkControl(index, 'active');
+    return activeControl.value
+      ? this.disableTranslation()
+      : this.enableTranslation();
+  }
+
+  getToggleClass(index: number): string {
+    const activeControl = this.getSocialNetworkControl(index, 'active');
+    return activeControl.value
+      ? buttonVariants.outline.gray
+      : buttonVariants.outline.neutral;
   }
 }

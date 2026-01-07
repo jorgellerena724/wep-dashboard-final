@@ -1211,7 +1211,7 @@
             "urlRequired": "URL is required",
             "usernameRequired": "Username is required",
             "urlInvalid": "URL is not valid",
-            "addFirst": "Add first social network",
+            "addFirst": "Add",
             "networkPlaceholder": "E.g: Facebook, Instagram, LinkedIn, etc.",
             "urlPlaceholder": "https://example.com",
             "usernamePlaceholderActive": "E.g: user123",
