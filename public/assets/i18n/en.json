@@ -250,6 +250,9 @@
         "load": "Error loading chatbot configurations",
         "duplicateName": "A model with this name already exists."
       }
+    },
+    "general": {
+      "copied": "Copied to clipboard"
     }
   },
   "language": {
@@ -1180,6 +1183,7 @@
         "title": "Contact",
         "table": {
           "email": "Email",
+          "phone": "Phone",
           "address": "Address"
         }
       },
@@ -1190,17 +1194,28 @@
             "title": "Email",
             "required": "Email is required",
             "minlength": "Email must be at least 3 characters",
-            "maxlength": "Email must be up to 20 characters"
+            "maxlength": "Email must be up to 20 characters",
+            "email": "The email address is not valid"
           },
           "socialNetworks": {
             "title": "Social Media",
-            "network": "Red Social",
+            "network": "Social Network",
             "copyUrl": "Copy URL",
             "delete": "Delete",
             "url": "Social Media Url",
-            "username": "username",
+            "username": "Username",
             "activate": "Activate",
-            "deactivate": "Deactivate"
+            "deactivate": "Deactivate",
+            "empty": "No social networks added",
+            "networkRequired": "Social network is required",
+            "urlRequired": "URL is required",
+            "usernameRequired": "Username is required",
+            "urlInvalid": "URL is not valid",
+            "addFirst": "Add first social network",
+            "networkPlaceholder": "E.g: Facebook, Instagram, LinkedIn, etc.",
+            "urlPlaceholder": "https://example.com",
+            "usernamePlaceholderActive": "E.g: user123",
+            "usernamePlaceholderInactive": "Optional"
           },
           "address": {
             "title": "Address",

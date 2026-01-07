@@ -251,6 +251,9 @@
         "duplicateName": "Ya existe un modelo con este nombre.",
         "cannotDelete": "No se puede eliminar el modelo, está siendo usado en una configuración."
       }
+    },
+    "general": {
+      "copied": "Copiado al portapapeles"
     }
   },
   "language": {
@@ -1183,7 +1186,17 @@
             "url": "Url de la red social",
             "username": "Nombre de usuario",
             "activate": "Activar",
-            "deactivate": "Desactivar"
+            "deactivate": "Desactivar",
+            "empty": "No hay redes sociales agregadas",
+            "networkRequired": "La red social es requerida",
+            "urlRequired": "La URL es requerida",
+            "usernameRequired": "El nombre de usuario es requerido",
+            "urlInvalid": "La URL no es válida",
+            "addFirst": "Agregar primera red social",
+            "networkPlaceholder": "Ej: Facebook, Instagram, LinkedIn, etc.",
+            "urlPlaceholder": "https://ejemplo.com",
+            "usernamePlaceholderActive": "Ej: usuario123",
+            "usernamePlaceholderInactive": "Opcional"
           },
           "address": {
             "title": "Dirección",
