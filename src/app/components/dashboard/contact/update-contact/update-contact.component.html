@@ -53,7 +53,8 @@
           <app-text-field
             [id]="'network-name-' + i"
             [label]="
-              'components.contact.edit.fields.socialNetworks.title' | transloco
+              'components.contact.edit.fields.socialNetworks.network'
+                | transloco
             "
             [control]="getSocialNetworkControl(i, 'network')"
             [placeholder]="

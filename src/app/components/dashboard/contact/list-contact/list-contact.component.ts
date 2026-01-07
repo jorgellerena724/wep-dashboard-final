@@ -69,12 +69,6 @@ export class ListContactComponent {
         filter: true,
       },
       {
-        field: 'phone',
-        header: this.phoneTranslation(),
-        sortable: true,
-        filter: true,
-      },
-      {
         field: 'address',
         header: this.addressTranslation(),
         sortable: true,
