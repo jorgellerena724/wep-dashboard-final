@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   ChangeDetectionStrategy,
   DestroyRef,
   viewChild,
@@ -27,7 +26,7 @@ import { icons } from '../../../../core/constants/icons.constant';
 import { UpdateHeaderComponent } from '../update-header/update-header.component';
 import { HeaderData } from '../../../../shared/interfaces/headerData.interface';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-header',
@@ -57,25 +56,28 @@ export class ListHeaderComponent {
     return template ? { image: template } : {};
   });
 
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.header.list.table.name'),
+    { initialValue: '' }
+  );
+  private imageTranslation = toSignal(
+    this.transloco.selectTranslate('components.header.list.table.image'),
+    { initialValue: '' }
+  );
+
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.header.list.table.name'
-    );
-    const imageTranslation = this.transloco.translate(
-      'components.header.list.table.image'
-    );
-
     return [
       {
         field: 'name',
-        header: nameTranslation,
+        header: this.nameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'image',
-        header: imageTranslation,
+        header: this.imageTranslation(),
         width: '240px',
       },
     ];
@@ -85,11 +87,16 @@ export class ListHeaderComponent {
     return []; // Este componente no tiene acciones de header
   });
 
+  // Signal reactivo para traducción de acción
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
@@ -100,11 +107,6 @@ export class ListHeaderComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Efecto para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('components.header.list.table.name');
-    });
   }
 
   loadData(): void {

@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   TemplateRef,
   viewChild,
   DestroyRef,
@@ -29,7 +28,7 @@ import { PublicationsService } from '../../../../shared/services/features/public
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { CreatePublicationComponent } from '../create-publication/create-publication.component';
 import { UpdatePublicationComponent } from '../update-publication/update-publication.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-publications',
@@ -67,44 +66,61 @@ export class ListPublicationComponent {
     return templates;
   });
 
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.publications.list.table.name'),
+    { initialValue: '' }
+  );
+  private categoryTranslation = toSignal(
+    this.transloco.selectTranslate('components.publications.list.table.category'),
+    { initialValue: '' }
+  );
+  private imageTranslation = toSignal(
+    this.transloco.selectTranslate('components.publications.list.table.image'),
+    { initialValue: '' }
+  );
+
   // Computed signals para traducciones
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.publications.list.table.name'
-    );
-    const categoryTranslation = this.transloco.translate(
-      'components.publications.list.table.category'
-    );
-    const imageTranslation = this.transloco.translate(
-      'components.publications.list.table.image'
-    );
-
     return [
       {
         field: 'title',
-        header: nameTranslation,
+        header: this.nameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'categoryName',
-        header: categoryTranslation,
+        header: this.categoryTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'firstImage',
-        header: imageTranslation,
+        header: this.imageTranslation(),
         width: '240px',
       },
     ];
   });
 
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
+
   headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -113,18 +129,15 @@ export class ListPublicationComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
@@ -143,12 +156,6 @@ export class ListPublicationComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.create');
-      // Las computed properties se actualizarán automáticamente
-    });
   }
 
   loadData(): void {

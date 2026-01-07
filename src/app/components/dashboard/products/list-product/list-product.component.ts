@@ -29,7 +29,7 @@ import { ConfirmDialogService } from '../../../../shared/services/system/confirm
 import { ProductService } from '../../../../shared/services/features/product.service';
 import { UpdateProductComponent } from '../update-product/update-product.component';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-product',
@@ -69,61 +69,90 @@ export class ListProductComponent {
     return templates;
   });
 
-  // Computed signals para traducciones de estado
-  activeStatus = computed(() =>
-    this.transloco.translate('status.active').trim()
+  // Signals reactivos para traducciones de estado
+  private activeStatus = toSignal(
+    this.transloco.selectTranslate('status.active'),
+    { initialValue: '' }
   );
-  inactiveStatus = computed(() =>
-    this.transloco.translate('status.inactive').trim()
+  private inactiveStatus = toSignal(
+    this.transloco.selectTranslate('status.inactive'),
+    { initialValue: '' }
+  );
+
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.products.list.table.name'),
+    { initialValue: '' }
+  );
+  private variantsTranslation = toSignal(
+    this.transloco.selectTranslate('components.products.list.table.variants.title'),
+    { initialValue: '' }
+  );
+  private descriptionTranslation = toSignal(
+    this.transloco.selectTranslate('components.products.list.table.description'),
+    { initialValue: '' }
+  );
+  private categoryTranslation = toSignal(
+    this.transloco.selectTranslate('components.products.list.table.category'),
+    { initialValue: '' }
+  );
+  private imageTranslation = toSignal(
+    this.transloco.selectTranslate('components.products.list.table.image'),
+    { initialValue: '' }
   );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.products.list.table.name'
-    );
-    const variantsTranslation = this.transloco.translate(
-      'components.products.list.table.variants.title'
-    );
-    const descriptionTranslation = this.transloco.translate(
-      'components.products.list.table.description'
-    );
-    const categoryTranslation = this.transloco.translate(
-      'components.products.list.table.category'
-    );
-    const imageTranslation = this.transloco.translate(
-      'components.products.list.table.image'
-    );
-
     return [
-      { field: 'title', header: nameTranslation, sortable: true, filter: true },
+      { field: 'title', header: this.nameTranslation(), sortable: true, filter: true },
       {
         field: 'variants',
-        header: variantsTranslation,
+        header: this.variantsTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'description',
-        header: descriptionTranslation,
+        header: this.descriptionTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'categoryName',
-        header: categoryTranslation,
+        header: this.categoryTranslation(),
         sortable: true,
         filter: true,
       },
-      { field: 'firstImage', header: imageTranslation, width: '240px' },
+      { field: 'firstImage', header: this.imageTranslation(), width: '240px' },
     ];
   });
 
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
+  private enableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' }
+  );
+  private disableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
+    { initialValue: '' }
+  );
+
   headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -132,28 +161,21 @@ export class ListProductComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-    const enableTranslation = this.transloco.translate('table.buttons.enable');
-    const disableTranslation = this.transloco.translate(
-      'table.buttons.disable'
-    );
-
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
       },
       {
-        label: (data) => (data.status ? disableTranslation : enableTranslation),
+        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -175,11 +197,6 @@ export class ListProductComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.create');
-    });
   }
 
   loadData(): void {
@@ -371,8 +388,8 @@ export class ListProductComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           // Actualizar estado local inmutablemente
           const updatedData = currentData.map((item) =>

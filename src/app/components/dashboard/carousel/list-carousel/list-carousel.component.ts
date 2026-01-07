@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   TemplateRef,
   viewChild,
   DestroyRef,
@@ -27,7 +26,7 @@ import { CarouselService } from '../../../../shared/services/features/carousel.s
 import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { UpdateCarouselComponent } from '../update-carousel/update-carousel.component';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-carousel',
@@ -58,77 +57,94 @@ export class ListCarouselComponent {
     return template ? { image: template } : {};
   });
 
-  // Computed signals para traducciones de estado
-  activeStatus = computed(() =>
-    this.transloco.translate('status.active').trim()
+  // Signals reactivos para traducciones de estado
+  private activeStatus = toSignal(
+    this.transloco.selectTranslate('status.active'),
+    { initialValue: '' }
   );
-  inactiveStatus = computed(() =>
-    this.transloco.translate('status.inactive').trim()
+  private inactiveStatus = toSignal(
+    this.transloco.selectTranslate('status.inactive'),
+    { initialValue: '' }
+  );
+
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.carousel.list.table.name'),
+    { initialValue: '' }
+  );
+  private descriptionTranslation = toSignal(
+    this.transloco.selectTranslate(
+      'components.carousel.list.table.description'
+    ),
+    { initialValue: '' }
+  );
+  private statusTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.status'),
+    { initialValue: '' }
+  );
+  private imageTranslation = toSignal(
+    this.transloco.selectTranslate('components.carousel.list.table.image'),
+    { initialValue: '' }
   );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.carousel.list.table.name'
-    );
-    const descriptionTranslation = this.transloco.translate(
-      'components.carousel.list.table.description'
-    );
-    const statusTranslation = this.transloco.translate(
-      'components.news.list.table.status'
-    );
-    const imageTranslation = this.transloco.translate(
-      'components.carousel.list.table.image'
-    );
-
     return [
       {
         field: 'title',
-        header: nameTranslation,
+        header: this.nameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'description',
-        header: descriptionTranslation,
+        header: this.descriptionTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'statusToShow',
-        header: statusTranslation,
+        header: this.statusTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'image',
-        header: imageTranslation,
+        header: this.imageTranslation(),
         width: '240px',
       },
     ];
   });
 
   headerActions = computed<TableAction[]>(() => {
-    // Puedes agregar acciones del header aquí si las necesitas
     return [];
   });
 
-  rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const disableTranslation = this.transloco.translate(
-      'table.buttons.disable'
-    );
-    const enableTranslation = this.transloco.translate('table.buttons.enable');
+  // Signals reactivos para traducciones de acciones
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private disableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
+    { initialValue: '' }
+  );
+  private enableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' }
+  );
 
+  rowActions = computed<RowAction[]>(() => {
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: (data) => (data.status ? disableTranslation : enableTranslation),
+        label: (data) =>
+          data.status ? this.disableTranslation() : this.enableTranslation(),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -142,11 +158,6 @@ export class ListCarouselComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.edit');
-    });
   }
 
   loadData(): void {
@@ -156,8 +167,8 @@ export class ListCarouselComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: HomeData[]) => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           const processedData = data.map((item: any) => ({
             ...item,
@@ -266,8 +277,8 @@ export class ListCarouselComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           // Actualizar el estado local
           const updatedData = currentData.map((item) =>

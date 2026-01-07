@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -27,7 +26,7 @@ import { UpdatePublicationCategoryComponent } from '../update-publication-catego
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { PublicationCategoryService } from '../../../../shared/services/features/publication-category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-publication-category',
@@ -49,27 +48,42 @@ export class ListPublicationCategoryComponent {
   data = signal<any[]>([]);
   loading = signal<boolean>(false);
 
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.publication-category.list.table.name'),
+    { initialValue: '' }
+  );
+
   // Computed signals para traducciones
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.publication-category.list.table.name'
-    );
-
     return [
       {
         field: 'title',
-        header: nameTranslation,
+        header: this.nameTranslation(),
         sortable: true,
         filter: true,
       },
     ];
   });
 
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
+
   headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -78,18 +92,15 @@ export class ListPublicationCategoryComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
@@ -116,11 +127,6 @@ export class ListPublicationCategoryComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.create');
-    });
   }
 
   loadData(): void {

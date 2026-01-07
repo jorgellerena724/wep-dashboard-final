@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -25,7 +24,7 @@ import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CreateEditChatbotConfigComponent } from '../create-chatbot-config/create-edit-chatbot-config.component';
 
 @Component({
@@ -48,62 +47,90 @@ export class ListChatbotConfigComponent {
   data = signal<any[]>([]);
   loading = signal<boolean>(false);
 
-  // Computed signals para traducciones de estado
-  activeStatus = computed(() =>
-    this.transloco.translate('status.active').trim()
+  // Signals reactivos para traducciones de estado
+  private activeStatus = toSignal(
+    this.transloco.selectTranslate('status.active'),
+    { initialValue: '' }
   );
-  inactiveStatus = computed(() =>
-    this.transloco.translate('status.inactive').trim()
+  private inactiveStatus = toSignal(
+    this.transloco.selectTranslate('status.inactive'),
+    { initialValue: '' }
+  );
+
+  // Signals reactivos para traducciones de columnas
+  private userNameTranslation = toSignal(
+    this.transloco.selectTranslate('components.chatbot_config.list.table.name'),
+    { initialValue: '' }
+  );
+  private modelNameTranslation = toSignal(
+    this.transloco.selectTranslate('components.chatbot_config.list.table.model'),
+    { initialValue: '' }
+  );
+  private tokensRemainingTranslation = toSignal(
+    this.transloco.selectTranslate('components.chatbot_config.list.table.tokens_remaining'),
+    { initialValue: '' }
+  );
+  private tokensLimitTranslation = toSignal(
+    this.transloco.selectTranslate('components.chatbot_config.list.table.tokens_limit'),
+    { initialValue: '' }
   );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const userNameTranslation = this.transloco.translate(
-      'components.chatbot_config.list.table.name'
-    );
-    const modelNameTranslation = this.transloco.translate(
-      'components.chatbot_config.list.table.model'
-    );
-    const tokensRemainingTranslation = this.transloco.translate(
-      'components.chatbot_config.list.table.tokens_remaining'
-    );
-    const tokensLimitTranslation = this.transloco.translate(
-      'components.chatbot_config.list.table.tokens_limit'
-    );
-
     return [
       {
         field: 'user_name',
-        header: userNameTranslation,
+        header: this.userNameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'model_name',
-        header: modelNameTranslation,
+        header: this.modelNameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'tokens_remaining',
-        header: tokensRemainingTranslation,
+        header: this.tokensRemainingTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'tokens_limit',
-        header: tokensLimitTranslation,
+        header: this.tokensLimitTranslation(),
         sortable: true,
         filter: true,
       },
     ];
   });
 
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
+  private enableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' }
+  );
+  private disableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
+    { initialValue: '' }
+  );
+
   headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -112,28 +139,21 @@ export class ListChatbotConfigComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-    const enableTranslation = this.transloco.translate('table.buttons.enable');
-    const disableTranslation = this.transloco.translate(
-      'table.buttons.disable'
-    );
-
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
       },
       {
-        label: (data) => (data.status ? disableTranslation : enableTranslation),
+        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -159,11 +179,6 @@ export class ListChatbotConfigComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.create');
-    });
   }
 
   loadData(): void {
@@ -174,8 +189,8 @@ export class ListChatbotConfigComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: HomeData[]) => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           const processedData = data.map((item: any) => ({
             ...item,
@@ -301,8 +316,8 @@ export class ListChatbotConfigComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           // Actualizar estado local inmutablemente
           const updatedData = currentData.map((item) =>

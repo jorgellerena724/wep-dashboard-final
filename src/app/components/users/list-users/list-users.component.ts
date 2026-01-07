@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   ChangeDetectionStrategy,
   DestroyRef,
 } from '@angular/core';
@@ -27,7 +26,7 @@ import { ChangeUserPasswordComponent } from '../change-user-password/change-user
 import { UpdateUserComponent } from '../update-user/update-user.component';
 import { icons } from '../../../core/constants/icons.constant';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-list-users',
@@ -49,46 +48,66 @@ export class UsersComponent {
   data = signal<any[]>([]);
   loading = signal<boolean>(false);
 
+  // Signals reactivos para traducciones de columnas
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.users.list.table.name'),
+    { initialValue: '' }
+  );
+  private emailTranslation = toSignal(
+    this.transloco.selectTranslate('components.users.list.table.email'),
+    { initialValue: '' }
+  );
+  private clientTranslation = toSignal(
+    this.transloco.selectTranslate('components.users.list.table.client'),
+    { initialValue: '' }
+  );
+
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const nameTranslation = this.transloco.translate(
-      'components.users.list.table.name'
-    );
-    const emailTranslation = this.transloco.translate(
-      'components.users.list.table.email'
-    );
-    const clientTranslation = this.transloco.translate(
-      'components.users.list.table.client'
-    );
-
     return [
       {
         field: 'full_name',
-        header: nameTranslation,
+        header: this.nameTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'email',
-        header: emailTranslation,
+        header: this.emailTranslation(),
         sortable: true,
         filter: true,
       },
       {
         field: 'client',
-        header: clientTranslation,
+        header: this.clientTranslation(),
         sortable: true,
         filter: true,
       },
     ];
   });
 
-  headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private changePasswordTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.changePassword'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
 
+  headerActions = computed<TableAction[]>(() => {
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -97,27 +116,21 @@ export class UsersComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const changePasswordTranslation = this.transloco.translate(
-      'table.buttons.changePassword'
-    );
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-
     return [
       {
-        label: changePasswordTranslation,
+        label: this.changePasswordTranslation(),
         icon: icons['changePassword'],
         onClick: (data) => this.changePassword(data),
         class: buttonVariants.outline.blue,
       },
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['editUser'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
@@ -173,14 +186,6 @@ export class UsersComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      // Acceder a las computed properties para que se activen las dependencias
-      this.columns();
-      this.headerActions();
-      this.rowActions();
-    });
   }
 
   loadData(): void {

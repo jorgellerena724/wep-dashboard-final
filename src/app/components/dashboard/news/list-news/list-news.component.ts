@@ -3,7 +3,6 @@ import {
   inject,
   signal,
   computed,
-  effect,
   TemplateRef,
   viewChild,
   DestroyRef,
@@ -30,7 +29,7 @@ import { UpdateNewsComponent } from '../update-news/update-news.component';
 import { CreateNewsComponent } from '../create-news/create-news.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest } from 'rxjs';
 
 @Component({
@@ -71,60 +70,90 @@ export class ListNewsComponent {
     return templates;
   });
 
-  // Computed signals para traducciones de estado
-  activeStatus = computed(() =>
-    this.transloco.translate('status.active').trim()
+  // Signals reactivos para traducciones de estado
+  private activeStatus = toSignal(
+    this.transloco.selectTranslate('status.active'),
+    { initialValue: '' }
   );
-  inactiveStatus = computed(() =>
-    this.transloco.translate('status.inactive').trim()
+  private inactiveStatus = toSignal(
+    this.transloco.selectTranslate('status.inactive'),
+    { initialValue: '' }
+  );
+
+  // Signals reactivos para traducciones de columnas
+  private orderTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.order'),
+    { initialValue: '' }
+  );
+  private nameTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.name'),
+    { initialValue: '' }
+  );
+  private descriptionTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.description'),
+    { initialValue: '' }
+  );
+  private dateTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.date'),
+    { initialValue: '' }
+  );
+  private statusTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.status'),
+    { initialValue: '' }
+  );
+  private imageTranslation = toSignal(
+    this.transloco.selectTranslate('components.news.list.table.image'),
+    { initialValue: '' }
   );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
-    const orderTranslation = this.transloco.translate(
-      'components.news.list.table.order'
-    );
-    const nameTranslation = this.transloco.translate(
-      'components.news.list.table.name'
-    );
-    const descriptionTranslation = this.transloco.translate(
-      'components.news.list.table.description'
-    );
-    const dateTranslation = this.transloco.translate(
-      'components.news.list.table.date'
-    );
-    const statusTranslation = this.transloco.translate(
-      'components.news.list.table.status'
-    );
-    const imageTranslation = this.transloco.translate(
-      'components.news.list.table.image'
-    );
-
     return [
-      { field: 'order', header: orderTranslation, width: '80px' },
-      { field: 'title', header: nameTranslation, sortable: true, filter: true },
+      { field: 'order', header: this.orderTranslation(), width: '80px' },
+      { field: 'title', header: this.nameTranslation(), sortable: true, filter: true },
       {
         field: 'description',
-        header: descriptionTranslation,
+        header: this.descriptionTranslation(),
         sortable: true,
         filter: true,
       },
-      { field: 'fecha', header: dateTranslation, sortable: true, filter: true },
+      { field: 'fecha', header: this.dateTranslation(), sortable: true, filter: true },
       {
         field: 'statusToShow',
-        header: statusTranslation,
+        header: this.statusTranslation(),
         sortable: true,
         filter: true,
       },
-      { field: 'image', header: imageTranslation, width: '240px' },
+      { field: 'image', header: this.imageTranslation(), width: '240px' },
     ];
   });
 
+  // Signals reactivos para traducciones de acciones
+  private createTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.create'),
+    { initialValue: '' }
+  );
+  private editTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.edit'),
+    { initialValue: '' }
+  );
+  private deleteTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.delete'),
+    { initialValue: '' }
+  );
+  private disableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
+    { initialValue: '' }
+  );
+  private enableTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' }
+  );
+
   headerActions = computed<TableAction[]>(() => {
-    const createTranslation = this.transloco.translate('table.buttons.create');
     return [
       {
-        label: createTranslation,
+        label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
         class: 'p-button-primary',
@@ -133,28 +162,21 @@ export class ListNewsComponent {
   });
 
   rowActions = computed<RowAction[]>(() => {
-    const editTranslation = this.transloco.translate('table.buttons.edit');
-    const deleteTranslation = this.transloco.translate('table.buttons.delete');
-    const disableTranslation = this.transloco.translate(
-      'table.buttons.disable'
-    );
-    const enableTranslation = this.transloco.translate('table.buttons.enable');
-
     return [
       {
-        label: editTranslation,
+        label: this.editTranslation(),
         icon: icons['edit'],
         onClick: (data) => this.edit(data),
         class: buttonVariants.outline.green,
       },
       {
-        label: deleteTranslation,
+        label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
         class: buttonVariants.outline.red,
       },
       {
-        label: (data) => (data.status ? disableTranslation : enableTranslation),
+        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -176,11 +198,6 @@ export class ListNewsComponent {
   constructor() {
     // Cargar datos iniciales
     this.loadData();
-
-    // Effect para recargar cuando cambie el idioma
-    effect(() => {
-      this.transloco.selectTranslate('table.buttons.create');
-    });
   }
 
   loadData(): void {
@@ -191,8 +208,8 @@ export class ListNewsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data: HomeData[]) => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           const processedData = data.map((item: any) => ({
             ...item,
@@ -338,8 +355,8 @@ export class ListNewsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          const active = this.activeStatus();
-          const inactive = this.inactiveStatus();
+          const active = this.activeStatus().trim();
+          const inactive = this.inactiveStatus().trim();
 
           // Actualizar estado local inmutablemente
           const updatedData = currentData.map((item) =>
