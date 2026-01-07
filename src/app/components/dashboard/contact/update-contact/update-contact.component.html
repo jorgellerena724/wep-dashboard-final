@@ -13,28 +13,223 @@
       }"
     ></app-text-field>
     <app-text-field
-      id="phone"
-      label="{{ 'components.contact.edit.fields.phone.title' | transloco }}"
-      [control]="getFormControl('phone')"
+      id="address"
+      label="{{ 'components.contact.edit.fields.address.title' | transloco }}"
+      [control]="getFormControl('address')"
       [errorMessages]="{
-        required: ( 'components.contact.edit.fields.phone.required' | transloco ),
-        minlength: ( 'components.contact.edit.fields.phone.minlength' | transloco ),
+        minlength:
+          ('components.contact.edit.fields.address.minlength' | transloco)
       }"
     ></app-text-field>
   </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
-  <app-text-field
-    id="address"
-    label="{{ 'components.contact.edit.fields.address.title' | transloco }}"
-    [control]="getFormControl('address')"
-    [isTextArea]="true"
-    textAreaHeight="h-56"
-    [errorMessages]="{
-      minlength:
-        ('components.contact.edit.fields.address.minlength' | transloco)
-    }"
-  ></app-text-field>
+
+  <!-- Sección de Redes Sociales -->
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h4
+        class="text-black text-sm mb-1 dark:text-[rgb(209,213,219)] font-bold"
+      >
+        {{ "components.contact.edit.fields.socialNetworks.title" | transloco }}
+      </h4>
+      <button
+        type="button"
+        (click)="addSocialNetwork()"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
+      >
+        <i class="pi pi-plus"></i>
+      </button>
+    </div>
+
+    @if (socialNetworks().length > 0) {
+    <div class="space-y-3">
+      @for (network of socialNetworks(); track network; let i = $index) {
+      <div
+        class="flex items-start gap-3 p-4 bg-white dark:bg-white rounded-lg border border-black"
+      >
+        <!-- Botón de Activar/Desactivar (Lado Izquierdo) -->
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            [formControl]="getSocialNetworkControl(i, 'active')"
+            class="sr-only peer"
+          />
+          <div
+            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+          ></div>
+        </label>
+
+        <!-- Contenido de la Red Social -->
+        <div class="flex-1 space-y-3">
+          <!-- Fila 1: Nombre de la Red -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              {{
+                "components.contact.edit.fields.socialNetworks.network"
+                  | transloco
+              }}
+            </label>
+            <div class="relative">
+              <input
+                [id]="'network-name-' + i"
+                [formControl]="getSocialNetworkControl(i, 'network')"
+                type="text"
+                placeholder="Ej: Facebook, Instagram, LinkedIn, etc."
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              />
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="pi pi-hashtag text-gray-400"></i>
+              </div>
+            </div>
+            @if (getSocialNetworkControl(i, 'network').invalid &&
+            getSocialNetworkControl(i, 'network').touched) {
+            <p class="mt-1 text-sm text-red-600">
+              {{
+                "components.contact.edit.fields.socialNetworks.networkRequired"
+                  | transloco
+              }}
+            </p>
+            }
+          </div>
+
+          <!-- Fila 2: URL y Usuario -->
+          <div class="grid grid-cols-2 gap-3">
+            <!-- URL -->
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                {{
+                  "components.contact.edit.fields.socialNetworks.url"
+                    | transloco
+                }}
+              </label>
+              <div class="relative">
+                <input
+                  [id]="'network-url-' + i"
+                  [formControl]="getSocialNetworkControl(i, 'url')"
+                  type="text"
+                  placeholder="https://ejemplo.com/usuario"
+                  (input)="onUrlChange(i)"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <i class="pi pi-link text-gray-400"></i>
+                </div>
+              </div>
+              @if (getSocialNetworkControl(i, 'url').invalid &&
+              getSocialNetworkControl(i, 'url').touched) {
+              <p class="mt-1 text-sm text-red-600">
+                {{
+                  getSocialNetworkControl(i, "url").hasError("invalidUrl")
+                    ? ("components.contact.edit.fields.socialNetworks.urlInvalid"
+                      | transloco)
+                    : ("components.contact.edit.fields.socialNetworks.urlRequired"
+                      | transloco)
+                }}
+              </p>
+              }
+            </div>
+
+            <!-- Usuario -->
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                {{
+                  "components.contact.edit.fields.socialNetworks.username"
+                    | transloco
+                }}
+                @if (isUsernameRequired(i)) {
+                <span class="text-red-500">*</span>
+                }
+              </label>
+              <div class="relative">
+                <input
+                  [id]="'network-username-' + i"
+                  [formControl]="getSocialNetworkControl(i, 'username')"
+                  type="text"
+                  [placeholder]="
+                    getSocialNetworkControl(i, 'active').value
+                      ? 'Ej: usuario123'
+                      : 'Opcional'
+                  "
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <i class="pi pi-user text-gray-400"></i>
+                </div>
+              </div>
+              @if (getSocialNetworkControl(i, 'username').invalid &&
+              getSocialNetworkControl(i, 'username').touched) {
+              <p class="mt-1 text-sm text-red-600">
+                {{ getUsernameErrorMessage(i) }}
+              </p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón para copiar URL -->
+        <button
+          type="button"
+          (click)="copyToClipboard(getSocialNetworkControl(i, 'url').value)"
+          class="flex-shrink-0 p-2 text-blue-500 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+          [disabled]="!getSocialNetworkControl(i, 'url').value"
+          [class.opacity-50]="!getSocialNetworkControl(i, 'url').value"
+          [class.cursor-not-allowed]="!getSocialNetworkControl(i, 'url').value"
+          pTooltip="{{
+            'components.contact.edit.fields.socialNetworks.copyUrl' | transloco
+          }}"
+          tooltipPosition="left"
+        >
+          <i class="pi pi-copy"></i>
+        </button>
+
+        <!-- Botón para eliminar -->
+        <button
+          type="button"
+          (click)="removeSocialNetwork(i)"
+          class="flex-shrink-0 p-2 text-red-500 dark:hover:bg-red-900/20 rounded-full transition-colors"
+          pTooltip="{{
+            'components.contact.edit.fields.socialNetworks.delete' | transloco
+          }}"
+          tooltipPosition="left"
+        >
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+      }
+    </div>
+    } @if (socialNetworks().length === 0) {
+    <div class="p-4 bg-white dark:bg-white rounded-lg border border-black">
+      <div class="text-center py-8">
+        <i
+          class="pi pi-share-alt text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
+        ></i>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{
+            "components.contact.edit.fields.socialNetworks.empty" | transloco
+          }}
+        </p>
+        <button
+          type="button"
+          (click)="addSocialNetwork()"
+          class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
+        >
+          <i class="pi pi-plus"></i>
+          <span>{{
+            "components.contact.edit.fields.socialNetworks.addFirst" | transloco
+          }}</span>
+        </button>
+      </div>
+    </div>
+    }
+  </div>
 </form>
+
 <style>
   /* Estilos para override de PrimeNG */
   :host ::ng-deep .p-fileupload-content {

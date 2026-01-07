@@ -51,9 +51,6 @@ export class ListContactComponent {
     const emailTranslation = this.transloco.translate(
       'components.contact.list.table.email'
     );
-    const phoneTranslation = this.transloco.translate(
-      'components.contact.list.table.phone'
-    );
     const addressTranslation = this.transloco.translate(
       'components.contact.list.table.address'
     );
@@ -62,12 +59,6 @@ export class ListContactComponent {
       {
         field: 'email',
         header: emailTranslation,
-        sortable: true,
-        filter: true,
-      },
-      {
-        field: 'phone',
-        header: phoneTranslation,
         sortable: true,
         filter: true,
       },
