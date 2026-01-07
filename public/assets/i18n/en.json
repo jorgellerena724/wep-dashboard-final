@@ -402,7 +402,9 @@
           "user": {
             "title": "User",
             "required": "User is required",
-            "exists": "This user already has a chatbot configuration"
+            "status": "Status",
+            "tokens_remaining": "Tokens Remaining",
+            "tokens_limit": "Token Limit"
           },
           "apiKey": {
             "title": "API Key",

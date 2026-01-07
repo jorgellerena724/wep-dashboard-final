@@ -51,14 +51,13 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
   // Signals
   models = signal<any[]>([]);
   users = signal<any[]>([]);
-  uploading = signal(false);
   isFormValid = signal(false);
   configId = signal<number | null>(null); // Para edición
   isEditing = computed(() => this.configId() !== null);
 
   // Computed
   isSubmitting = signal<boolean>(false);
-  isFormInvalid = computed(() => !this.isFormValid() || this.uploading());
+  isFormInvalid = computed(() => !this.isFormValid());
 
   // Form
   form: FormGroup;
@@ -184,8 +183,6 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
       return;
     }
 
-    this.uploading.set(true);
-
     // Preparar payload
     const payload: any = {
       user_id: this.form.get('user_id')?.value,
@@ -200,7 +197,6 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
       payload.api_key = apiKeyValue;
     } else if (!this.isEditing()) {
       // Si es creación y no hay API key, mostrar error
-      this.uploading.set(false);
       this.notificationSrv.addNotification(
         this.transloco.translate(
           'notifications.chatbot_config.error.apiKeyRequired'
@@ -221,8 +217,6 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
 
     request$.subscribe({
       next: (response) => {
-        this.uploading.set(false);
-
         this.notificationSrv.addNotification(
           this.transloco.translate(
             this.isEditing()
@@ -246,8 +240,6 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
         }
       },
       error: (error) => {
-        this.uploading.set(false);
-
         let errorMessage = this.transloco.translate(
           this.isEditing()
             ? 'notifications.chatbot_config.error.update'

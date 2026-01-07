@@ -27,7 +27,6 @@ import { ChatbotService } from '../../../../shared/services/features/chatbot.ser
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CreateEditChatbotConfigComponent } from '../create-chatbot-config/create-edit-chatbot-config.component';
-import { UpdateChatbotConfigComponent } from '../update-chatbot-config/update-chatbot-config.component';
 
 @Component({
   selector: 'app-list-chatbot-config',
@@ -65,6 +64,12 @@ export class ListChatbotConfigComponent {
     const modelNameTranslation = this.transloco.translate(
       'components.chatbot_config.list.table.model'
     );
+    const tokensRemainingTranslation = this.transloco.translate(
+      'components.chatbot_config.list.table.tokens_remaining'
+    );
+    const tokensLimitTranslation = this.transloco.translate(
+      'components.chatbot_config.list.table.tokens_limit'
+    );
 
     return [
       {
@@ -76,6 +81,18 @@ export class ListChatbotConfigComponent {
       {
         field: 'model_name',
         header: modelNameTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'tokens_remaining',
+        header: tokensRemainingTranslation,
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'tokens_limit',
+        header: tokensLimitTranslation,
         sortable: true,
         filter: true,
       },

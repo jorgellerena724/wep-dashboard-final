@@ -392,7 +392,9 @@
         "table": {
           "name": "Nombre de usuario",
           "model": "Nombre del modelo de IA",
-          "status": "Estado"
+          "status": "Estado",
+          "tokens_remaining": "Tokens restantes",
+          "tokens_limit": "Límite de tokens"
         },
         "errors": {}
       },

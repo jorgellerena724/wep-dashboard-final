@@ -4,15 +4,11 @@ import {
   PLATFORM_ID,
   OnDestroy,
   inject,
-  signal,
-  computed,
-  Injector,
-  runInInjectionContext,
 } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
-import { Observable, throwError, Subscription } from 'rxjs';
-import { catchError, map, distinctUntilChanged, filter } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError, Subscription } from 'rxjs';
+import { catchError, filter, map, distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { isPlatformBrowser } from '@angular/common';
 import { NotificationService } from '../../shared/services/system/notification.service';
@@ -36,21 +32,12 @@ interface LoginResponse {
 })
 export class AuthService implements OnDestroy {
   private redirectExecuted = false;
+  private initialNavigationChecked = new BehaviorSubject<boolean>(false);
+  public initialNavigationChecked$ =
+    this.initialNavigationChecked.asObservable();
 
-  // Signals para estado reactivo
-  private tokenSignal = signal<string | null>(null);
-  private userSignal = signal<User | null>(null);
-  private initialNavigationCheckedSignal = signal<boolean>(false);
-
-  // Computed properties para observables externos
-  public initialNavigationChecked$ = computed(() =>
-    this.initialNavigationCheckedSignal()
-  );
-  public token$ = computed(() => this.tokenSignal());
-  public user$ = computed(() => this.userSignal());
-  public isLoggedInSignal = computed(
-    () => !!this.userSignal() && !this.checkTokenExpiration()
-  );
+  private tokenSubject = new BehaviorSubject<string | null>(null);
+  private userSubject = new BehaviorSubject<User | null>(null);
 
   private inactivityTimer: any;
   private tokenExpirationTimer: any;
@@ -71,8 +58,7 @@ export class AuthService implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private notificationSrv: NotificationService,
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private injector: Injector
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.loadInitialState();
     this.setupNavigationTracking();
@@ -231,12 +217,12 @@ export class AuthService implements OnDestroy {
 
           if (user.exp && Date.now() >= user.exp) {
             this.logout(false); // No mostrar notificación al iniciar la app
-            this.initialNavigationCheckedSignal.set(true);
+            this.initialNavigationChecked.next(true);
             return;
           }
 
-          this.tokenSignal.set(sessionToken);
-          this.userSignal.set(user);
+          this.tokenSubject.next(sessionToken);
+          this.userSubject.next(user);
           this.setupExpirationTimer(user.exp);
           this.setupActivityListeners();
           this.resetInactivityTimer();
@@ -246,15 +232,15 @@ export class AuthService implements OnDestroy {
             this.redirectAfterLogin();
           }
         } else {
-          this.initialNavigationCheckedSignal.set(true);
+          this.initialNavigationChecked.next(true);
         }
       } catch (error) {
         console.error('Error loading initial state:', error);
         this.logout(false); // No mostrar notificación al iniciar la app
-        this.initialNavigationCheckedSignal.set(true);
+        this.initialNavigationChecked.next(true);
       }
     } else {
-      this.initialNavigationCheckedSignal.set(true);
+      this.initialNavigationChecked.next(true);
     }
   }
 
@@ -289,7 +275,7 @@ export class AuthService implements OnDestroy {
   }
 
   public checkTokenExpiration(): boolean {
-    const user = this.userSignal();
+    const user = this.userSubject.value;
     if (user?.exp) {
       const currentTime = Date.now();
       return currentTime >= user.exp;
@@ -327,8 +313,8 @@ export class AuthService implements OnDestroy {
     this.warningTimer = setTimeout(() => {
       if (!this.isLoggingOut && this.user) {
         // MODIFICADO: Usar la clave de traducción para la advertencia de inactividad
-        const warningMessage = runInInjectionContext(this.injector, () =>
-          this.transloco.translate('notifications.session.inactivityWarning')
+        const warningMessage = this.transloco.translate(
+          'notifications.session.inactivityWarning'
         );
         this.notificationSrv.addNotification(warningMessage, 'warning');
       }
@@ -342,7 +328,7 @@ export class AuthService implements OnDestroy {
   }
 
   isLoggedIn(): boolean {
-    return this.isLoggedInSignal();
+    return !!this.user && !this.checkTokenExpiration();
   }
 
   public login(email: string, password: string): Observable<boolean> {
@@ -362,8 +348,8 @@ export class AuthService implements OnDestroy {
                 localStorage.setItem('token', response.access_token);
                 localStorage.setItem('user', JSON.stringify(decodedToken));
               }
-              this.tokenSignal.set(response.access_token);
-              this.userSignal.set(decodedToken);
+              this.tokenSubject.next(response.access_token);
+              this.userSubject.next(decodedToken);
               this.setupExpirationTimer(decodedToken.exp);
               this.setupActivityListeners();
               this.resetInactivityTimer();
@@ -383,8 +369,8 @@ export class AuthService implements OnDestroy {
     if (this.isLoggingOut) return;
     this.isLoggingOut = true;
     this.clearAllTimers();
-    this.tokenSignal.set(null);
-    this.userSignal.set(null);
+    this.tokenSubject.next(null);
+    this.userSubject.next(null);
     this.cleanupAndRedirect();
   }
 
@@ -393,14 +379,14 @@ export class AuthService implements OnDestroy {
 
     this.isLoggingOut = true;
     this.clearAllTimers();
-    this.tokenSignal.set(null);
-    this.userSignal.set(null);
+    this.tokenSubject.next(null);
+    this.userSubject.next(null);
 
     // Solo mostrar notificación si se solicita explícitamente
     if (showNotification) {
       // MODIFICADO: Usar la clave de traducción para el cierre de sesión
-      const logoutMessage = runInInjectionContext(this.injector, () =>
-        this.transloco.translate('notifications.session.logoutSuccess')
+      const logoutMessage = this.transloco.translate(
+        'notifications.session.logoutSuccess'
       );
       this.notificationSrv.addNotification(logoutMessage, 'success');
     }
@@ -428,12 +414,12 @@ export class AuthService implements OnDestroy {
   }
 
   public updateUser(newUserData: Partial<User>): void {
-    const currentUser = this.userSignal();
+    const currentUser = this.userSubject.value;
     if (currentUser && isPlatformBrowser(this.platformId)) {
       try {
         const updatedUser = { ...currentUser, ...newUserData };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        this.userSignal.set(updatedUser);
+        this.userSubject.next(updatedUser);
       } catch (error) {
         console.warn('Error updating user:', error);
       }
@@ -441,24 +427,11 @@ export class AuthService implements OnDestroy {
   }
 
   public get user(): User | null {
-    return this.userSignal();
+    return this.userSubject.value;
   }
 
   public get token(): string | null {
-    return this.tokenSignal();
-  }
-
-  // Métodos adicionales para compatibilidad con código existente
-  public getUserSignal() {
-    return this.userSignal;
-  }
-
-  public getTokenSignal() {
-    return this.tokenSignal;
-  }
-
-  public getInitialNavigationCheckedSignal() {
-    return this.initialNavigationCheckedSignal;
+    return this.tokenSubject.value;
   }
 
   public redirectAfterLogin(): void {
@@ -475,10 +448,10 @@ export class AuthService implements OnDestroy {
         } else {
           this.router.navigate(['/admin'], { replaceUrl: true });
         }
-        this.initialNavigationCheckedSignal.set(true);
+        this.initialNavigationChecked.next(true);
       }, 100);
     } else {
-      this.initialNavigationCheckedSignal.set(true);
+      this.initialNavigationChecked.next(true);
     }
   }
 
