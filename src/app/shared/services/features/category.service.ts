@@ -24,11 +24,11 @@ export class CategoryService {
   }
 
   patch(data: any, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}category/${id}`, data);
+    return this.http.patch(`${this.apiUrl}category/${id}/`, data);
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}category/${id}`, {
+    return this.http.delete<any>(`${this.apiUrl}category/${id}/`, {
       body: { id: id },
     });
   }

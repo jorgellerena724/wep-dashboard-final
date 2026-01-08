@@ -204,10 +204,17 @@ export class ListCategoryComponent {
         },
         error: (error) => {
           if (
-            error.error.statusCode === 400 &&
-            error.error.message.includes('No se puede eliminar la categoría')
+            error.status === 400 &&
+            error.error.detail.includes(
+              'No se puede eliminar la categoría porque tiene productos asociados.'
+            )
           ) {
-            this.notificationSrv.addNotification(error.error.message, 'error');
+            this.notificationSrv.addNotification(
+              this.transloco.translate(
+                'notifications.categories.error.productAsociated'
+              ),
+              'error'
+            );
           } else {
             this.notificationSrv.addNotification(
               this.transloco.translate('notifications.categories.error.delete'),

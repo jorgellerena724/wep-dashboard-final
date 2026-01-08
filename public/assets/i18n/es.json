@@ -163,6 +163,7 @@
         "create": "Error al registrar la categoría.",
         "update": "Error al actualizar la categoría.",
         "delete": "Error al eliminar la categoría.",
+        "productAsociated": "No se puede eliminar la categoría porque tiene productos asociados.",
         "load": "Error al cargar la información.",
         "formInvalid": "Compruebe los campos del formulario.",
         "duplicateName": "Ya existe una categoría con este nombre."

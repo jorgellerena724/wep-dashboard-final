@@ -162,6 +162,7 @@
         "create": "Error registering category.",
         "update": "Error updating category.",
         "delete": "Error deleting category.",
+        "productAsociated": "The category cannot be deleted because it has associated products.",
         "load": "Error loading information.",
         "formInvalid": "Check the form fields.",
         "duplicateName": "A category with this name already exists."
