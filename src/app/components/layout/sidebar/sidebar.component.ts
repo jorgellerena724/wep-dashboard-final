@@ -19,7 +19,6 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { CollapsedService } from '../../../shared/services/system/collapsed.service';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { TranslocoModule } from '@jsverse/transloco';
 import {
@@ -61,36 +60,39 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
   collapsedWidth = computed(() => this.collapsedService.getCollapsedWidth());
   expandedWidth = computed(() => this.collapsedService.getExpandedWidth());
 
-  private subscription = new Subscription();
-
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     if (isPlatformBrowser(platformId)) {
       this.checkScreenSize();
     }
-  }
 
-  ngOnInit(): void {
-    this.initializeMenuItems();
-
-    this.collapsedService.sidebarCollapsed$.subscribe((collapsed) => {
+    // Effect para sincronizar el estado del sidebar
+    effect(() => {
+      const collapsed = this.collapsedService.sidebarCollapsed();
       this.sidebarCollapsed.set(collapsed);
       this.cdr.markForCheck();
     });
 
-    this.subscription.add(
-      this.collapsedService.isMobile$.subscribe((isMobile) => {
-        this.isMobileView.set(isMobile);
-        this.showSidebar.set(!isMobile);
-      })
-    );
+    // Effect para sincronizar el estado móvil
+    effect(() => {
+      const isMobile = this.collapsedService.isMobile();
+      this.isMobileView.set(isMobile);
+      this.showSidebar.set(!isMobile);
+    });
 
-    this.subscription.add(
-      this.router.events
+    // Effect para sincronizar cambios de ruta
+    effect(() => {
+      const subscription = this.router.events
         .pipe(filter((event) => event instanceof NavigationEnd))
         .subscribe(() => {
           this.updateRouteTitle();
-        })
-    );
+        });
+
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  ngOnInit(): void {
+    this.initializeMenuItems();
 
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
@@ -107,7 +109,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    // Ya no necesitamos destruir subscription ya que usamos effects
   }
 
   private initializeMenuItems(): void {

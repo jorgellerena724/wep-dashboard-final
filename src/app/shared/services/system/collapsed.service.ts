@@ -1,20 +1,19 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, Inject, PLATFORM_ID, signal, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CollapsedService {
-  private sidebarCollapsedSubject = new BehaviorSubject<boolean>(false);
-  public sidebarCollapsed$: Observable<boolean> = this.sidebarCollapsedSubject.asObservable();
+  private sidebarCollapsedSignal = signal<boolean>(false);
+  public sidebarCollapsed = computed(() => this.sidebarCollapsedSignal());
  
   private collapsedWidth = 'w-20';
   private expandedWidth = 'w-64';
  
   // Propiedades para pantallas móviles
-  private isMobileSubject = new BehaviorSubject<boolean>(false);
-  public isMobile$: Observable<boolean> = this.isMobileSubject.asObservable();
+  private isMobileSignal = signal<boolean>(false);
+  public isMobile = computed(() => this.isMobileSignal());
  
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     // Solo ejecutar código relacionado con window si estamos en el navegador
@@ -31,32 +30,32 @@ export class CollapsedService {
     // Solo ejecutar si estamos en el navegador
     if (isPlatformBrowser(this.platformId)) {
       const isMobile = window.innerWidth < 750;
-      this.isMobileSubject.next(isMobile);
+      this.isMobileSignal.set(isMobile);
      
       // Si cambia a móvil, colapsar automáticamente
-      if (isMobile && !this.sidebarCollapsedSubject.value) {
-        this.sidebarCollapsedSubject.next(true);
+      if (isMobile && !this.sidebarCollapsedSignal()) {
+        this.sidebarCollapsedSignal.set(true);
       }
     }
   }
  
   toggleSidebar(): void {
     // Solo permitir alternar si no está en modo móvil o forzar colapso en móvil
-    if (this.isMobileSubject.value) {
+    if (this.isMobileSignal()) {
       // En móvil, siempre colapsar
-      this.sidebarCollapsedSubject.next(true);
+      this.sidebarCollapsedSignal.set(true);
     } else {
       // En escritorio, toggle normal
-      this.sidebarCollapsedSubject.next(!this.sidebarCollapsedSubject.value);
+      this.sidebarCollapsedSignal.update(state => !state);
     }
   }
  
   getSidebarState(): boolean {
-    return this.sidebarCollapsedSubject.value;
+    return this.sidebarCollapsedSignal();
   }
  
   setSidebarState(state: boolean): void {
-    this.sidebarCollapsedSubject.next(state);
+    this.sidebarCollapsedSignal.set(state);
   }
  
   getCollapsedWidth(): string {
@@ -68,15 +67,15 @@ export class CollapsedService {
   }
  
   setMobileState(isMobile: boolean): void {
-    this.isMobileSubject.next(isMobile);
+    this.isMobileSignal.set(isMobile);
     
     // Si cambia a móvil, forzar el colapso del sidebar
     if (isMobile) {
-      this.sidebarCollapsedSubject.next(true);
+      this.sidebarCollapsedSignal.set(true);
     }
   }
  
   getMobileState(): boolean {
-    return this.isMobileSubject.value;
+    return this.isMobileSignal();
   }
 }

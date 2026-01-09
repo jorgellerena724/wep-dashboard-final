@@ -114,32 +114,22 @@ export class AppComponent {
       return () => subscription.unsubscribe();
     });
 
-    // Effect para suscribirse al estado del sidebar
+    // Effect para suscribirse al estado del sidebar usando signals
     effect(() => {
-      const subscription = this.collapsedService.sidebarCollapsed$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((collapsed) => {
-          this.isCollapsed.set(collapsed);
-        });
-
-      return () => subscription.unsubscribe();
+      const collapsed = this.collapsedService.sidebarCollapsed();
+      this.isCollapsed.set(collapsed);
     });
 
-    // Effect para suscribirse al estado móvil
+    // Effect para suscribirse al estado móvil usando signals
     effect(() => {
-      const subscription = this.collapsedService.isMobile$
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((mobile) => {
-          this.isMobile.set(mobile);
+      const mobile = this.collapsedService.isMobile();
+      this.isMobile.set(mobile);
 
-          // Si cambia a móvil, asegurarse que el layout se ajusta correctamente
-          if (mobile && this.showLayout()) {
-            // Forzar el colapso del sidebar en móvil
-            this.collapsedService.setSidebarState(true);
-          }
-        });
-
-      return () => subscription.unsubscribe();
+      // Si cambia a móvil, asegurarse que el layout se ajusta correctamente
+      if (mobile && this.showLayout()) {
+        // Forzar el colapso del sidebar en móvil
+        this.collapsedService.setSidebarState(true);
+      }
     });
 
     // Inicializar tamaño de pantalla
