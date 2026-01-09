@@ -25,17 +25,19 @@ export class PublicationsService {
     if (cached) {
       return of(cached);
     }
-    
+
     this.isLoading.set(true);
     const timestamp = new Date().getTime();
-    return this.http.get<PublicationData[]>(
-      this.apiUrl + `publications/?no-cache=${timestamp}`
-    ).pipe(
-      tap(data => {
-        this.dataSignal.set(data);
-        this.isLoading.set(false);
-      })
-    );
+    return this.http
+      .get<PublicationData[]>(
+        this.apiUrl + `publications/?no-cache=${timestamp}`
+      )
+      .pipe(
+        tap((data) => {
+          this.dataSignal.set(data);
+          this.isLoading.set(false);
+        })
+      );
   }
 
   getImage(name: string): Observable<Blob> {
@@ -51,23 +53,23 @@ export class PublicationsService {
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl + 'publications/', data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .post<any[]>(this.apiUrl + 'publications/', data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}publications/${id}`, formData).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch(`${this.apiUrl}publications/${id}`, formData)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}publications/${id}`, {
-      body: { id: id },
-    }).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .delete<any>(`${this.apiUrl}publications/${id}`, {
+        body: { id: id },
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   private invalidateCache(): void {

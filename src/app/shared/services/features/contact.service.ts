@@ -22,23 +22,23 @@ export class ContactService {
     if (cached) {
       return of(cached);
     }
-    
+
     this.isLoading.set(true);
     const timestamp = new Date().getTime();
-    return this.http.get<ContactData[]>(
-      this.apiUrl + `contact/?no-cache=${timestamp}`
-    ).pipe(
-      tap(data => {
-        this.dataSignal.set(data);
-        this.isLoading.set(false);
-      })
-    );
+    return this.http
+      .get<ContactData[]>(this.apiUrl + `contact/?no-cache=${timestamp}`)
+      .pipe(
+        tap((data) => {
+          this.dataSignal.set(data);
+          this.isLoading.set(false);
+        })
+      );
   }
 
   patch(formData: any, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}contact/${id}`, formData).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch(`${this.apiUrl}contact/${id}`, formData)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   private invalidateCache(): void {

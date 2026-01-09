@@ -21,10 +21,10 @@ export class UserService {
     if (cached) {
       return of(cached);
     }
-    
+
     this.isLoading.set(true);
     return this.http.get<any[]>(this.apiUrl).pipe(
-      tap(data => {
+      tap((data) => {
         this.dataSignal.set(data);
         this.isLoading.set(false);
       })
@@ -32,31 +32,31 @@ export class UserService {
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl, data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .post<any[]>(this.apiUrl, data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   patch(data: any): Observable<any[]> {
-    return this.http.patch<any[]>(this.apiUrl + data.id, data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch<any[]>(this.apiUrl + data.id, data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(this.apiUrl + id, {
-      body: { id: id },
-    }).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .delete<any>(this.apiUrl + id, {
+        body: { id: id },
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   changePassword(data: any): Observable<any> {
-    return this.http.patch<any[]>(this.apiUrl + data.id, {
-      newPassword: data.newPassword,
-    }).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch<any[]>(this.apiUrl + data.id, {
+        newPassword: data.newPassword,
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   private invalidateCache(): void {

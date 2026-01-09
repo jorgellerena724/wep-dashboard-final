@@ -22,37 +22,37 @@ export class CategoryService {
     if (cached) {
       return of(cached);
     }
-    
+
     this.isLoading.set(true);
     const timestamp = new Date().getTime();
-    return this.http.get<HomeData[]>(
-      this.apiUrl + `category/?no-cache=${timestamp}`
-    ).pipe(
-      tap(data => {
-        this.dataSignal.set(data);
-        this.isLoading.set(false);
-      })
-    );
+    return this.http
+      .get<HomeData[]>(this.apiUrl + `category/?no-cache=${timestamp}`)
+      .pipe(
+        tap((data) => {
+          this.dataSignal.set(data);
+          this.isLoading.set(false);
+        })
+      );
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl + 'category/', data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .post<any[]>(this.apiUrl + 'category/', data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   patch(data: any, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}category/${id}/`, data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch(`${this.apiUrl}category/${id}/`, data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}category/${id}/`, {
-      body: { id: id },
-    }).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .delete<any>(`${this.apiUrl}category/${id}/`, {
+        body: { id: id },
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   private invalidateCache(): void {

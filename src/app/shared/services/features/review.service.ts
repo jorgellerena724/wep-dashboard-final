@@ -25,17 +25,17 @@ export class ReviewService {
     if (cached) {
       return of(cached);
     }
-    
+
     this.isLoading.set(true);
     const timestamp = new Date().getTime();
-    return this.http.get<HomeData[]>(
-      this.apiUrl + `reviews/?no-cache=${timestamp}`
-    ).pipe(
-      tap(data => {
-        this.dataSignal.set(data);
-        this.isLoading.set(false);
-      })
-    );
+    return this.http
+      .get<HomeData[]>(this.apiUrl + `reviews/?no-cache=${timestamp}`)
+      .pipe(
+        tap((data) => {
+          this.dataSignal.set(data);
+          this.isLoading.set(false);
+        })
+      );
   }
 
   getImage(name: string): Observable<Blob> {
@@ -51,23 +51,23 @@ export class ReviewService {
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl + 'reviews/', data).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .post<any[]>(this.apiUrl + 'reviews/', data)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}reviews/${id}`, formData).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .patch(`${this.apiUrl}reviews/${id}`, formData)
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}reviews/${id}`, {
-      body: { id: id },
-    }).pipe(
-      tap(() => this.invalidateCache())
-    );
+    return this.http
+      .delete<any>(`${this.apiUrl}reviews/${id}`, {
+        body: { id: id },
+      })
+      .pipe(tap(() => this.invalidateCache()));
   }
 
   private invalidateCache(): void {
