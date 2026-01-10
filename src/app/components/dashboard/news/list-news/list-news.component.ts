@@ -109,14 +109,24 @@ export class ListNewsComponent {
   columns = computed<Column[]>(() => {
     return [
       { field: 'order', header: this.orderTranslation(), width: '80px' },
-      { field: 'title', header: this.nameTranslation(), sortable: true, filter: true },
+      {
+        field: 'title',
+        header: this.nameTranslation(),
+        sortable: true,
+        filter: true,
+      },
       {
         field: 'description',
         header: this.descriptionTranslation(),
         sortable: true,
         filter: true,
       },
-      { field: 'fecha', header: this.dateTranslation(), sortable: true, filter: true },
+      {
+        field: 'fecha',
+        header: this.dateTranslation(),
+        sortable: true,
+        filter: true,
+      },
       {
         field: 'statusToShow',
         header: this.statusTranslation(),
@@ -175,7 +185,8 @@ export class ListNewsComponent {
         class: buttonVariants.outline.red,
       },
       {
-        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
+        label: (data) =>
+          data.status ? this.disableTranslation() : this.enableTranslation(),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
