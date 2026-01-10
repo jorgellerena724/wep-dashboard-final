@@ -25,8 +25,7 @@ import { NotificationService } from '../../../../shared/services/system/notifica
 import { icons } from '../../../../core/constants/icons.constant';
 import { NewsService } from '../../../../shared/services/features/news.service';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { UpdateNewsComponent } from '../update-news/update-news.component';
-import { CreateNewsComponent } from '../create-news/create-news.component';
+import { CreateEditNewsComponent } from '../create-edit-news/create-edit-news.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -270,7 +269,7 @@ export class ListNewsComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateNewsComponent,
+      component: CreateEditNewsComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -289,7 +288,7 @@ export class ListNewsComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateNewsComponent,
+      component: CreateEditNewsComponent,
       data: {
         initialData: {
           ...data,

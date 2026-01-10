@@ -1,19 +1,19 @@
-<!-- update-news.component.html -->
+<!-- create-edit-news.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
       id="title"
-      label="{{ 'components.news.edit.fields.name.title' | transloco }}"
+      label="{{ t('fields.name.title') }}"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ('components.news.edit.fields.name.required' | transloco),
-        minlength: ('components.news.edit.fields.name.minlength' | transloco),
+        required: (t('fields.name.required')),
+        minlength: (t('fields.name.minlength')),
         duplicateName: ('notifications.news.error.duplicateName' | transloco)
       }"
     ></app-text-field>
     <app-text-field
       id="fecha"
-      label="{{ 'components.news.edit.fields._date.title' | transloco }}"
+      label="{{ t('fields._date.title') }}"
       type="date"
       [control]="getFormControl('fecha')"
     ></app-text-field>
@@ -21,15 +21,13 @@
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <app-text-field
     id="description"
-    label="{{ 'components.news.edit.fields.description.title' | transloco }}"
+    label="{{ t('fields.description.title') }}"
     [control]="getFormControl('description')"
     [isTextArea]="true"
     textAreaHeight="h-56"
     [errorMessages]="{
-      required:
-        ('components.news.edit.fields.description.required' | transloco),
-      minlength:
-        ('components.news.edit.fields.description.minlength' | transloco)
+      required: (t('fields.description.required')),
+      minlength: (t('fields.description.minlength'))
     }"
   ></app-text-field>
   <hr class="border-gray-500 my-1 border-opacity-10" />
@@ -37,13 +35,11 @@
     <!-- File Upload -->
     <app-file-upload
       #fileUpload
-      label="{{ 'components.news.edit.fields.image.title' | transloco }}"
+      label="{{ t('fields.image.title') }}"
       accept="image/*,video/mp4,video/quicktime"
       [maxFileSize]="1024 * 1024 * 20"
       fileUploadText="{{ 'image.select' | transloco }}"
-      fileRecommendation="{{
-        'components.news.edit.fields.image.recommendation' | transloco
-      }}"
+      fileRecommendation="{{ t('fields.image.recommendation') }}"
       (fileSelected)="onFileUploaded($event)"
       (fileRemoved)="removeFile()"
       (fileError)="onFileError($event)"

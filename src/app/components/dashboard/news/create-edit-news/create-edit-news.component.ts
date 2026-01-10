@@ -4,6 +4,7 @@ import {
   input,
   output,
   signal,
+  computed,
   effect,
   untracked,
   ChangeDetectionStrategy,
@@ -14,8 +15,6 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  AbstractControl,
-  ValidationErrors,
   FormControl,
 } from '@angular/forms';
 import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
@@ -31,8 +30,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-update-news',
-  templateUrl: './update-news.component.html',
+  selector: 'app-create-edit-news',
+  templateUrl: './create-edit-news.component.html',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -43,7 +42,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UpdateNewsComponent implements DynamicComponent {
+export class CreateEditNewsComponent implements DynamicComponent {
   // Servicios
   private fb = inject(FormBuilder);
   private srv = inject(NewsService);
@@ -70,12 +69,15 @@ export class UpdateNewsComponent implements DynamicComponent {
   // Formulario
   form: FormGroup;
 
+  // Computed para modo (create vs edit)
+  isEdit = computed(() => !!this.initialData()?.id);
+
   constructor() {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(3)]],
       fecha: [''],
-      image: [null, Validators.required],
+      description: ['', [Validators.required, Validators.minLength(3)]],
+      image: ['', Validators.required],
     });
 
     // Effect para inicializar datos
@@ -251,11 +253,6 @@ export class UpdateNewsComponent implements DynamicComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
-    // Siempre enviar fecha
-    const rawFecha = this.form.get('fecha')?.value;
-    const fechaValue = rawFecha ? rawFecha.toString().trim() : '';
-    formData.append('fecha', fechaValue);
-
     // Preservar saltos de línea en la descripción
     const description = this.form.get('description')?.value;
     const processedDescription = description
@@ -266,6 +263,11 @@ export class UpdateNewsComponent implements DynamicComponent {
       .replace(/\s+$/, '');
     formData.append('description', processedDescription);
 
+    // Manejar fecha
+    const rawFecha = this.form.get('fecha')?.value;
+    const fechaValue = rawFecha ? rawFecha.toString().trim() : '';
+    formData.append('fecha', fechaValue);
+
     const file = this.selectedFile();
     if (file) {
       formData.append('photo', file, file.name);
@@ -273,38 +275,73 @@ export class UpdateNewsComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    this.srv
-      .patch(formData, this.id())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
+    if (!this.isEdit()) {
+      // Create
+      this.srv
+        .post(formData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.uploading.set(false);
 
-          const message = this.transloco.translate(
-            'notifications.news.success.updated'
-          );
-          this.notificationSrv.addNotification(message, 'success');
-          this.submitSuccess.emit();
+            const message = this.transloco.translate(
+              'notifications.news.success.created'
+            );
+            this.notificationSrv.addNotification(message, 'success');
+            this.submitSuccess.emit();
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+            const data = this.initialData();
+            if (data?.onSave) {
+              data.onSave();
+            }
 
-          if (!data?.closeOnSubmit) {
-            this.resetForm();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
-          this.handleError(error);
-          this.submitError.emit();
-        },
-      });
+            if (!data?.closeOnSubmit) {
+              this.resetForm();
+            }
+          },
+          error: (error) => {
+            this.uploading.set(false);
+            this.handleError(error, false);
+            this.submitError.emit();
+          },
+        });
+    } else {
+      // Update
+      this.srv
+        .patch(formData, this.id())
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.uploading.set(false);
+
+            const message = this.transloco.translate(
+              'notifications.news.success.updated'
+            );
+            this.notificationSrv.addNotification(message, 'success');
+            this.submitSuccess.emit();
+
+            const data = this.initialData();
+            if (data?.onSave) {
+              data.onSave();
+            }
+
+            if (!data?.closeOnSubmit) {
+              this.resetForm();
+            }
+          },
+          error: (error) => {
+            this.uploading.set(false);
+            this.handleError(error, true);
+            this.submitError.emit();
+          },
+        });
+    }
   }
 
-  private handleError(error: any): void {
-    let messageKey = 'notifications.news.error.update';
+  private handleError(error: any, isUpdate: boolean): void {
+    let messageKey = isUpdate
+      ? 'notifications.news.error.update'
+      : 'notifications.news.error.create';
 
     if (
       error.status === 400 &&
@@ -349,5 +386,13 @@ export class UpdateNewsComponent implements DynamicComponent {
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  // Helper para traducciones dinámicas en template
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.news.edit'
+      : 'components.news.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
   }
 }
