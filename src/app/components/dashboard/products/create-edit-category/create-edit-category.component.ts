@@ -7,6 +7,7 @@ import {
   effect,
   untracked,
   ChangeDetectionStrategy,
+  computed,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -20,15 +21,16 @@ import { NotificationService } from '../../../../shared/services/system/notifica
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { TextFieldComponent } from '../../../../shared/components/app-text-field/app-text-field.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DynamicComponent } from '../../../../shared/interfaces/dynamic.interface';
 
 @Component({
-  selector: 'app-create-category',
-  templateUrl: './create-category.component.html',
+  selector: 'app-create-edit-category',
+  templateUrl: './create-edit-category.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateCategoryComponent {
+export class CreateEditCategoryComponent implements DynamicComponent {
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private srv = inject(CategoryService);
@@ -42,6 +44,8 @@ export class CreateCategoryComponent {
   id = signal<number>(0);
   isSubmitting = signal<boolean>(false);
   form: FormGroup;
+
+  isEdit = computed(() => !!this.initialData()?.id);
 
   constructor() {
     this.form = this.fb.group({
@@ -64,6 +68,13 @@ export class CreateCategoryComponent {
       .subscribe((status) => this.formValid.emit(status === 'VALID'));
   }
 
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.category.edit'
+      : 'components.category.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isSubmitting()) {
       if (this.form.invalid) this.form.markAllAsTouched();
@@ -75,10 +86,18 @@ export class CreateCategoryComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
-    this.srv.post(formData).subscribe({
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
+
+    subscription$.subscribe({
       next: () => {
+        const messageKey = this.isEdit()
+          ? 'notifications.categories.success.updated'
+          : 'notifications.categories.success.created';
+
         this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.categories.success.created'),
+          this.transloco.translate(messageKey),
           'success'
         );
         this.submitSuccess.emit();
@@ -90,20 +109,23 @@ export class CreateCategoryComponent {
         this.isSubmitting.set(false);
       },
       error: (error) => {
-        const msgKey =
-          error.status === 400 && error.error?.detail?.includes('Ya existe')
-            ? 'notifications.categories.error.duplicateName'
-            : 'notifications.categories.error.create';
-
-        this.notificationSrv.addNotification(
-          this.transloco.translate(msgKey),
-          'error'
-        );
-
+        this.handleError(error, this.isEdit());
         this.isSubmitting.set(false);
         this.submitError.emit();
       },
     });
+  }
+
+  private handleError(error: any, isUpdate: boolean): void {
+    const msgKey =
+      error.status === 400 && error.error?.detail?.includes('Ya existe')
+        ? 'notifications.categories.error.duplicateName'
+        : 'notifications.categories.error.create';
+
+    this.notificationSrv.addNotification(
+      this.transloco.translate(msgKey),
+      'error'
+    );
   }
 
   getFormControl(controlName: string): FormControl {

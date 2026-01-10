@@ -20,8 +20,7 @@ import {
 import { NotificationService } from '../../../../shared/services/system/notification.service';
 import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { CreateCategoryComponent } from '../create-category/create-category.component';
-import { UpdateCategoryComponent } from '../update-category/update-category.component';
+import { CreateEditCategoryComponent } from '../create-edit-category/create-edit-category.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { CategoryService } from '../../../../shared/services/features/category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -137,7 +136,7 @@ export class ListCategoryComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateCategoryComponent,
+      component: CreateEditCategoryComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -156,7 +155,7 @@ export class ListCategoryComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateCategoryComponent,
+      component: CreateEditCategoryComponent,
       data: {
         initialData: {
           ...data,

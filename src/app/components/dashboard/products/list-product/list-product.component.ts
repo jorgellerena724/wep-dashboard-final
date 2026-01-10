@@ -24,10 +24,9 @@ import {
 import { NotificationService } from '../../../../shared/services/system/notification.service';
 import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { CreateProductComponent } from '../create-product/create-product.component';
+import { CreateEditProductComponent } from '../create-edit-product/create-edit-product.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { ProductService } from '../../../../shared/services/features/product.service';
-import { UpdateProductComponent } from '../update-product/update-product.component';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
@@ -85,11 +84,15 @@ export class ListProductComponent {
     { initialValue: '' }
   );
   private variantsTranslation = toSignal(
-    this.transloco.selectTranslate('components.products.list.table.variants.title'),
+    this.transloco.selectTranslate(
+      'components.products.list.table.variants.title'
+    ),
     { initialValue: '' }
   );
   private descriptionTranslation = toSignal(
-    this.transloco.selectTranslate('components.products.list.table.description'),
+    this.transloco.selectTranslate(
+      'components.products.list.table.description'
+    ),
     { initialValue: '' }
   );
   private categoryTranslation = toSignal(
@@ -104,7 +107,12 @@ export class ListProductComponent {
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
     return [
-      { field: 'title', header: this.nameTranslation(), sortable: true, filter: true },
+      {
+        field: 'title',
+        header: this.nameTranslation(),
+        sortable: true,
+        filter: true,
+      },
       {
         field: 'variants',
         header: this.variantsTranslation(),
@@ -175,7 +183,8 @@ export class ListProductComponent {
         class: buttonVariants.outline.red,
       },
       {
-        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
+        label: (data) =>
+          data.status ? this.disableTranslation() : this.enableTranslation(),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -296,7 +305,7 @@ export class ListProductComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateProductComponent,
+      component: CreateEditProductComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -315,7 +324,7 @@ export class ListProductComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateProductComponent,
+      component: CreateEditProductComponent,
       data: {
         initialData: {
           ...data,

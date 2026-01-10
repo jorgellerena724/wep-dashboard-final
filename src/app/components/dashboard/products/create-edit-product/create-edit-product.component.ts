@@ -9,6 +9,7 @@ import {
   ChangeDetectionStrategy,
   DestroyRef,
   PLATFORM_ID,
+  computed,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -43,11 +44,13 @@ interface ProductFile {
   previewUrl: string | null;
   videoUrl: SafeResourceUrl | null;
   isVideo: boolean;
+  isExisting?: boolean;
+  existingPath?: string;
 }
 
 @Component({
-  selector: 'app-create-product',
-  templateUrl: './create-product.component.html',
+  selector: 'app-create-edit-product',
+  templateUrl: './create-edit-product.component.html',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -59,7 +62,7 @@ interface ProductFile {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateProductComponent implements DynamicComponent {
+export class CreateEditProductComponent implements DynamicComponent {
   // Servicios
   private fb = inject(FormBuilder);
   private srv = inject(ProductService);
@@ -79,6 +82,7 @@ export class CreateProductComponent implements DynamicComponent {
   // Signals para estado
   id = signal<number>(0);
   uploading = signal<boolean>(false);
+  loadingImage = signal<boolean>(false);
   showCalUrlField = signal<boolean>(false);
   categories = signal<any[]>([]);
 
@@ -94,6 +98,9 @@ export class CreateProductComponent implements DynamicComponent {
 
   // Formulario
   form: FormGroup;
+
+  // Computed para detectar modo
+  isEdit = computed(() => !!this.initialData()?.id);
 
   // Computed para facilitar acceso en template
   isFormInvalidComputed = signal<boolean>(false);
@@ -117,7 +124,29 @@ export class CreateProductComponent implements DynamicComponent {
         untracked(() => {
           this.form.patchValue(data);
 
-          if (data.variants && typeof data.variants === 'object') {
+          if (this.isEdit()) {
+            this.form.get('category')?.setValue(data.category?.id);
+            this.id.set(data.id || 0);
+
+            // Cargar variantes existentes
+            if (data.variants) {
+              this.loadVariantsFromData(data.variants);
+            }
+
+            // Cargar archivos existentes
+            if (data.files && Array.isArray(data.files)) {
+              this.loadExistingFiles(data.files);
+            }
+          } else {
+            // En modo crear, solo establecer el id en 0
+            this.id.set(0);
+          }
+
+          if (
+            data.variants &&
+            typeof data.variants === 'object' &&
+            !this.isEdit()
+          ) {
             this.loadVariantsFromData(data.variants);
           }
         });
@@ -147,12 +176,95 @@ export class CreateProductComponent implements DynamicComponent {
       });
   }
 
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.products.edit'
+      : 'components.products.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
+  private initShowCalUrlField(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    this.showCalUrlField.set(urlParams.has('showCalUrl'));
+  }
+
+  // Cargar archivos existentes desde los datos del producto
+  private loadExistingFiles(filesData: any[]): void {
+    filesData.forEach((fileData, index) => {
+      const isVideo = this.isVideoFile(fileData.media);
+
+      const productFile: ProductFile = {
+        file: null,
+        title: fileData.title || '',
+        previewUrl: null,
+        videoUrl: null,
+        isVideo,
+        isExisting: true,
+        existingPath: fileData.media,
+      };
+
+      this.productFiles.update((files) => [...files, productFile]);
+      this.addFileToFormArray(productFile.title, null);
+
+      // Cargar preview del archivo existente
+      this.loadExistingFilePreview(productFile, index);
+    });
+  }
+
+  private loadExistingFilePreview(
+    productFile: ProductFile,
+    index: number
+  ): void {
+    if (productFile.existingPath) {
+      this.loadingImage.set(true);
+
+      this.srv
+        .getImage(productFile.existingPath)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (blob: Blob) => {
+            if (productFile.isVideo) {
+              this.createVideoPreview(
+                blob,
+                productFile.existingPath?.split('.').pop(),
+                index
+              );
+            } else {
+              this.createImagePreview(blob, index);
+            }
+            this.loadingImage.set(false);
+          },
+          error: () => {
+            if (productFile.isVideo) {
+              this.setFallbackVideo(productFile.existingPath!, index);
+            } else {
+              this.setFallbackImage(productFile.existingPath!, index);
+            }
+            this.loadingImage.set(false);
+          },
+        });
+    }
+  }
+
+  private isVideoFile(filename: string): boolean {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return ['mp4', 'webm', 'mov'].includes(extension || '');
+  }
+
   // Métodos para manejar archivos múltiples
   onFileUploaded(files: FileList | File[]): void {
     const filesArray = files instanceof FileList ? Array.from(files) : files;
 
     filesArray.forEach((file) => {
-      const supportedVideoTypes = ['video/mp4', 'video/quicktime'];
+      const supportedVideoTypes = [
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
+        'video/quicktime',
+      ];
+
       const isVideo = supportedVideoTypes.includes(file.type);
 
       if (isVideo) {
@@ -166,10 +278,11 @@ export class CreateProductComponent implements DynamicComponent {
           previewUrl: null,
           videoUrl,
           isVideo,
+          isExisting: false,
         };
 
         this.productFiles.update((files) => [...files, productFile]);
-        this.addFileToFormArray(productFile);
+        this.addFileToFormArray(productFile.title, file);
       } else {
         const reader = new FileReader();
         reader.onload = () => {
@@ -181,24 +294,24 @@ export class CreateProductComponent implements DynamicComponent {
             previewUrl,
             videoUrl: null,
             isVideo: false,
+            isExisting: false,
           };
 
           this.productFiles.update((files) => [...files, productFile]);
-          this.addFileToFormArray(productFile);
+          this.addFileToFormArray(productFile.title, file);
         };
         reader.readAsDataURL(file);
       }
     });
   }
 
-  private addFileToFormArray(productFile: ProductFile): void {
+  private addFileToFormArray(title: string, file: File | null): void {
     const fileGroup = this.fb.group({
-      title: [productFile.title],
-      file: [productFile.file],
+      title: [title],
+      file: [file],
     });
     this.filesFormArray.push(fileGroup);
 
-    // Limpiar el error de required cuando hay al menos un archivo
     if (this.filesFormArray.length > 0) {
       this.filesFormArray.setErrors(null);
     }
@@ -230,7 +343,6 @@ export class CreateProductComponent implements DynamicComponent {
     });
     this.filesFormArray.removeAt(index);
 
-    // Marcar como requerido si no quedan archivos
     if (this.productFiles().length === 0) {
       this.filesFormArray.setErrors({ required: true });
       this.filesFormArray.markAsTouched();
@@ -249,7 +361,6 @@ export class CreateProductComponent implements DynamicComponent {
       return newFiles;
     });
 
-    // Intercambiar en filesFormArray
     const control = this.filesFormArray.at(index);
     this.filesFormArray.removeAt(index);
     this.filesFormArray.insert(index - 1, control);
@@ -267,7 +378,6 @@ export class CreateProductComponent implements DynamicComponent {
       return newFiles;
     });
 
-    // Intercambiar en filesFormArray
     const control = this.filesFormArray.at(index);
     this.filesFormArray.removeAt(index);
     this.filesFormArray.insert(index + 1, control);
@@ -327,6 +437,32 @@ export class CreateProductComponent implements DynamicComponent {
       });
 
       this.variants.set(newVariants);
+    } else if (variantsData && typeof variantsData === 'object') {
+      const variantsArray = variantsData.variants || [];
+      if (Array.isArray(variantsArray)) {
+        this.variants.set([]);
+        this.variantsFormArray.clear();
+
+        const newVariants: ProductVariant[] = [];
+
+        variantsArray.forEach((variant: any) => {
+          const variantGroup = this.fb.group({
+            description: [
+              variant.value || variant.description || '',
+              Validators.required,
+            ],
+            price: [variant.price || 0, Validators.min(0)],
+          });
+
+          this.variantsFormArray.push(variantGroup);
+          newVariants.push({
+            description: variant.value || variant.description || '',
+            price: variant.price || 0,
+          });
+        });
+
+        this.variants.set(newVariants);
+      }
     }
   }
 
@@ -342,10 +478,62 @@ export class CreateProductComponent implements DynamicComponent {
     return variantsData;
   }
 
+  // Métodos para preview de archivos existentes
+  private createVideoPreview(
+    blob: Blob,
+    extension: string | undefined,
+    index: number
+  ): void {
+    let mimeType = 'video/mp4';
+    if (extension === 'mov') mimeType = 'video/quicktime';
+    if (extension === 'webm') mimeType = 'video/webm';
+    if (extension === 'ogg') mimeType = 'video/ogg';
+
+    const videoBlob = new Blob([blob], { type: mimeType });
+    const videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+      URL.createObjectURL(videoBlob)
+    );
+
+    this.productFiles.update((files) => {
+      const newFiles = [...files];
+      newFiles[index].videoUrl = videoUrl;
+      return newFiles;
+    });
+  }
+
+  private setFallbackVideo(videoPath: string, index: number): void {
+    const videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoPath);
+
+    this.productFiles.update((files) => {
+      const newFiles = [...files];
+      newFiles[index].videoUrl = videoUrl;
+      return newFiles;
+    });
+  }
+
+  private createImagePreview(blob: Blob, index: number): void {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      this.productFiles.update((files) => {
+        const newFiles = [...files];
+        newFiles[index].previewUrl = reader.result as string;
+        return newFiles;
+      });
+    };
+    reader.readAsDataURL(new Blob([blob]));
+  }
+
+  private setFallbackImage(imagePath: string, index: number): void {
+    this.productFiles.update((files) => {
+      const newFiles = [...files];
+      newFiles[index].previewUrl = imagePath;
+      return newFiles;
+    });
+  }
+
   async onSubmit(): Promise<void> {
     const currentFiles = this.productFiles();
 
-    // Verificar que haya al menos un archivo
     if (this.form.invalid || currentFiles.length === 0) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.products.error.formInvalid'),
@@ -388,51 +576,106 @@ export class CreateProductComponent implements DynamicComponent {
     const variantsData = this.getVariantsData();
     formData.append('variants', JSON.stringify(variantsData));
 
-    // Agregar títulos
-    const fileTitles = this.filesFormArray.controls.map(
-      (control) => control.get('title')?.value || ''
-    );
-    formData.append('file_titles', JSON.stringify(fileTitles));
+    if (this.isEdit()) {
+      // Lógica de actualización: separar archivos existentes y nuevos
+      const existingFiles = currentFiles.filter((file) => file.isExisting);
+      const newFiles = currentFiles.filter(
+        (file) => !file.isExisting && file.file
+      );
 
-    // Agregar archivos
-    currentFiles.forEach((productFile) => {
-      if (productFile.file) {
-        formData.append('files', productFile.file, productFile.file.name);
-      }
-    });
+      // Enviar información de archivos existentes que deben mantenerse
+      const existingFilesData = existingFiles.map((file) => ({
+        path: file.existingPath,
+        title:
+          this.filesFormArray.at(currentFiles.indexOf(file)).get('title')
+            ?.value || '',
+      }));
+      formData.append('existing_files', JSON.stringify(existingFilesData));
+
+      // Agregar títulos de archivos nuevos
+      const newFileTitles = newFiles.map((file) => {
+        const index = currentFiles.indexOf(file);
+        return this.filesFormArray.at(index).get('title')?.value || '';
+      });
+      formData.append('file_titles', JSON.stringify(newFileTitles));
+
+      // Agregar archivos nuevos
+      newFiles.forEach((productFile) => {
+        if (productFile.file) {
+          formData.append('files', productFile.file, productFile.file.name);
+        }
+      });
+    } else {
+      // Lógica de creación: agregar todos los archivos
+      const fileTitles = this.filesFormArray.controls.map(
+        (control) => control.get('title')?.value || ''
+      );
+      formData.append('file_titles', JSON.stringify(fileTitles));
+
+      currentFiles.forEach((productFile) => {
+        if (productFile.file) {
+          formData.append('files', productFile.file, productFile.file.name);
+        }
+      });
+    }
 
     this.uploading.set(true);
 
-    this.srv
-      .post(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
-          this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.products.success.created'),
-            'success'
-          );
-          this.submitSuccess.emit();
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+    subscription$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        this.uploading.set(false);
+        const messageKey = this.isEdit()
+          ? 'notifications.products.success.updated'
+          : 'notifications.products.success.created';
 
-          if (!data?.closeOnSubmit) {
-            this.resetForm();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
-          this.notificationSrv.addNotification(
-            this.transloco.translate('notifications.products.error.create'),
-            'error'
-          );
-          this.submitError.emit();
-        },
-      });
+        this.notificationSrv.addNotification(
+          this.transloco.translate(messageKey),
+          'success'
+        );
+        this.submitSuccess.emit();
+
+        const data = this.initialData();
+        if (data?.onSave) {
+          data.onSave();
+        }
+
+        if (!data?.closeOnSubmit) {
+          this.resetForm();
+        }
+      },
+      error: (error) => {
+        this.uploading.set(false);
+        this.handleError(error, this.isEdit());
+        this.submitError.emit();
+      },
+    });
+  }
+
+  private handleError(error: any, isUpdate: boolean): void {
+    if (
+      isUpdate &&
+      error.status === 400 &&
+      error.error.message?.includes('imagen') &&
+      error.error.message?.includes('servidor')
+    ) {
+      this.notificationSrv.addNotification(
+        this.transloco.translate('notifications.products.error.duplicateImage'),
+        'error'
+      );
+    } else {
+      const messageKey = isUpdate
+        ? 'notifications.products.error.update'
+        : 'notifications.products.error.create';
+
+      this.notificationSrv.addNotification(
+        this.transloco.translate(messageKey),
+        'error'
+      );
+    }
   }
 
   get isFormInvalid(): boolean {
@@ -478,83 +721,60 @@ export class CreateProductComponent implements DynamicComponent {
   }
 
   private resetForm(): void {
-    this.form.reset();
+    if (this.isEdit()) {
+      // Mantener solo archivos existentes
+      const currentFiles = this.productFiles();
+      const newFiles = currentFiles.filter((file) => !file.isExisting);
 
-    // Limpiar URLs
-    const currentFiles = this.productFiles();
-    currentFiles.forEach((file) => {
-      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(file.previewUrl);
-      }
-      if (file.videoUrl) {
-        const unsafeUrl = file.videoUrl as any;
-        if (unsafeUrl.changingThisBreaksApplicationSecurity) {
-          URL.revokeObjectURL(unsafeUrl.changingThisBreaksApplicationSecurity);
+      // Limpiar URLs de archivos nuevos
+      newFiles.forEach((file) => {
+        if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(file.previewUrl);
         }
-      }
-    });
+        if (file.videoUrl) {
+          const unsafeUrl = file.videoUrl as any;
+          if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+            URL.revokeObjectURL(
+              unsafeUrl.changingThisBreaksApplicationSecurity
+            );
+          }
+        }
+      });
 
-    this.productFiles.set([]);
-    this.filesFormArray.clear();
-    this.filesFormArray.setErrors({ required: true });
-    this.variants.set([]);
-    this.variantsFormArray.clear();
-  }
+      const existingFiles = currentFiles.filter((file) => file.isExisting);
+      this.productFiles.set(existingFiles);
 
-  private initShowCalUrlField(): void {
-    const clientFromStorage = this.getClientFromLocalStorage();
-    if (clientFromStorage !== null) {
-      this.showCalUrlField.set(
-        this.isClientAllowedForCalUrl(clientFromStorage)
-      );
-      return;
+      this.filesFormArray.clear();
+      existingFiles.forEach((file) => {
+        this.addFileToFormArray(file.title, null);
+      });
+
+      this.variants.set([]);
+      this.variantsFormArray.clear();
+    } else {
+      // En modo crear, limpiar todo
+      this.form.reset();
+
+      const currentFiles = this.productFiles();
+      currentFiles.forEach((file) => {
+        if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+        if (file.videoUrl) {
+          const unsafeUrl = file.videoUrl as any;
+          if (unsafeUrl.changingThisBreaksApplicationSecurity) {
+            URL.revokeObjectURL(
+              unsafeUrl.changingThisBreaksApplicationSecurity
+            );
+          }
+        }
+      });
+
+      this.productFiles.set([]);
+      this.filesFormArray.clear();
+      this.filesFormArray.setErrors({ required: true });
+      this.variants.set([]);
+      this.variantsFormArray.clear();
     }
-    this.showCalUrlField.set(false);
-  }
-
-  private isClientAllowedForCalUrl(
-    clientValue: string | undefined | null
-  ): boolean {
-    if (!clientValue && clientValue !== '') {
-      return false;
-    }
-    return clientValue === 'shirkasoft' || clientValue === 'breeze';
-  }
-
-  private getClientFromLocalStorage(): string | null {
-    if (!isPlatformBrowser(this.platformId)) return null;
-
-    const candidateKeys = [
-      'session',
-      'user',
-      'userSession',
-      'auth',
-      'currentUser',
-      'wep_session',
-    ];
-
-    for (const key of candidateKeys) {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object' && 'client' in parsed) {
-          return parsed['client'];
-        }
-        if (typeof parsed === 'string') {
-          return parsed;
-        }
-      } catch (e) {
-        if (typeof raw === 'string' && raw.trim().length > 0) {
-          return raw;
-        }
-      }
-    }
-
-    const direct = localStorage.getItem('sessionClient');
-    if (direct) return direct;
-
-    return null;
   }
 }
