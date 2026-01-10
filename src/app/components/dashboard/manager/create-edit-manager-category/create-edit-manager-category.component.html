@@ -1,15 +1,13 @@
-<!-- update-manager-category.component.html -->
+<!-- create-edit-manager-category.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid">
     <app-text-field
       id="title"
-      label="{{
-        'components.manager-category.edit.fields.name.title' | transloco
-      }}"
+      label="{{ t('fields.name.title') }}"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ( 'components.manager-category.edit.fields.name.required' | transloco ),
-        minlength: ( 'components.manager-category.edit.fields.name.minlength' | transloco ),
+        required: ( t('fields.name.required') ),
+        minlength: ( t('fields.name.minlength') ),
         duplicateName: ( 'notifications.manager-category.error.duplicateName' | transloco ),
       }"
     ></app-text-field>

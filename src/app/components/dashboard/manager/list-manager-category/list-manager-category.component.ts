@@ -20,8 +20,7 @@ import {
 import { NotificationService } from '../../../../shared/services/system/notification.service';
 import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { CreateManagerCategoryComponent } from '../create-manager-category/create-manager-category.component';
-import { UpdateManagerCategoryComponent } from '../update-manager-category/update-manager-category.component';
+import { CreateEditManagerCategoryComponent } from '../create-edit-manager-category/create-edit-manager-category.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ManagerCategoryService } from '../../../../shared/services/features/manager-category.service';
@@ -47,7 +46,9 @@ export class ListManagerCategoryComponent {
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
-    this.transloco.selectTranslate('components.manager-category.list.table.name'),
+    this.transloco.selectTranslate(
+      'components.manager-category.list.table.name'
+    ),
     { initialValue: '' }
   );
 
@@ -137,7 +138,7 @@ export class ListManagerCategoryComponent {
     );
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateManagerCategoryComponent,
+      component: CreateEditManagerCategoryComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -155,7 +156,7 @@ export class ListManagerCategoryComponent {
     );
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateManagerCategoryComponent,
+      component: CreateEditManagerCategoryComponent,
       data: {
         initialData: {
           ...data,

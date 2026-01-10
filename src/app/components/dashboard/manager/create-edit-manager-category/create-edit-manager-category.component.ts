@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -23,31 +24,36 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-update-manager-category',
-  templateUrl: './update-manager-category.component.html',
+  selector: 'app-create-edit-manager-category',
+  templateUrl: './create-edit-manager-category.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UpdateManagerCategoryComponent implements DynamicComponent {
+export class CreateEditManagerCategoryComponent implements DynamicComponent {
   // Servicios
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private srv = inject(ManagerCategoryService);
   private notificationSrv = inject(NotificationService);
+
   // Signals
   initialData = input<any>();
   formValid = output<boolean>();
   submitSuccess = output<void>();
   submitError = output<void>();
+
   // Variables
   id = signal<number>(0);
   isSubmitting = signal<boolean>(false);
   form: FormGroup;
 
+  // Computed para modo (create vs edit)
+  isEdit = computed(() => !!this.initialData()?.id);
+
   constructor() {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(2)]],
+      title: ['', [Validators.required, Validators.minLength(3)]],
     });
 
     effect(() => {
@@ -68,7 +74,7 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isSubmitting()) {
       if (this.form.invalid) this.form.markAllAsTouched();
-      this.submitError.emit(); // Importante para liberar el botón del modal
+      this.submitError.emit();
       return;
     }
 
@@ -76,7 +82,11 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
     const formData = new FormData();
     formData.append('title', this.form.get('title')?.value);
 
-    this.srv.patch(formData, this.id()).subscribe({
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
+
+    subscription$.subscribe({
       next: () => {
         this.notificationSrv.addNotification(
           this.transloco.translate('notifications.categories.success.created'),
@@ -102,12 +112,20 @@ export class UpdateManagerCategoryComponent implements DynamicComponent {
         );
 
         this.isSubmitting.set(false);
-        this.submitError.emit(); // ERROR 2 FIX: Notifica al modal que deje de cargar
+        this.submitError.emit();
       },
     });
   }
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  // Helper para traducciones dinámicas en template
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.manager-category.edit'
+      : 'components.manager-category.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
   }
 }
