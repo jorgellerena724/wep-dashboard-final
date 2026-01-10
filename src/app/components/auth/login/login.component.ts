@@ -5,13 +5,11 @@ import {
   signal,
   ChangeDetectionStrategy,
   DestroyRef,
-  computed,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   FormBuilder,
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -22,6 +20,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -44,7 +43,6 @@ export class LoginComponent {
   // Signals
   isLoading = signal<boolean>(false);
   languageMenuOpen = signal<boolean>(false);
-  currentLanguageIcon = signal<string>(`${this.imgPath}españa.ico`);
   currentLanguage = signal<string>('Español');
   currentLanguageCode = signal<string>('es');
   showPassword = signal<boolean>(false);
@@ -92,19 +90,10 @@ export class LoginComponent {
 
   private updateLanguageDisplay(lang: string) {
     this.currentLanguageCode.set(lang);
-
     if (lang === 'es') {
-      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
-      this.transloco
-        .selectTranslate('language.es')
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((t) => this.currentLanguage.set(t));
+      this.currentLanguage.set('Español');
     } else if (lang === 'en') {
-      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
-      this.transloco
-        .selectTranslate('language.en')
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((t) => this.currentLanguage.set(t));
+      this.currentLanguage.set('English');
     }
   }
 
@@ -116,7 +105,11 @@ export class LoginComponent {
       localStorage.setItem('selectedLang', lang);
     }
 
-    this.updateLanguageDisplay(lang);
+    if (lang === 'es') {
+      this.currentLanguage.set('Español');
+    } else if (lang === 'en') {
+      this.currentLanguage.set('English');
+    }
     this.languageMenuOpen.set(false);
   }
 

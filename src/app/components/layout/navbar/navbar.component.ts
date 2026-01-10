@@ -79,7 +79,6 @@ export class NavbarComponent {
   protected readonly imgPath = environment.imgPath;
 
   // Signals para idioma
-  currentLanguageIcon = signal<string>(`${this.imgPath}españa.ico`);
   currentLanguage = signal<string>('Español');
   currentLanguageCode = signal<string>('es');
 
@@ -524,10 +523,8 @@ export class NavbarComponent {
   private updateLanguageDisplay(lang: string) {
     this.currentLanguageCode.set(lang);
     if (lang === 'es') {
-      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
       this.currentLanguage.set('Español');
     } else if (lang === 'en') {
-      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
       this.currentLanguage.set('English');
     }
   }
@@ -539,10 +536,8 @@ export class NavbarComponent {
       localStorage.setItem('selectedLang', lang);
     }
     if (lang === 'es') {
-      this.currentLanguageIcon.set(`${this.imgPath}españa.ico`);
       this.currentLanguage.set('Español');
     } else if (lang === 'en') {
-      this.currentLanguageIcon.set(`${this.imgPath}eeuu.ico`);
       this.currentLanguage.set('English');
     }
     this.languageMenuOpen.set(false);
