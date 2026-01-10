@@ -24,13 +24,15 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-update-publication-category',
-  templateUrl: './update-publication-category.component.html',
+  selector: 'app-create-edit-publication-category',
+  templateUrl: './create-edit-publication-category.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UpdatePublicationCategoryComponent implements DynamicComponent {
+export class CreateEditPublicationCategoryComponent
+  implements DynamicComponent
+{
   // Servicios
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
@@ -47,6 +49,9 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
   // Signals para estado
   id = signal<number>(0);
   uploading = signal<boolean>(false);
+
+  // Computed para detectar modo
+  isEdit = computed(() => !!this.initialData()?.id);
 
   // Computed signals
   isFormInvalid = computed(() => {
@@ -78,6 +83,13 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
       });
   }
 
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.publication-category.edit'
+      : 'components.publication-category.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       if (this.form.get('title')?.errors?.['duplicateName']) {
@@ -105,41 +117,46 @@ export class UpdatePublicationCategoryComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    this.srv
-      .patch(formData, this.id())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
-          this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.publication-category.success.updated'
-            ),
-            'success'
-          );
-          this.submitSuccess.emit();
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+    subscription$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        this.uploading.set(false);
+        const messageKey = this.isEdit()
+          ? 'notifications.publication-category.success.updated'
+          : 'notifications.publication-category.success.created';
 
-          if (!data?.closeOnSubmit) {
-            this.form.reset();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
-          this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.publication-category.error.update'
-            ),
-            'error'
-          );
-          this.submitError.emit();
-          console.error('Error:', error);
-        },
-      });
+        this.notificationSrv.addNotification(
+          this.transloco.translate(messageKey),
+          'success'
+        );
+        this.submitSuccess.emit();
+
+        const data = this.initialData();
+        if (data?.onSave) {
+          data.onSave();
+        }
+
+        if (!data?.closeOnSubmit) {
+          this.form.reset();
+        }
+      },
+      error: (error) => {
+        this.uploading.set(false);
+        const messageKey = this.isEdit()
+          ? 'notifications.publication-category.error.update'
+          : 'notifications.publication-category.error.create';
+
+        this.notificationSrv.addNotification(
+          this.transloco.translate(messageKey),
+          'error'
+        );
+        this.submitError.emit();
+        console.error('Error:', error);
+      },
+    });
   }
 
   getFormControl(controlName: string): FormControl {

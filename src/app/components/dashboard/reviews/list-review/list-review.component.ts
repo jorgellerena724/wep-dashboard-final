@@ -25,8 +25,7 @@ import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { ReviewService } from '../../../../shared/services/features/review.service';
-import { CreateReviewComponent } from '../create-review/create-review.component';
-import { UpdateReviewComponent } from '../update-review/update-review.component';
+import { CreateEditReviewComponent } from '../create-edit-review/create-edit-review.component';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
@@ -207,7 +206,7 @@ export class ListReviewComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateReviewComponent,
+      component: CreateEditReviewComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -226,7 +225,7 @@ export class ListReviewComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateReviewComponent,
+      component: CreateEditReviewComponent,
       data: {
         initialData: {
           ...data,

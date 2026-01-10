@@ -26,8 +26,7 @@ import { PublicationData } from '../../../../shared/interfaces/publications.inte
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { PublicationsService } from '../../../../shared/services/features/publications.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { CreatePublicationComponent } from '../create-publication/create-publication.component';
-import { UpdatePublicationComponent } from '../update-publication/update-publication.component';
+import { CreateEditPublicationComponent } from '../create-edit-publication/create-edit-publication.component';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -72,7 +71,9 @@ export class ListPublicationComponent {
     { initialValue: '' }
   );
   private categoryTranslation = toSignal(
-    this.transloco.selectTranslate('components.publications.list.table.category'),
+    this.transloco.selectTranslate(
+      'components.publications.list.table.category'
+    ),
     { initialValue: '' }
   );
   private imageTranslation = toSignal(
@@ -228,7 +229,7 @@ export class ListPublicationComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreatePublicationComponent,
+      component: CreateEditPublicationComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -247,7 +248,7 @@ export class ListPublicationComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdatePublicationComponent,
+      component: CreateEditPublicationComponent,
       data: {
         initialData: {
           ...data,

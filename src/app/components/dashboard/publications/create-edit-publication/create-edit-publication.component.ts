@@ -30,8 +30,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-create-publication',
-  templateUrl: './create-publication.component.html',
+  selector: 'app-create-edit-publication',
+  templateUrl: './create-edit-publication.component.html',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -43,7 +43,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreatePublicationComponent implements DynamicComponent {
+export class CreateEditPublicationComponent implements DynamicComponent {
   // Servicios
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
@@ -69,6 +69,9 @@ export class CreatePublicationComponent implements DynamicComponent {
 
   // Formulario
   form: FormGroup;
+
+  // Computed para detectar modo
+  isEdit = computed(() => !!this.initialData()?.id);
 
   // Computed para facilitar acceso en template
   isFormInvalidComputed = signal<boolean>(false);
@@ -112,6 +115,9 @@ export class CreatePublicationComponent implements DynamicComponent {
       if (data) {
         untracked(() => {
           this.form.patchValue(data);
+          this.form
+            .get('publication_category')
+            ?.setValue(data.publication_category?.id || '');
           this.id.set(data.id || 0);
         });
       }
@@ -132,6 +138,13 @@ export class CreatePublicationComponent implements DynamicComponent {
       .subscribe(() => {
         this.formValid.emit(this.form.valid);
       });
+  }
+
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.publications.edit'
+      : 'components.publications.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
   }
 
   onFileUploaded(files: File[]): void {
@@ -185,57 +198,64 @@ export class CreatePublicationComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    this.srv
-      .post(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.uploading.set(false);
-          this.imageUrl.set(null);
-          this.form.patchValue({ photo: '' });
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
 
-          this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.publications.success.created'
-            ),
-            'success'
-          );
-          this.submitSuccess.emit();
+    subscription$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.uploading.set(false);
+        this.imageUrl.set(null);
+        this.form.patchValue({ photo: '' });
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+        const messageKey = this.isEdit()
+          ? 'notifications.publications.success.updated'
+          : 'notifications.publications.success.created';
 
-          if (!data?.closeOnSubmit) {
-            this.resetForm();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
+        this.notificationSrv.addNotification(
+          this.transloco.translate(messageKey),
+          'success'
+        );
+        this.submitSuccess.emit();
 
-          if (
-            error.status === 400 &&
-            error.error?.message &&
-            error.error.message.includes(
-              'La imagen que esta intentando subir ya se encuentra en el servidor'
-            )
-          ) {
-            this.notificationSrv.addNotification(error.error.message, 'error');
-          } else {
-            const errorMessage =
-              error.error?.message ||
-              error.error?.detail ||
-              this.transloco.translate(
-                'notifications.publications.error.create'
-              );
+        const data = this.initialData();
+        if (data?.onSave) {
+          data.onSave();
+        }
 
-            this.notificationSrv.addNotification(errorMessage, 'error');
-          }
+        if (!data?.closeOnSubmit) {
+          this.resetForm();
+        }
+      },
+      error: (error) => {
+        this.uploading.set(false);
+        this.handleError(error, this.isEdit());
+        this.submitError.emit();
+      },
+    });
+  }
 
-          this.submitError.emit();
-        },
-      });
+  private handleError(error: any, isUpdate: boolean): void {
+    if (
+      error.status === 400 &&
+      error.error?.message &&
+      error.error.message.includes(
+        'La imagen que esta intentando subir ya se encuentra en el servidor'
+      )
+    ) {
+      this.notificationSrv.addNotification(error.error.message, 'error');
+    } else {
+      const messageKey = isUpdate
+        ? 'notifications.publications.error.update'
+        : 'notifications.publications.error.create';
+
+      const errorMessage =
+        error.error?.message ||
+        error.error?.detail ||
+        this.transloco.translate(messageKey);
+
+      this.notificationSrv.addNotification(errorMessage, 'error');
+    }
   }
 
   getFormControl(controlName: string): FormControl {

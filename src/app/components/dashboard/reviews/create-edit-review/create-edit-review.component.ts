@@ -4,11 +4,11 @@ import {
   input,
   output,
   signal,
-  computed,
   effect,
   untracked,
   ChangeDetectionStrategy,
   DestroyRef,
+  computed,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -28,8 +28,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-create-review',
-  templateUrl: './create-review.component.html',
+  selector: 'app-create-edit-review',
+  templateUrl: './create-edit-review.component.html',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -40,7 +40,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateReviewComponent implements DynamicComponent {
+export class CreateEditReviewComponent implements DynamicComponent {
   // Servicios
   private fb = inject(FormBuilder);
   private srv = inject(ReviewService);
@@ -64,31 +64,18 @@ export class CreateReviewComponent implements DynamicComponent {
   // Formulario
   form: FormGroup;
 
+  // Computed para detectar modo
+  isEdit = computed(() => !!this.initialData()?.id);
+
   // Computed para validación
   isFormInvalid = computed(() => this.form.invalid || this.uploading());
 
-  // Computed para traducciones de error
-  formInvalidMessage = computed(() =>
-    this.transloco.translate('notifications.reviews.error.formInvalid')
-  );
-
-  createdMessage = computed(() =>
-    this.transloco.translate('notifications.reviews.success.created')
-  );
-
-  createErrorMessage = computed(() =>
-    this.transloco.translate('notifications.reviews.error.create')
-  );
-
-  duplicateImageMessage = computed(() =>
-    this.transloco.translate('notifications.reviews.error.duplicateImage')
-  );
-
   constructor() {
     this.form = this.fb.group({
+      id: [''],
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      image: ['', Validators.required],
+      image: ['', this.isEdit() ? null : Validators.required],
     });
 
     // Effect para inicializar datos
@@ -96,7 +83,7 @@ export class CreateReviewComponent implements DynamicComponent {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          this.form.patchValue(data);
+          this.initializeForm(data);
         });
       }
     });
@@ -107,13 +94,56 @@ export class CreateReviewComponent implements DynamicComponent {
     });
   }
 
-  onFileSelected(file: File): void {
-    this.selectedFile.set(file);
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.reviews.edit'
+      : 'components.reviews.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
+  private initializeForm(data: any): void {
+    this.form.patchValue(data);
+    this.id.set(data.id || 0);
+
+    if (data.photo) {
+      this.loadCurrentImage();
+    }
+  }
+
+  private loadCurrentImage(): void {
+    const data = this.initialData();
+    if (!data?.photo) return;
+
+    this.loadingImage.set(true);
+
+    this.srv
+      .getImage(data.photo)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob: Blob) => {
+          this.createImagePreview(blob);
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage.set(false);
+        },
+        error: () => {
+          this.setFallbackImage();
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage.set(false);
+        },
+      });
+  }
+
+  private createImagePreview(blob: Blob): void {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imageUrl.set(e.target?.result as string);
+    reader.onloadend = () => {
+      this.imageUrl.set(reader.result as string);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(new Blob([blob]));
+  }
+
+  private setFallbackImage(): void {
+    const data = this.initialData();
+    this.imageUrl.set(data?.photo || null);
   }
 
   onFileUploaded(files: File[]): void {
@@ -131,7 +161,7 @@ export class CreateReviewComponent implements DynamicComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
-        this.formInvalidMessage(),
+        this.transloco.translate('notifications.reviews.error.formInvalid'),
         'warning'
       );
       this.form.markAllAsTouched();
@@ -160,39 +190,44 @@ export class CreateReviewComponent implements DynamicComponent {
 
     this.uploading.set(true);
 
-    this.srv
-      .post(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
-          this.imageUrl.set(null);
-          this.form.patchValue({ photo: '' });
+    const subscription$ = this.isEdit()
+      ? this.srv.patch(formData, this.id())
+      : this.srv.post(formData);
 
-          this.notificationSrv.addNotification(
-            this.createdMessage(),
-            'success'
-          );
-          this.submitSuccess.emit();
+    subscription$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        this.uploading.set(false);
+        this.imageUrl.set(null);
+        this.form.patchValue({ photo: '' });
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+        const messageKey = this.isEdit()
+          ? 'notifications.reviews.success.updated'
+          : 'notifications.reviews.success.created';
 
-          if (!data?.closeOnSubmit) {
-            this.resetForm();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
-          this.handleError(error);
-          this.submitError.emit();
-        },
-      });
+        this.notificationSrv.addNotification(
+          this.transloco.translate(messageKey),
+          'success'
+        );
+        this.submitSuccess.emit();
+
+        const data = this.initialData();
+        if (data?.onSave) {
+          data.onSave();
+        }
+
+        if (!data?.closeOnSubmit) {
+          this.resetForm();
+        }
+      },
+      error: (error) => {
+        this.uploading.set(false);
+        this.handleError(error, this.isEdit());
+        this.submitError.emit();
+      },
+    });
   }
 
-  private handleError(error: any): void {
+  private handleError(error: any, isUpdate: boolean): void {
     if (
       error.status === 400 &&
       error.error.message.includes(
@@ -200,11 +235,18 @@ export class CreateReviewComponent implements DynamicComponent {
       )
     ) {
       this.notificationSrv.addNotification(
-        this.duplicateImageMessage(),
+        this.transloco.translate('notifications.reviews.error.duplicateImage'),
         'error'
       );
     } else {
-      this.notificationSrv.addNotification(this.createErrorMessage(), 'error');
+      const messageKey = isUpdate
+        ? 'notifications.reviews.error.update'
+        : 'notifications.reviews.error.create';
+
+      this.notificationSrv.addNotification(
+        this.transloco.translate(messageKey),
+        'error'
+      );
     }
   }
 

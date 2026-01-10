@@ -21,8 +21,7 @@ import {
 import { NotificationService } from '../../../../shared/services/system/notification.service';
 import { icons } from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { CreatePublicationCategoryComponent } from '../create-publication-category/create-publication-category.component';
-import { UpdatePublicationCategoryComponent } from '../update-publication-category/update-publication-category.component';
+import { CreateEditPublicationCategoryComponent } from '../create-edit-publication-category/create-edit-publication-category.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { PublicationCategoryService } from '../../../../shared/services/features/publication-category.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -50,7 +49,9 @@ export class ListPublicationCategoryComponent {
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
-    this.transloco.selectTranslate('components.publication-category.list.table.name'),
+    this.transloco.selectTranslate(
+      'components.publication-category.list.table.name'
+    ),
     { initialValue: '' }
   );
 
@@ -163,7 +164,7 @@ export class ListPublicationCategoryComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreatePublicationCategoryComponent,
+      component: CreateEditPublicationCategoryComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -182,7 +183,7 @@ export class ListPublicationCategoryComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdatePublicationCategoryComponent,
+      component: CreateEditPublicationCategoryComponent,
       data: {
         initialData: {
           ...data,

@@ -1,28 +1,25 @@
-<!-- update-header.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid grid-cols-1 gap-4">
     <app-text-field
       id="title"
-      label="{{ 'components.reviews.create.fields.name.title' | transloco }}"
+      [label]="t('fields.name.title')"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ( 'components.reviews.create.fields.name.required' | transloco ),
-        minlength: ( 'components.reviews.create.fields.name.minlength' | transloco ),
+        required: t('fields.name.required'),
+        minlength: t('fields.name.minlength'),
       }"
     ></app-text-field>
   </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <app-text-field
     id="description"
-    label="{{
-      'components.reviews.create.fields.description.title' | transloco
-    }}"
+    [label]="t('fields.description.title')"
     [control]="getFormControl('description')"
     [isTextArea]="true"
     textAreaHeight="h-56"
     [errorMessages]="{
-        required: ( 'components.reviews.create.fields.description.required' | transloco ),
-        minlength: ( 'components.reviews.create.fields.description.minlength' | transloco ),
+        required: t('fields.description.required'),
+        minlength: t('fields.description.minlength'),
       }"
   ></app-text-field>
   <hr class="border-gray-500 my-1 border-opacity-10" />
@@ -30,13 +27,11 @@
     <!-- File Upload -->
     <app-file-upload
       #fileUpload
-      label="{{ 'components.reviews.create.fields.image.title' | transloco }}"
+      [label]="t('fields.image.title')"
       accept="image/*"
       [maxFileSize]="1024 * 1024"
       fileUploadText="{{ 'image.select' | transloco }}"
-      fileRecommendation="{{
-        'components.reviews.create.fields.image.recommendation' | transloco
-      }}"
+      [fileRecommendation]="t('fields.image.recommendation')"
       (fileSelected)="onFileUploaded($event)"
       (fileRemoved)="removeFile()"
       (fileError)="onFileError($event)"
@@ -131,6 +126,7 @@
     }
   </div>
 </form>
+
 <style>
   /* Estilos para override de PrimeNG */
   :host ::ng-deep .p-fileupload-content {

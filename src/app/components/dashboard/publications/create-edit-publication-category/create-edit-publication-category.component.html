@@ -1,16 +1,16 @@
-<!-- update-header.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid">
     <app-text-field
       id="title"
-      label="{{
-        'components.publication-category.create.fields.name.title' | transloco
-      }}"
+      [label]="t('fields.name.title')"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ( 'components.publication-category.create.fields.name.required' | transloco ),
-        minlength: ( 'components.publication-category.create.fields.name.minlength' | transloco ),
-        duplicateName: ( 'notifications.publication-category.error.duplicateName' | transloco ),
+        required: t('fields.name.required'),
+        minlength: t('fields.name.minlength'),
+        duplicateName: (
+          'notifications.publication-category.error.duplicateName'
+            | transloco
+        ),
       }"
     ></app-text-field>
   </div>

@@ -2,25 +2,21 @@
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
       id="title"
-      label="{{
-        'components.publications.create.fields.name.title' | transloco
-      }}"
+      [label]="t('fields.name.title')"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ( 'components.publications.create.fields.name.required' | transloco ),
-        minlength: ( 'components.publications.create.fields.name.minlength' | transloco ),
-        duplicateTitle: ( 'components.publications.create.fields.name.duplicateTitle' | transloco ),
+        required: t('fields.name.required'),
+        minlength: t('fields.name.minlength'),
+        duplicateTitle: t('fields.name.duplicateTitle'),
       }"
     ></app-text-field>
     <app-select
-      [placeholder]="
-        'components.publications.create.fields.category.title' | transloco
-      "
+      [placeholder]="t('fields.category.title')"
       [options]="categories()"
       formControlName="publication_category"
       [control]="getFormControl('publication_category')"
       [errorMessages]="{
-        required: ( 'components.publications.create.fields.category.required' | transloco ),
+        required: t('fields.category.required'),
       }"
     ></app-select>
   </div>
@@ -28,19 +24,12 @@
   <div class="field">
     <!-- Document File Upload -->
     <app-file-upload
-      label="{{
-        'components.publications.create.fields.document.title' | transloco
-      }}"
+      [label]="t('fields.document.title')"
       accept=".pdf,.zip"
       [allowedExtensions]="['.pdf', '.zip']"
       [maxFileSize]="10 * 1024 * 1024"
-      fileUploadText="{{
-        'components.publications.create.fields.document.select' | transloco
-      }}"
-      fileRecommendation="{{
-        'components.publications.create.fields.document.recommendation'
-          | transloco
-      }}"
+      [fileUploadText]="t('fields.document.select')"
+      [fileRecommendation]="t('fields.document.recommendation')"
       (fileSelected)="onDocumentUploaded($event)"
       (fileRemoved)="removeDocument()"
       (fileError)="onDocumentError($event)"
@@ -92,7 +81,7 @@
             type="button"
             (click)="removeDocument()"
             class="absolute top-2 right-2 text-red-500 bg-transparent transition-all duration-200 p-1 rounded-full"
-            pTooltip="{{ 'image.delete' | transloco }}"
+            [pTooltip]="'image.delete' | transloco"
             tooltipPosition="top"
           >
             <i class="pi pi-trash text-lg"></i>
@@ -117,14 +106,10 @@
           ></i>
           <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
             <span class="block font-medium">{{
-              "components.publications.create.fields.document.nodata.title"
-                | transloco
+              t("fields.document.nodata.title")
             }}</span>
             <span class="block text-xs mt-1 opacity-75">
-              {{
-                "components.publications.create.fields.document.nodata.subtitle"
-                  | transloco
-              }}
+              {{ t("fields.document.nodata.subtitle") }}
             </span>
           </p>
         </div>
@@ -133,9 +118,7 @@
     </div>
     @if (form.get('file')?.invalid && form.get('file')?.touched) {
     <div class="text-red-500 text-sm mt-2 mb-2">
-      {{
-        "components.publications.create.fields.document.required" | transloco
-      }}
+      {{ t("fields.document.required") }}
     </div>
     }
   </div>
@@ -144,36 +127,17 @@
     <!-- File Upload -->
     <app-file-upload
       #fileUpload
-      label="{{
-        'components.publications.create.fields.image.title' | transloco
-      }}"
+      [label]="t('fields.image.title')"
       accept="image/*"
-      [maxFileSize]="1024 * 1024"
+      [maxFileSize]="5 * 1024 * 1024"
       fileUploadText="{{ 'image.select' | transloco }}"
-      fileRecommendation="{{
-        'components.publications.create.fields.image.recommendation' | transloco
-      }}"
+      [fileRecommendation]="t('fields.image.recommendation')"
       (fileSelected)="onFileUploaded($event)"
       (fileRemoved)="removeFile()"
       (fileError)="onFileError($event)"
     ></app-file-upload>
     <!-- Contenedor de altura fija para la previsualización -->
     <div class="mt-4 relative h-[240px]">
-      <!-- Loading state -->
-      @if (loadingImage()) {
-      <div
-        class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg"
-      >
-        <div class="text-center">
-          <div
-            class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"
-          ></div>
-          <span class="text-gray-600 dark:text-gray-300 text-sm">{{
-            "image.loading" | transloco
-          }}</span>
-        </div>
-      </div>
-      }
       <!-- Image Preview Section -->
       @if (imageUrl() && !loadingImage()) {
       <div class="absolute inset-0 flex flex-col">
@@ -192,7 +156,7 @@
                 alt="{{ 'image.alt' | transloco }}"
               />
             </div>
-            <!-- Delete Button - Estilo mejorado con Tailwind -->
+            <!-- Delete Button -->
             <button
               type="button"
               (click)="removeFile()"
@@ -203,13 +167,6 @@
               <i class="pi pi-trash text-lg"></i>
             </button>
           </div>
-        </div>
-        <!-- Info Message - Fijo en la parte inferior -->
-        <div class="mt-auto pt-3">
-          <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-            <i class="pi pi-info-circle mr-1"></i>
-            {{ "image.info" | transloco }}
-          </p>
         </div>
       </div>
       }
@@ -240,13 +197,9 @@
       </div>
       }
     </div>
-    @if (form.get('image')?.invalid && form.get('image')?.touched) {
-    <div class="text-red-500 text-sm mt-2 mb-2">
-      {{ "image.required" | transloco }}
-    </div>
-    }
   </div>
 </form>
+
 <style>
   /* Estilos para override de PrimeNG */
   :host ::ng-deep .p-fileupload-content {
