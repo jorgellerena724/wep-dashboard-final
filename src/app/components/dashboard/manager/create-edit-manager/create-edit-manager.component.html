@@ -1,14 +1,13 @@
-<!-- update-manager.component.html -->
 <form [formGroup]="form" class="space-y-4 max-h-[70vh] pr-4 w-[420]">
   <div class="mb-4 grid grid-cols-2 gap-4">
     <app-text-field
       id="title"
-      label="{{ 'components.managers.edit.fields.name.title' | transloco }}"
+      label="{{ t('fields.name.title') }}"
       [control]="getFormControl('title')"
       [errorMessages]="{
-        required: ( 'components.managers.edit.fields.name.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.name.minlength' | transloco ),
-        uniqueName: ( 'components.managers.edit.fields.name.uniqueName' | transloco ),
+        required: ( t('fields.name.required') ),
+        minlength: ( t('fields.name.minlength') ),
+        uniqueName: ( t('fields.name.uniqueName') ),
       }"
     ></app-text-field>
     <app-select
@@ -26,26 +25,24 @@
   <div class="mb-4 grid grid-cols-1 gap-4">
     <app-text-field
       id="charge"
-      label="{{ 'components.managers.edit.fields.charge.title' | transloco }}"
+      label="{{ t('fields.charge.title') }}"
       [control]="getFormControl('charge')"
       [errorMessages]="{
-        required: ( 'components.managers.edit.fields.charge.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.charge.minlength' | transloco ),
+        required: ( t('fields.charge.required') ),
+        minlength: ( t('fields.charge.minlength') ),
       }"
     ></app-text-field>
   </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
   <app-text-field
     id="description"
-    label="{{
-      'components.managers.edit.fields.description.title' | transloco
-    }}"
+    label="{{ t('fields.description.title') }}"
     [control]="getFormControl('description')"
     [isTextArea]="true"
     textAreaHeight="h-56"
     [errorMessages]="{
-        required: ( 'components.managers.edit.fields.description.required' | transloco ),
-        minlength: ( 'components.managers.edit.fields.description.minlength' | transloco ),
+        required: ( t('fields.description.required') ),
+        minlength: ( t('fields.description.minlength') ),
       }"
   ></app-text-field>
   <hr class="border-gray-500 my-1 border-opacity-10" />
@@ -53,12 +50,12 @@
     <!-- File Upload -->
     <app-file-upload
       #fileUpload
-      label="{{ 'components.managers.edit.fields.image.title' | transloco }}"
+      label="{{ 'components.managers.create.fields.image.title' | transloco }}"
       accept="image/*"
       [maxFileSize]="1024 * 1024"
       fileUploadText="{{ 'image.select' | transloco }}"
       fileRecommendation="{{
-        'components.managers.edit.fields.image.recommendation' | transloco
+        'components.managers.create.fields.image.recommendation' | transloco
       }}"
       (fileSelected)="onFileUploaded($event)"
       (fileRemoved)="removeFile()"

@@ -24,8 +24,7 @@ import { NotificationService } from '../../../../shared/services/system/notifica
 import { icons } from '../../../../core/constants/icons.constant';
 import { ManagerService } from '../../../../shared/services/features/manager.service';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
-import { UpdateManagerComponent } from '../update-manager/update-manager.component';
-import { CreateManagerComponent } from '../create-manager/create-manager.component';
+import { CreateEditManagerComponent } from '../create-edit-manager/create-edit-manager.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -70,7 +69,9 @@ export class ListManagerComponent {
     { initialValue: '' }
   );
   private descriptionTranslation = toSignal(
-    this.transloco.selectTranslate('components.managers.list.table.description'),
+    this.transloco.selectTranslate(
+      'components.managers.list.table.description'
+    ),
     { initialValue: '' }
   );
   private chargeTranslation = toSignal(
@@ -217,7 +218,7 @@ export class ListManagerComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: CreateManagerComponent,
+      component: CreateEditManagerComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -236,7 +237,7 @@ export class ListManagerComponent {
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
-      component: UpdateManagerComponent,
+      component: CreateEditManagerComponent,
       data: {
         initialData: {
           ...data,

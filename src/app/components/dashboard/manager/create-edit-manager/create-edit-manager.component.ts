@@ -30,8 +30,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-create-manager',
-  templateUrl: './create-manager.component.html',
+  selector: 'app-create-edit-manager',
+  templateUrl: './create-edit-manager.component.html',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -43,7 +43,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateManagerComponent implements DynamicComponent {
+export class CreateEditManagerComponent implements DynamicComponent {
   // Servicios
   private fb = inject(FormBuilder);
   private srv = inject(ManagerService);
@@ -72,7 +72,10 @@ export class CreateManagerComponent implements DynamicComponent {
   // Computed para validación
   isFormInvalid = computed(() => this.form.invalid || this.uploading());
 
-  // Computed para traducciones de error
+  // Computed para modo (create vs edit)
+  isEdit = computed(() => !!this.initialData()?.id);
+
+  // Mensajes
   formInvalidMessage = computed(() =>
     this.transloco.translate('notifications.managers.error.formInvalid')
   );
@@ -83,6 +86,14 @@ export class CreateManagerComponent implements DynamicComponent {
 
   createErrorMessage = computed(() =>
     this.transloco.translate('notifications.managers.error.create')
+  );
+
+  updatedMessage = computed(() =>
+    this.transloco.translate('notifications.managers.success.updated')
+  );
+
+  updateErrorMessage = computed(() =>
+    this.transloco.translate('notifications.managers.error.update')
   );
 
   constructor() {
@@ -99,11 +110,7 @@ export class CreateManagerComponent implements DynamicComponent {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          const formData = { ...data };
-          if (formData.manager_category_id && !formData.manager_category) {
-            formData.manager_category = formData.manager_category_id;
-          }
-          this.form.patchValue(formData);
+          this.initializeForm(data);
         });
       }
     });
@@ -127,6 +134,53 @@ export class CreateManagerComponent implements DynamicComponent {
       });
   }
 
+  private initializeForm(data: any): void {
+    const formData = { ...data };
+
+    // Determinar el valor de la categoría
+    if (formData.manager_category?.id) {
+      formData.manager_category = formData.manager_category.id;
+    } else if (
+      formData.manager_category_id !== null &&
+      formData.manager_category_id !== undefined &&
+      formData.manager_category_id !== ''
+    ) {
+      formData.manager_category = formData.manager_category_id;
+    } else if (formData.manager_category === undefined) {
+      formData.manager_category = null;
+    }
+
+    this.id.set(data.id || 0);
+    this.form.patchValue(formData);
+
+    if (data.photo) {
+      this.loadCurrentImage();
+    }
+  }
+
+  private loadCurrentImage(): void {
+    const data = this.initialData();
+    if (!data?.photo) return;
+
+    this.loadingImage.set(true);
+
+    this.srv
+      .getImage(data.photo)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob: Blob) => {
+          this.createImagePreview(blob);
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage.set(false);
+        },
+        error: () => {
+          this.setFallbackImage();
+          this.form.get('image')?.setValue('existing-image');
+          this.loadingImage.set(false);
+        },
+      });
+  }
+
   onFileSelected(file: File): void {
     this.selectedFile.set(file);
     const reader = new FileReader();
@@ -146,6 +200,19 @@ export class CreateManagerComponent implements DynamicComponent {
       this.imageUrl.set(reader.result as string);
     };
     reader.readAsDataURL(file);
+  }
+
+  private createImagePreview(blob: Blob): void {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      this.imageUrl.set(reader.result as string);
+    };
+    reader.readAsDataURL(new Blob([blob]));
+  }
+
+  private setFallbackImage(): void {
+    const data = this.initialData();
+    this.imageUrl.set(data?.photo || null);
   }
 
   async onSubmit(): Promise<void> {
@@ -177,55 +244,119 @@ export class CreateManagerComponent implements DynamicComponent {
 
     // Get manager_category value
     const categoryId = this.form.get('manager_category')?.value;
-    if (
-      categoryId !== null &&
-      categoryId !== undefined &&
-      categoryId !== '' &&
-      categoryId !== 'null'
-    ) {
-      formData.append('manager_category_id', categoryId.toString());
+    const hadCategoryBefore =
+      this.initialData()?.manager_category_id ||
+      this.initialData()?.manager_category?.id;
+
+    if (!this.isEdit()) {
+      // Create logic
+      if (
+        categoryId !== null &&
+        categoryId !== undefined &&
+        categoryId !== '' &&
+        categoryId !== 'null'
+      ) {
+        formData.append('manager_category_id', categoryId.toString());
+      }
+    } else {
+      // Update logic
+      const wantsToRemoveCategory =
+        hadCategoryBefore &&
+        (categoryId === null ||
+          categoryId === undefined ||
+          categoryId === '' ||
+          categoryId === 'null');
+
+      if (wantsToRemoveCategory) {
+        formData.append('remove_manager_category', 'true');
+      } else if (
+        categoryId !== null &&
+        categoryId !== undefined &&
+        categoryId !== '' &&
+        categoryId !== 'null' &&
+        !isNaN(Number(categoryId)) &&
+        Number(categoryId) > 0
+      ) {
+        formData.append('manager_category_id', categoryId.toString());
+      }
     }
 
     const file = this.selectedFile();
     if (file) {
       formData.append('photo', file, file.name);
+    } else if (this.imageUrl() === null && this.initialData()?.photo) {
+      // if previously had photo but now removed
+      formData.append('remove_photo', 'true');
     }
 
     this.uploading.set(true);
 
-    this.srv
-      .post(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.uploading.set(false);
-          this.imageUrl.set(null);
-          this.form.patchValue({ photo: '' });
+    if (!this.isEdit()) {
+      this.srv
+        .post(formData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.uploading.set(false);
+            this.imageUrl.set(null);
+            this.form.patchValue({ photo: '' });
 
-          this.notificationSrv.addNotification(
-            this.createdMessage(),
-            'success'
-          );
-          this.submitSuccess.emit();
+            this.notificationSrv.addNotification(
+              this.createdMessage(),
+              'success'
+            );
+            this.submitSuccess.emit();
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
-          }
+            const data = this.initialData();
+            if (data?.onSave) {
+              data.onSave();
+            }
 
-          if (!data?.closeOnSubmit) {
-            this.resetForm();
-          }
-        },
-        error: (error) => {
-          this.uploading.set(false);
-          this.handleError(error);
-          this.submitError.emit();
-        },
-      });
+            if (!data?.closeOnSubmit) {
+              this.resetForm();
+            }
+          },
+          error: (error) => {
+            this.uploading.set(false);
+            this.handleError(error, false);
+            this.submitError.emit();
+          },
+        });
+    } else {
+      this.srv
+        .patch(formData, this.id())
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (response) => {
+            this.uploading.set(false);
+            this.imageUrl.set(null);
+            this.form.patchValue({ photo: '' });
+
+            this.notificationSrv.addNotification(
+              this.updatedMessage(),
+              'success'
+            );
+            this.submitSuccess.emit();
+
+            const data = this.initialData();
+            if (data?.onSave) {
+              data.onSave();
+            }
+
+            if (!data?.closeOnSubmit) {
+              this.resetForm();
+            }
+          },
+          error: (error) => {
+            this.uploading.set(false);
+            this.handleError(error, true);
+            this.submitError.emit();
+          },
+        });
+    }
   }
 
-  private handleError(error: any): void {
+  private handleError(error: any, isUpdate: boolean): void {
     if (
       error.status === 400 &&
       error.error.message.includes(
@@ -234,7 +365,10 @@ export class CreateManagerComponent implements DynamicComponent {
     ) {
       this.notificationSrv.addNotification(error.error.message, 'error');
     } else {
-      this.notificationSrv.addNotification(this.createErrorMessage(), 'error');
+      this.notificationSrv.addNotification(
+        isUpdate ? this.updateErrorMessage() : this.createErrorMessage(),
+        'error'
+      );
     }
   }
 
@@ -282,5 +416,13 @@ export class CreateManagerComponent implements DynamicComponent {
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  // Helper para traducciones dinámicas en template
+  t(suffix: string): string {
+    const prefix = this.isEdit()
+      ? 'components.managers.edit'
+      : 'components.managers.create';
+    return this.transloco.translate(`${prefix}.${suffix}`);
   }
 }
