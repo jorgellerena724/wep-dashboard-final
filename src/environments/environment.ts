@@ -3,7 +3,6 @@ const imgUrl = `${apiUrl}images/`;
 const imgPath = `/assets/img/`;
 
 export const environment = {
-  use_minio: false,
   production: false,
   api: `${apiUrl}`,
   api_users: `${apiUrl}users/`,

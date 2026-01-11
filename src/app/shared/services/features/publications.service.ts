@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { PublicationData } from '../../interfaces/publications.interface';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,14 +10,13 @@ import { AuthService } from '../../../core/services/auth.service';
 export class PublicationsService {
   private apiUrl = environment.api;
   private imgUrl = environment.api_img;
-  private use_minio = environment.use_minio;
 
   // Signal para cachear datos
   private dataSignal = signal<PublicationData[] | null>(null);
   public data = computed(() => this.dataSignal());
   public isLoading = signal<boolean>(false);
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
   get(): Observable<PublicationData[]> {
     const cached = this.dataSignal();
@@ -42,11 +40,7 @@ export class PublicationsService {
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = this.use_minio
-      ? `${
-          this.imgUrl
-        }${this.authService.getClient()}/${name}/?no-cache=${timestamp}`
-      : `${this.imgUrl}${name}/?no-cache=${timestamp}`;
+    const url = `${this.imgUrl}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });
