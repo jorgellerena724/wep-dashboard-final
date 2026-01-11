@@ -14,6 +14,7 @@ import {
   afterNextRender,
   effect,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslocoService } from '@jsverse/transloco';
 import {
@@ -31,18 +32,8 @@ import { HomeData } from '../../interfaces/home.interface';
 @Component({
   selector: 'app-base-list',
   standalone: true,
-  imports: [TableComponent],
-  template: `
-    <app-table
-      [data]="data()"
-      [columns]="columns()"
-      [loading]="loading()"
-      [customTemplates]="customTemplates()"
-      [headerActions]="headerActions()"
-      [rowActions]="rowActions()"
-      (refresh)="onRefresh()"
-    ></app-table>
-  `,
+  imports: [CommonModule, TableComponent],
+  templateUrl: './app-base-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BaseListComponent<T = HomeData> {

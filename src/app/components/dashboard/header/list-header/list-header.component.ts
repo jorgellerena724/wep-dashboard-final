@@ -9,7 +9,6 @@ import {
   untracked,
 } from '@angular/core';
 import {
-  TableComponent,
   Column,
   TableAction,
   RowAction,
@@ -27,10 +26,11 @@ import { UpdateHeaderComponent } from '../update-header/update-header.component'
 import { HeaderData } from '../../../../shared/interfaces/headerData.interface';
 import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { BaseListComponent } from '../../../../shared/components/app-base-list/app-base-list.component';
 
 @Component({
   selector: 'app-list-header',
-  imports: [TableComponent, ButtonModule, TranslocoModule],
+  imports: [BaseListComponent, ButtonModule, TranslocoModule],
   templateUrl: './list-header.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,6 +44,7 @@ export class ListHeaderComponent {
   private destroyRef = inject(DestroyRef);
 
   imageTemplate = viewChild('imageTemplate');
+  base = viewChild<BaseListComponent<HeaderData>>('base');
 
   // Signals para el estado
   data = signal<HeaderData[]>([]);
@@ -55,6 +56,44 @@ export class ListHeaderComponent {
     const template = this.imageTemplate();
     return template ? { image: template } : {};
   });
+
+  // Config y título para el componente base
+  config = computed((): any => {
+    return {
+      translationPrefix: 'components.header.list',
+      service: this.srv,
+      columns: (transloco: TranslocoService) => [
+        {
+          field: 'name',
+          header: transloco.translate('components.header.list.table.name'),
+          sortable: true,
+          filter: true,
+        },
+        {
+          field: 'image',
+          header: transloco.translate('components.header.list.table.image'),
+          width: '240px',
+        },
+      ],
+      media: { type: 'image', fieldName: 'logo' },
+      order: { enabled: false },
+      status: { enabled: false },
+      actions: {
+        edit: {
+          enabled: true,
+          component: UpdateHeaderComponent,
+          translationKey: 'components.header.edit.title',
+        },
+      },
+      customTemplates: this.imageTemplate()
+        ? { image: this.imageTemplate() }
+        : {},
+    };
+  });
+
+  title = computed(() =>
+    this.transloco.translate('components.header.list.title')
+  );
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
@@ -119,6 +158,12 @@ export class ListHeaderComponent {
         next: (data: HeaderData[]) => {
           this.data.set(data);
           this.loading.set(false);
+          // Si el componente base está disponible, sincronizamos sus datos
+          const baseCmp = this.base();
+          if (baseCmp) {
+            baseCmp.updateData(data);
+            baseCmp.setLoading(false);
+          }
           this.loadImages(data);
         },
         error: (error) => {
@@ -127,6 +172,10 @@ export class ListHeaderComponent {
             'error'
           );
           this.loading.set(false);
+          const baseCmp = this.base();
+          if (baseCmp) {
+            baseCmp.setLoading(false);
+          }
         },
       });
   }
