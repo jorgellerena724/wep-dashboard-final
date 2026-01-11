@@ -48,6 +48,8 @@ export class UpdateHeaderComponent {
 
   // Signals para inputs/outputs
   initialData = input<any>();
+  onSave = input<(() => void) | undefined>(undefined);
+  closeOnSubmit = input<boolean>(false);
   formValid = output<boolean>();
   submitSuccess = output<void>();
   submitError = output<void>();
@@ -186,12 +188,12 @@ export class UpdateHeaderComponent {
 
           this.submitSuccess.emit();
 
-          const data = this.initialData();
-          if (data?.onSave) {
-            data.onSave();
+          const onSaveCallback = this.onSave();
+          if (onSaveCallback) {
+            onSaveCallback();
           }
 
-          if (!data?.closeOnSubmit) {
+          if (!this.closeOnSubmit()) {
             this.resetForm();
           }
         },
