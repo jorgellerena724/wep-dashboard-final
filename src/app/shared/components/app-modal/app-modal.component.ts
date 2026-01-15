@@ -16,7 +16,6 @@ import { ModalService, ModalConfig } from '../../services/system/modal.service';
 import { NotificationService } from '../../services/system/notification.service';
 import { CommonModule } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-modal',
