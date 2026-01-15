@@ -54,7 +54,7 @@ export class PublicationsService {
 
   patch(formData: FormData, id: number): Observable<any> {
     return this.http
-      .patch(`${this.apiUrl}publications/${id}`, formData)
+      .patch(`${this.apiUrl}publications/${id}/`, formData)
       .pipe(tap(() => this.invalidateCache()));
   }
 
