@@ -119,6 +119,30 @@ export class CreateEditPublicationComponent implements DynamicComponent {
             .get('publication_category')
             ?.setValue(data.publication_category?.id || '');
           this.id.set(data.id || 0);
+
+          if (data.photo) {
+            this.loadingImage.set(true);
+            this.srv.getImage(data.photo).subscribe({
+              next: (blob) => {
+                const file = new File([blob], data.photo, { type: blob.type });
+                this.selectedFile.set(file);
+                this.imageUrl.set(URL.createObjectURL(blob));
+                this.form.get('image')?.setValue(file);
+                this.loadingImage.set(false);
+              },
+              error: () => {
+                this.loadingImage.set(false);
+              },
+            });
+          }
+
+          if (data.file) {
+            const dummyFile = new File([], data.file, {
+              type: 'application/octet-stream',
+            });
+            this.selectedDocument.set(dummyFile);
+            this.form.get('file')?.setValue(dummyFile);
+          }
         });
       }
     });
