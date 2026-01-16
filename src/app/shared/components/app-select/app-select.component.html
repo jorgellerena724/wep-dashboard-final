@@ -77,7 +77,7 @@
     <!-- Regular options list -->
     @for (option of regularOptions(); track trackByFn($index, option)) {
     <div
-      class="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 text-gray-500"
+      class="flex items-center justify-center gap-2 p-2 cursor-pointer hover:bg-gray-100 text-gray-500"
       [class.disabled]="isOptionDisabled(option)"
       (click)="!isOptionDisabled(option) && onOptionClick(option)"
     >

@@ -28,6 +28,7 @@ import { SelectComponent } from '../../../../shared/components/app-select/app-se
 import { ManagerCategoryService } from '../../../../shared/services/features/manager-category.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { switchMap, map } from 'rxjs';
 
 @Component({
   selector: 'app-create-edit-manager',
@@ -392,13 +393,20 @@ export class CreateEditManagerComponent implements DynamicComponent {
   }
 
   private fetchCategories(): void {
-    this.categorySrv
-      .get()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.transloco
+      .selectTranslate('components.managers.create.no_category')
+      .pipe(
+        switchMap((noCategoryLabel) =>
+          this.categorySrv
+            .get()
+            .pipe(map((data) => ({ noCategoryLabel, data })))
+        ),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
-        next: (data) => {
+        next: ({ noCategoryLabel, data }) => {
           this.categories.set([
-            { value: null, label: 'Sin categoría' },
+            { value: null, label: noCategoryLabel },
             ...data.map((com: any) => ({
               value: com.id,
               label: com.title,

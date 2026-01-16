@@ -684,6 +684,7 @@
       },
       "create": {
         "title": "Register manager",
+        "no_category": "Uncategorized",
         "fields": {
           "name": {
             "title": "Name",

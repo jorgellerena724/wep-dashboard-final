@@ -661,6 +661,7 @@
       },
       "create": {
         "title": "Registrar directivo",
+        "no_category": "Sin categoría",
         "fields": {
           "name": {
             "title": "Nombre",
