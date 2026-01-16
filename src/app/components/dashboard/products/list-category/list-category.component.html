@@ -7,11 +7,20 @@
     <h1
       class="ml-2 sm:ml-0 text-2xl font-bold text-gray-700 dark:text-gray-300"
     >
-      {{ title() }}
+      {{ "components.category.list.title" | transloco }}
     </h1>
 
+    <!-- La tabla con sus nuevas propiedades -->
     <div class="mt-4">
-      <app-base-list [config]="config()" />
+      <app-table
+        [data]="data()"
+        [columns]="columns()"
+        [loading]="loading()"
+        [headerActions]="headerActions()"
+        [rowActions]="rowActions()"
+        (refresh)="onRefresh()"
+      >
+      </app-table>
     </div>
   </div>
 </div>
