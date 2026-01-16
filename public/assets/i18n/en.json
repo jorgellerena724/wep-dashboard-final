@@ -883,6 +883,7 @@
       },
       "create": {
         "title": "Register product or service",
+        "no_categories_found": "Uncategorized",
         "fields": {
           "name": {
             "title": "Name",

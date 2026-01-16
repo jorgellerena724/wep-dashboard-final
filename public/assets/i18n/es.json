@@ -860,6 +860,7 @@
       },
       "create": {
         "title": "Registrar producto o servicio",
+        "no_categories_found": "Sin categorías",
         "fields": {
           "name": {
             "title": "Nombre",

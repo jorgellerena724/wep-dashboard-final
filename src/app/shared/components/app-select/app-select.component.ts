@@ -71,6 +71,7 @@ export class SelectComponent implements ControlValueAccessor {
     required: 'Este campo es requerido',
   });
   preserveSearchOnLoad = input<boolean>(false);
+  emptyMessageKey = input<string>('table.nodata');
 
   // Outputs
   selectionChange = output<any>();
