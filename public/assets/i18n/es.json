@@ -834,12 +834,6 @@
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           }
         }
-      },
-      "delete": {
-        "title": "¿Eliminar elemento?",
-        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
-        "confirm": "Eliminar",
-        "cancel": "Cancelar"
       }
     },
     "products": {
@@ -1024,12 +1018,6 @@
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           }
         }
-      },
-      "delete": {
-        "title": "¿Eliminar elemento?",
-        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
-        "confirm": "Eliminar",
-        "cancel": "Cancelar"
       }
     },
     "manager-category": {
@@ -1060,12 +1048,6 @@
             "maxlength": "El nombre debe tener hasta 20 caracteres"
           }
         }
-      },
-      "delete": {
-        "title": "¿Eliminar elemento?",
-        "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
-        "confirm": "Eliminar",
-        "cancel": "Cancelar"
       }
     },
     "publications": {
@@ -1347,5 +1329,13 @@
     "info": "Vista previa del video. Formatos permitidos: MP4, MOV",
     "unsupported": "Formato de video no compatible. Intente con MP4 o MOV.",
     "converting": "Convirtiendo video a formato compatible..."
+  },
+  "common": {
+    "delete": {
+      "title": "¿Eliminar elemento?",
+      "message": "¿Está seguro que desea eliminar este elemento? Esta acción no se puede deshacer.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    }
   }
 }
