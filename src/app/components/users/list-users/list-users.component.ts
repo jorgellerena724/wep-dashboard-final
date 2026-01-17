@@ -13,7 +13,6 @@ import {
   RowAction,
 } from '../../../shared/components/app-table/app.table.component';
 import { UserService } from '../../../shared/services/users/user.service';
-import { CreateUserComponent } from '../create-user/create-user.component';
 import { ButtonModule } from 'primeng/button';
 import { buttonVariants } from '../../../core/constants/button-variant.constant';
 import { NotificationService } from '../../../shared/services/system/notification.service';
@@ -23,7 +22,7 @@ import {
   ModalConfig,
 } from '../../../shared/services/system/modal.service';
 import { ChangeUserPasswordComponent } from '../change-user-password/change-user-password.component';
-import { UpdateUserComponent } from '../update-user/update-user.component';
+import { CreateEditUserComponent } from '../create-edit-user/create-edit-user.component';
 import { icons } from '../../../core/constants/icons.constant';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -51,15 +50,15 @@ export class UsersComponent {
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.users.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private emailTranslation = toSignal(
     this.transloco.selectTranslate('components.users.list.table.email'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private clientTranslation = toSignal(
     this.transloco.selectTranslate('components.users.list.table.client'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -89,19 +88,19 @@ export class UsersComponent {
   // Signals reactivos para traducciones de acciones
   private createTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.create'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private changePasswordTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.changePassword'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private deleteTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.delete'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   headerActions = computed<TableAction[]>(() => {
@@ -140,47 +139,47 @@ export class UsersComponent {
 
   // Computed para mensajes de error
   loadErrorMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.load')
+    this.transloco.translate('notifications.users.error.load'),
   );
 
   selfDeleteErrorMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.selfDelete')
+    this.transloco.translate('notifications.users.error.selfDelete'),
   );
 
   deleteSuccessMessage = computed(() =>
-    this.transloco.translate('notifications.users.success.deleted')
+    this.transloco.translate('notifications.users.success.deleted'),
   );
 
   deleteErrorMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.delete')
+    this.transloco.translate('notifications.users.error.delete'),
   );
 
   createTitleMessage = computed(() =>
-    this.transloco.translate('components.users.create.title')
+    this.transloco.translate('components.users.create.title'),
   );
 
   editTitleMessage = computed(() =>
-    this.transloco.translate('components.users.edit.title')
+    this.transloco.translate('components.users.edit.title'),
   );
 
   changePasswordTitleMessage = computed(() =>
-    this.transloco.translate('components.users.password.title')
+    this.transloco.translate('components.users.password.title'),
   );
 
   deleteTitleMessage = computed(() =>
-    this.transloco.translate('components.products.delete.title')
+    this.transloco.translate('components.products.delete.title'),
   );
 
   deleteMessageMessage = computed(() =>
-    this.transloco.translate('components.products.delete.message')
+    this.transloco.translate('components.products.delete.message'),
   );
 
   deleteConfirmMessage = computed(() =>
-    this.transloco.translate('components.products.delete.confirm')
+    this.transloco.translate('components.products.delete.confirm'),
   );
 
   deleteCancelMessage = computed(() =>
-    this.transloco.translate('components.products.delete.cancel')
+    this.transloco.translate('components.products.delete.cancel'),
   );
 
   constructor() {
@@ -202,7 +201,7 @@ export class UsersComponent {
         error: (error) => {
           this.notificationSrv.addNotification(
             this.loadErrorMessage(),
-            'error'
+            'error',
           );
           this.loading.set(false);
         },
@@ -216,7 +215,7 @@ export class UsersComponent {
   create(): void {
     const modalConfig: ModalConfig = {
       title: this.createTitleMessage(),
-      component: CreateUserComponent,
+      component: CreateEditUserComponent,
       data: {
         initialData: {
           onSave: () => {
@@ -231,7 +230,7 @@ export class UsersComponent {
   edit(data: any): void {
     const modalConfig: ModalConfig = {
       title: this.editTitleMessage(),
-      component: UpdateUserComponent,
+      component: CreateEditUserComponent,
       data: {
         initialData: {
           ...data,
@@ -270,7 +269,7 @@ export class UsersComponent {
     if (data.id === currentUser.id) {
       this.notificationSrv.addNotification(
         this.selfDeleteErrorMessage(),
-        'warning'
+        'warning',
       );
       return;
     }
@@ -293,7 +292,7 @@ export class UsersComponent {
             this.loadData();
             this.notificationSrv.addNotification(
               this.deleteSuccessMessage(),
-              'success'
+              'success',
             );
           },
           error: (error) => {
@@ -303,12 +302,12 @@ export class UsersComponent {
             ) {
               this.notificationSrv.addNotification(
                 error.error.message,
-                'error'
+                'error',
               );
             } else {
               this.notificationSrv.addNotification(
                 this.deleteErrorMessage(),
-                'error'
+                'error',
               );
             }
             this.loading.set(false);
