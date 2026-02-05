@@ -560,7 +560,6 @@ export class CreateEditProductComponent implements DynamicComponent {
         this.transloco.translate('notifications.products.error.formInvalid'),
         'warning',
       );
-      this.form.markAllAsTouched();
 
       this.filesFormArray.setErrors(
         currentFiles.length === 0 ? { required: true } : null,

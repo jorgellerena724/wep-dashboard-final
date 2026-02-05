@@ -30,9 +30,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [ReactiveFormsModule, TextFieldComponent, TranslocoModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateEditPublicationCategoryComponent
-  implements DynamicComponent
-{
+export class CreateEditPublicationCategoryComponent implements DynamicComponent {
   // Servicios
   private transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
@@ -92,22 +90,13 @@ export class CreateEditPublicationCategoryComponent
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      if (this.form.get('title')?.errors?.['duplicateName']) {
-        this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.publication-category.error.duplicateName'
-          ),
-          'warning'
-        );
-      } else {
-        this.notificationSrv.addNotification(
-          this.transloco.translate(
-            'notifications.publication-category.error.formInvalid'
-          ),
-          'warning'
-        );
-      }
-      this.form.markAllAsTouched();
+      this.notificationSrv.addNotification(
+        this.transloco.translate(
+          'notifications.publication-category.error.formInvalid',
+        ),
+        'warning',
+      );
+
       this.submitError.emit();
       return;
     }
@@ -130,7 +119,7 @@ export class CreateEditPublicationCategoryComponent
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -151,7 +140,7 @@ export class CreateEditPublicationCategoryComponent
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'error'
+          'error',
         );
         this.submitError.emit();
         console.error('Error:', error);

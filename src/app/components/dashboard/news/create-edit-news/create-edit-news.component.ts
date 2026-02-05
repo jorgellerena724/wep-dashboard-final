@@ -149,15 +149,15 @@ export class CreateEditNewsComponent implements DynamicComponent {
     const videoBlob = new Blob([blob], { type: mimeType });
     this.videoUrl.set(
       this.sanitizer.bypassSecurityTrustResourceUrl(
-        URL.createObjectURL(videoBlob)
-      )
+        URL.createObjectURL(videoBlob),
+      ),
     );
   }
 
   private setFallbackVideo(): void {
     const data = this.initialData();
     this.videoUrl.set(
-      this.sanitizer.bypassSecurityTrustResourceUrl(data?.photo || '')
+      this.sanitizer.bypassSecurityTrustResourceUrl(data?.photo || ''),
     );
   }
 
@@ -193,7 +193,7 @@ export class CreateEditNewsComponent implements DynamicComponent {
     if (isVideoFile) {
       const videoUrl = URL.createObjectURL(file);
       this.videoUrl.set(
-        this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl)
+        this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl),
       );
       this.imageUrl.set(null);
     } else {
@@ -233,18 +233,10 @@ export class CreateEditNewsComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      if (this.form.get('title')?.errors?.['duplicateName']) {
-        this.notificationSrv.addNotification(
-          this.transloco.translate('notifications.news.error.duplicateName'),
-          'warning'
-        );
-      } else {
-        const message = this.transloco.translate(
-          'notifications.news.error.formInvalid'
-        );
-        this.notificationSrv.addNotification(message, 'warning');
-      }
-      this.form.markAllAsTouched();
+      this.notificationSrv.addNotification(
+        this.transloco.translate('notifications.news.error.formInvalid'),
+        'warning',
+      );
 
       this.submitError.emit();
       return;
@@ -285,7 +277,7 @@ export class CreateEditNewsComponent implements DynamicComponent {
             this.uploading.set(false);
 
             const message = this.transloco.translate(
-              'notifications.news.success.created'
+              'notifications.news.success.created',
             );
             this.notificationSrv.addNotification(message, 'success');
             this.submitSuccess.emit();
@@ -315,7 +307,7 @@ export class CreateEditNewsComponent implements DynamicComponent {
             this.uploading.set(false);
 
             const message = this.transloco.translate(
-              'notifications.news.success.updated'
+              'notifications.news.success.updated',
             );
             this.notificationSrv.addNotification(message, 'success');
             this.submitSuccess.emit();
@@ -346,7 +338,7 @@ export class CreateEditNewsComponent implements DynamicComponent {
     if (
       error.status === 400 &&
       error.error.message?.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor'
+        'La imagen que esta intentando subir ya se encuentra en el servidor',
       )
     ) {
       messageKey = 'notifications.news.error.duplicateImage';
@@ -354,7 +346,7 @@ export class CreateEditNewsComponent implements DynamicComponent {
 
     this.notificationSrv.addNotification(
       this.transloco.translate(messageKey),
-      'error'
+      'error',
     );
   }
 

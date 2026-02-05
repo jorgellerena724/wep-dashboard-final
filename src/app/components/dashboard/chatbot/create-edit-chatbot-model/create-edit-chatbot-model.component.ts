@@ -71,8 +71,7 @@ export class CreateEditChatbotModelComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isSubmitting()) {
-      if (this.form.invalid) this.form.markAllAsTouched();
-      this.submitError.emit(); // Importante para liberar el botón del modal
+      this.submitError.emit();
       return;
     }
 
@@ -94,9 +93,9 @@ export class CreateEditChatbotModelComponent {
           this.transloco.translate(
             this.id() > 0
               ? 'notifications.chatbot_model.success.updated'
-              : 'notifications.chatbot_model.success.created'
+              : 'notifications.chatbot_model.success.created',
           ),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -114,7 +113,7 @@ export class CreateEditChatbotModelComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(msgKey),
-          'error'
+          'error',
         );
 
         this.isSubmitting.set(false);

@@ -57,19 +57,19 @@ export class CreateUserComponent implements DynamicComponent {
 
   // Computed para traducciones de error
   formInvalidMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.formInvalid')
+    this.transloco.translate('notifications.users.error.formInvalid'),
   );
 
   createdMessage = computed(() =>
-    this.transloco.translate('notifications.users.success.created')
+    this.transloco.translate('notifications.users.success.created'),
   );
 
   createErrorMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.create')
+    this.transloco.translate('notifications.users.error.create'),
   );
 
   emailExistsMessage = computed(() =>
-    this.transloco.translate('notifications.users.error.emailExists')
+    this.transloco.translate('notifications.users.error.emailExists'),
   );
 
   constructor() {
@@ -123,9 +123,8 @@ export class CreateUserComponent implements DynamicComponent {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
         this.formInvalidMessage(),
-        'warning'
+        'warning',
       );
-      this.markAllFieldsAsTouched();
       this.submitError.emit();
       return;
     }
@@ -142,7 +141,7 @@ export class CreateUserComponent implements DynamicComponent {
           this.uploading.set(false);
           this.notificationSrv.addNotification(
             this.createdMessage(),
-            'success'
+            'success',
           );
           this.submitSuccess.emit();
 
@@ -160,28 +159,17 @@ export class CreateUserComponent implements DynamicComponent {
           if (error.error.message.includes('correo electrónico')) {
             this.notificationSrv.addNotification(
               this.emailExistsMessage(),
-              'error'
+              'error',
             );
           } else {
             this.notificationSrv.addNotification(
               this.createErrorMessage(),
-              'error'
+              'error',
             );
           }
           this.submitError.emit();
         },
       });
-  }
-
-  markAllFieldsAsTouched(): void {
-    Object.keys(this.form.controls).forEach((key) => {
-      const control = this.form.get(key);
-      if (control) {
-        control.markAsTouched();
-        // Forzar validación en cada cambio
-        control.updateValueAndValidity({ onlySelf: true, emitEvent: true });
-      }
-    });
   }
 
   getFormControl(controlName: string): FormControl {

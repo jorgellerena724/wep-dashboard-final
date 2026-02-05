@@ -73,7 +73,6 @@ export class CreateEditManagerCategoryComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.isSubmitting()) {
-      if (this.form.invalid) this.form.markAllAsTouched();
       this.submitError.emit();
       return;
     }
@@ -90,7 +89,7 @@ export class CreateEditManagerCategoryComponent implements DynamicComponent {
       next: () => {
         this.notificationSrv.addNotification(
           this.transloco.translate('notifications.categories.success.created'),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -108,7 +107,7 @@ export class CreateEditManagerCategoryComponent implements DynamicComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(msgKey),
-          'error'
+          'error',
         );
 
         this.isSubmitting.set(false);

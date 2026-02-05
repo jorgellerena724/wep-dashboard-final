@@ -60,13 +60,21 @@ export class TextFieldComponent implements ControlValueAccessor {
 
   // Signals internos
   private _value = signal<any>('');
+  private _disabledState = signal<boolean>(false);
   showPassword = signal<boolean>(false);
   hadError = signal<boolean>(false);
   private errorTracker = signal<number>(0);
 
+  // ✅ Signal para trackear si ya nos suscribimos
+  private subscribed = signal<boolean>(false);
+
+  // Computed para combinar disabled input y estado interno
+  isDisabled = computed(() => this.disabled() || this._disabledState());
+
   // Computed signals
   value = computed(() => this._value());
 
+  // Computed para obtener el control correcto del FormGroup o directamente
   actualControl = computed(() => {
     const ctrl = this.control();
     if (ctrl) return ctrl;
@@ -80,6 +88,7 @@ export class TextFieldComponent implements ControlValueAccessor {
   });
 
   shouldShowError = computed(() => {
+    // Forzar recalculo cuando cambie errorTracker
     this.errorTracker();
 
     const ctrl = this.actualControl();
@@ -112,6 +121,7 @@ export class TextFieldComponent implements ControlValueAccessor {
       maxlength: `Máximo ${ctrl.errors?.['maxlength']?.requiredLength} caracteres`,
       pattern: 'Formato inválido',
       passwordMismatch: 'Las contraseñas no coinciden',
+      warning: 'Este campo es necesario para que tenga código del sistema',
     };
 
     return Object.keys(ctrl.errors).map((errorKey) => {
@@ -136,36 +146,55 @@ export class TextFieldComponent implements ControlValueAccessor {
     // Effect para sincronizar el estado disabled
     effect(() => {
       const ctrl = this.actualControl();
-      const isDisabled = this.disabled();
+      const shouldDisable = this.isDisabled();
 
-      if (ctrl && isDisabled) {
+      if (ctrl && shouldDisable) {
         Promise.resolve().then(() => {
           ctrl.disable();
         });
       }
     });
 
-    // Effect para verificar errores iniciales y suscribirse a cambios
+    // ✅ Effect mejorado para manejar suscripciones sin duplicados
     effect(() => {
       const ctrl = this.actualControl();
-      if (!ctrl) return;
+
+      // Si no hay control o ya nos suscribimos, salir
+      if (!ctrl) {
+        this.subscribed.set(false);
+        return;
+      }
+
+      // Si ya nos suscribimos a este control, no hacerlo de nuevo
+      if (this.subscribed()) return;
 
       // Verificar estado inicial
       if (ctrl.invalid && ctrl.touched) {
         this.hadError.set(true);
       }
 
-      // Suscribirse a cambios de estado
+      // ✅ Suscribirse a cambios de estado UNA SOLA VEZ
       ctrl.statusChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
+          // Actualizar el tracker para forzar recalculo de computed signals
           this.errorTracker.update((v) => v + 1);
 
-          // Actualizar hadError
+          // Actualizar hadError cuando el campo tiene errores y fue tocado
           if (ctrl.invalid && ctrl.touched) {
             this.hadError.set(true);
           }
         });
+
+      // ✅ Suscribirse también a valueChanges para detectar cuando se marca como touched
+      ctrl.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          this.errorTracker.update((v) => v + 1);
+        });
+
+      // Marcar como suscrito
+      this.subscribed.set(true);
     });
   }
 
@@ -178,6 +207,7 @@ export class TextFieldComponent implements ControlValueAccessor {
       'ArrowLeft',
       'ArrowRight',
       'Delete',
+      '.',
     ];
 
     // Permitir punto y coma si allowDecimals está activado
@@ -229,6 +259,9 @@ export class TextFieldComponent implements ControlValueAccessor {
 
   onBlur(): void {
     this.onTouched();
+
+    // Actualizar errorTracker para forzar recalculo
+    this.errorTracker.update((v) => v + 1);
 
     // Actualizar hadError si hay un error después de tocar el campo
     const ctrl = this.actualControl();
@@ -292,6 +325,7 @@ export class TextFieldComponent implements ControlValueAccessor {
       const ctrl = this.actualControl();
       setTimeout(() => {
         ctrl?.updateValueAndValidity();
+        this.errorTracker.update((v) => v + 1);
       });
     }
 
@@ -342,5 +376,9 @@ export class TextFieldComponent implements ControlValueAccessor {
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this._disabledState.set(isDisabled);
   }
 }

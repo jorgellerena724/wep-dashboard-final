@@ -118,14 +118,14 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
             data.map((user: any) => ({
               value: user.id,
               label: `${user.full_name} (${user.email})`,
-            }))
+            })),
           );
           resolve();
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.users.error.load'),
-            'error'
+            'error',
           );
           reject(err);
         },
@@ -141,19 +141,19 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
             data.map((model: any) => ({
               value: model.id,
               label: `${model.name} (${this.formatTokenLimit(
-                model.daily_token_limit
+                model.daily_token_limit,
               )}/día)`,
               daily_token_limit: model.daily_token_limit, // Guardamos para referencia
-            }))
+            })),
           );
           resolve();
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate(
-              'notifications.chatbot_config.error.loadModels'
+              'notifications.chatbot_config.error.loadModels',
             ),
-            'error'
+            'error',
           );
         },
       });
@@ -173,12 +173,10 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
         this.transloco.translate(
-          'notifications.chatbot_config.error.formInvalid'
+          'notifications.chatbot_config.error.formInvalid',
         ),
-        'warning'
+        'warning',
       );
-      this.form.markAllAsTouched();
-
       this.submitError.emit();
       return;
     }
@@ -199,9 +197,9 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
       // Si es creación y no hay API key, mostrar error
       this.notificationSrv.addNotification(
         this.transloco.translate(
-          'notifications.chatbot_config.error.apiKeyRequired'
+          'notifications.chatbot_config.error.apiKeyRequired',
         ),
-        'error'
+        'error',
       );
       this.submitError.emit();
       return;
@@ -221,9 +219,9 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
           this.transloco.translate(
             this.isEditing()
               ? 'notifications.chatbot_config.success.updated'
-              : 'notifications.chatbot_config.success.created'
+              : 'notifications.chatbot_config.success.created',
           ),
-          'success'
+          'success',
         );
 
         this.submitSuccess.emit();
@@ -243,7 +241,7 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
         let errorMessage = this.transloco.translate(
           this.isEditing()
             ? 'notifications.chatbot_config.error.update'
-            : 'notifications.chatbot_config.error.create'
+            : 'notifications.chatbot_config.error.create',
         );
 
         // Manejar errores específicos
@@ -253,20 +251,20 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
             error.error?.detail?.includes('Ya existe')
           ) {
             errorMessage = this.transloco.translate(
-              'notifications.chatbot_config.error.userExists'
+              'notifications.chatbot_config.error.userExists',
             );
           } else if (error.error?.detail?.includes('invalid API key')) {
             errorMessage = this.transloco.translate(
-              'notifications.chatbot_config.error.invalidApiKey'
+              'notifications.chatbot_config.error.invalidApiKey',
             );
           }
         } else if (error.status === 409) {
           errorMessage = this.transloco.translate(
-            'notifications.chatbot_config.error.userExists'
+            'notifications.chatbot_config.error.userExists',
           );
         } else if (error.status === 404) {
           errorMessage = this.transloco.translate(
-            'notifications.users.error.notFound'
+            'notifications.users.error.notFound',
           );
         }
 

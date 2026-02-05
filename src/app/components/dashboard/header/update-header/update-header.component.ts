@@ -154,10 +154,9 @@ export class UpdateHeaderComponent {
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.uploading()) {
       if (this.form.invalid) {
-        this.form.markAllAsTouched();
         this.notificationSrv.addNotification(
           this.transloco.translate('notifications.header.error.formInvalid'),
-          'warning'
+          'warning',
         );
       }
       this.submitError.emit();
@@ -183,7 +182,7 @@ export class UpdateHeaderComponent {
 
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.header.success.updated'),
-            'success'
+            'success',
           );
 
           this.submitSuccess.emit();
@@ -211,7 +210,7 @@ export class UpdateHeaderComponent {
     if (
       error.status === 400 &&
       error.error.message?.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor'
+        'La imagen que esta intentando subir ya se encuentra en el servidor',
       )
     ) {
       messageKey = 'notifications.header.error.duplicateImage';
@@ -219,7 +218,7 @@ export class UpdateHeaderComponent {
 
     this.notificationSrv.addNotification(
       this.transloco.translate(messageKey),
-      'error'
+      'error',
     );
   }
 

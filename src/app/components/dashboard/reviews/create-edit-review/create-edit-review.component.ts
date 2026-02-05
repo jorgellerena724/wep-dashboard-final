@@ -162,9 +162,8 @@ export class CreateEditReviewComponent implements DynamicComponent {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.reviews.error.formInvalid'),
-        'warning'
+        'warning',
       );
-      this.form.markAllAsTouched();
 
       this.submitError.emit();
       return;
@@ -206,7 +205,7 @@ export class CreateEditReviewComponent implements DynamicComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -231,12 +230,12 @@ export class CreateEditReviewComponent implements DynamicComponent {
     if (
       error.status === 400 &&
       error.error.message.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
+        'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."',
       )
     ) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.reviews.error.duplicateImage'),
-        'error'
+        'error',
       );
     } else {
       const messageKey = isUpdate
@@ -245,7 +244,7 @@ export class CreateEditReviewComponent implements DynamicComponent {
 
       this.notificationSrv.addNotification(
         this.transloco.translate(messageKey),
-        'error'
+        'error',
       );
     }
   }
