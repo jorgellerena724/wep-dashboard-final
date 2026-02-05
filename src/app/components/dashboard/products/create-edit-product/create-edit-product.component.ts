@@ -63,6 +63,9 @@ interface ProductFile {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateEditProductComponent implements DynamicComponent {
+  // Array de clientes permitidos para ver el campo cal_url
+  private readonly ALLOWED_CLIENTS_FOR_CAL_URL = ['shirkasoft', 'breeze'];
+
   // Servicios
   private fb = inject(FormBuilder);
   private srv = inject(ProductService);
@@ -186,8 +189,26 @@ export class CreateEditProductComponent implements DynamicComponent {
   private initShowCalUrlField(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    this.showCalUrlField.set(urlParams.has('showCalUrl'));
+    try {
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        const user = JSON.parse(userString);
+        const client = user?.client;
+
+        // Verificar si el usuario está en la lista de clientes permitidos
+        const isAllowed = this.ALLOWED_CLIENTS_FOR_CAL_URL.some(
+          (allowedClient) =>
+            client.toLowerCase().includes(allowedClient.toLowerCase()),
+        );
+
+        this.showCalUrlField.set(isAllowed);
+      } else {
+        this.showCalUrlField.set(false);
+      }
+    } catch (error) {
+      console.error('Error al leer usuario del localStorage:', error);
+      this.showCalUrlField.set(false);
+    }
   }
 
   // Cargar archivos existentes desde los datos del producto
@@ -215,7 +236,7 @@ export class CreateEditProductComponent implements DynamicComponent {
 
   private loadExistingFilePreview(
     productFile: ProductFile,
-    index: number
+    index: number,
   ): void {
     if (productFile.existingPath) {
       this.loadingImage.set(true);
@@ -229,7 +250,7 @@ export class CreateEditProductComponent implements DynamicComponent {
               this.createVideoPreview(
                 blob,
                 productFile.existingPath?.split('.').pop(),
-                index
+                index,
               );
             } else {
               this.createImagePreview(blob, index);
@@ -482,7 +503,7 @@ export class CreateEditProductComponent implements DynamicComponent {
   private createVideoPreview(
     blob: Blob,
     extension: string | undefined,
-    index: number
+    index: number,
   ): void {
     let mimeType = 'video/mp4';
     if (extension === 'mov') mimeType = 'video/quicktime';
@@ -491,7 +512,7 @@ export class CreateEditProductComponent implements DynamicComponent {
 
     const videoBlob = new Blob([blob], { type: mimeType });
     const videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      URL.createObjectURL(videoBlob)
+      URL.createObjectURL(videoBlob),
     );
 
     this.productFiles.update((files) => {
@@ -537,12 +558,12 @@ export class CreateEditProductComponent implements DynamicComponent {
     if (this.form.invalid || currentFiles.length === 0) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.products.error.formInvalid'),
-        'warning'
+        'warning',
       );
       this.form.markAllAsTouched();
 
       this.filesFormArray.setErrors(
-        currentFiles.length === 0 ? { required: true } : null
+        currentFiles.length === 0 ? { required: true } : null,
       );
       this.filesFormArray.markAsTouched();
 
@@ -556,7 +577,7 @@ export class CreateEditProductComponent implements DynamicComponent {
     const calUrlValue = this.form.get('cal_url')?.value;
     formData.append(
       'cal_url',
-      calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : ''
+      calUrlValue && calUrlValue.trim() ? calUrlValue.trim() : '',
     );
 
     // Preservar saltos de línea en la descripción
@@ -580,7 +601,7 @@ export class CreateEditProductComponent implements DynamicComponent {
       // Lógica de actualización: separar archivos existentes y nuevos
       const existingFiles = currentFiles.filter((file) => file.isExisting);
       const newFiles = currentFiles.filter(
-        (file) => !file.isExisting && file.file
+        (file) => !file.isExisting && file.file,
       );
 
       // Enviar información de archivos existentes que deben mantenerse
@@ -608,7 +629,7 @@ export class CreateEditProductComponent implements DynamicComponent {
     } else {
       // Lógica de creación: agregar todos los archivos
       const fileTitles = this.filesFormArray.controls.map(
-        (control) => control.get('title')?.value || ''
+        (control) => control.get('title')?.value || '',
       );
       formData.append('file_titles', JSON.stringify(fileTitles));
 
@@ -634,7 +655,7 @@ export class CreateEditProductComponent implements DynamicComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -664,7 +685,7 @@ export class CreateEditProductComponent implements DynamicComponent {
     ) {
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.products.error.duplicateImage'),
-        'error'
+        'error',
       );
     } else {
       const messageKey = isUpdate
@@ -673,7 +694,7 @@ export class CreateEditProductComponent implements DynamicComponent {
 
       this.notificationSrv.addNotification(
         this.transloco.translate(messageKey),
-        'error'
+        'error',
       );
     }
   }
@@ -698,13 +719,13 @@ export class CreateEditProductComponent implements DynamicComponent {
             data.map((com: any) => ({
               value: com.id,
               label: com.title,
-            }))
+            })),
           );
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.categories.error.load'),
-            'error'
+            'error',
           );
         },
       });
@@ -735,7 +756,7 @@ export class CreateEditProductComponent implements DynamicComponent {
           const unsafeUrl = file.videoUrl as any;
           if (unsafeUrl.changingThisBreaksApplicationSecurity) {
             URL.revokeObjectURL(
-              unsafeUrl.changingThisBreaksApplicationSecurity
+              unsafeUrl.changingThisBreaksApplicationSecurity,
             );
           }
         }
@@ -764,7 +785,7 @@ export class CreateEditProductComponent implements DynamicComponent {
           const unsafeUrl = file.videoUrl as any;
           if (unsafeUrl.changingThisBreaksApplicationSecurity) {
             URL.revokeObjectURL(
-              unsafeUrl.changingThisBreaksApplicationSecurity
+              unsafeUrl.changingThisBreaksApplicationSecurity,
             );
           }
         }
