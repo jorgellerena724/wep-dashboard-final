@@ -76,8 +76,12 @@ export class CreateEditCategoryComponent implements DynamicComponent {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid || this.isSubmitting()) {
-      if (this.form.invalid) this.form.markAllAsTouched();
+    if (this.isSubmitting()) {
+      this.submitError.emit();
+      return;
+    }
+
+    if (this.form.invalid) {
       this.submitError.emit();
       return;
     }
@@ -98,7 +102,7 @@ export class CreateEditCategoryComponent implements DynamicComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -124,11 +128,21 @@ export class CreateEditCategoryComponent implements DynamicComponent {
 
     this.notificationSrv.addNotification(
       this.transloco.translate(msgKey),
-      'error'
+      'error',
     );
   }
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  markAllFieldsAsTouched(): void {
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (control) {
+        control.markAsTouched();
+        control.updateValueAndValidity({ onlySelf: true, emitEvent: true });
+      }
+    });
   }
 }

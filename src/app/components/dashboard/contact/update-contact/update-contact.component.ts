@@ -82,25 +82,25 @@ export class UpdateContactComponent implements DynamicComponent {
 
   // Computed para traducciones de error
   formInvalidMessage = computed(() =>
-    this.transloco.translate('notifications.contact.error.formInvalid')
+    this.transloco.translate('notifications.contact.error.formInvalid'),
   );
 
   updatedMessage = computed(() =>
-    this.transloco.translate('notifications.contact.success.updated')
+    this.transloco.translate('notifications.contact.success.updated'),
   );
 
   updateErrorMessage = computed(() =>
-    this.transloco.translate('notifications.contact.error.update')
+    this.transloco.translate('notifications.contact.error.update'),
   );
 
   // Signals reactivos para traducciones de botones
   private disableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.disable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private enableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.enable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   constructor() {
@@ -302,9 +302,8 @@ export class UpdateContactComponent implements DynamicComponent {
     if (this.form.invalid || hasInvalidNetworks) {
       this.notificationSrv.addNotification(
         this.formInvalidMessage(),
-        'warning'
+        'warning',
       );
-      this.form.markAllAsTouched();
       this.submitError.emit();
       return;
     }
@@ -346,7 +345,7 @@ export class UpdateContactComponent implements DynamicComponent {
 
           this.notificationSrv.addNotification(
             this.updatedMessage(),
-            'success'
+            'success',
           );
           this.submitSuccess.emit();
 
@@ -363,7 +362,7 @@ export class UpdateContactComponent implements DynamicComponent {
           this.uploading.set(false);
           this.notificationSrv.addNotification(
             this.updateErrorMessage(),
-            'error'
+            'error',
           );
           console.error('Error:', error);
           this.submitError.emit();
@@ -398,7 +397,7 @@ export class UpdateContactComponent implements DynamicComponent {
       await navigator.clipboard.writeText(text);
       this.notificationSrv.addNotification(
         this.transloco.translate('notifications.general.copied'),
-        'success'
+        'success',
       );
     } catch (err) {
       console.error('Error al copiar:', err);
@@ -474,7 +473,7 @@ export class UpdateContactComponent implements DynamicComponent {
 
     if (activeControl.value && usernameControl.hasError('required')) {
       return this.transloco.translate(
-        'components.contact.edit.fields.socialNetworks.usernameRequired'
+        'components.contact.edit.fields.socialNetworks.usernameRequired',
       );
     }
 
@@ -484,7 +483,7 @@ export class UpdateContactComponent implements DynamicComponent {
   // Obtener label del campo username con asterisco si es requerido
   getUsernameLabel(index: number): string {
     const baseLabel = this.transloco.translate(
-      'components.contact.edit.fields.socialNetworks.username'
+      'components.contact.edit.fields.socialNetworks.username',
     );
     return this.isUsernameRequired(index) ? `${baseLabel} *` : baseLabel;
   }

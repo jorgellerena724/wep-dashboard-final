@@ -193,11 +193,10 @@ export class CreateEditPublicationComponent implements DynamicComponent {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
         this.transloco.translate(
-          'notifications.publications.error.formInvalid'
+          'notifications.publications.error.formInvalid',
         ),
-        'warning'
+        'warning',
       );
-      this.form.markAllAsTouched();
 
       this.submitError.emit();
       return;
@@ -207,7 +206,7 @@ export class CreateEditPublicationComponent implements DynamicComponent {
     formData.append('title', this.form.get('title')?.value);
     formData.append(
       'publication_category_id',
-      this.form.get('publication_category')?.value
+      this.form.get('publication_category')?.value,
     );
 
     const selectedFile = this.selectedFile();
@@ -238,7 +237,7 @@ export class CreateEditPublicationComponent implements DynamicComponent {
 
         this.notificationSrv.addNotification(
           this.transloco.translate(messageKey),
-          'success'
+          'success',
         );
         this.submitSuccess.emit();
 
@@ -264,7 +263,7 @@ export class CreateEditPublicationComponent implements DynamicComponent {
       error.status === 400 &&
       error.error?.message &&
       error.error.message.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor'
+        'La imagen que esta intentando subir ya se encuentra en el servidor',
       )
     ) {
       this.notificationSrv.addNotification(error.error.message, 'error');
@@ -328,15 +327,15 @@ export class CreateEditPublicationComponent implements DynamicComponent {
             data.map((com: any) => ({
               value: com.id,
               label: com.title,
-            }))
+            })),
           );
         },
         error: (err) => {
           this.notificationSrv.addNotification(
             this.transloco.translate(
-              'notifications.publication-category.error.load'
+              'notifications.publication-category.error.load',
             ),
-            'error'
+            'error',
           );
         },
       });

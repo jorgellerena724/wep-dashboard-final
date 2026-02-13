@@ -78,23 +78,23 @@ export class CreateEditManagerComponent implements DynamicComponent {
 
   // Mensajes
   formInvalidMessage = computed(() =>
-    this.transloco.translate('notifications.managers.error.formInvalid')
+    this.transloco.translate('notifications.managers.error.formInvalid'),
   );
 
   createdMessage = computed(() =>
-    this.transloco.translate('notifications.managers.success.created')
+    this.transloco.translate('notifications.managers.success.created'),
   );
 
   createErrorMessage = computed(() =>
-    this.transloco.translate('notifications.managers.error.create')
+    this.transloco.translate('notifications.managers.error.create'),
   );
 
   updatedMessage = computed(() =>
-    this.transloco.translate('notifications.managers.success.updated')
+    this.transloco.translate('notifications.managers.success.updated'),
   );
 
   updateErrorMessage = computed(() =>
-    this.transloco.translate('notifications.managers.error.update')
+    this.transloco.translate('notifications.managers.error.update'),
   );
 
   constructor() {
@@ -220,10 +220,8 @@ export class CreateEditManagerComponent implements DynamicComponent {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
         this.formInvalidMessage(),
-        'warning'
+        'warning',
       );
-      this.form.markAllAsTouched();
-
       this.submitError.emit();
       return;
     }
@@ -304,7 +302,7 @@ export class CreateEditManagerComponent implements DynamicComponent {
 
             this.notificationSrv.addNotification(
               this.createdMessage(),
-              'success'
+              'success',
             );
             this.submitSuccess.emit();
 
@@ -335,7 +333,7 @@ export class CreateEditManagerComponent implements DynamicComponent {
 
             this.notificationSrv.addNotification(
               this.updatedMessage(),
-              'success'
+              'success',
             );
             this.submitSuccess.emit();
 
@@ -361,14 +359,14 @@ export class CreateEditManagerComponent implements DynamicComponent {
     if (
       error.status === 400 &&
       error.error.message.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."'
+        'La imagen que esta intentando subir ya se encuentra en el servidor."The image you are trying to upload is already on the server."',
       )
     ) {
       this.notificationSrv.addNotification(error.error.message, 'error');
     } else {
       this.notificationSrv.addNotification(
         isUpdate ? this.updateErrorMessage() : this.createErrorMessage(),
-        'error'
+        'error',
       );
     }
   }
@@ -415,7 +413,7 @@ export class CreateEditManagerComponent implements DynamicComponent {
         },
         error: (err) => {
           const message = this.transloco.translate(
-            'notifications.publication-category.error.load'
+            'notifications.publication-category.error.load',
           );
           this.notificationSrv.addNotification(message, 'error');
         },

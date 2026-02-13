@@ -4,7 +4,6 @@ import {
   ApplicationRef,
   createComponent,
   EnvironmentInjector,
-  signal,
   DestroyRef,
   inject,
 } from '@angular/core';
@@ -23,11 +22,15 @@ export interface ConfirmConfig {
 export class ConfirmDialogService {
   private dialogRef: ComponentRef<ConfirmDialogComponent> | null = null;
   private destroyRef = inject(DestroyRef);
+  private appRef = inject(ApplicationRef);
+  private injector = inject(EnvironmentInjector);
 
-  constructor(
-    private appRef: ApplicationRef,
-    private injector: EnvironmentInjector
-  ) {}
+  constructor() {
+    // Registrar limpieza en el DestroyRef
+    this.destroyRef.onDestroy(() => {
+      this.cleanupDialog();
+    });
+  }
 
   async confirm(config: ConfirmConfig): Promise<boolean> {
     // Si ya existe un diálogo, destruirlo
@@ -70,10 +73,5 @@ export class ConfirmDialogService {
       this.dialogRef.destroy();
       this.dialogRef = null;
     }
-  }
-
-  // Método para limpiar en caso de que el servicio se destruya
-  ngOnDestroy(): void {
-    this.cleanupDialog();
   }
 }

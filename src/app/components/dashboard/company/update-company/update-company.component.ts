@@ -163,11 +163,10 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
-      const message = this.transloco.translate(
-        'notifications.company.error.formInvalid'
+      this.notificationSrv.addNotification(
+        'notifications.company.error.formInvalid',
+        'warning',
       );
-      this.notificationSrv.addNotification(message, 'warning');
-      this.form.markAllAsTouched();
 
       this.submitError.emit();
       return;
@@ -201,7 +200,7 @@ export class UpdateCompanyComponent implements DynamicComponent {
           this.uploading.set(false);
 
           const message = this.transloco.translate(
-            'notifications.company.success.updated'
+            'notifications.company.success.updated',
           );
           this.notificationSrv.addNotification(message, 'success');
           this.submitSuccess.emit();
@@ -229,7 +228,7 @@ export class UpdateCompanyComponent implements DynamicComponent {
     if (
       error.status === 400 &&
       error.error.message?.includes(
-        'La imagen que esta intentando subir ya se encuentra en el servidor'
+        'La imagen que esta intentando subir ya se encuentra en el servidor',
       )
     ) {
       messageKey = 'notifications.company.error.duplicateImage';
@@ -237,7 +236,7 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
     this.notificationSrv.addNotification(
       this.transloco.translate(messageKey),
-      'error'
+      'error',
     );
   }
 

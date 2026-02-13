@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { HomeData } from '../../interfaces/home.interface';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,66 +10,35 @@ import { AuthService } from '../../../core/services/auth.service';
 export class ProductService {
   private apiUrl = environment.api;
   private imgUrl = environment.api_img;
-  private use_minio = environment.use_minio;
 
-  // Signal para cachear datos
-  private dataSignal = signal<HomeData[] | null>(null);
-  public data = computed(() => this.dataSignal());
-  public isLoading = signal<boolean>(false);
-
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
   get(): Observable<HomeData[]> {
-    const cached = this.dataSignal();
-    if (cached) {
-      return of(cached);
-    }
-
-    this.isLoading.set(true);
     const timestamp = new Date().getTime();
-    return this.http
-      .get<HomeData[]>(this.apiUrl + `product/?no-cache=${timestamp}`)
-      .pipe(
-        tap((data) => {
-          this.dataSignal.set(data);
-          this.isLoading.set(false);
-        })
-      );
+    return this.http.get<HomeData[]>(
+      this.apiUrl + `product/?no-cache=${timestamp}`
+    );
   }
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = this.use_minio
-      ? `${
-          this.imgUrl
-        }${this.authService.getClient()}/${name}/?no-cache=${timestamp}`
-      : `${this.imgUrl}${name}/?no-cache=${timestamp}`;
+    const url = `${this.imgUrl}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });
   }
 
   post(data: any): Observable<any[]> {
-    return this.http
-      .post<any[]>(this.apiUrl + 'product/', data)
-      .pipe(tap(() => this.invalidateCache()));
+    return this.http.post<any[]>(this.apiUrl + 'product/', data);
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http
-      .patch(`${this.apiUrl}product/${id}`, formData)
-      .pipe(tap(() => this.invalidateCache()));
+    return this.http.patch(`${this.apiUrl}product/${id}`, formData);
   }
 
   delete(id: number): Observable<any> {
-    return this.http
-      .delete<any>(`${this.apiUrl}product/${id}`, {
-        body: { id: id },
-      })
-      .pipe(tap(() => this.invalidateCache()));
-  }
-
-  private invalidateCache(): void {
-    this.dataSignal.set(null);
+    return this.http.delete<any>(`${this.apiUrl}product/${id}`, {
+      body: { id: id },
+    });
   }
 }

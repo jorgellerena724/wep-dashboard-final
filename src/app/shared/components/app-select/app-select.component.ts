@@ -11,6 +11,8 @@ import {
   HostListener,
   ElementRef,
   ChangeDetectionStrategy,
+  inject,
+  DestroyRef,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -22,7 +24,7 @@ import {
 } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ThemeService } from '../../../core/services/theme.service';
-import { TranslocoModule } from '@jsverse/transloco';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface SelectOption {
   label: string;
@@ -33,13 +35,7 @@ interface SelectOption {
 @Component({
   selector: 'app-select',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    FloatLabelModule,
-    TranslocoModule,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, FloatLabelModule],
   templateUrl: './app-select.component.html',
   styleUrl: './app-select.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,9 +82,20 @@ export class SelectComponent implements ControlValueAccessor {
   searchTerm = signal<string>('');
   currentPage = signal<number>(1);
   private searchTermChanged = signal<boolean>(false);
+  private _isDisabled = signal<boolean>(false);
+
+  // Para debounce con signals
+  private debounceTimer: any = null;
+
+  private errorTracker = signal<number>(0);
+  hadError = signal<boolean>(false);
+  private subscribed = signal<boolean>(false);
 
   // Computed signals
   value = computed(() => this._value());
+
+  // Computed para combinar ambos estados
+  isDisabled = computed(() => this.disabled() || this._isDisabled());
 
   actualControl = computed(() => {
     const ctrl = this.control();
@@ -103,8 +110,17 @@ export class SelectComponent implements ControlValueAccessor {
   });
 
   shouldShowError = computed(() => {
+    this.errorTracker();
+
     const ctrl = this.actualControl();
     return ctrl?.invalid && (ctrl?.dirty || ctrl?.touched);
+  });
+
+  wasFixedError = computed(() => {
+    this.errorTracker();
+
+    const ctrl = this.actualControl();
+    return this.hadError() && ctrl?.valid && ctrl?.touched;
   });
 
   displayValue = computed(() => {
@@ -134,6 +150,8 @@ export class SelectComponent implements ControlValueAccessor {
   });
 
   getErrorMessages = computed(() => {
+    this.errorTracker();
+
     const ctrl = this.actualControl();
     if (!ctrl?.errors) return [];
 
@@ -162,7 +180,7 @@ export class SelectComponent implements ControlValueAccessor {
 
     const normalizedSearchTerm = this.normalizeText(term);
     return opts.filter((option) =>
-      this.normalizeText(option.label).includes(normalizedSearchTerm)
+      this.normalizeText(option.label).includes(normalizedSearchTerm),
     );
   });
 
@@ -171,7 +189,6 @@ export class SelectComponent implements ControlValueAccessor {
     const term = this.searchTerm();
     const allowCustom = this.allowCustomEntries();
 
-    // Añadir opción custom si se permite y hay término de búsqueda
     if (allowCustom && term && !filtered.some((o) => o.value === term)) {
       filtered = [
         {
@@ -229,11 +246,29 @@ export class SelectComponent implements ControlValueAccessor {
   // Callbacks para ControlValueAccessor
   private onChange = (_: any) => {};
   private onTouched = () => {};
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private elementRef: ElementRef,
-    private themeService: ThemeService
+    private themeService: ThemeService,
   ) {
+    // Configurar debounce con effect
+    effect(() => {
+      const term = this.searchTerm();
+
+      if (term !== '' && this.isSearchable()) {
+        // Limpiar timer anterior
+        if (this.debounceTimer) {
+          clearTimeout(this.debounceTimer);
+        }
+
+        // Establecer nuevo timer
+        this.debounceTimer = setTimeout(() => {
+          this.search.emit(term);
+        }, 300);
+      }
+    });
+
     // Effect para inicializar valor
     effect(() => {
       const isMultiple = this.multiple();
@@ -247,11 +282,66 @@ export class SelectComponent implements ControlValueAccessor {
       this.options(); // Track options changes
       this.currentPage.set(1);
 
-      // Solo resetear searchTerm si no queremos preservarlo o si no se ha modificado aún
       if (!this.preserveSearchOnLoad() || !this.searchTermChanged()) {
         this.searchTerm.set('');
       }
     });
+
+    effect(() => {
+      const ctrl = this.actualControl();
+
+      if (!ctrl) {
+        this.subscribed.set(false);
+        return;
+      }
+
+      if (this.subscribed()) return;
+
+      if (ctrl.invalid && ctrl.touched) {
+        this.hadError.set(true);
+      }
+
+      ctrl.statusChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          this.errorTracker.update((v) => v + 1);
+
+          if (ctrl.invalid && ctrl.touched) {
+            this.hadError.set(true);
+          }
+        });
+
+      ctrl.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          this.errorTracker.update((v) => v + 1);
+        });
+
+      this.subscribed.set(true);
+    });
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this._isDisabled.set(isDisabled);
+  }
+
+  // ✅ Método auxiliar para marcar como touched y actualizar errores
+  private markAsTouchedAndUpdate(): void {
+    const ctrl = this.actualControl();
+    if (ctrl) {
+      ctrl.markAsTouched();
+
+      // Forzar actualización de validación
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+
+    this.onTouched();
+    this.errorTracker.update((v) => v + 1);
+
+    // Actualizar hadError si hay errores
+    if (ctrl?.invalid) {
+      this.hadError.set(true);
+    }
   }
 
   normalizeText(text: string): string {
@@ -291,7 +381,7 @@ export class SelectComponent implements ControlValueAccessor {
 
     return !validCombos.some((combination) => {
       const allSelected = hypotheticalSelection.every((selected) =>
-        combination.includes(selected)
+        combination.includes(selected),
       );
       const withinLimit = hypotheticalSelection.length <= combination.length;
       return allSelected && withinLimit;
@@ -324,7 +414,9 @@ export class SelectComponent implements ControlValueAccessor {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
-    if (!clickedInside) {
+    if (!clickedInside && this.isOpen()) {
+      // ✅ Marcar como touched al cerrar por click afuera
+      this.markAsTouchedAndUpdate();
       this.isOpen.set(false);
     }
   }
@@ -341,6 +433,9 @@ export class SelectComponent implements ControlValueAccessor {
     this.selectionChange.emit(customOption.value);
     this.isOpen.set(false);
     this.searchTerm.set('');
+
+    // ✅ Marcar como touched después de seleccionar
+    this.markAsTouchedAndUpdate();
   }
 
   onInputChange(event: Event) {
@@ -352,7 +447,6 @@ export class SelectComponent implements ControlValueAccessor {
     if (previousSearch !== this.searchTerm()) {
       this.search.emit(this.searchTerm());
 
-      // Si permitimos entradas personalizadas, actualizar el valor
       if (this.allowCustomEntries() && this.searchTerm()) {
         this._value.set(this.searchTerm());
         this.onChange(this.searchTerm());
@@ -364,9 +458,8 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   onOptionClick(option: SelectOption) {
-    if (this.disabled()) return;
+    if (this.isDisabled()) return;
 
-    // Si es una opción custom
     if (this.allowCustomEntries() && option.value === this.searchTerm()) {
       const customOption: SelectOption = {
         label: this.searchTerm(),
@@ -378,10 +471,12 @@ export class SelectComponent implements ControlValueAccessor {
       this.selectionChange.emit(customOption.value);
       this.isOpen.set(false);
       this.searchTerm.set('');
+
+      // ✅ Marcar como touched después de seleccionar
+      this.markAsTouchedAndUpdate();
       return;
     }
 
-    // Lógica normal de selección
     if (this.multiple()) {
       this.toggleOption(option);
     } else {
@@ -399,6 +494,9 @@ export class SelectComponent implements ControlValueAccessor {
     this.onTouched();
     this.selectionChange.emit(option.value);
     this.isOpen.set(false);
+
+    // ✅ Marcar como touched después de seleccionar
+    this.markAsTouchedAndUpdate();
   }
 
   toggleOption(option: SelectOption) {
@@ -423,13 +521,23 @@ export class SelectComponent implements ControlValueAccessor {
     this.onChange(newValue);
     this.onTouched();
     this.selectionChange.emit(newValue);
+
+    // ✅ Marcar como touched después de cambiar selección
+    this.markAsTouchedAndUpdate();
   }
 
   toggleDropdown() {
-    if (this.disabled()) return;
+    if (this.isDisabled()) return;
 
+    const wasOpen = this.isOpen();
     this.isOpen.update((v) => !v);
 
+    // ✅ Si estamos CERRANDO el dropdown, marcar como touched
+    if (wasOpen && !this.isOpen()) {
+      this.markAsTouchedAndUpdate();
+    }
+
+    // Focus en el input de búsqueda si es searchable
     if (this.isOpen() && this.isSearchable()) {
       setTimeout(() => {
         this.filterInput()?.nativeElement?.focus();
