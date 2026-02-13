@@ -613,8 +613,10 @@ export class NavbarComponent {
   }
 
   private startTitleAnimation(): void {
+    // Limpiar cualquier intervalo o timeout existente
     if (this.animationInterval) {
       clearInterval(this.animationInterval);
+      this.animationInterval = undefined;
     }
 
     // Esperar a que Transloco cargue la traducción
@@ -626,20 +628,26 @@ export class NavbarComponent {
       return;
     }
 
+    // Resetear el título inmediatamente al cambiar de idioma
+    this.animatedTitle.set('');
+
     const animateTitle = () => {
       const title = this.transloco.translate('navbar.title');
       let currentIndex = 0;
 
-      const typeInterval = setInterval(() => {
+      this.animationInterval = setInterval(() => {
         if (currentIndex <= title.length) {
           this.animatedTitle.set(title.substring(0, currentIndex));
           currentIndex++;
         } else {
-          clearInterval(typeInterval);
+          if (this.animationInterval) {
+            clearInterval(this.animationInterval);
+            this.animationInterval = undefined;
+          }
           // Mantener el título completo por 5 segundos antes de reiniciar
-          setTimeout(() => {
+          this.animationInterval = setTimeout(() => {
             animateTitle();
-          }, 5000);
+          }, 5000) as any;
         }
       }, 100); // 100ms entre cada letra
     };
