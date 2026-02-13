@@ -82,6 +82,10 @@ export class NavbarComponent {
   currentLanguage = signal<string>('Español');
   currentLanguageCode = signal<string>('es');
 
+  // Signals para animación del título
+  animatedTitle = signal<string>('');
+  private animationInterval: any;
+
   // Signals para usuario
   userData = signal<any>(null);
   showUsersMenu = signal(true);
@@ -160,7 +164,7 @@ export class NavbarComponent {
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
         this.mobileMenuOpen.set(false);
@@ -177,7 +181,13 @@ export class NavbarComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((lang) => {
         this.updateLanguageDisplay(lang);
+        this.startTitleAnimation();
       });
+
+    // Iniciar animación del título
+    if (isPlatformBrowser(this.platformId)) {
+      this.startTitleAnimation();
+    }
 
     // Effect para inicializar menú de usuarios
     effect(() => {
@@ -205,7 +215,7 @@ export class NavbarComponent {
     const notificationId = this.notificationService.addNotification(
       this.transloco.translate('navbar.backup.generating'),
       'info',
-      true
+      true,
     );
 
     let progress = 0;
@@ -245,7 +255,7 @@ export class NavbarComponent {
           setTimeout(() => {
             this.notificationService.addNotification(
               this.transloco.translate('navbar.backup.download_success'),
-              'success'
+              'success',
             );
           }, 1000);
         },
@@ -260,7 +270,7 @@ export class NavbarComponent {
             this.transloco.translate('navbar.backup.download_error');
           const translatedMessage = this.transloco.translate(
             'navbar.backup.download_error_message',
-            { message: errorMessage }
+            { message: errorMessage },
           );
           this.notificationService.addNotification(translatedMessage, 'error');
         },
@@ -281,7 +291,7 @@ export class NavbarComponent {
       if (!file.name.endsWith('.zip')) {
         this.notificationService.addNotification(
           this.transloco.translate('navbar.backup.invalid_file'),
-          'error'
+          'error',
         );
         return;
       }
@@ -290,7 +300,7 @@ export class NavbarComponent {
       dialog.title = this.transloco.translate('navbar.confirm_restore_title');
       dialog.message = this.transloco.translate('navbar.confirm_restore');
       dialog.confirmLabel = this.transloco.translate(
-        'navbar.confirm_restore_button'
+        'navbar.confirm_restore_button',
       );
       dialog.cancelLabel = this.transloco.translate('navbar.cancel_button');
 
@@ -300,7 +310,7 @@ export class NavbarComponent {
       const notificationId = this.notificationService.addNotification(
         this.transloco.translate('navbar.backup.restoring'),
         'info',
-        true
+        true,
       );
 
       let progress = 0;
@@ -326,7 +336,7 @@ export class NavbarComponent {
             setTimeout(() => {
               this.notificationService.addNotification(
                 this.transloco.translate('navbar.backup.restore_success'),
-                'success'
+                'success',
               );
             }, 1000);
 
@@ -345,11 +355,11 @@ export class NavbarComponent {
               this.transloco.translate('navbar.backup.restore_error');
             const translatedMessage = this.transloco.translate(
               'navbar.backup.restore_error_message',
-              { message: errorMessage }
+              { message: errorMessage },
             );
             this.notificationService.addNotification(
               translatedMessage,
-              'error'
+              'error',
             );
           },
         });
@@ -600,5 +610,46 @@ export class NavbarComponent {
       }
     }
     return null;
+  }
+
+  private startTitleAnimation(): void {
+    if (this.animationInterval) {
+      clearInterval(this.animationInterval);
+    }
+
+    // Esperar a que Transloco cargue la traducción
+    const fullTitle = this.transloco.translate('navbar.title');
+
+    // Si la traducción aún no está cargada, esperar un poco
+    if (fullTitle === 'navbar.title') {
+      setTimeout(() => this.startTitleAnimation(), 100);
+      return;
+    }
+
+    const animateTitle = () => {
+      const title = this.transloco.translate('navbar.title');
+      let currentIndex = 0;
+
+      const typeInterval = setInterval(() => {
+        if (currentIndex <= title.length) {
+          this.animatedTitle.set(title.substring(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(typeInterval);
+          // Mantener el título completo por 5 segundos antes de reiniciar
+          setTimeout(() => {
+            animateTitle();
+          }, 5000);
+        }
+      }, 100); // 100ms entre cada letra
+    };
+
+    animateTitle();
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationInterval) {
+      clearInterval(this.animationInterval);
+    }
   }
 }
