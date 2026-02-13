@@ -960,6 +960,12 @@
             "uniqueName": "A manager with this name already exists in this category",
             "duplicateTitle": "A product with this name already exists"
           },
+          "calurl": {
+            "title": "Link to schedule appointments",
+            "required": "The name is required",
+            "minlength": "The name must be at least 2 characters",
+            "maxlength": "The name must be up to 20 characters"
+          },
           "price": {
             "title": "Price"
           },
