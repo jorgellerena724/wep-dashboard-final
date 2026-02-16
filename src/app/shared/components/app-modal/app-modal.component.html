@@ -1,20 +1,49 @@
 <p-dialog
   [visible]="visible()"
   (visibleChange)="visible.set($event)"
-  [header]="title()"
   [modal]="true"
   [closeOnEscape]="true"
   [dismissableMask]="false"
   (onHide)="closeModal()"
   [styleClass]="'custom-modal bg-[rgb(245,245,245)]'"
+  [style]="{
+    width: isExpanded() ? '95vw' : '50vw',
+    height: isExpanded() ? '95vh' : 'auto',
+  }"
   [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
   [focusOnShow]="false"
+  [showHeader]="true"
 >
+  <!-- Header personalizado con título y botones -->
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full">
+      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
+        title()
+      }}</span>
+      <div class="flex items-center gap-2">
+        <!-- Botón de expandir/contraer -->
+        <button
+          type="button"
+          (click)="toggleExpand()"
+          class="p-dialog-header-icon p-link flex items-center justify-center"
+          [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
+        >
+          <span
+            [class]="
+              isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
+            "
+          ></span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+
   <!-- HR del encabezado -->
   <hr class="border-t border-gray-600 w-full dark:border-gray-300" />
   <div
     class="custom-scroll p-2 sm:p-4"
-    style="max-height: 300px; overflow-y: auto"
+    [style.max-height]="isExpanded() ? '75vh' : maxContentHeight()"
+    style="overflow-y: auto"
   >
     <div class="flex flex-col space-y-6">
       <ng-container #dynamicContent></ng-container>
@@ -25,30 +54,30 @@
 
   <!-- Footer con botones -->
   @if (modalButtonsVisible()) {
-  <ng-template pTemplate="footer">
-    <div class="flex justify-end gap-4 mt-1">
-      <button
-        pButton
-        (click)="closeModal()"
-        label="{{ 'modal.buttons.cancel' | transloco }}"
-        class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-red-800 hover:bg-red-700 mb-2 border border-red-800 hover:border-red-700"
-        [disabled]="isProcessing()"
-      ></button>
-      <button
-        pButton
-        (click)="onAccept()"
-        label="{{ 'modal.buttons.acept' | transloco }}"
-        [loadingIcon]="'pi pi-spin pi-spinner text-white'"
-        [ngStyle]="{
-          '--p-button-loading-icon-color': '#ffffff',
-          color: '#ffffff'
-        }"
-        class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-green-800 hover:bg-green-700 mr-2 mb-2 border border-green-800 hover:border-green-700"
-        [disabled]="isProcessing()"
-        [loading]="loading()"
-      ></button>
-    </div>
-  </ng-template>
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-4 mt-1">
+        <button
+          pButton
+          (click)="closeModal()"
+          label="{{ 'modal.buttons.cancel' | transloco }}"
+          class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-red-800 hover:bg-red-700 mb-2 border border-red-800 hover:border-red-700"
+          [disabled]="isProcessing()"
+        ></button>
+        <button
+          pButton
+          (click)="onAccept()"
+          label="{{ 'modal.buttons.acept' | transloco }}"
+          [loadingIcon]="'pi pi-spin pi-spinner text-white'"
+          [ngStyle]="{
+            '--p-button-loading-icon-color': '#ffffff',
+            color: '#ffffff',
+          }"
+          class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-green-800 hover:bg-green-700 mr-2 mb-2 border border-green-800 hover:border-green-700"
+          [disabled]="isProcessing()"
+          [loading]="loading()"
+        ></button>
+      </div>
+    </ng-template>
   }
 </p-dialog>
 
@@ -76,9 +105,43 @@
   .custom-modal .p-dialog-content {
     overflow-x: auto;
   }
+  /* Estilos para el modal */
+  .custom-modal .p-dialog-content {
+    overflow-x: auto;
+  }
   .custom-modal .p-dialog {
     max-height: 90vh;
     overflow: hidden;
+    transition:
+      width 0.3s ease,
+      height 0.3s ease;
+  }
+
+  /* Estilos para el header personalizado */
+  :host ::ng-deep .custom-modal .p-dialog-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Estilos para los botones del header */
+  :host ::ng-deep .custom-modal .p-dialog-header-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    color: #4b5563;
+  }
+
+  :host ::ng-deep .custom-modal .p-dialog-header-icon:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+
+  :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
+    font-size: 1rem;
   }
 
   /* Estilos para botones deshabilitados */
