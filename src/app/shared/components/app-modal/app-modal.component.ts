@@ -50,9 +50,6 @@ export class ModalComponent {
   // Signal para manejar tamaño maximo
   maxContentHeight = signal('300px');
 
-  // Signal para estado expandido
-  isExpanded = signal(false);
-
   // Suscripciones para manejo manual
   private formValidSub?: Subscription;
   private submitSuccessSub?: Subscription;
@@ -189,16 +186,11 @@ export class ModalComponent {
     this.visible.set(false);
     this.isProcessing.set(false);
     this.loading.set(false);
-    this.isExpanded.set(false);
 
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null;
     }
-  }
-
-  toggleExpand() {
-    this.isExpanded.update((expanded: boolean) => !expanded);
   }
 
   onAccept() {
