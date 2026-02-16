@@ -6,17 +6,35 @@
   [dismissableMask]="false"
   (onHide)="closeModal()"
   [styleClass]="'custom-modal bg-[rgb(245,245,245)]'"
-  [style]="{ width: '50vw', height: 'auto' }"
+  [style]="{
+    width: isExpanded() ? '95vw' : '50vw',
+    height: isExpanded() ? '95vh' : 'auto',
+  }"
   [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
   [focusOnShow]="false"
   [showHeader]="true"
 >
-  <!-- Header personalizado con título -->
+  <!-- Header personalizado con título y botones -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
       <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
         title()
       }}</span>
+      <div class="flex items-center gap-2">
+        <!-- Botón de expandir/contraer -->
+        <button
+          type="button"
+          (click)="toggleExpand()"
+          class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
+          [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
+        >
+          <span
+            [class]="
+              isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
+            "
+          ></span>
+        </button>
+      </div>
     </div>
   </ng-template>
 
@@ -24,7 +42,7 @@
   <hr class="border-t border-gray-600 w-full dark:border-gray-300" />
   <div
     class="custom-scroll p-2 sm:p-4"
-    [style.max-height]="maxContentHeight()"
+    [style.max-height]="isExpanded() ? '75vh' : maxContentHeight()"
     style="overflow-y: auto"
   >
     <div class="flex flex-col space-y-6">
