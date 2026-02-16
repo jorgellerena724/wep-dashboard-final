@@ -6,51 +6,23 @@
   [dismissableMask]="false"
   (onHide)="closeModal()"
   [styleClass]="'custom-modal bg-[rgb(245,245,245)]'"
-  [style]="{
-    width: isExpanded() ? '95vw' : '50vw',
-    height: isExpanded() ? '95vh' : 'auto',
-  }"
   [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
   [focusOnShow]="false"
   [showHeader]="true"
 >
-  <!-- Header personalizado con título y botones -->
+  <!-- Header personalizado con título -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
       <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
         title()
       }}</span>
-      <div class="flex items-center gap-2">
-        <!-- Botón de expandir/contraer -->
-        <button
-          type="button"
-          (click)="toggleExpand()"
-          class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
-          [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
-        >
-          <span
-            [class]="
-              isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
-            "
-          ></span>
-        </button>
-      </div>
     </div>
   </ng-template>
 
-  <!-- HR del encabezado -->
-  <hr class="border-t border-gray-600 w-full dark:border-gray-300" />
-  <div
-    class="custom-scroll p-2 sm:p-4"
-    [style.max-height]="isExpanded() ? '75vh' : maxContentHeight()"
-    style="overflow-y: auto"
-  >
-    <div class="flex flex-col space-y-6">
-      <ng-container #dynamicContent></ng-container>
-    </div>
-  </div>
+  <ng-container #dynamicContent></ng-container>
+
   <!-- HR del final -->
-  <hr class="border-t border-gray-600 w-full dark:border-gray-300 mt-4" />
+  <hr class="border-t border-gray-300 w-full dark:border-gray-300 mt-4" />
 
   <!-- Footer con botones -->
   @if (modalButtonsVisible()) {
@@ -59,14 +31,14 @@
         <button
           pButton
           (click)="closeModal()"
-          label="{{ 'modal.buttons.cancel' | transloco }}"
+          label="Cancelar"
           class="w-full gap-2 p-2 text-white rounded-lg transition-colors duration-300 bg-red-800 hover:bg-red-700 mb-2 border border-red-800 hover:border-red-700"
           [disabled]="isProcessing()"
         ></button>
         <button
           pButton
           (click)="onAccept()"
-          label="{{ 'modal.buttons.acept' | transloco }}"
+          label="Aceptar"
           [loadingIcon]="'pi pi-spin pi-spinner text-white'"
           [ngStyle]="{
             '--p-button-loading-icon-color': '#ffffff',
@@ -82,45 +54,26 @@
 </p-dialog>
 
 <style>
-  .custom-scroll::-webkit-scrollbar {
-    width: 8px;
-  }
-  .custom-scroll::-webkit-scrollbar-track {
-    background-color: #9ca3af;
-  }
-  .custom-scroll::-webkit-scrollbar-thumb {
-    background-color: #9ca3af;
-    border-radius: 10px;
-    border: 2px solid #f1f1f1;
-  }
-  .custom-scroll::-webkit-scrollbar-thumb:hover {
-    background-color: #9ca3af;
-  }
-  /* Para Firefox */
-  .custom-scroll {
-    scrollbar-width: thin;
-    background-color: #9ca3af #f1f1f1;
-  }
-  /* Estilos para el modal */
-  .custom-modal .p-dialog-content {
-    overflow-x: auto;
-  }
-  /* Estilos para el modal */
-  .custom-modal .p-dialog-content {
-    overflow-x: auto;
-  }
-  .custom-modal .p-dialog {
-    max-height: 100vh;
-    overflow: hidden;
-    transition:
-      width 0.3s ease,
-      height 0.3s ease;
+  /* Estilos básicos del modal */
+  :host ::ng-deep .custom-modal .p-dialog {
+    max-width: 90vw;
+    width: 90vw;
   }
 
-  /* Estilos para el header personalizado */
+  :host ::ng-deep .custom-modal .p-dialog-content {
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-height: 70vh;
+  }
+
   :host ::ng-deep .custom-modal .p-dialog-header {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #e5e7eb;
+  }
+
+  :host ::ng-deep .custom-modal .p-dialog-footer {
+    padding: 1rem 1.5rem;
   }
 
   /* Estilos para los botones del header */
@@ -137,7 +90,7 @@
   }
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon:hover {
-    background-color: #e9e0e0;
+    background-color: #e5e7eb;
   }
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
@@ -146,100 +99,32 @@
   }
 
   /* Estilos para botones deshabilitados */
-  .custom-modal .p-button:disabled,
-  .custom-modal .p-button.p-disabled,
-  button:disabled {
-    /* No usar opacidad para que el spinner y el texto no se vean grises */
-    opacity: 1 !important;
-    cursor: not-allowed !important;
-    pointer-events: none;
-  }
-
-  /* Forzar color blanco del spinner de carga en el botón (PrimeNG) */
-  .custom-modal .p-button .p-button-loading-icon,
-  .custom-modal .p-button .pi.pi-spinner {
-    color: #ffffff !important;
-  }
-  /* Versión global para overlays de Prime (el diálogo se monta fuera del host) */
-  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon,
-  :host ::ng-deep .custom-modal .p-button .pi.pi-spinner {
-    color: #ffffff !important;
-  }
-  /* Asegurar blanco cuando el botón esté en estado loading o deshabilitado */
-  .custom-modal .p-button.p-button-loading .p-button-loading-icon,
-  .custom-modal .p-button:disabled .p-button-loading-icon,
-  .custom-modal .p-button:disabled .p-button-icon,
-  .custom-modal .p-button:disabled .p-button-label {
-    color: #ffffff !important;
-  }
-  :host
-    ::ng-deep
-    .custom-modal
-    .p-button.p-button-loading
-    .p-button-loading-icon,
-  :host ::ng-deep .custom-modal .p-button:disabled .p-button-loading-icon,
-  :host ::ng-deep .custom-modal .p-button:disabled .p-button-icon,
-  :host ::ng-deep .custom-modal .p-button:disabled .p-button-label {
-    color: #ffffff !important;
-  }
-  /* Si el ícono es SVG con clase .p-icon */
-  .custom-modal .p-button .p-button-loading-icon .p-icon,
-  .custom-modal .p-button:disabled .p-button-loading-icon .p-icon {
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
-  }
-  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon .p-icon,
-  :host
-    ::ng-deep
-    .custom-modal
-    .p-button:disabled
-    .p-button-loading-icon
-    .p-icon {
-    fill: #ffffff !important;
-    stroke: #ffffff !important;
-  }
-  /* Si Prime usa p-progress-spinner (SVG) dentro del botón */
-  .custom-modal .p-button .p-button-loading-icon .p-progress-spinner circle,
-  .custom-modal
-    .p-button:disabled
-    .p-button-loading-icon
-    .p-progress-spinner
-    circle {
-    stroke: #ffffff !important;
-  }
-  :host
-    ::ng-deep
-    .custom-modal
-    .p-button
-    .p-button-loading-icon
-    .p-progress-spinner
-    circle,
-  :host
-    ::ng-deep
-    .custom-modal
-    .p-button:disabled
-    .p-button-loading-icon
-    .p-progress-spinner
-    circle {
-    stroke: #ffffff !important;
-  }
-
-  /* Variable del tema (Prime) para el color del loading icon */
-  :host ::ng-deep .custom-modal .p-button {
-    --p-button-loading-icon-color: #ffffff;
-  }
-
-  /* Deshabilitado sin opacidad en overlay */
   :host ::ng-deep .custom-modal .p-button:disabled,
   :host ::ng-deep .custom-modal .p-button.p-disabled {
     opacity: 1 !important;
     pointer-events: none;
   }
 
+  /* Color blanco para spinner de carga */
+  :host ::ng-deep .custom-modal .p-button {
+    --p-button-loading-icon-color: #ffffff;
+  }
+
+  :host ::ng-deep .custom-modal .p-button .p-button-loading-icon,
+  :host ::ng-deep .custom-modal .p-button .pi.pi-spinner {
+    color: #ffffff !important;
+  }
+
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-loading-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-icon,
+  :host ::ng-deep .custom-modal .p-button:disabled .p-button-label {
+    color: #ffffff !important;
+  }
+
   @media (max-width: 640px) {
-    .custom-modal .p-dialog {
+    :host ::ng-deep .custom-modal .p-dialog {
       width: 100vw !important;
-      height: 100vh !important;
+      max-width: 100vw !important;
     }
   }
 </style>
