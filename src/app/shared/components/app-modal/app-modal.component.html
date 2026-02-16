@@ -25,7 +25,7 @@
         <button
           type="button"
           (click)="toggleExpand()"
-          class="p-dialog-header-icon p-link flex items-center justify-center"
+          class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
           [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
         >
           <span
@@ -125,8 +125,8 @@
 
   /* Estilos para los botones del header */
   :host ::ng-deep .custom-modal .p-dialog-header-icon {
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -137,7 +137,7 @@
   }
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+    background-color: #e9e0e0;
   }
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
