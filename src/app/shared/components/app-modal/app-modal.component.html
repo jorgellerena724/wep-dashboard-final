@@ -4,6 +4,7 @@
   [modal]="true"
   [closeOnEscape]="true"
   [dismissableMask]="false"
+  [draggable]="false"
   (onHide)="closeModal()"
   [styleClass]="computedModalClass()"
   [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
@@ -13,9 +14,7 @@
   <!-- Header personalizado con título -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
-      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
-        title()
-      }}</span>
+      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{ title() }}</span>
       <div class="flex items-center gap-2">
         <!-- Botón de expandir/contraer -->
         @if (showExpandButton()) {
@@ -25,11 +24,7 @@
             class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
             [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
           >
-            <span
-              [class]="
-                isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
-              "
-            ></span>
+            <span [class]="isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"></span>
           </button>
         }
       </div>
