@@ -122,18 +122,29 @@ export class ModalComponent {
   }
 
   closeModal() {
-    // Resetear estado expandido de forma inmediata sin esperar re-render
+    // Si está expandido, primero contraerlo y luego cerrar
     if (this.isExpanded()) {
       this.isExpanded.set(false);
-    }
-    // Usar setTimeout para asegurar que el cambio de estado se procese antes de cerrar
-    setTimeout(() => {
+      // Dar tiempo para que se aplique la transición de contraer antes de cerrar
+      setTimeout(() => {
+        this.visible.set(false);
+        this.isProcessing.set(false);
+        this.loading.set(false);
+        setTimeout(() => {
+          this.cleanup();
+          this.modalSrv.clear();
+        }, 100);
+      }, 50);
+    } else {
+      // Si no está expandido, cerrar directamente
       this.visible.set(false);
       this.isProcessing.set(false);
       this.loading.set(false);
-      this.cleanup();
-      this.modalSrv.clear();
-    }, 0);
+      setTimeout(() => {
+        this.cleanup();
+        this.modalSrv.clear();
+      }, 100);
+    }
   }
 
   toggleExpand() {
