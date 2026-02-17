@@ -71,37 +71,37 @@ export class ListProductComponent {
   // Signals reactivos para traducciones de estado
   private activeStatus = toSignal(
     this.transloco.selectTranslate('status.active'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private inactiveStatus = toSignal(
     this.transloco.selectTranslate('status.inactive'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.products.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private variantsTranslation = toSignal(
     this.transloco.selectTranslate(
-      'components.products.list.table.variants.title'
+      'components.products.list.table.variants.title',
     ),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private descriptionTranslation = toSignal(
     this.transloco.selectTranslate(
-      'components.products.list.table.description'
+      'components.products.list.table.description',
     ),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private categoryTranslation = toSignal(
     this.transloco.selectTranslate('components.products.list.table.category'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.products.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -138,23 +138,23 @@ export class ListProductComponent {
   // Signals reactivos para traducciones de acciones
   private createTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.create'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private deleteTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.delete'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private enableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.enable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private disableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.disable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   headerActions = computed<TableAction[]>(() => {
@@ -252,7 +252,7 @@ export class ListProductComponent {
         error: (error) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.products.error.load'),
-            'error'
+            'error',
           );
           this.loading.set(false);
         },
@@ -278,7 +278,7 @@ export class ListProductComponent {
             error: (error) => {
               console.error(
                 `Error loading media for product ${item.id}:`,
-                error
+                error,
               );
             },
           });
@@ -300,12 +300,13 @@ export class ListProductComponent {
 
   create(): void {
     const translatedTitle = this.transloco.translate(
-      'components.products.create.title'
+      'components.products.create.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditProductComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           onSave: () => {
@@ -319,12 +320,13 @@ export class ListProductComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.products.edit.title'
+      'components.products.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditProductComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -357,9 +359,9 @@ export class ListProductComponent {
             this.loadData();
             this.notificationSrv.addNotification(
               this.transloco.translate(
-                'notifications.products.success.deleted'
+                'notifications.products.success.deleted',
               ),
-              'success'
+              'success',
             );
           },
           error: (error) => {
@@ -369,14 +371,14 @@ export class ListProductComponent {
             ) {
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.products.error.cannotDelete'
+                  'notifications.products.error.cannotDelete',
                 ),
-                'error'
+                'error',
               );
             } else {
               this.notificationSrv.addNotification(
                 this.transloco.translate('notifications.products.error.delete'),
-                'error'
+                'error',
               );
             }
             this.loading.set(false);
@@ -408,7 +410,7 @@ export class ListProductComponent {
                   status: newStatus,
                   statusToShow: newStatus ? active : inactive,
                 }
-              : item
+              : item,
           );
 
           this.data.set(updatedData);
@@ -416,7 +418,7 @@ export class ListProductComponent {
           const statusText = newStatus ? active : inactive;
           const message = this.transloco.translate(
             'notifications.news.success.statusUpdated',
-            { status: statusText }
+            { status: statusText },
           );
           this.notificationSrv.addNotification(message, 'success');
         },
@@ -425,7 +427,7 @@ export class ListProductComponent {
             this.notificationSrv.addNotification(error.error.message, 'error');
           } else {
             const message = this.transloco.translate(
-              'notifications.news.error.statusUpdate'
+              'notifications.news.error.statusUpdate',
             );
             this.notificationSrv.addNotification(message, 'error');
           }

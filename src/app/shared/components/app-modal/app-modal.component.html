@@ -13,7 +13,9 @@
   <!-- Header personalizado con título -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
-      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{ title() }}</span>
+      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
+        title()
+      }}</span>
       <div class="flex items-center gap-2">
         <!-- Botón de expandir/contraer -->
         @if (showExpandButton()) {
@@ -23,7 +25,11 @@
             class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
             [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
           >
-            <span [class]="isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"></span>
+            <span
+              [class]="
+                isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
+              "
+            ></span>
           </button>
         }
       </div>
@@ -137,25 +143,25 @@
   }
 
   /* Estilos para el modal expandido - DEBEN IR DESPUÉS para sobrescribir */
-  :host ::ng-deep .custom-modal-expanded .p-dialog {
+  :host ::ng-deep .p-dialog.custom-modal-expanded {
     max-width: 100vw !important;
-    width: 100vw !important;
+    width: 95vw !important;
     height: 100vh !important;
     margin: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 0.5rem !important;
     top: 0 !important;
     left: 0 !important;
     transform: none !important;
   }
 
-  :host ::ng-deep .custom-modal-expanded .p-dialog-content {
+  :host ::ng-deep .p-dialog.custom-modal-expanded .p-dialog-content {
     max-height: calc(100vh - 140px) !important;
     height: calc(100vh - 140px) !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  :host ::ng-deep .custom-modal-expanded .p-dialog-content > * {
+  :host ::ng-deep .p-dialog.custom-modal-expanded .p-dialog-content > * {
     width: 100% !important;
     max-width: 100% !important;
   }

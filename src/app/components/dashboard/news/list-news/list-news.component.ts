@@ -72,37 +72,37 @@ export class ListNewsComponent {
   // Signals reactivos para traducciones de estado
   private activeStatus = toSignal(
     this.transloco.selectTranslate('status.active'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private inactiveStatus = toSignal(
     this.transloco.selectTranslate('status.inactive'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Signals reactivos para traducciones de columnas
   private orderTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.order'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private descriptionTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.description'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private dateTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.date'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private statusTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.status'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -140,23 +140,23 @@ export class ListNewsComponent {
   // Signals reactivos para traducciones de acciones
   private createTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.create'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private deleteTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.delete'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private disableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.disable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private enableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.enable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   headerActions = computed<TableAction[]>(() => {
@@ -258,7 +258,7 @@ export class ListNewsComponent {
             error: () => {
               this.translateAndNotify(
                 'notifications.news.error.loadImage',
-                'error'
+                'error',
               );
             },
           });
@@ -275,12 +275,13 @@ export class ListNewsComponent {
 
   create(): void {
     const translatedTitle = this.transloco.translate(
-      'components.news.create.title'
+      'components.news.create.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditNewsComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           onSave: () => {
@@ -294,12 +295,13 @@ export class ListNewsComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.news.edit.title'
+      'components.news.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditNewsComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -332,19 +334,19 @@ export class ListNewsComponent {
             this.onRefresh();
             this.translateAndNotify(
               'notifications.news.success.deleted',
-              'success'
+              'success',
             );
           },
           error: (error) => {
             if (error?.error?.message && error.error?.statusCode === 400) {
               this.notificationSrv.addNotification(
                 error.error.message,
-                'error'
+                'error',
               );
             } else {
               this.translateAndNotify(
                 'notifications.news.error.delete',
-                'error'
+                'error',
               );
             }
             this.loading.set(false);
@@ -376,7 +378,7 @@ export class ListNewsComponent {
                   status: newStatus,
                   statusToShow: newStatus ? active : inactive,
                 }
-              : item
+              : item,
           );
 
           this.data.set(updatedData);
@@ -384,7 +386,7 @@ export class ListNewsComponent {
           const statusText = newStatus ? active : inactive;
           const message = this.transloco.translate(
             'notifications.news.success.statusUpdated',
-            { status: statusText }
+            { status: statusText },
           );
           this.notificationSrv.addNotification(message, 'success');
         },
@@ -394,7 +396,7 @@ export class ListNewsComponent {
           } else {
             this.translateAndNotify(
               'notifications.news.error.statusUpdate',
-              'error'
+              'error',
             );
           }
         },
@@ -423,7 +425,7 @@ export class ListNewsComponent {
       currentItem.id,
       previousOrder,
       previousItem.id,
-      currentOrder
+      currentOrder,
     );
   }
 
@@ -449,7 +451,7 @@ export class ListNewsComponent {
       currentItem.id,
       nextOrder,
       nextItem.id,
-      currentOrder
+      currentOrder,
     );
   }
 
@@ -457,7 +459,7 @@ export class ListNewsComponent {
     id1: number,
     order1: number,
     id2: number,
-    order2: number
+    order2: number,
   ): void {
     const update1$ = this.srv.updateOrder(id1, order1);
     const update2$ = this.srv.updateOrder(id2, order2);
@@ -469,7 +471,7 @@ export class ListNewsComponent {
           this.onRefresh();
           this.translateAndNotify(
             'notifications.news.success.orderUpdated',
-            'success'
+            'success',
           );
         },
         error: (error) => {
@@ -479,7 +481,7 @@ export class ListNewsComponent {
           } else {
             this.translateAndNotify(
               'notifications.news.error.orderUpdate',
-              'error'
+              'error',
             );
           }
         },
@@ -514,7 +516,7 @@ export class ListNewsComponent {
   private translateAndNotify(
     key: string,
     severity: 'success' | 'error' | 'warning' | 'info',
-    params?: object
+    params?: object,
   ): void {
     const message = this.transloco.translate(key, params);
     this.notificationSrv.addNotification(message, severity);

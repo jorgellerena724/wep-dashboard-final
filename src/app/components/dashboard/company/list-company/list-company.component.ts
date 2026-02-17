@@ -64,29 +64,29 @@ export class ListCompanyComponent {
   // Signals reactivos para traducciones de estado
   private activeStatus = toSignal(
     this.transloco.selectTranslate('status.active'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private inactiveStatus = toSignal(
     this.transloco.selectTranslate('status.inactive'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private descriptionTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.description'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private statusTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.status'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -123,15 +123,15 @@ export class ListCompanyComponent {
   // Signals reactivos para traducciones de acciones
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private disableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.disable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private enableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.enable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   rowActions = computed<RowAction[]>(() => {
@@ -143,7 +143,8 @@ export class ListCompanyComponent {
         class: buttonVariants.outline.green,
       },
       {
-        label: (data) => (data.status ? this.disableTranslation() : this.enableTranslation()),
+        label: (data) =>
+          data.status ? this.disableTranslation() : this.enableTranslation(),
         icon: (data) => (data.status ? icons['activate'] : icons['deactivate']),
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
@@ -183,7 +184,7 @@ export class ListCompanyComponent {
         },
         error: (error) => {
           const message = this.transloco.translate(
-            'notifications.company.error.load'
+            'notifications.company.error.load',
           );
           this.notificationSrv.addNotification(message, 'error');
           this.loading.set(false);
@@ -204,7 +205,7 @@ export class ListCompanyComponent {
             },
             error: (error) => {
               const message = this.transloco.translate(
-                'notifications.company.error.loadImage'
+                'notifications.company.error.loadImage',
               );
               this.notificationSrv.addNotification(message, 'error');
             },
@@ -221,12 +222,13 @@ export class ListCompanyComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.company.edit.title'
+      'components.company.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: UpdateCompanyComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -270,7 +272,7 @@ export class ListCompanyComponent {
                   status: newStatus,
                   statusToShow: newStatus ? active : inactive,
                 }
-              : item
+              : item,
           );
 
           this.data.set(updatedData);
@@ -278,7 +280,7 @@ export class ListCompanyComponent {
           const statusText = newStatus ? active : inactive;
           const message = this.transloco.translate(
             'notifications.company.success.statusUpdated',
-            { status: statusText }
+            { status: statusText },
           );
           this.notificationSrv.addNotification(message, 'success');
         },
@@ -286,11 +288,11 @@ export class ListCompanyComponent {
           if (error?.error?.message && error.error?.statusCode === 400) {
             this.notificationSrv.addNotification(
               error.error.message + '.',
-              'error'
+              'error',
             );
           } else {
             const message = this.transloco.translate(
-              'notifications.company.error.statusUpdate'
+              'notifications.company.error.statusUpdate',
             );
             this.notificationSrv.addNotification(message, 'error');
           }
