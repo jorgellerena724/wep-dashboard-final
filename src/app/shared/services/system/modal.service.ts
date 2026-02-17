@@ -5,6 +5,7 @@ export interface ModalConfig {
   component: Type<any>;
   data?: any;
   showButtons?: boolean;
+  showExpandButton?: boolean;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   width?: string;
   onClose?: () => void;

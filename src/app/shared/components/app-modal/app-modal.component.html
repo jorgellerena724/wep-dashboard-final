@@ -5,7 +5,7 @@
   [closeOnEscape]="true"
   [dismissableMask]="false"
   (onHide)="closeModal()"
-  [styleClass]="'custom-modal bg-[rgb(245,245,245)]'"
+  [styleClass]="computedModalClass()"
   [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
   [focusOnShow]="false"
   [showHeader]="true"
@@ -13,9 +13,20 @@
   <!-- Header personalizado con título -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
-      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
-        title()
-      }}</span>
+      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{ title() }}</span>
+      <div class="flex items-center gap-2">
+        <!-- Botón de expandir/contraer -->
+        @if (showExpandButton()) {
+          <button
+            type="button"
+            (click)="toggleExpand()"
+            class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
+            [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
+          >
+            <span [class]="isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"></span>
+          </button>
+        }
+      </div>
     </div>
   </ng-template>
 
@@ -86,7 +97,7 @@
     border-radius: 50%;
     transition: background-color 0.2s;
     cursor: pointer;
-    color: #6b7280;
+    color: #374151 !important;
   }
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon:hover {
@@ -95,7 +106,11 @@
 
   :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
     font-size: 1rem;
-    color: #6b7280;
+    color: #374151 !important;
+  }
+
+  :host ::ng-deep .custom-modal .p-dialog-header-icon span {
+    color: #374151 !important;
   }
 
   /* Estilos para botones deshabilitados */
@@ -119,6 +134,30 @@
   :host ::ng-deep .custom-modal .p-button:disabled .p-button-icon,
   :host ::ng-deep .custom-modal .p-button:disabled .p-button-label {
     color: #ffffff !important;
+  }
+
+  /* Estilos para el modal expandido - DEBEN IR DESPUÉS para sobrescribir */
+  :host ::ng-deep .custom-modal-expanded .p-dialog {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+  }
+
+  :host ::ng-deep .custom-modal-expanded .p-dialog-content {
+    max-height: calc(100vh - 140px) !important;
+    height: calc(100vh - 140px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :host ::ng-deep .custom-modal-expanded .p-dialog-content > * {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   @media (max-width: 640px) {
