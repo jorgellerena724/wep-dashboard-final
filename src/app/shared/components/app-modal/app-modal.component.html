@@ -14,7 +14,9 @@
   <!-- Header personalizado con título -->
   <ng-template pTemplate="header">
     <div class="flex items-center justify-between w-full">
-      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{ title() }}</span>
+      <span class="font-semibold text-lg text-gray-700 dark:text-gray-300">{{
+        title()
+      }}</span>
       <div class="flex items-center gap-2">
         <!-- Botón de expandir/contraer -->
         @if (showExpandButton()) {
@@ -24,7 +26,11 @@
             class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
             [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
           >
-            <span [class]="isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"></span>
+            <span
+              [class]="
+                isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
+              "
+            ></span>
           </button>
         }
       </div>
@@ -34,11 +40,13 @@
   <ng-container #dynamicContent></ng-container>
 
   <!-- HR del final -->
-  <hr class="border-t border-gray-300 w-full dark:border-gray-300 mt-4" />
+  @if (modalButtonsVisible()) {
+    <hr class="border-t border-gray-300 w-full dark:border-gray-300 mt-4" />
+  }
 
   <!-- Footer con botones -->
-  @if (modalButtonsVisible()) {
-    <ng-template pTemplate="footer">
+  <ng-template pTemplate="footer">
+    @if (modalButtonsVisible()) {
       <div class="flex justify-end gap-4 mt-1">
         <button
           pButton
@@ -61,8 +69,8 @@
           [loading]="loading()"
         ></button>
       </div>
-    </ng-template>
-  }
+    }
+  </ng-template>
 </p-dialog>
 
 <style>
