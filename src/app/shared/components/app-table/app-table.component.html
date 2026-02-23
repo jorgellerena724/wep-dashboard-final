@@ -237,26 +237,26 @@
     background: #18181b;
   }
 
-  /* Botón de página SELECCIONADA (Aquí estaba tu problema del verde) */
+  /* Botón de página SELECCIONADA - Gris suave */
   :host ::ng-deep .p-paginator-page.p-paginator-page-selected {
-    background: #9ca3af !important; /* !important para asegurar que pise el tema default */
+    background: #d1d5db !important; /* Gris suave en lugar de gris oscuro */
     pointer-events: none;
-    color: white !important;
+    color: #374151 !important; /* Texto oscuro para contraste */
   }
 
   :host ::ng-deep .dark .p-paginator-page.p-paginator-page-selected {
-    background: #1f2937 !important;
+    background: #4b5563 !important; /* Gris suave para modo oscuro */
     color: white !important;
   }
 
-  /* Hover en botones */
+  /* Hover en botones - Gris más suave */
   :host ::ng-deep .p-paginator-page:hover,
   :host ::ng-deep .p-paginator-next:hover,
   :host ::ng-deep .p-paginator-last:hover,
   :host ::ng-deep .p-paginator-first:hover,
   :host ::ng-deep .p-paginator-prev:hover {
-    background: #d1d5db !important;
-    color: #343b46 !important;
+    background: #e5e7eb !important; /* Gris más claro y suave */
+    color: #374151 !important;
   }
 
   :host ::ng-deep .dark .p-paginator-page:hover,
@@ -264,8 +264,8 @@
   :host ::ng-deep .dark .p-paginator-last:hover,
   :host ::ng-deep .dark .p-paginator-first:hover,
   :host ::ng-deep .dark .p-paginator-prev:hover {
-    background: #343b46 !important;
-    color: #d1d5db !important;
+    background: #374151 !important; /* Gris menos fuerte para modo oscuro */
+    color: #e5e7eb !important;
   }
 
   /* Color de texto base de los botones */
@@ -295,20 +295,51 @@
     color: #d1d5db;
   }
 
-  /* Dropdown de opciones (Select) */
-  :host ::ng-deep .p-select-option.p-select-option-selected {
-    background: #9ca3af !important;
+  /* Dropdown de opciones (Select) - Opción seleccionada gris suave */
+  :host ::ng-deep .p-select-option.p-select-option-selected,
+  :host ::ng-deep .p-select-option.p-highlight,
+  :host ::ng-deep .p-select-option.p-focus {
+    background: #d1d5db !important; /* Gris suave */
+    color: #374151 !important; /* Texto oscuro */
+  }
+  :host ::ng-deep .dark .p-select-option.p-select-option-selected,
+  :host ::ng-deep .dark .p-select-option.p-highlight,
+  :host ::ng-deep .dark .p-select-option.p-focus {
+    background: #4b5563 !important; /* Gris suave para modo oscuro */
     color: white !important;
   }
-  :host ::ng-deep .dark .p-select-option.p-select-option-selected {
-    background: #1f2937 !important;
-    color: white !important;
-  }
+  /* Hover del dropdown - Gris más suave */
   :host ::ng-deep .p-select-option:hover {
-    background: #d1d5db !important;
+    background: #e5e7eb !important; /* Gris más claro y suave */
+    color: #374151 !important;
   }
   :host ::ng-deep .dark .p-select-option:hover {
-    background: #343b46 !important;
+    background: #374151 !important; /* Gris menos fuerte */
+    color: #e5e7eb !important;
+  }
+
+  /* Asegurar que no haya colores primarios (verde) en el dropdown */
+  :host ::ng-deep .p-select-overlay .p-select-option {
+    background: transparent !important;
+  }
+  :host
+    ::ng-deep
+    .p-select-overlay
+    .p-select-option:not(:hover):not(.p-select-option-selected):not(
+      .p-highlight
+    ):not(.p-focus) {
+    background: transparent !important;
+    color: #374151 !important;
+  }
+  :host
+    ::ng-deep
+    .dark
+    .p-select-overlay
+    .p-select-option:not(:hover):not(.p-select-option-selected):not(
+      .p-highlight
+    ):not(.p-focus) {
+    background: transparent !important;
+    color: #e5e7eb !important;
   }
 
   /* Animación custom */
