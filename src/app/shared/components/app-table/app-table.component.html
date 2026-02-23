@@ -67,7 +67,7 @@
               col.field !== 'actions' && col.sortable ? col.field : undefined
             "
             [width]="col.width"
-            class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b-1 border-b-gray-700 dark:border-b-gray-200 dark:border-b-1"
+            class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b-1 border-r border-b-gray-700 border-r-gray-700 dark:border-b-gray-200 dark:border-b-1 dark:border-r-gray-700"
           >
             <div class="flex items-center justify-between gap-2">
               <span>{{ col.header }}</span>
@@ -136,7 +136,7 @@
       >
         @for (col of columnsWithActions(); track col.field) {
           <td
-            class="px-6 py-0 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-gray-400 dark:border-gray-600"
+            class="px-6 py-0 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-r border-gray-400 border-r-gray-400 dark:border-gray-600 dark:border-r-gray-700"
           >
             @if (col.field !== "actions") {
               <ng-container
