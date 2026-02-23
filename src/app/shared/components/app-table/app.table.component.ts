@@ -71,17 +71,10 @@ export class TableComponent {
   private themeService = inject(ThemeService);
   private fb = inject(FormBuilder);
 
-  // --- SOLUCIÓN TRADUCCIONES ---
-  // Convertimos el stream de traducción en una Signal.
-  // Cuando carga el idioma o cambia, esta signal se actualiza.
   private actionsHeaderLabel = toSignal(
     this.transloco.selectTranslate('table.actions'),
-    { initialValue: 'Actions' } // Valor temporal mientras carga
+    { initialValue: 'Actions' },
   );
-
-  // --- SOLUCIÓN TEMA OSCURO ---
-  // Optimización: Usar toSignal en lugar de .subscribe dentro de un effect
-  // Asumiendo que themeService.darkMode$ es un Observable<boolean>
   isDark = toSignal(this.themeService.darkMode$, { initialValue: false });
 
   // Inputs
@@ -210,7 +203,7 @@ export class TableComponent {
           .get(col.field)
           ?.value.toLowerCase();
         filtered = filtered.filter((item) =>
-          String(item[col.field]).toLowerCase().includes(searchTerm)
+          String(item[col.field]).toLowerCase().includes(searchTerm),
         );
       }
     });
@@ -245,7 +238,10 @@ export class TableComponent {
 
   onPageChange(event: any) {
     this.first.set(event.first);
-    this.updateDisplayedData();
+    // ✨ FIX: Actualizar displayedData considerando el nuevo rows del evento
+    const filtered = this.filteredData();
+    const displayed = filtered.slice(event.first, event.first + event.rows);
+    this.displayedData.set(displayed);
   }
 
   refreshData() {
