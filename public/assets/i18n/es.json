@@ -621,7 +621,7 @@
         }
       },
       "edit": {
-        "title": "Modificar dato de la empresa",
+        "title": "Modificar datos de la empresa",
         "fields": {
           "name": {
             "title": "Nombre",
