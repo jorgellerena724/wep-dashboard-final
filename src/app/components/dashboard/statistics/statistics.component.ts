@@ -1,210 +1,418 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   inject,
   PLATFORM_ID,
   ChangeDetectorRef,
-  OnDestroy,
+  signal,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChartModule } from 'primeng/chart';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { Subscription } from 'rxjs';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormArray,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { TooltipModule } from 'primeng/tooltip';
+import { Subject, forkJoin } from 'rxjs';
+import { skip, takeUntil } from 'rxjs/operators';
+import {
+  MetricsService,
+  MetricEvent,
+  MetricsConfig,
+  DayMetric,
+  SummaryMetric,
+} from '../../../shared/services/features/metrics.service';
+import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
+
+const COLOR_PALETTE = [
+  { bg: 'rgba(59, 130, 246, 0.2)', border: 'rgb(59, 130, 246)' },
+  { bg: 'rgba(34, 197, 94, 0.2)', border: 'rgb(34, 197, 94)' },
+  { bg: 'rgba(249, 115, 22, 0.2)', border: 'rgb(249, 115, 22)' },
+  { bg: 'rgba(139, 92, 246, 0.2)', border: 'rgb(139, 92, 246)' },
+  { bg: 'rgba(236, 72, 153, 0.2)', border: 'rgb(236, 72, 153)' },
+  { bg: 'rgba(6, 182, 212, 0.2)', border: 'rgb(6, 182, 212)' },
+];
+
+function toISODate(d: Date): string {
+  return d.toISOString().split('T')[0];
+}
+function startOfWeek(d: Date): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + (r.getDay() === 0 ? -6 : 1 - r.getDay()));
+  return r;
+}
+function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
 
 @Component({
   selector: 'app-statistics',
   standalone: true,
-  imports: [CommonModule, ChartModule, TranslocoModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    ChartModule,
+    TranslocoModule,
+    TextFieldComponent,
+    TooltipModule,
+  ],
   templateUrl: './statistics.component.html',
   styleUrls: ['./statistics.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatisticsComponent implements OnInit, OnDestroy {
-  platformId = inject(PLATFORM_ID);
-  cd = inject(ChangeDetectorRef);
-  translocoService = inject(TranslocoService);
+  private platformId = inject(PLATFORM_ID);
+  private cd = inject(ChangeDetectorRef);
+  private transloco = inject(TranslocoService);
+  private metricsSrv = inject(MetricsService);
+  private fb = inject(FormBuilder); // ✅ inyectado
+  private destroy$ = new Subject<void>();
 
-  // Datos para gráfica de usuarios por semana
-  weeklyUsersData: any;
-  weeklyUsersOptions: any;
+  // ── Métricas ──────────────────────────────────────────────
+  loading = signal(false);
+  readonly ranges = ['today', 'week', 'month', 'custom'] as const;
+  selectedRange = signal<(typeof this.ranges)[number]>('week');
+  customStart = signal(toISODate(new Date(Date.now() - 7 * 86400000)));
+  customEnd = signal(toISODate(new Date()));
+  summary = signal<SummaryMetric | null>(null);
+  events = signal<MetricEvent[]>([]);
 
-  // Datos para gráfica de usuarios por mes
-  monthlyUsersData: any;
-  monthlyUsersOptions: any;
+  lineChartData = signal<any>({ labels: [], datasets: [] });
+  lineChartOptions = signal<any>({});
+  barChartData = signal<any>({ labels: [], datasets: [] });
+  barChartOptions = signal<any>({});
+  pieChartData = signal<any>({ labels: [], datasets: [] });
+  pieChartOptions = signal<any>({});
 
-  private langSubscription?: Subscription;
+  // ── Config ────────────────────────────────────────────────
+  showConfigPanel = signal(false);
+  config = signal<MetricsConfig | null>(null);
+  savingConfig = signal(false);
+  loadingConfig = signal(false);
+  eventsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
 
-  ngOnInit() {
-    // Esperar a que las traducciones estén cargadas
-    this.translocoService
-      .selectTranslate('components.statistics.chart_labels.users')
-      .subscribe(() => {
-        this.initChart();
+  ngOnInit(): void {
+    this.load();
+
+    this.transloco.langChanges$
+      .pipe(
+        skip(1), // ← ignora la emisión inicial de carga
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => this.load());
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onRangeChange(range: (typeof this.ranges)[number]): void {
+    this.selectedRange.set(range);
+    if (range !== 'custom') this.load();
+  }
+
+  onCustomDateChange(): void {
+    if (this.customStart() && this.customEnd()) this.load();
+  }
+
+  private getDateRange(): { start: string; end: string } {
+    const today = new Date();
+    switch (this.selectedRange()) {
+      case 'today':
+        return { start: toISODate(today), end: toISODate(today) };
+      case 'week':
+        return { start: toISODate(startOfWeek(today)), end: toISODate(today) };
+      case 'month':
+        return { start: toISODate(startOfMonth(today)), end: toISODate(today) };
+      case 'custom':
+        return { start: this.customStart(), end: this.customEnd() };
+    }
+  }
+
+  load(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.loading.set(true);
+    const { start, end } = this.getDateRange();
+
+    forkJoin({
+      range: this.metricsSrv.getRange(start, end),
+      summary: this.metricsSrv.getSummary(start, end),
+      config: this.metricsSrv.getConfig(),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ range, summary, config }) => {
+          this.summary.set(summary);
+
+          // Derivar los eventos activos desde la config
+          const activeEvents: MetricEvent[] = (config.events ?? []).filter(
+            (e) => e.is_active,
+          );
+
+          this.events.set(activeEvents);
+          this.buildCharts(range, activeEvents);
+          this.loading.set(false);
+          this.cd.markForCheck();
+        },
+        error: () => {
+          this.loading.set(false);
+          this.cd.markForCheck();
+        },
       });
+  }
 
-    // Suscribirse a cambios de idioma
-    this.langSubscription = this.translocoService.langChanges$.subscribe(() => {
-      setTimeout(() => {
-        this.initChart();
-      }, 100);
+  // ── Config ────────────────────────────────────────────────
+  openConfig(): void {
+    this.loadingConfig.set(true);
+    this.metricsSrv
+      .getConfig()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cfg) => {
+          this.config.set(cfg);
+          this.loadEventsFromConfig(cfg.events);
+          this.showConfigPanel.set(true);
+          this.loadingConfig.set(false);
+          this.cd.markForCheck();
+        },
+        error: () => {
+          this.loadingConfig.set(false);
+          this.cd.markForCheck();
+        },
+      });
+  }
+
+  closeConfig(): void {
+    this.showConfigPanel.set(false);
+    this.eventsFormArray.clear();
+  }
+
+  private loadEventsFromConfig(events: MetricEvent[]): void {
+    this.eventsFormArray.clear();
+    events.forEach((ev) => {
+      this.eventsFormArray.push(
+        this.fb.group({
+          event_name: [ev.event_name, Validators.required],
+          label: [ev.label, Validators.required],
+          is_active: [ev.is_active],
+        }),
+      );
     });
   }
 
-  ngOnDestroy() {
-    if (this.langSubscription) {
-      this.langSubscription.unsubscribe();
-    }
+  addEventRow(): void {
+    this.eventsFormArray.push(
+      this.fb.group({
+        event_name: ['', Validators.required],
+        label: ['', Validators.required],
+        is_active: [true],
+      }),
+    );
+    this.cd.markForCheck();
   }
 
-  initChart() {
-    if (isPlatformBrowser(this.platformId)) {
-      const documentStyle = getComputedStyle(document.documentElement);
-      const textColor =
-        documentStyle.getPropertyValue('--p-text-color') || '#374151';
-      const textColorSecondary =
-        documentStyle.getPropertyValue('--p-text-muted-color') || '#6B7280';
-      const surfaceBorder =
-        documentStyle.getPropertyValue('--p-content-border-color') || '#E5E7EB';
-
-      // Obtener traducciones con fallback
-      const usersLabel =
-        this.translocoService.translate(
-          'components.statistics.chart_labels.users',
-        ) || 'Users';
-
-      const dayLabels = [
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.monday',
-        ) || 'Monday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.tuesday',
-        ) || 'Tuesday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.wednesday',
-        ) || 'Wednesday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.thursday',
-        ) || 'Thursday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.friday',
-        ) || 'Friday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.saturday',
-        ) || 'Saturday',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.days.sunday',
-        ) || 'Sunday',
-      ];
-
-      const monthLabels = [
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.january',
-        ) || 'January',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.february',
-        ) || 'February',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.march',
-        ) || 'March',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.april',
-        ) || 'April',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.may',
-        ) || 'May',
-        this.translocoService.translate(
-          'components.statistics.chart_labels.months.june',
-        ) || 'June',
-      ];
-
-      // Datos simulados para usuarios por semana
-      this.weeklyUsersData = {
-        labels: dayLabels,
-        datasets: [
-          {
-            label: usersLabel,
-            data: [120, 150, 180, 220, 200, 160, 140],
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-          },
-        ],
-      };
-
-      // Datos simulados para usuarios por mes
-      this.monthlyUsersData = {
-        labels: monthLabels,
-        datasets: [
-          {
-            label: usersLabel,
-            data: [3200, 2800, 3500, 4100, 3800, 4200],
-            backgroundColor: [
-              'rgba(34, 197, 94, 0.2)',
-              'rgba(59, 130, 246, 0.2)',
-              'rgba(249, 115, 22, 0.2)',
-              'rgba(139, 92, 246, 0.2)',
-              'rgba(236, 72, 153, 0.2)',
-              'rgba(6, 182, 212, 0.2)',
-            ],
-            borderColor: [
-              'rgb(34, 197, 94)',
-              'rgb(59, 130, 246)',
-              'rgb(249, 115, 22)',
-              'rgb(139, 92, 246)',
-              'rgb(236, 72, 153)',
-              'rgb(6, 182, 212)',
-            ],
-            borderWidth: 1,
-          },
-        ],
-      };
-
-      // Opciones comunes para ambas gráficas
-      const commonOptions = {
-        maintainAspectRatio: false,
-        aspectRatio: 0.8,
-        plugins: {
-          legend: {
-            labels: {
-              color: textColor,
-              font: {
-                size: 14,
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: textColorSecondary,
-              font: {
-                size: 12,
-              },
-            },
-            grid: {
-              color: surfaceBorder,
-            },
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: textColorSecondary,
-              font: {
-                size: 12,
-              },
-            },
-            grid: {
-              color: surfaceBorder,
-            },
-          },
-        },
-      };
-
-      this.weeklyUsersOptions = { ...commonOptions };
-      this.monthlyUsersOptions = { ...commonOptions };
-
+  removeEventRow(index: number): void {
+    const eventName = this.eventsFormArray.at(index).get('event_name')?.value;
+    if (!eventName) {
+      this.eventsFormArray.removeAt(index);
       this.cd.markForCheck();
+      return;
     }
+    this.metricsSrv
+      .deleteEvent(eventName)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.eventsFormArray.removeAt(index);
+        this.load();
+        this.cd.markForCheck();
+      });
+  }
+
+  toggleEventActive(index: number): void {
+    const control = this.eventsFormArray.at(index);
+    const eventName = control.get('event_name')?.value;
+    const newValue = !control.get('is_active')?.value;
+    if (!eventName) return;
+    control.get('is_active')?.setValue(newValue);
+    this.metricsSrv
+      .updateEvent(eventName, undefined, newValue)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.load();
+        this.cd.markForCheck();
+      });
+  }
+
+  saveEvent(index: number): void {
+    const control = this.eventsFormArray.at(index);
+    if (control.invalid) {
+      control.markAllAsTouched();
+      this.cd.markForCheck();
+      return;
+    }
+
+    const event_name = control.get('event_name')?.value.trim();
+    const label = control.get('label')?.value.trim();
+    const is_active = control.get('is_active')?.value;
+
+    this.savingConfig.set(true);
+    const existsInConfig = this.config()?.events.some(
+      (e) => e.event_name === event_name,
+    );
+    const request$ = existsInConfig
+      ? this.metricsSrv.updateEvent(event_name, label, is_active)
+      : this.metricsSrv.addEvent(event_name, label);
+
+    request$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (cfg) => {
+        this.config.set(cfg);
+        this.savingConfig.set(false);
+        this.load();
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.savingConfig.set(false);
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  getEventControl(index: number, field: string): FormControl {
+    return this.eventsFormArray.at(index).get(field) as FormControl;
+  }
+
+  // ── Gráficas ──────────────────────────────────────────────
+  private buildCharts(data: DayMetric[], events: MetricEvent[]): void {
+    const docStyle = getComputedStyle(document.documentElement);
+    const textColor = docStyle.getPropertyValue('--p-text-color') || '#374151';
+    const textMuted =
+      docStyle.getPropertyValue('--p-text-muted-color') || '#6B7280';
+    const borderColor =
+      docStyle.getPropertyValue('--p-content-border-color') || '#E5E7EB';
+
+    const commonOptions = {
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: textColor, font: { size: 13 } } } },
+      scales: {
+        x: { ticks: { color: textMuted }, grid: { color: borderColor } },
+        y: {
+          beginAtZero: true,
+          ticks: { color: textMuted },
+          grid: { color: borderColor },
+        },
+      },
+    };
+
+    const totals = this.summary();
+
+    this.lineChartData.set({
+      labels: data.map((d) => d.date),
+      datasets: events.map((ev, i) => {
+        const color = COLOR_PALETTE[i % COLOR_PALETTE.length];
+        return {
+          label: ev.label,
+          data: data.map((d) => d.counters[ev.event_name] ?? 0),
+          borderColor: color.border,
+          backgroundColor: color.bg,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2,
+        };
+      }),
+    });
+
+    this.barChartData.set({
+      labels: events.map((ev) => ev.label),
+      datasets: [
+        {
+          label: this.transloco.translate(
+            'components.statistics.chart_labels.total',
+          ),
+          data: events.map((ev) => totals?.totals[ev.event_name] ?? 0),
+          backgroundColor: events.map(
+            (_, i) => COLOR_PALETTE[i % COLOR_PALETTE.length].bg,
+          ),
+          borderColor: events.map(
+            (_, i) => COLOR_PALETTE[i % COLOR_PALETTE.length].border,
+          ),
+          borderWidth: 1,
+        },
+      ],
+    });
+
+    this.lineChartOptions.set({ ...commonOptions });
+    this.barChartOptions.set({ ...commonOptions });
+
+    // ── Pastel — proporción de totales por evento ──────────────
+    const totalsValues = events.map((ev) => totals?.totals[ev.event_name] ?? 0);
+    const hasData = totalsValues.some((v) => v > 0);
+
+    this.pieChartData.set({
+      labels: events.map((ev) => ev.label),
+      datasets: [
+        {
+          data: totalsValues,
+          backgroundColor: events.map(
+            (_, i) => COLOR_PALETTE[i % COLOR_PALETTE.length].border,
+          ),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    });
+
+    this.pieChartOptions.set({
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: textColor, font: { size: 13 }, padding: 16 },
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx: any) => {
+              const total = ctx.dataset.data.reduce(
+                (a: number, b: number) => a + b,
+                0,
+              );
+              const pct =
+                total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : '0';
+              return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+            },
+          },
+        },
+      },
+    });
+  }
+
+  get summaryEntries(): { key: string; label: string; value: number }[] {
+    const s = this.summary();
+    if (!s) return [];
+    const evMap = Object.fromEntries(
+      this.events().map((e) => [e.event_name, e.label]),
+    );
+    return Object.entries(s.totals).map(([key, value]) => ({
+      key,
+      label: evMap[key] ?? key,
+      value,
+    }));
+  }
+
+  colorForIndex(i: number): string {
+    return COLOR_PALETTE[i % COLOR_PALETTE.length].border;
+  }
+  bgColorForIndex(i: number): string {
+    return COLOR_PALETTE[i % COLOR_PALETTE.length].bg;
+  }
+  getInputValue(e: Event): string {
+    return (e.target as HTMLInputElement).value;
   }
 }

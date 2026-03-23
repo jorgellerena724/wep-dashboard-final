@@ -479,36 +479,35 @@
     },
     "statistics": {
       "title": "Statistics",
-      "weekly_users": "Weekly Users",
-      "monthly_users": "Monthly Users",
-      "total_users": "Total Users",
-      "weekly_growth": "Weekly Growth",
-      "avg_session": "Average Session",
+      "trend": "Period trend",
+      "totals": "Period totals",
+      "proportion": "Events proportion",
+      "ranges": {
+        "today": "Today",
+        "week": "This week",
+        "month": "This month",
+        "custom": "Custom"
+      },
       "chart_labels": {
-        "users": "Users",
-        "days": {
-          "monday": "Monday",
-          "tuesday": "Tuesday",
-          "wednesday": "Wednesday",
-          "thursday": "Thursday",
-          "friday": "Friday",
-          "saturday": "Saturday",
-          "sunday": "Sunday"
-        },
-        "months": {
-          "january": "January",
-          "february": "February",
-          "march": "March",
-          "april": "April",
-          "may": "May",
-          "june": "June",
-          "july": "July",
-          "august": "August",
-          "september": "September",
-          "october": "October",
-          "november": "November",
-          "december": "December"
+        "total": "Total",
+        "events": {
+          "site_visits": "Site visits",
+          "bookings_created": "Bookings created",
+          "bookings_cancelled": "Bookings cancelled",
+          "bookings_rescheduled": "Bookings rescheduled",
+          "payments_completed": "Payments completed",
+          "payments_refunded": "Payments refunded"
         }
+      },
+      "configure": "Configure events",
+      "config": {
+        "title": "Event Management",
+        "empty": "No events configured",
+        "add": "Add event",
+        "save": "Save",
+        "delete": "Delete",
+        "label": "Visible label",
+        "event_name": "Event name"
       }
     },
     "header": {

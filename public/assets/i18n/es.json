@@ -477,36 +477,35 @@
     },
     "statistics": {
       "title": "Estadísticas",
-      "weekly_users": "Usuarios por Semana",
-      "monthly_users": "Usuarios por Mes",
-      "total_users": "Total de Usuarios",
-      "weekly_growth": "Crecimiento Semanal",
-      "avg_session": "Sesión Promedio",
+      "trend": "Tendencia del período",
+      "totals": "Totales del período",
+      "proportion": "Proporción de eventos",
+      "ranges": {
+        "today": "Hoy",
+        "week": "Esta semana",
+        "month": "Este mes",
+        "custom": "Personalizado"
+      },
       "chart_labels": {
-        "users": "Usuarios",
-        "days": {
-          "monday": "Lunes",
-          "tuesday": "Martes",
-          "wednesday": "Miércoles",
-          "thursday": "Jueves",
-          "friday": "Viernes",
-          "saturday": "Sábado",
-          "sunday": "Domingo"
-        },
-        "months": {
-          "january": "Enero",
-          "february": "Febrero",
-          "march": "Marzo",
-          "april": "Abril",
-          "may": "Mayo",
-          "june": "Junio",
-          "july": "Julio",
-          "august": "Agosto",
-          "september": "Septiembre",
-          "october": "Octubre",
-          "november": "Noviembre",
-          "december": "Diciembre"
+        "total": "Total",
+        "events": {
+          "site_visits": "Visitas al sitio",
+          "bookings_created": "Citas agendadas",
+          "bookings_cancelled": "Citas canceladas",
+          "bookings_rescheduled": "Citas reagendadas",
+          "payments_completed": "Pagos completados",
+          "payments_refunded": "Pagos reembolsados"
         }
+      },
+      "configure": "Configurar eventos",
+      "config": {
+        "title": "Gestión de eventos",
+        "empty": "No hay eventos configurados",
+        "add": "Agregar evento",
+        "save": "Guardar",
+        "delete": "Eliminar",
+        "label": "Etiqueta visible",
+        "event_name": "Nombre del evento"
       }
     },
     "header": {
