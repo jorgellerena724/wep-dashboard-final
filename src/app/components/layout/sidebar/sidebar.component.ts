@@ -123,6 +123,13 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
         route: ['/admin'],
       },
       {
+        label: 'sidebar.statistics',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bar-chart ml-1" viewBox="0 0 16 16">
+          <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/>
+        </svg>`,
+        route: ['/statistics'],
+      },
+      {
         label: 'sidebar.header',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" width="25" height="24" fill="currentColor" class="bi bi-chevron-bar-up ml-1" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M3.646 11.854a.5.5 0 0 0 .708 0L8 8.207l3.646 3.647a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 0 .708M2.4 5.2c0 .22.18.4.4.4h10.4a.4.4 0 0 0 0-.8H2.8a.4.4 0 0 0-.4.4"/>
@@ -348,7 +355,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
     items.forEach((item) => {
       if (item.children) {
         const shouldBeOpen = item.children.some(
-          (child) => child.route && routePath.includes(child.route[0])
+          (child) => child.route && routePath.includes(child.route[0]),
         );
         if (item.isOpen !== shouldBeOpen) {
           item.isOpen = shouldBeOpen;
@@ -365,6 +372,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
     // Set title
     const titleMap: Record<string, string> = {
       '/admin': 'Administración',
+      '/statistics': 'Estadísticas',
       '/header': 'Encabezado',
       '/carousel': 'Inicio - Carrusel',
       '/news': 'Inicio - Novedades',

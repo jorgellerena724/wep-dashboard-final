@@ -66,15 +66,15 @@ export class ListReviewComponent {
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.reviews.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private descriptionTranslation = toSignal(
     this.transloco.selectTranslate('components.reviews.list.table.description'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.reviews.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -103,15 +103,15 @@ export class ListReviewComponent {
   // Signals reactivos para traducciones de acciones
   private createTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.create'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private deleteTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.delete'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   headerActions = computed<TableAction[]>(() => {
@@ -163,7 +163,7 @@ export class ListReviewComponent {
         },
         error: (error) => {
           const message = this.transloco.translate(
-            'notifications.reviews.error.load'
+            'notifications.reviews.error.load',
           );
           this.notificationSrv.addNotification(message, 'error');
           this.loading.set(false);
@@ -184,7 +184,7 @@ export class ListReviewComponent {
             },
             error: (error) => {
               const message = this.transloco.translate(
-                'notifications.reviews.error.loadImage'
+                'notifications.reviews.error.loadImage',
               );
               this.notificationSrv.addNotification(message, 'error');
             },
@@ -201,12 +201,13 @@ export class ListReviewComponent {
 
   create(): void {
     const translatedTitle = this.transloco.translate(
-      'components.reviews.create.title'
+      'components.reviews.create.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditReviewComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           onSave: () => {
@@ -220,12 +221,13 @@ export class ListReviewComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.reviews.edit.title'
+      'components.reviews.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditReviewComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -240,16 +242,16 @@ export class ListReviewComponent {
 
   async delete(data: any): Promise<void> {
     const titleTranslation = this.transloco.translate(
-      'components.reviews.delete.title'
+      'components.reviews.delete.title',
     );
     const messageTranslation = this.transloco.translate(
-      'components.reviews.delete.message'
+      'components.reviews.delete.message',
     );
     const confirmTranslation = this.transloco.translate(
-      'components.reviews.delete.confirm'
+      'components.reviews.delete.confirm',
     );
     const cancelTranslation = this.transloco.translate(
-      'components.reviews.delete.cancel'
+      'components.reviews.delete.cancel',
     );
 
     const confirmed = await this.confirmDialogService.confirm({
@@ -269,7 +271,7 @@ export class ListReviewComponent {
           next: () => {
             this.onRefresh();
             const message = this.transloco.translate(
-              'notifications.reviews.success.deleted'
+              'notifications.reviews.success.deleted',
             );
             this.notificationSrv.addNotification(message, 'success');
           },
@@ -280,11 +282,11 @@ export class ListReviewComponent {
             ) {
               this.notificationSrv.addNotification(
                 error.error.message,
-                'error'
+                'error',
               );
             } else {
               const message = this.transloco.translate(
-                'notifications.reviews.error.delete'
+                'notifications.reviews.error.delete',
               );
               this.notificationSrv.addNotification(message, 'error');
             }

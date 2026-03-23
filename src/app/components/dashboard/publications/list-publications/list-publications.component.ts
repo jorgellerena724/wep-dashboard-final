@@ -68,17 +68,17 @@ export class ListPublicationComponent {
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.publications.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private categoryTranslation = toSignal(
     this.transloco.selectTranslate(
-      'components.publications.list.table.category'
+      'components.publications.list.table.category',
     ),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.publications.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones
@@ -107,15 +107,15 @@ export class ListPublicationComponent {
   // Signals reactivos para traducciones de acciones
   private createTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.create'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private deleteTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.delete'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   headerActions = computed<TableAction[]>(() => {
@@ -181,7 +181,7 @@ export class ListPublicationComponent {
         error: (error) => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.publications.error.load'),
-            'error'
+            'error',
           );
           this.loading.set(false);
         },
@@ -202,9 +202,9 @@ export class ListPublicationComponent {
             error: (error) => {
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.managers.error.loadImage'
+                  'notifications.managers.error.loadImage',
                 ),
-                'error'
+                'error',
               );
             },
           });
@@ -224,12 +224,13 @@ export class ListPublicationComponent {
 
   create(): void {
     const translatedTitle = this.transloco.translate(
-      'components.publications.create.title'
+      'components.publications.create.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditPublicationComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           onSave: () => {
@@ -243,12 +244,13 @@ export class ListPublicationComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.publications.edit.title'
+      'components.publications.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: CreateEditPublicationComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -285,30 +287,30 @@ export class ListPublicationComponent {
             this.loadData();
             this.notificationSrv.addNotification(
               this.transloco.translate(
-                'notifications.publications.success.deleted'
+                'notifications.publications.success.deleted',
               ),
-              'success'
+              'success',
             );
           },
           error: (error) => {
             if (
               error.error.statusCode === 400 &&
               error.error.message.includes(
-                'No se puede eliminar la publicación'
+                'No se puede eliminar la publicación',
               )
             ) {
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.publications.error.cannotDelete'
+                  'notifications.publications.error.cannotDelete',
                 ),
-                'error'
+                'error',
               );
             } else {
               this.notificationSrv.addNotification(
                 this.transloco.translate(
-                  'notifications.publications.error.delete'
+                  'notifications.publications.error.delete',
                 ),
-                'error'
+                'error',
               );
             }
             this.loading.set(false);

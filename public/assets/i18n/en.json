@@ -355,6 +355,7 @@
     "info": "Information",
     "users": "Users",
     "users_manage": "Manage users",
+    "statistics": "Statistics",
     "expand": "Expand",
     "collapse": "Collapse"
   },
@@ -474,6 +475,40 @@
       },
       "edit": {
         "title": "Modify AI Model"
+      }
+    },
+    "statistics": {
+      "title": "Statistics",
+      "weekly_users": "Weekly Users",
+      "monthly_users": "Monthly Users",
+      "total_users": "Total Users",
+      "weekly_growth": "Weekly Growth",
+      "avg_session": "Average Session",
+      "chart_labels": {
+        "users": "Users",
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        },
+        "months": {
+          "january": "January",
+          "february": "February",
+          "march": "March",
+          "april": "April",
+          "may": "May",
+          "june": "June",
+          "july": "July",
+          "august": "August",
+          "september": "September",
+          "october": "October",
+          "november": "November",
+          "december": "December"
+        }
       }
     },
     "header": {

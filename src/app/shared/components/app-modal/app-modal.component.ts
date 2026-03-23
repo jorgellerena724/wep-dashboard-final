@@ -30,8 +30,9 @@ import { CommonModule } from '@angular/common';
 export class ModalComponent {
   private notificationSrv = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
-  modalSrv = inject(ModalService);
+  private modalSrv = inject(ModalService);
 
+  // Usando viewChild signal - disponible después del render
   container = viewChild.required('dynamicContent', { read: ViewContainerRef });
 
   visible = signal(false);
@@ -45,9 +46,11 @@ export class ModalComponent {
 
   private subscriptions: Subscription[] = [];
 
-  modalButtonsVisible = computed(
-    () => this.currentConfig()?.showButtons ?? true,
-  );
+  modalButtonsVisible = computed(() => this.currentConfig()?.showButtons ?? true);
+
+  showExpandButton = computed(() => this.currentConfig()?.showExpandButton ?? false);
+
+  modalWidth = computed(() => this.modalSrv.modalWidth());
 
   constructor() {
     effect(() => {
@@ -55,6 +58,7 @@ export class ModalComponent {
       if (config) {
         this.title.set(config.title);
         this.currentConfig.set(config);
+        this.isExpanded.set(false); // Siempre iniciar colapsado
         untracked(() => this.loadComponent(config));
         this.visible.set(true);
         this.isProcessing.set(false);
@@ -86,15 +90,9 @@ export class ModalComponent {
     const instance = this.componentRef.instance;
 
     // Suscribirse a eventos
-    this.subscribeToOutput(instance.formValid, (valid: boolean) =>
-      this.isFormValid.set(valid),
-    );
-    this.subscribeToOutput(instance.submitSuccess, () =>
-      this.handleSubmit(true),
-    );
-    this.subscribeToOutput(instance.submitError, () =>
-      this.handleSubmit(false),
-    );
+    this.subscribeToOutput(instance.formValid, (valid: boolean) => this.isFormValid.set(valid));
+    this.subscribeToOutput(instance.submitSuccess, () => this.handleSubmit(true));
+    this.subscribeToOutput(instance.submitError, () => this.handleSubmit(false));
 
     this.componentRef.changeDetectorRef.detectChanges();
   }
@@ -114,22 +112,38 @@ export class ModalComponent {
   }
 
   closeModal() {
+    // Cerrar directamente sin mostrar transición de contraer
     this.visible.set(false);
     this.isProcessing.set(false);
     this.loading.set(false);
-    this.cleanup();
-    this.modalSrv.clear();
+    // Resetear el estado expandido sin mostrar la transición
+    if (this.isExpanded()) {
+      this.isExpanded.set(false);
+    }
+    setTimeout(() => {
+      this.cleanup();
+      this.modalSrv.clear();
+    }, 100);
   }
 
   toggleExpand() {
     this.isExpanded.update((expanded) => !expanded);
   }
 
+  // Computed para el ancho del modal
+  computedModalWidth = computed(() => {
+    return this.isExpanded() ? '100vw' : this.modalWidth();
+  });
+
+  // Computed para la clase del modal
+  computedModalClass = computed(() => {
+    return this.isExpanded()
+      ? 'custom-modal custom-modal-expanded bg-[rgb(245,245,245)]'
+      : 'custom-modal bg-[rgb(245,245,245)]';
+  });
+
   onAccept() {
-    if (
-      !this.componentRef ||
-      !this.isDynamicComponent(this.componentRef.instance)
-    ) {
+    if (!this.componentRef || !this.isDynamicComponent(this.componentRef.instance)) {
       return;
     }
 
@@ -143,10 +157,7 @@ export class ModalComponent {
       this.componentRef.changeDetectorRef.detectChanges();
 
       if (this.hasRealErrors(form)) {
-        this.notificationSrv.addNotification(
-          'Compruebe los campos del formulario.',
-          'warning',
-        );
+        this.notificationSrv.addNotification('Compruebe los campos del formulario.', 'warning');
         return;
       }
     }
@@ -158,32 +169,23 @@ export class ModalComponent {
 
   private getForm(instance: any): FormGroup | null {
     if (!instance['form']) return null;
-    return typeof instance['form'] === 'function'
-      ? instance['form']()
-      : instance['form'];
+    return typeof instance['form'] === 'function' ? instance['form']() : instance['form'];
   }
 
   private hasRealErrors(control: FormGroup | FormControl): boolean {
     if (control instanceof FormControl) {
       const errors = control.errors;
-      return errors
-        ? Object.keys(errors).some((key) => key !== 'warning')
-        : false;
+      return errors ? Object.keys(errors).some((key) => key !== 'warning') : false;
     }
 
     // Verificar errores del grupo
     const groupErrors = control.errors;
-    if (
-      groupErrors &&
-      Object.keys(groupErrors).some((key) => key !== 'warning')
-    ) {
+    if (groupErrors && Object.keys(groupErrors).some((key) => key !== 'warning')) {
       return true;
     }
 
     // Verificar controles hijos
-    return Object.values(control.controls).some((child) =>
-      this.hasRealErrors(child as any),
-    );
+    return Object.values(control.controls).some((child) => this.hasRealErrors(child as any));
   }
 
   private markAllAsTouched(control: FormGroup | FormControl): void {
@@ -191,16 +193,12 @@ export class ModalComponent {
     control.updateValueAndValidity({ onlySelf: true, emitEvent: true });
 
     if (control instanceof FormGroup) {
-      Object.values(control.controls).forEach((child) =>
-        this.markAllAsTouched(child as any),
-      );
+      Object.values(control.controls).forEach((child) => this.markAllAsTouched(child as any));
     }
   }
 
   private isDynamicComponent(instance: any): instance is DynamicComponent {
-    return (
-      typeof instance?.onSubmit === 'function' && instance?.form !== undefined
-    );
+    return typeof instance?.onSubmit === 'function' && instance?.form !== undefined;
   }
 
   private cleanup() {

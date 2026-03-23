@@ -60,31 +60,31 @@ export class ListCarouselComponent {
   // Signals reactivos para traducciones de estado
   private activeStatus = toSignal(
     this.transloco.selectTranslate('status.active'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private inactiveStatus = toSignal(
     this.transloco.selectTranslate('status.inactive'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Signals reactivos para traducciones de columnas
   private nameTranslation = toSignal(
     this.transloco.selectTranslate('components.carousel.list.table.name'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private descriptionTranslation = toSignal(
     this.transloco.selectTranslate(
-      'components.carousel.list.table.description'
+      'components.carousel.list.table.description',
     ),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private statusTranslation = toSignal(
     this.transloco.selectTranslate('components.news.list.table.status'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private imageTranslation = toSignal(
     this.transloco.selectTranslate('components.carousel.list.table.image'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Computed signals para traducciones reactivas
@@ -123,15 +123,15 @@ export class ListCarouselComponent {
   // Signals reactivos para traducciones de acciones
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private disableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.disable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
   private enableTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.enable'),
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   rowActions = computed<RowAction[]>(() => {
@@ -194,7 +194,7 @@ export class ListCarouselComponent {
                   },
                   error: (error) => {
                     const message = this.transloco.translate(
-                      'notifications.carousel.error.loadImage'
+                      'notifications.carousel.error.loadImage',
                     );
                     this.notificationSrv.addNotification(message, 'error');
                   },
@@ -204,7 +204,7 @@ export class ListCarouselComponent {
         },
         error: (error) => {
           const message = this.transloco.translate(
-            'notifications.carousel.error.load'
+            'notifications.carousel.error.load',
           );
           this.notificationSrv.addNotification(message, 'error');
           this.loading.set(false);
@@ -226,12 +226,13 @@ export class ListCarouselComponent {
 
   edit(data: any): void {
     const translatedTitle = this.transloco.translate(
-      'components.carousel.edit.title'
+      'components.carousel.edit.title',
     );
 
     const modalConfig: ModalConfig = {
       title: translatedTitle,
       component: UpdateCarouselComponent,
+      showExpandButton: true,
       data: {
         initialData: {
           ...data,
@@ -256,12 +257,12 @@ export class ListCarouselComponent {
   toggleStatus(data: any): void {
     const currentData = this.data();
     const activeItems = currentData.filter(
-      (item) => item.status && item.id !== data.id
+      (item) => item.status && item.id !== data.id,
     ).length;
 
     if (data.status && activeItems < 2) {
       const translatedError = this.transloco.translate(
-        'components.carousel.list.errors.min_active'
+        'components.carousel.list.errors.min_active',
       );
       this.notificationSrv.addNotification(translatedError, 'error');
       return;
@@ -288,7 +289,7 @@ export class ListCarouselComponent {
                   status: newStatus,
                   statusToShow: newStatus ? active : inactive,
                 }
-              : item
+              : item,
           );
 
           this.data.set(updatedData);
@@ -296,7 +297,7 @@ export class ListCarouselComponent {
           const statusText = newStatus ? active : inactive;
           const message = this.transloco.translate(
             'notifications.carousel.success.statusUpdated',
-            { status: statusText }
+            { status: statusText },
           );
           this.notificationSrv.addNotification(message, 'success');
         },
@@ -304,11 +305,11 @@ export class ListCarouselComponent {
           if (error?.error?.message && error.error?.statusCode === 400) {
             this.notificationSrv.addNotification(
               error.error.message + '.',
-              'error'
+              'error',
             );
           } else {
             const message = this.transloco.translate(
-              'notifications.carousel.error.statusUpdate'
+              'notifications.carousel.error.statusUpdate',
             );
             this.notificationSrv.addNotification(message, 'error');
           }

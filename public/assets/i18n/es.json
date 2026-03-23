@@ -355,6 +355,7 @@
     "info": "Información",
     "users": "Usuarios",
     "users_manage": "Gestionar usuarios",
+    "statistics": "Estadísticas",
     "expand": "Expandir",
     "collapse": "Contraer"
   },
@@ -472,6 +473,40 @@
       },
       "edit": {
         "title": "Modificar Modelo de IA"
+      }
+    },
+    "statistics": {
+      "title": "Estadísticas",
+      "weekly_users": "Usuarios por Semana",
+      "monthly_users": "Usuarios por Mes",
+      "total_users": "Total de Usuarios",
+      "weekly_growth": "Crecimiento Semanal",
+      "avg_session": "Sesión Promedio",
+      "chart_labels": {
+        "users": "Usuarios",
+        "days": {
+          "monday": "Lunes",
+          "tuesday": "Martes",
+          "wednesday": "Miércoles",
+          "thursday": "Jueves",
+          "friday": "Viernes",
+          "saturday": "Sábado",
+          "sunday": "Domingo"
+        },
+        "months": {
+          "january": "Enero",
+          "february": "Febrero",
+          "march": "Marzo",
+          "april": "Abril",
+          "may": "Mayo",
+          "june": "Junio",
+          "july": "Julio",
+          "august": "Agosto",
+          "september": "Septiembre",
+          "october": "Octubre",
+          "november": "Noviembre",
+          "december": "Diciembre"
+        }
       }
     },
     "header": {
