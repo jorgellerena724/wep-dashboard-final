@@ -480,6 +480,7 @@
       "trend": "Tendencia del período",
       "totals": "Totales del período",
       "proportion": "Proporción de eventos",
+      "server_time": "Hora del servidor",
       "ranges": {
         "today": "Hoy",
         "week": "Esta semana",

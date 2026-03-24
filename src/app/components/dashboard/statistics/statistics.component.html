@@ -21,6 +21,23 @@
         </button>
       </div>
 
+      @if (serverTime()) {
+        <div
+          class="flex items-center gap-2 mb-4 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-fit text-sm text-gray-500 dark:text-gray-400"
+        >
+          <i class="pi pi-clock text-xs"></i>
+          <span>
+            {{ "components.statistics.server_time" | transloco }}:
+            <span
+              class="font-mono font-medium text-gray-700 dark:text-gray-300"
+            >
+              {{ serverTime()!.server_time }}
+            </span>
+            ({{ serverTime()!.timezone }})
+          </span>
+        </div>
+      }
+
       <div class="flex flex-wrap items-center gap-2">
         @for (range of ranges; track range) {
           <button

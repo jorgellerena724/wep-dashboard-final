@@ -37,6 +37,12 @@ export class MetricsService {
     return this.http.get<DayMetric>(`${this.urlMetrics}/today/`);
   }
 
+  getServerTime(): Observable<{ server_time: string; timezone: string }> {
+    return this.http.get<{ server_time: string; timezone: string }>(
+      `${this.urlMetrics}/server-time/`,
+    );
+  }
+
   getRange(startDate: string, endDate: string): Observable<DayMetric[]> {
     const params = new HttpParams()
       .set('start_date', startDate)

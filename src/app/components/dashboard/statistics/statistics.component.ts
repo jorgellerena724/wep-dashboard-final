@@ -41,13 +41,18 @@ const COLOR_PALETTE = [
 ];
 
 function toISODate(d: Date): string {
-  return d.toISOString().split('T')[0];
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
+
 function startOfWeek(d: Date): Date {
   const r = new Date(d);
   r.setDate(r.getDate() + (r.getDay() === 0 ? -6 : 1 - r.getDay()));
   return r;
 }
+
 function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
@@ -91,6 +96,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   pieChartData = signal<any>({ labels: [], datasets: [] });
   pieChartOptions = signal<any>({});
 
+  serverTime = signal<{ server_time: string; timezone: string } | null>(null);
+
   // ── Config ────────────────────────────────────────────────
   showConfigPanel = signal(false);
   config = signal<MetricsConfig | null>(null);
@@ -100,6 +107,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.load();
+    this.loadServerTime();
 
     this.transloco.langChanges$
       .pipe(
@@ -166,6 +174,19 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           this.loading.set(false);
           this.cd.markForCheck();
         },
+      });
+  }
+
+  private loadServerTime(): void {
+    this.metricsSrv
+      .getServerTime()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.serverTime.set(data);
+          this.cd.markForCheck();
+        },
+        error: () => {},
       });
   }
 

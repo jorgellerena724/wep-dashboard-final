@@ -482,6 +482,7 @@
       "trend": "Period trend",
       "totals": "Period totals",
       "proportion": "Events proportion",
+      "server_time": "Server time",
       "ranges": {
         "today": "Today",
         "week": "This week",
