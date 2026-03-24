@@ -1346,7 +1346,8 @@
       "disable": "Desactivar estado",
       "enable": "Activar estado",
       "moveUp": "Subir",
-      "moveDown": "Bajar"
+      "moveDown": "Bajar",
+      "import": "Importar"
     },
     "search": "Buscar...",
     "nodata": "No se encontraron registros.",

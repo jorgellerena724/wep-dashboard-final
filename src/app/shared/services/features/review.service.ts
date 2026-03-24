@@ -16,7 +16,7 @@ export class ReviewService {
   get(): Observable<HomeData[]> {
     const timestamp = new Date().getTime();
     return this.http.get<HomeData[]>(
-      this.apiUrl + `reviews/?no-cache=${timestamp}`
+      this.apiUrl + `reviews/?no-cache=${timestamp}`,
     );
   }
 
@@ -40,5 +40,16 @@ export class ReviewService {
     return this.http.delete<any>(`${this.apiUrl}reviews/${id}`, {
       body: { id: id },
     });
+  }
+
+  import(
+    formData: FormData,
+  ): Observable<{
+    source: string;
+    created: number;
+    skipped: number;
+    total: number;
+  }> {
+    return this.http.post<any>(`${this.apiUrl}reviews/import/`, formData);
   }
 }

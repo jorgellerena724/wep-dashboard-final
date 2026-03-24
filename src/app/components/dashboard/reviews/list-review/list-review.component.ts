@@ -105,6 +105,10 @@ export class ListReviewComponent {
     this.transloco.selectTranslate('table.buttons.create'),
     { initialValue: '' },
   );
+  private importTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.import'),
+    { initialValue: '' },
+  );
   private editTranslation = toSignal(
     this.transloco.selectTranslate('table.buttons.edit'),
     { initialValue: '' },
@@ -120,6 +124,12 @@ export class ListReviewComponent {
         label: this.createTranslation(),
         icon: icons['add'],
         onClick: () => this.create(),
+        class: 'p-button-primary',
+      },
+      {
+        label: this.importTranslation(),
+        icon: icons['importFile'],
+        onClick: () => this.import(),
         class: 'p-button-primary',
       },
     ];
@@ -310,5 +320,51 @@ export class ListReviewComponent {
     Object.values(images).forEach((url) => {
       if (url.startsWith('blob:')) URL.revokeObjectURL(url);
     });
+  }
+
+  import(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = (event: Event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      this.loading.set(true);
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+      formData.append('source', 'google');
+
+      this.srv
+        .import(formData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res) => {
+            this.notificationSrv.addNotification(
+              this.transloco.translate(
+                'notifications.reviews.success.imported',
+                {
+                  created: res.created,
+                  skipped: res.skipped,
+                },
+              ),
+              'success',
+            );
+            this.loading.set(false);
+            this.onRefresh();
+          },
+          error: (err) => {
+            this.notificationSrv.addNotification(
+              err?.error?.detail ??
+                this.transloco.translate('notifications.reviews.error.import'),
+              'error',
+            );
+            this.loading.set(false);
+          },
+        });
+    };
+
+    input.click();
   }
 }
