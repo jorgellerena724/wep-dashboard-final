@@ -11,25 +11,14 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChartModule } from 'primeng/chart';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormArray,
-  FormControl,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import { TooltipModule } from 'primeng/tooltip';
 import { Subject, forkJoin } from 'rxjs';
 import { skip, takeUntil } from 'rxjs/operators';
 import {
   MetricsService,
   MetricEvent,
-  MetricsConfig,
   DayMetric,
   SummaryMetric,
-} from '../../../shared/services/features/metrics.service';
-import { TextFieldComponent } from '../../../shared/components/app-text-field/app-text-field.component';
+} from '../../../../shared/services/features/metrics.service';
 
 const COLOR_PALETTE = [
   { bg: 'rgba(59, 130, 246, 0.2)', border: 'rgb(59, 130, 246)' },
@@ -58,26 +47,18 @@ function startOfMonth(d: Date): Date {
 }
 
 @Component({
-  selector: 'app-statistics',
+  selector: 'app-charts-statistics',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    ChartModule,
-    TranslocoModule,
-    TextFieldComponent,
-    TooltipModule,
-  ],
-  templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.css'],
+  imports: [CommonModule, ChartModule, TranslocoModule],
+  templateUrl: './charts-statistics.component.html',
+  styleUrls: ['./charts-statistics.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StatisticsComponent implements OnInit, OnDestroy {
+export class ChartsStatisticsComponent implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private cd = inject(ChangeDetectorRef);
   private transloco = inject(TranslocoService);
   private metricsSrv = inject(MetricsService);
-  private fb = inject(FormBuilder); // ✅ inyectado
   private destroy$ = new Subject<void>();
 
   // ── Métricas ──────────────────────────────────────────────
@@ -97,13 +78,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   pieChartOptions = signal<any>({});
 
   serverTime = signal<{ server_time: string; timezone: string } | null>(null);
-
-  // ── Config ────────────────────────────────────────────────
-  showConfigPanel = signal(false);
-  config = signal<MetricsConfig | null>(null);
-  savingConfig = signal(false);
-  loadingConfig = signal(false);
-  eventsFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
 
   ngOnInit(): void {
     this.load();
@@ -190,126 +164,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Config ────────────────────────────────────────────────
-  openConfig(): void {
-    this.loadingConfig.set(true);
-    this.metricsSrv
-      .getConfig()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (cfg) => {
-          this.config.set(cfg);
-          this.loadEventsFromConfig(cfg.events);
-          this.showConfigPanel.set(true);
-          this.loadingConfig.set(false);
-          this.cd.markForCheck();
-        },
-        error: () => {
-          this.loadingConfig.set(false);
-          this.cd.markForCheck();
-        },
-      });
-  }
-
-  closeConfig(): void {
-    this.showConfigPanel.set(false);
-    this.eventsFormArray.clear();
-  }
-
-  private loadEventsFromConfig(events: MetricEvent[]): void {
-    this.eventsFormArray.clear();
-    events.forEach((ev) => {
-      this.eventsFormArray.push(
-        this.fb.group({
-          event_name: [ev.event_name, Validators.required],
-          label: [ev.label, Validators.required],
-          is_active: [ev.is_active],
-        }),
-      );
-    });
-  }
-
-  addEventRow(): void {
-    this.eventsFormArray.push(
-      this.fb.group({
-        event_name: ['', Validators.required],
-        label: ['', Validators.required],
-        is_active: [true],
-      }),
-    );
-    this.cd.markForCheck();
-  }
-
-  removeEventRow(index: number): void {
-    const eventName = this.eventsFormArray.at(index).get('event_name')?.value;
-    if (!eventName) {
-      this.eventsFormArray.removeAt(index);
-      this.cd.markForCheck();
-      return;
-    }
-    this.metricsSrv
-      .deleteEvent(eventName)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.eventsFormArray.removeAt(index);
-        this.load();
-        this.cd.markForCheck();
-      });
-  }
-
-  toggleEventActive(index: number): void {
-    const control = this.eventsFormArray.at(index);
-    const eventName = control.get('event_name')?.value;
-    const newValue = !control.get('is_active')?.value;
-    if (!eventName) return;
-    control.get('is_active')?.setValue(newValue);
-    this.metricsSrv
-      .updateEvent(eventName, undefined, newValue)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.load();
-        this.cd.markForCheck();
-      });
-  }
-
-  saveEvent(index: number): void {
-    const control = this.eventsFormArray.at(index);
-    if (control.invalid) {
-      control.markAllAsTouched();
-      this.cd.markForCheck();
-      return;
-    }
-
-    const event_name = control.get('event_name')?.value.trim();
-    const label = control.get('label')?.value.trim();
-    const is_active = control.get('is_active')?.value;
-
-    this.savingConfig.set(true);
-    const existsInConfig = this.config()?.events.some(
-      (e) => e.event_name === event_name,
-    );
-    const request$ = existsInConfig
-      ? this.metricsSrv.updateEvent(event_name, label, is_active)
-      : this.metricsSrv.addEvent(event_name, label);
-
-    request$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (cfg) => {
-        this.config.set(cfg);
-        this.savingConfig.set(false);
-        this.load();
-        this.cd.markForCheck();
-      },
-      error: () => {
-        this.savingConfig.set(false);
-        this.cd.markForCheck();
-      },
-    });
-  }
-
-  getEventControl(index: number, field: string): FormControl {
-    return this.eventsFormArray.at(index).get(field) as FormControl;
-  }
-
   // ── Gráficas ──────────────────────────────────────────────
   private buildCharts(data: DayMetric[], events: MetricEvent[]): void {
     const docStyle = getComputedStyle(document.documentElement);
@@ -374,7 +228,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
     // ── Pastel — proporción de totales por evento ──────────────
     const totalsValues = events.map((ev) => totals?.totals[ev.event_name] ?? 0);
-    const hasData = totalsValues.some((v) => v > 0);
 
     this.pieChartData.set({
       labels: events.map((ev) => ev.label),

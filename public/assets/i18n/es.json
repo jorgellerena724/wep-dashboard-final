@@ -356,6 +356,8 @@
     "users": "Usuarios",
     "users_manage": "Gestionar usuarios",
     "statistics": "Estadísticas",
+    "statistics_charts": "Gráficas",
+    "statistics_config": "Configuración de métricas",
     "expand": "Expandir",
     "collapse": "Contraer"
   },

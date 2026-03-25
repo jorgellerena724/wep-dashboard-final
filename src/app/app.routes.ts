@@ -15,8 +15,17 @@ export const routes: Routes = [
   {
     path: 'statistics',
     loadComponent: () =>
-      import('./components/dashboard/statistics/statistics.component').then(
-        (m) => m.StatisticsComponent,
+      import('./components/dashboard/statistics/charts-statistics/charts-statistics.component').then(
+        (m) => m.ChartsStatisticsComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+
+  {
+    path: 'statistics-config',
+    loadComponent: () =>
+      import('./components/dashboard/statistics/config-statistics/config-statistics.component').then(
+        (m) => m.ConfigStatisticsComponent,
       ),
     canActivate: [AuthGuard],
   },
