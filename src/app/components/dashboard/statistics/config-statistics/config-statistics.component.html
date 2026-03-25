@@ -16,22 +16,11 @@
         [data]="data()"
         [columns]="columns()"
         [loading]="loading()"
-        [customTemplates]="customTemplates()"
         [headerActions]="headerActions()"
         [rowActions]="rowActions()"
         (refresh)="onRefresh()"
       >
       </app-table>
     </div>
-
-    <ng-template #statusTemplate let-rowData let-field="field">
-      <div class="flex justify-center items-center">
-        <i
-          class="pi text-lg"
-          [class.pi-eye]="rowData.is_active"
-          [class.pi-eye-slash]="!rowData.is_active"
-        ></i>
-      </div>
-    </ng-template>
   </div>
 </div>

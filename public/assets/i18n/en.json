@@ -142,8 +142,8 @@
         "created": "Metric event created successfully.",
         "updated": "Metric event updated successfully.",
         "deleted": "Metric event deleted successfully.",
-        "activated": "Event activated successfully.",
-        "deactivated": "Event deactivated successfully."
+        "activated": "Status updated",
+        "deactivated": "Status updated"
       },
       "error": {
         "create": "Error creating metric event.",

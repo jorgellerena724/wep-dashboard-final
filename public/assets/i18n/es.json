@@ -143,8 +143,8 @@
         "created": "Evento de métrica creado correctamente.",
         "updated": "Evento de métrica actualizado correctamente.",
         "deleted": "Evento de métrica eliminado satisfactoriamente.",
-        "activated": "Evento activado correctamente.",
-        "deactivated": "Evento desactivado correctamente."
+        "activated": " Estado actualizado",
+        "deactivated": " Estado actualizado"
       },
       "error": {
         "create": "Error al crear el evento de métrica.",

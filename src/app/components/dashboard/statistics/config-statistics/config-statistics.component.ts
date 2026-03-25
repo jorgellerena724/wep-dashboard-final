@@ -64,19 +64,6 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
   loading = signal<boolean>(false);
   config = signal<MetricsConfig | null>(null);
 
-  // ViewChild para el template de estado
-  statusTemplate = viewChild<TemplateRef<any>>('statusTemplate');
-
-  // Computed signal para templates personalizados
-  customTemplates = computed<{ [key: string]: any }>(() => {
-    const statusTpl = this.statusTemplate();
-    const templates: { [key: string]: any } = {};
-
-    if (statusTpl) templates['is_active'] = statusTpl;
-
-    return templates;
-  });
-
   // Signals reactivos para traducciones de columnas
   private eventNameTranslation = toSignal(
     this.transloco.selectTranslate(
@@ -164,7 +151,7 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
             ? this.deactivateTranslation()
             : this.activateTranslation(),
         icon: (data) =>
-          data.is_active ? icons['deactivate'] : icons['activate'],
+          data.is_active ? icons['activate'] : icons['deactivate'],
         onClick: (data) => this.toggleStatus(data),
         class: (data) =>
           data.is_active
