@@ -16,7 +16,8 @@ export const buttonVariants = {
     green: 'bg-transparent text-green-500',
     gray: 'bg-transparent text-gray-900',
     neutral: 'bg-transparent text-neutral-500',
-    
+    orange: 'bg-transparent text-orange-500',
+
     //blue: 'border-2 px-3 border-blue-600 text-blue-500',
     //red: 'border-2 px-3 border-red-600 text-red-500',
     //yellow: 'border-2 px-3 border-yellow-600 text-yellow-500',

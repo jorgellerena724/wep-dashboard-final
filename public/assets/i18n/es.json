@@ -138,6 +138,23 @@
         "duplicateImage": "La imagen que está intentando subir ya se encuentra en el servidor."
       }
     },
+    "statistics": {
+      "success": {
+        "created": "Evento de métrica creado correctamente.",
+        "updated": "Evento de métrica actualizado correctamente.",
+        "deleted": "Evento de métrica eliminado satisfactoriamente.",
+        "activated": "Evento activado correctamente.",
+        "deactivated": "Evento desactivado correctamente."
+      },
+      "error": {
+        "create": "Error al crear el evento de métrica.",
+        "update": "Error al actualizar el evento de métrica.",
+        "delete": "Error al eliminar el evento de métrica.",
+        "load": "Error al cargar la información.",
+        "formInvalid": "Compruebe los campos del formulario.",
+        "toggle": "Error al cambiar el estado del evento."
+      }
+    },
     "manager-category": {
       "success": {
         "created": "Categoría registrada correctamente.",
@@ -511,7 +528,60 @@
         "label": "Etiqueta visible",
         "event_name": "Nombre del evento",
         "event_name_required": "El nombre del evento es requerido",
-        "label_required": "La etiqueta es requerida"
+        "label_required": "La etiqueta es requerida",
+        "table": {
+          "event_name": "Nombre del evento",
+          "label": "Etiqueta",
+          "status": "Estado"
+        }
+      },
+      "create": {
+        "title": "Crear evento de métrica",
+        "fields": {
+          "event_name": {
+            "title": "Nombre del evento",
+            "required": "El nombre del evento es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "label": {
+            "title": "Etiqueta visible",
+            "placeholder": "Etiqueta para mostrar",
+            "required": "La etiqueta es requerida",
+            "minlength": "La etiqueta debe tener al menos 3 caracteres"
+          },
+          "status": {
+            "title": "Estado del evento",
+            "active": "Activo",
+            "inactive": "Inactivo"
+          }
+        }
+      },
+      "edit": {
+        "title": "Modificar evento de métrica",
+        "fields": {
+          "event_name": {
+            "title": "Nombre del evento",
+            "required": "El nombre del evento es requerido",
+            "minlength": "El nombre debe tener al menos 3 caracteres"
+          },
+          "label": {
+            "title": "Etiqueta visible",
+            "placeholder": "Etiqueta para mostrar",
+            "required": "La etiqueta es requerida",
+            "minlength": "La etiqueta debe tener al menos 3 caracteres"
+          },
+          "status": {
+            "title": "Estado del evento",
+            "active": "Activo",
+            "inactive": "Inactivo"
+          }
+        }
+      },
+      "delete": {
+        "title": "¿Eliminar evento?",
+        "message": "¿Está seguro que desea eliminar este evento? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
       }
     },
     "header": {

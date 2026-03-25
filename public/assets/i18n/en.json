@@ -137,6 +137,23 @@
         "duplicateImage": "The image you are trying to upload is already on the server."
       }
     },
+    "statistics": {
+      "success": {
+        "created": "Metric event created successfully.",
+        "updated": "Metric event updated successfully.",
+        "deleted": "Metric event deleted successfully.",
+        "activated": "Event activated successfully.",
+        "deactivated": "Event deactivated successfully."
+      },
+      "error": {
+        "create": "Error creating metric event.",
+        "update": "Error updating metric event.",
+        "delete": "Error deleting metric event.",
+        "load": "Error loading information.",
+        "formInvalid": "Check the form fields.",
+        "toggle": "Error changing event status."
+      }
+    },
     "manager-category": {
       "success": {
         "created": "Category registered successfully.",
@@ -513,7 +530,60 @@
         "label": "Visible label",
         "event_name": "Event name",
         "event_name_required": "Event name is required",
-        "label_required": "Label is required"
+        "label_required": "Label is required",
+        "table": {
+          "event_name": "Event name",
+          "label": "Label",
+          "status": "Status"
+        }
+      },
+      "create": {
+        "title": "Create metric event",
+        "fields": {
+          "event_name": {
+            "title": "Event name",
+            "required": "Event name is required",
+            "minlength": "Name must be at least 3 characters"
+          },
+          "label": {
+            "title": "Visible label",
+            "placeholder": "Label to display",
+            "required": "Label is required",
+            "minlength": "Label must be at least 3 characters"
+          },
+          "status": {
+            "title": "Event status",
+            "active": "Active",
+            "inactive": "Inactive"
+          }
+        }
+      },
+      "edit": {
+        "title": "Edit metric event",
+        "fields": {
+          "event_name": {
+            "title": "Event name",
+            "required": "Event name is required",
+            "minlength": "Name must be at least 3 characters"
+          },
+          "label": {
+            "title": "Visible label",
+            "placeholder": "Label to display",
+            "required": "Label is required",
+            "minlength": "Label must be at least 3 characters"
+          },
+          "status": {
+            "title": "Event status",
+            "active": "Active",
+            "inactive": "Inactive"
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete event?",
+        "message": "Are you sure you want to delete this event? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
       }
     },
     "header": {

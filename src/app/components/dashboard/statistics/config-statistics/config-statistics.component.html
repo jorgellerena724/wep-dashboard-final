@@ -1,136 +1,39 @@
-<div class="h-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] rounded-lg">
+<div
+  class="h-full items-center shadow-[0_4px_20px_rgba(0,0,0,0.5)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)] rounded-lg"
+>
   <div
-    class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] rounded-lg sm:p-4 border-2 border-gray-600 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+    class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] dark:border-gray-200 rounded-lg sm:p-4 border-2 border-gray-600 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
   >
-    <!-- Header -->
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
+    <h1
+      class="ml-2 sm:ml-0 text-2xl font-bold text-gray-700 dark:text-gray-300"
     >
-      <div class="flex items-center gap-3">
-        <h1
-          class="ml-2 sm:ml-0 text-2xl font-bold text-gray-700 dark:text-gray-300"
-        >
-          {{ "components.statistics.config.title" | transloco }}
-        </h1>
-        <button
-          type="button"
-          (click)="addEventRow()"
-          class="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-        >
-          <i class="pi pi-plus text-xs"></i>
-          <span>{{ "components.statistics.config.add" | transloco }}</span>
-        </button>
-      </div>
+      {{ "components.statistics.config.title" | transloco }}
+    </h1>
+
+    <!-- La tabla con signals -->
+    <div class="mt-4">
+      <app-table
+        [data]="data()"
+        [columns]="columns()"
+        [loading]="loading()"
+        [customTemplates]="customTemplates()"
+        [headerActions]="headerActions()"
+        [rowActions]="rowActions()"
+        (refresh)="onRefresh()"
+      >
+      </app-table>
     </div>
 
-    <!-- Loading -->
-    @if (loading()) {
-      <div class="flex justify-center items-center h-64">
-        <div
-          class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"
-        ></div>
+    <ng-template #statusTemplate let-rowData let-field="field">
+      <div class="flex justify-center items-center">
+        <i
+          class="pi text-lg"
+          [class.pi-eye]="rowData.is_active"
+          [class.pi-eye-slash]="!rowData.is_active"
+          [class.text-green-500]="rowData.is_active"
+          [class.text-gray-400]="!rowData.is_active"
+        ></i>
       </div>
-    }
-
-    @if (!loading()) {
-      <!-- Lista de eventos -->
-      <div class="space-y-3">
-        @if (eventsFormArray.length === 0) {
-          <div class="text-center py-8">
-            <i
-              class="pi pi-chart-bar text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-            ></i>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ "components.statistics.config.empty" | transloco }}
-            </p>
-            <button
-              type="button"
-              (click)="addEventRow()"
-              class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm text-white rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
-            >
-              <i class="pi pi-plus"></i>
-              <span>{{
-                "components.statistics.config.addFirst" | transloco
-              }}</span>
-            </button>
-          </div>
-        }
-
-        @for (ev of eventsFormArray.controls; track $index; let i = $index) {
-          <div
-            class="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-md"
-          >
-            <!-- Campos -->
-            <div class="flex-1 grid grid-cols-2 gap-3">
-              <app-text-field
-                [id]="'event-name-' + i"
-                [label]="'components.statistics.config.event_name' | transloco"
-                [control]="getEventControl(i, 'event_name')"
-                placeholder="site_visits"
-                [errorMessages]="{
-                  required:
-                    ('components.statistics.config.event_name_required'
-                    | transloco),
-                }"
-              />
-              <app-text-field
-                [id]="'event-label-' + i"
-                [label]="'components.statistics.config.label' | transloco"
-                [control]="getEventControl(i, 'label')"
-                [placeholder]="'components.statistics.config.label' | transloco"
-                [errorMessages]="{
-                  required:
-                    ('components.statistics.config.label_required' | transloco),
-                }"
-              />
-            </div>
-
-            <!-- Toggle activo -->
-            <button
-              type="button"
-              (click)="toggleEventActive(i)"
-              [pTooltip]="
-                getEventControl(i, 'is_active').value
-                  ? ('table.buttons.disable' | transloco)
-                  : ('table.buttons.enable' | transloco)
-              "
-              tooltipPosition="top"
-              class="flex-shrink-0 mt-6 p-2 rounded-full transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
-            >
-              <i
-                class="pi text-lg"
-                [class.pi-eye]="getEventControl(i, 'is_active').value"
-                [class.pi-eye-slash]="!getEventControl(i, 'is_active').value"
-                [class.text-green-500]="getEventControl(i, 'is_active').value"
-                [class.text-gray-400]="!getEventControl(i, 'is_active').value"
-              ></i>
-            </button>
-
-            <!-- Guardar -->
-            <button
-              type="button"
-              (click)="saveEvent(i)"
-              [disabled]="savingConfig()"
-              [pTooltip]="'components.statistics.config.save' | transloco"
-              tooltipPosition="top"
-              class="flex-shrink-0 mt-6 p-2 text-blue-500 hover:text-blue-700 rounded-full transition-colors disabled:opacity-50"
-            >
-              <i class="pi pi-check text-lg"></i>
-            </button>
-
-            <!-- Eliminar -->
-            <button
-              type="button"
-              (click)="removeEventRow(i)"
-              [pTooltip]="'components.statistics.config.delete' | transloco"
-              tooltipPosition="top"
-              class="flex-shrink-0 mt-6 p-2 text-red-500 hover:text-red-700 rounded-full transition-colors"
-            >
-              <i class="pi pi-trash text-lg"></i>
-            </button>
-          </div>
-        }
-      </div>
-    }
+    </ng-template>
   </div>
 </div>
