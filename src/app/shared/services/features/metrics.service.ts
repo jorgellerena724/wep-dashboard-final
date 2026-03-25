@@ -89,16 +89,23 @@ export class MetricsService {
     let params = new HttpParams();
     if (label !== undefined) params = params.set('label', label);
     if (is_active !== undefined) params = params.set('is_active', is_active);
+
+    // Codificar el event_name para evitar problemas con caracteres especiales
+    const encodedEventName = encodeURIComponent(event_name);
+
     return this.http.patch<MetricsConfig>(
-      `${this.urlConfig}/config/event/${event_name}/`,
+      `${this.urlConfig}/config/event/${encodedEventName}/`,
       null,
       { params },
     );
   }
 
   deleteEvent(event_name: string): Observable<void> {
+    // Codificar el event_name para evitar problemas con caracteres especiales
+    const encodedEventName = encodeURIComponent(event_name);
+
     return this.http.delete<void>(
-      `${this.urlConfig}/config/event/${event_name}/`,
+      `${this.urlConfig}/config/event/${encodedEventName}/`,
     );
   }
 }

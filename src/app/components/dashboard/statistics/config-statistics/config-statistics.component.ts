@@ -235,6 +235,15 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
   toggleStatus(data: MetricEvent): void {
     const newStatus = !data.is_active;
 
+    // Validar que el event_name no esté vacío o sea inválido
+    if (!data.event_name || data.event_name.trim() === '') {
+      const message = this.transloco.translate(
+        'notifications.statistics.error.invalid_event_name',
+      );
+      this.notificationSrv.addNotification(message, 'error');
+      return;
+    }
+
     this.metricsSrv
       .updateEvent(data.event_name, undefined, newStatus)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -248,16 +257,34 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
           this.notificationSrv.addNotification(message, 'success');
         },
         error: (error) => {
+          console.error('Error toggling status:', error);
           const actionKey = newStatus ? 'activate' : 'deactivate';
-          const message = this.transloco.translate(
+          let message = this.transloco.translate(
             `notifications.statistics.error.${actionKey}`,
           );
+
+          // Agregar información adicional del error si está disponible
+          if (error.error?.message) {
+            message += `: ${error.error.message}`;
+          } else if (error.message) {
+            message += `: ${error.message}`;
+          }
+
           this.notificationSrv.addNotification(message, 'error');
         },
       });
   }
 
   async delete(data: MetricEvent): Promise<void> {
+    // Validar que el event_name no esté vacío o sea inválido
+    if (!data.event_name || data.event_name.trim() === '') {
+      const message = this.transloco.translate(
+        'notifications.statistics.error.invalid_event_name',
+      );
+      this.notificationSrv.addNotification(message, 'error');
+      return;
+    }
+
     const titleTranslation = this.transloco.translate(
       'components.statistics.delete.title',
     );
@@ -293,9 +320,18 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
             this.notificationSrv.addNotification(message, 'success');
           },
           error: (error) => {
-            const message = this.transloco.translate(
+            console.error('Error deleting event:', error);
+            let message = this.transloco.translate(
               'notifications.statistics.error.delete',
             );
+
+            // Agregar información adicional del error si está disponible
+            if (error.error?.message) {
+              message += `: ${error.error.message}`;
+            } else if (error.message) {
+              message += `: ${error.message}`;
+            }
+
             this.notificationSrv.addNotification(message, 'error');
             this.loading.set(false);
           },
