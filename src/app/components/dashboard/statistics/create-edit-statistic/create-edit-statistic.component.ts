@@ -70,7 +70,6 @@ export class CreateEditStatisticComponent implements DynamicComponent {
     this.form = this.fb.group({
       event_name: ['', [Validators.required, Validators.minLength(3)]],
       label: ['', [Validators.required, Validators.minLength(3)]],
-      is_active: [true],
     });
 
     // Effect para inicializar datos
@@ -100,11 +99,6 @@ export class CreateEditStatisticComponent implements DynamicComponent {
     this.form.patchValue(data);
   }
 
-  toggleActive(): void {
-    const currentValue = this.form.get('is_active')?.value;
-    this.form.get('is_active')?.setValue(!currentValue);
-  }
-
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.notificationSrv.addNotification(
@@ -118,12 +112,11 @@ export class CreateEditStatisticComponent implements DynamicComponent {
 
     const event_name = this.form.get('event_name')?.value.trim();
     const label = this.form.get('label')?.value.trim();
-    const is_active = this.form.get('is_active')?.value;
 
     this.uploading.set(true);
 
     const subscription$ = this.isEdit()
-      ? this.srv.updateEvent(event_name, label, is_active)
+      ? this.srv.updateEvent(event_name, label)
       : this.srv.addEvent(event_name, label);
 
     subscription$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -172,7 +165,6 @@ export class CreateEditStatisticComponent implements DynamicComponent {
     this.form.reset({
       event_name: '',
       label: '',
-      is_active: true,
     });
   }
 

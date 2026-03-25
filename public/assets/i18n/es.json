@@ -152,7 +152,9 @@
         "delete": "Error al eliminar el evento de métrica.",
         "load": "Error al cargar la información.",
         "formInvalid": "Compruebe los campos del formulario.",
-        "toggle": "Error al cambiar el estado del evento."
+        "toggle": "Error al cambiar el estado del evento.",
+        "activate": "Error al activar el evento.",
+        "deactivate": "Error al desactivar el evento."
       }
     },
     "manager-category": {

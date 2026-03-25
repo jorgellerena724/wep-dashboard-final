@@ -59,13 +59,13 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
   private destroy$ = new Subject<void>();
 
-  // ViewChild signal
-  statusTemplate = viewChild<TemplateRef<any>>('statusTemplate');
-
   // Signals para el estado
   data = signal<MetricEvent[]>([]);
   loading = signal<boolean>(false);
   config = signal<MetricsConfig | null>(null);
+
+  // ViewChild para el template de estado
+  statusTemplate = viewChild<TemplateRef<any>>('statusTemplate');
 
   // Computed signal para templates personalizados
   customTemplates = computed<{ [key: string]: any }>(() => {
@@ -112,6 +112,7 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
         field: 'is_active',
         header: this.statusTranslation(),
         width: '120px',
+        sortable: true,
       },
     ];
   });
@@ -129,8 +130,12 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
     this.transloco.selectTranslate('table.buttons.delete'),
     { initialValue: '' },
   );
-  private toggleTranslation = toSignal(
-    this.transloco.selectTranslate('table.buttons.toggle'),
+  private activateTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.enable'),
+    { initialValue: '' },
+  );
+  private deactivateTranslation = toSignal(
+    this.transloco.selectTranslate('table.buttons.disable'),
     { initialValue: '' },
   );
 
@@ -154,15 +159,17 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
         class: buttonVariants.outline.green,
       },
       {
-        label: (data: MetricEvent) =>
-          data.is_active ? 'Desactivar' : 'Activar',
-        icon: (data: MetricEvent) =>
-          data.is_active ? 'pi pi-eye-slash' : 'pi pi-eye',
-        onClick: (data) => this.toggleActive(data),
-        class: (data: MetricEvent) =>
+        label: (data) =>
           data.is_active
-            ? buttonVariants.outline.yellow
-            : buttonVariants.outline.blue,
+            ? this.deactivateTranslation()
+            : this.activateTranslation(),
+        icon: (data) =>
+          data.is_active ? icons['deactivate'] : icons['activate'],
+        onClick: (data) => this.toggleStatus(data),
+        class: (data) =>
+          data.is_active
+            ? buttonVariants.outline.gray
+            : buttonVariants.outline.neutral,
       },
       {
         label: this.deleteTranslation(),
@@ -248,30 +255,27 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
     this.modalSrv.open(modalConfig);
   }
 
-  async toggleActive(data: MetricEvent): Promise<void> {
-    this.loading.set(true);
+  toggleStatus(data: MetricEvent): void {
+    const newStatus = !data.is_active;
 
     this.metricsSrv
-      .updateEvent(data.event_name, data.label, !data.is_active)
+      .updateEvent(data.event_name, undefined, newStatus)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.onRefresh();
-          const messageKey = data.is_active
-            ? 'notifications.statistics.success.deactivated'
-            : 'notifications.statistics.success.activated';
-
-          this.notificationSrv.addNotification(
-            this.transloco.translate(messageKey),
-            'success',
+          const actionKey = newStatus ? 'activated' : 'deactivated';
+          const message = this.transloco.translate(
+            `notifications.statistics.success.${actionKey}`,
           );
+          this.notificationSrv.addNotification(message, 'success');
         },
         error: (error) => {
+          const actionKey = newStatus ? 'activate' : 'deactivate';
           const message = this.transloco.translate(
-            'notifications.statistics.error.toggle',
+            `notifications.statistics.error.${actionKey}`,
           );
           this.notificationSrv.addNotification(message, 'error');
-          this.loading.set(false);
         },
       });
   }

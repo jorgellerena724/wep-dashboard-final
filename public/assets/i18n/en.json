@@ -151,7 +151,9 @@
         "delete": "Error deleting metric event.",
         "load": "Error loading information.",
         "formInvalid": "Check the form fields.",
-        "toggle": "Error changing event status."
+        "toggle": "Error changing event status.",
+        "activate": "Error activating event.",
+        "deactivate": "Error deactivating event."
       }
     },
     "manager-category": {

@@ -22,34 +22,4 @@
       minlength: t('fields.label.minlength'),
     }"
   ></app-text-field>
-  <hr class="border-gray-500 my-1 border-opacity-10" />
-  <div class="field">
-    <label
-      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-    >
-      {{ t("fields.status.title") }}
-    </label>
-    <div class="flex items-center gap-3">
-      <button
-        type="button"
-        (click)="toggleActive()"
-        class="flex items-center gap-2 p-2 rounded-lg transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
-      >
-        <i
-          class="pi text-lg"
-          [class.pi-eye]="getFormControl('is_active').value"
-          [class.pi-eye-slash]="!getFormControl('is_active').value"
-          [class.text-green-500]="getFormControl('is_active').value"
-          [class.text-gray-400]="!getFormControl('is_active').value"
-        ></i>
-        <span class="text-sm">
-          {{
-            getFormControl("is_active").value
-              ? t("fields.status.active")
-              : t("fields.status.inactive")
-          }}
-        </span>
-      </button>
-    </div>
-  </div>
 </form>
