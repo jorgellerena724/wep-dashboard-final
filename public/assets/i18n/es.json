@@ -376,7 +376,7 @@
     "users_manage": "Gestionar usuarios",
     "statistics": "Estadísticas",
     "statistics_charts": "Gráficas",
-    "statistics_config": "Configuración de métricas",
+    "statistics_config": "Configuración",
     "expand": "Expandir",
     "collapse": "Contraer"
   },
@@ -521,7 +521,7 @@
       },
       "configure": "Configurar eventos",
       "config": {
-        "title": "Gestión de eventos",
+        "title": "Gestión de métricas",
         "empty": "No hay eventos configurados",
         "add": "Agregar evento",
         "addFirst": "Agregar primer evento",

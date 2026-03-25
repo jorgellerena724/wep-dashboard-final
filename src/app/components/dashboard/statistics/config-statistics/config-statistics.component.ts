@@ -75,10 +75,6 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
     this.transloco.selectTranslate('components.statistics.config.table.label'),
     { initialValue: '' },
   );
-  private statusTranslation = toSignal(
-    this.transloco.selectTranslate('components.statistics.config.table.status'),
-    { initialValue: '' },
-  );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
@@ -94,12 +90,6 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
         header: this.labelTranslation(),
         sortable: true,
         filter: true,
-      },
-      {
-        field: 'is_active',
-        header: this.statusTranslation(),
-        width: '120px',
-        sortable: true,
       },
     ];
   });

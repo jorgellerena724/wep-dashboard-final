@@ -376,7 +376,7 @@
     "users_manage": "Manage users",
     "statistics": "Statistics",
     "statistics_charts": "Charts",
-    "statistics_config": "Metrics Configuration",
+    "statistics_config": "Configuration",
     "expand": "Expand",
     "collapse": "Collapse"
   },
@@ -523,7 +523,7 @@
       },
       "configure": "Configure events",
       "config": {
-        "title": "Event Management",
+        "title": "Metrics Management",
         "empty": "No events configured",
         "add": "Add event",
         "addFirst": "Add first event",
