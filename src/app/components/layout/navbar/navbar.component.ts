@@ -71,6 +71,7 @@ export class NavbarComponent {
   isPublicationsSubmenuOpen = signal(false);
   isContactSubmenuOpen = signal(false);
   isHeaderSubmenuOpen = signal(false);
+  isStatisticsSubmenuOpen = signal(false);
   isUsersSubmenuOpen = signal(false);
   isChatbotSubmenuOpen = signal(false);
   languageMenuOpen = signal(false);
@@ -128,6 +129,11 @@ export class NavbarComponent {
 
   isHeaderRouteActive = computed(() => {
     return this.currentUrl().includes('/header');
+  });
+
+  isStatisticsRouteActive = computed(() => {
+    const url = this.currentUrl();
+    return url.includes('/statistics') || url.includes('/statistics-config');
   });
 
   isUsersRouteActive = computed(() => {
@@ -409,6 +415,10 @@ export class NavbarComponent {
     this.isHeaderSubmenuOpen.update((v) => !v);
   }
 
+  toggleStatisticsSubmenu(): void {
+    this.isStatisticsSubmenuOpen.update((v) => !v);
+  }
+
   toggleUsersSubmenu(): void {
     this.isUsersSubmenuOpen.update((v) => !v);
   }
@@ -428,6 +438,7 @@ export class NavbarComponent {
     if (except !== 'publications') this.isPublicationsSubmenuOpen.set(false);
     if (except !== 'contact') this.isContactSubmenuOpen.set(false);
     if (except !== 'header') this.isHeaderSubmenuOpen.set(false);
+    if (except !== 'statistics') this.isStatisticsSubmenuOpen.set(false);
     if (except !== 'users') this.isUsersSubmenuOpen.set(false);
     if (except !== 'chatbot') this.isChatbotSubmenuOpen.set(false);
   }
