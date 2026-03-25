@@ -3,10 +3,9 @@
     class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] rounded-lg sm:p-4 border-2 border-gray-600 shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
   >
     <!-- Header -->
-    <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
-    >
-      <div class="flex items-center gap-3">
+    <div class="mb-6">
+      <!-- Título solo -->
+      <div class="mb-4">
         <h1
           class="ml-2 sm:ml-0 text-2xl font-bold text-gray-700 dark:text-gray-300"
         >
@@ -14,36 +13,41 @@
         </h1>
       </div>
 
-      @if (serverTime()) {
-        <div
-          class="flex items-center gap-2 mb-4 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-fit text-sm text-gray-500 dark:text-gray-400"
-        >
-          <i class="pi pi-clock text-xs"></i>
-          <span>
-            {{ "components.statistics.server_time" | transloco }}:
-            <span
-              class="font-mono font-medium text-gray-700 dark:text-gray-300"
-            >
-              {{ serverTime()!.server_time }}
-            </span>
-            ({{ serverTime()!.timezone }})
-          </span>
-        </div>
-      }
-
-      <div class="flex flex-wrap items-center gap-2">
-        @for (range of ranges; track range) {
-          <button
-            (click)="onRangeChange(range)"
-            [class.bg-gray-800]="selectedRange() === range"
-            [class.text-white]="selectedRange() === range"
-            [class.bg-white]="selectedRange() !== range"
-            [class.text-gray-700]="selectedRange() !== range"
-            class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-400 dark:border-gray-600 transition-colors"
+      <!-- Server time y botones de rango -->
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
+        @if (serverTime()) {
+          <div
+            class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 w-fit text-sm text-gray-500 dark:text-gray-400"
           >
-            {{ "components.statistics.ranges." + range | transloco }}
-          </button>
+            <i class="pi pi-clock text-xs"></i>
+            <span>
+              {{ "components.statistics.server_time" | transloco }}:
+              <span
+                class="font-mono font-medium text-gray-700 dark:text-gray-300"
+              >
+                {{ serverTime()!.server_time }}
+              </span>
+              ({{ serverTime()!.timezone }})
+            </span>
+          </div>
         }
+
+        <div class="flex flex-wrap items-center gap-2">
+          @for (range of ranges; track range) {
+            <button
+              (click)="onRangeChange(range)"
+              [class.bg-gray-800]="selectedRange() === range"
+              [class.text-white]="selectedRange() === range"
+              [class.bg-white]="selectedRange() !== range"
+              [class.text-gray-700]="selectedRange() !== range"
+              class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-400 dark:border-gray-600 transition-colors"
+            >
+              {{ "components.statistics.ranges." + range | transloco }}
+            </button>
+          }
+        </div>
       </div>
     </div>
 
