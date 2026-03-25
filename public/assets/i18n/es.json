@@ -503,10 +503,13 @@
         "title": "Gestión de eventos",
         "empty": "No hay eventos configurados",
         "add": "Agregar evento",
+        "addFirst": "Agregar primer evento",
         "save": "Guardar",
         "delete": "Eliminar",
         "label": "Etiqueta visible",
-        "event_name": "Nombre del evento"
+        "event_name": "Nombre del evento",
+        "event_name_required": "El nombre del evento es requerido",
+        "label_required": "La etiqueta es requerida"
       }
     },
     "header": {

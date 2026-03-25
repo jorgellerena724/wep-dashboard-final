@@ -505,10 +505,13 @@
         "title": "Event Management",
         "empty": "No events configured",
         "add": "Add event",
+        "addFirst": "Add first event",
         "save": "Save",
         "delete": "Delete",
         "label": "Visible label",
-        "event_name": "Event name"
+        "event_name": "Event name",
+        "event_name_required": "Event name is required",
+        "label_required": "Label is required"
       }
     },
     "header": {
