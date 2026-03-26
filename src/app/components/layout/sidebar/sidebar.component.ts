@@ -476,12 +476,32 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
     const showUsers = this.showUsersMenu();
 
     // Filtrar items que requieren permisos especiales
-    return items.filter((item) => {
-      // Si es el menú de usuarios o chatbot, verificar permisos
-      if (item.label === 'sidebar.users' || item.label === 'sidebar.chatbot') {
-        return showUsers;
-      }
-      return true;
-    });
+    return items
+      .filter((item) => {
+        // Si es el menú de usuarios o chatbot, verificar permisos
+        if (
+          item.label === 'sidebar.users' ||
+          item.label === 'sidebar.chatbot'
+        ) {
+          return showUsers;
+        }
+        return true;
+      })
+      .map((item) => {
+        // Filtrar submenús que requieren permisos especiales
+        if (item.children && item.label === 'sidebar.statistics') {
+          return {
+            ...item,
+            children: item.children.filter((child) => {
+              // Filtrar configuración de estadísticas solo para shirkasoft
+              if (child.label === 'sidebar.statistics_config') {
+                return showUsers;
+              }
+              return true;
+            }),
+          };
+        }
+        return item;
+      });
   });
 }
