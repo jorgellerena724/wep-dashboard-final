@@ -5,6 +5,7 @@
       [label]="t('fields.event_name.title')"
       [control]="getFormControl('event_name')"
       placeholder="site_visits"
+      [disabled]="isEdit()"
       [errorMessages]="{
         required: t('fields.event_name.required'),
         minlength: t('fields.event_name.minlength'),

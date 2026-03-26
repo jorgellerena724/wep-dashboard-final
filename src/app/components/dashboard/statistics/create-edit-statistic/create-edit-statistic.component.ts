@@ -97,6 +97,11 @@ export class CreateEditStatisticComponent implements DynamicComponent {
 
   private initializeForm(data: any): void {
     this.form.patchValue(data);
+
+    // En modo edición, deshabilitar el campo event_name
+    if (this.isEdit()) {
+      this.form.get('event_name')?.disable();
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -110,7 +115,10 @@ export class CreateEditStatisticComponent implements DynamicComponent {
       return;
     }
 
-    const event_name = this.form.get('event_name')?.value.trim();
+    // En modo edición, usar el event_name original, no el del formulario
+    const event_name = this.isEdit()
+      ? this.initialData()?.event_name
+      : this.form.get('event_name')?.value.trim();
     const label = this.form.get('label')?.value.trim();
 
     this.uploading.set(true);
