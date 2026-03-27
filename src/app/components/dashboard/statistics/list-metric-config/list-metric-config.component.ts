@@ -41,14 +41,14 @@ import { icons } from '../../../../core/constants/icons.constant';
 import { buttonVariants } from '../../../../core/constants/button-variant.constant';
 
 @Component({
-  selector: 'app-config-statistics',
+  selector: 'app-list-metric-config',
   standalone: true,
   imports: [CommonModule, TranslocoModule, TableComponent, TooltipModule],
-  templateUrl: './config-statistics.component.html',
-  styleUrls: ['./config-statistics.component.css'],
+  templateUrl: './list-metric-config.component.html',
+  styleUrls: ['./list-metric-config.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfigStatisticsComponent implements OnInit, OnDestroy {
+export class ListMetricConfigComponent implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private cd = inject(ChangeDetectorRef);
   private metricsSrv = inject(MetricsService);
@@ -75,10 +75,20 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
     this.transloco.selectTranslate('components.statistics.config.table.label'),
     { initialValue: '' },
   );
+  private clientTranslation = toSignal(
+    this.transloco.selectTranslate('components.statistics.config.table.client'),
+    { initialValue: '' },
+  );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
     return [
+      {
+        field: 'client',
+        header: this.clientTranslation(),
+        sortable: true,
+        filter: true,
+      },
       {
         field: 'event_name',
         header: this.eventNameTranslation(),
@@ -136,19 +146,6 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
         class: buttonVariants.outline.green,
       },
       {
-        label: (data) =>
-          data.is_active
-            ? this.deactivateTranslation()
-            : this.activateTranslation(),
-        icon: (data) =>
-          data.is_active ? icons['activate'] : icons['deactivate'],
-        onClick: (data) => this.toggleStatus(data),
-        class: (data) =>
-          data.is_active
-            ? buttonVariants.outline.gray
-            : buttonVariants.outline.neutral,
-      },
-      {
         label: this.deleteTranslation(),
         icon: icons['delete'],
         onClick: (data) => this.delete(data),
@@ -167,16 +164,21 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
     this.loading.set(true);
     this.metricsSrv
-      .getConfig()
+      .getAllConfigs()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (cfg) => {
-          this.config.set(cfg);
-          this.data.set(cfg.events);
+        next: (configs) => {
+          this.data.set(
+            configs.map((data: any) => ({
+              ...data,
+              client: data.user?.client ?? data.user_id,
+              event_name:
+                data.events?.map((e: any) => e.event_name).join(', ') ?? '',
+              label: data.events?.map((e: any) => e.label).join(', ') ?? '',
+            })),
+          );
           this.loading.set(false);
           this.cd.markForCheck();
         },
@@ -232,107 +234,38 @@ export class ConfigStatisticsComponent implements OnInit, OnDestroy {
     this.modalSrv.open(modalConfig);
   }
 
-  toggleStatus(data: MetricEvent): void {
-    const newStatus = !data.is_active;
-
-    // Validar que el event_name no esté vacío o sea inválido
-    if (!data.event_name || data.event_name.trim() === '') {
-      const message = this.transloco.translate(
-        'notifications.statistics.error.invalid_event_name',
-      );
-      this.notificationSrv.addNotification(message, 'error');
-      return;
-    }
-
-    this.metricsSrv
-      .updateEvent(data.event_name, undefined, newStatus)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.onRefresh();
-          const actionKey = newStatus ? 'activated' : 'deactivated';
-          const message = this.transloco.translate(
-            `notifications.statistics.success.${actionKey}`,
-          );
-          this.notificationSrv.addNotification(message, 'success');
-        },
-        error: (error) => {
-          console.error('Error toggling status:', error);
-          const actionKey = newStatus ? 'activate' : 'deactivate';
-          let message = this.transloco.translate(
-            `notifications.statistics.error.${actionKey}`,
-          );
-
-          // Agregar información adicional del error si está disponible
-          if (error.error?.message) {
-            message += `: ${error.error.message}`;
-          } else if (error.message) {
-            message += `: ${error.message}`;
-          }
-
-          this.notificationSrv.addNotification(message, 'error');
-        },
-      });
-  }
-
-  async delete(data: MetricEvent): Promise<void> {
-    // Validar que el event_name no esté vacío o sea inválido
-    if (!data.event_name || data.event_name.trim() === '') {
-      const message = this.transloco.translate(
-        'notifications.statistics.error.invalid_event_name',
-      );
-      this.notificationSrv.addNotification(message, 'error');
-      return;
-    }
-
-    const titleTranslation = this.transloco.translate(
-      'components.statistics.delete.title',
-    );
-    const messageTranslation = this.transloco.translate(
-      'components.statistics.delete.message',
-    );
-    const confirmTranslation = this.transloco.translate(
-      'components.statistics.delete.confirm',
-    );
-    const cancelTranslation = this.transloco.translate(
-      'components.statistics.delete.cancel',
-    );
-
+  async delete(data: any): Promise<void> {
     const confirmed = await this.confirmDialogService.confirm({
-      title: titleTranslation,
-      message: messageTranslation,
-      confirmLabel: confirmTranslation,
-      cancelLabel: cancelTranslation,
+      title: this.transloco.translate('components.statistics.delete.title'),
+      message: this.transloco.translate('components.statistics.delete.message'),
+      confirmLabel: this.transloco.translate(
+        'components.statistics.delete.confirm',
+      ),
+      cancelLabel: this.transloco.translate(
+        'components.statistics.delete.cancel',
+      ),
     });
 
     if (confirmed) {
       this.loading.set(true);
-
       this.metricsSrv
-        .deleteEvent(data.event_name)
+        .deleteConfig(data.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
             this.onRefresh();
-            const message = this.transloco.translate(
-              'notifications.statistics.success.deleted',
+            this.notificationSrv.addNotification(
+              this.transloco.translate(
+                'notifications.statistics.success.deleted',
+              ),
+              'success',
             );
-            this.notificationSrv.addNotification(message, 'success');
           },
-          error: (error) => {
-            console.error('Error deleting event:', error);
-            let message = this.transloco.translate(
-              'notifications.statistics.error.delete',
+          error: () => {
+            this.notificationSrv.addNotification(
+              this.transloco.translate('notifications.statistics.error.delete'),
+              'error',
             );
-
-            // Agregar información adicional del error si está disponible
-            if (error.error?.message) {
-              message += `: ${error.error.message}`;
-            } else if (error.message) {
-              message += `: ${error.message}`;
-            }
-
-            this.notificationSrv.addNotification(message, 'error');
             this.loading.set(false);
           },
         });

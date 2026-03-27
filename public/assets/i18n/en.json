@@ -139,16 +139,16 @@
     },
     "statistics": {
       "success": {
-        "created": "Metric event created successfully.",
-        "updated": "Metric event updated successfully.",
-        "deleted": "Metric event deleted successfully.",
+        "created": "Metric created successfully.",
+        "updated": "Metric updated successfully.",
+        "deleted": "Metric deleted successfully.",
         "activated": "Status updated",
         "deactivated": "Status updated"
       },
       "error": {
-        "create": "Error creating metric event.",
-        "update": "Error updating metric event.",
-        "delete": "Error deleting metric event.",
+        "create": "Error creating metric.",
+        "update": "Error updating metric.",
+        "delete": "Error deleting metric.",
         "load": "Error loading information.",
         "formInvalid": "Check the form fields.",
         "toggle": "Error changing event status.",
@@ -524,16 +524,8 @@
       "configure": "Configure events",
       "config": {
         "title": "Metrics Management",
-        "empty": "No events configured",
-        "add": "Add event",
-        "addFirst": "Add first event",
-        "save": "Save",
-        "delete": "Delete",
-        "label": "Visible label",
-        "event_name": "Event name",
-        "event_name_required": "Event name is required",
-        "label_required": "Label is required",
         "table": {
+          "client": "Client",
           "event_name": "Event name",
           "label": "Label",
           "status": "Status"
@@ -541,6 +533,8 @@
       },
       "create": {
         "title": "Create metric event",
+        "remove": "Remove event",
+        "add": "Add event",
         "fields": {
           "event_name": {
             "title": "Event name",

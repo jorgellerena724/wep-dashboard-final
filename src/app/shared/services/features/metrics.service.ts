@@ -6,12 +6,19 @@ import { environment } from '../../../../environments/environment';
 export interface MetricEvent {
   event_name: string;
   label: string;
-  is_active: boolean;
 }
 
 export interface MetricsConfig {
   id: number;
+  user_id: number;
   events: MetricEvent[];
+}
+
+export interface ConfigUser {
+  // ← para el dropdown
+  id: number;
+  email: string;
+  client: string;
 }
 
 export interface DayMetric {
@@ -33,24 +40,24 @@ export class MetricsService {
   private urlConfig = `${environment.api}metrics-config`;
 
   // ── Métricas ──────────────────────────────────────────────
-  getToday(): Observable<DayMetric> {
+  getToday() {
     return this.http.get<DayMetric>(`${this.urlMetrics}/today/`);
   }
 
-  getServerTime(): Observable<{ server_time: string; timezone: string }> {
+  getServerTime() {
     return this.http.get<{ server_time: string; timezone: string }>(
       `${this.urlMetrics}/server-time/`,
     );
   }
 
-  getRange(startDate: string, endDate: string): Observable<DayMetric[]> {
+  getRange(startDate: string, endDate: string) {
     const params = new HttpParams()
       .set('start_date', startDate)
       .set('end_date', endDate);
     return this.http.get<DayMetric[]>(`${this.urlMetrics}/range/`, { params });
   }
 
-  getSummary(startDate: string, endDate: string): Observable<SummaryMetric> {
+  getSummary(startDate: string, endDate: string) {
     const params = new HttpParams()
       .set('start_date', startDate)
       .set('end_date', endDate);
@@ -59,53 +66,40 @@ export class MetricsService {
     });
   }
 
-  getEvents(): Observable<{ events: MetricEvent[] }> {
+  getEvents() {
     return this.http.get<{ events: MetricEvent[] }>(
       `${this.urlMetrics}/events/`,
     );
   }
 
   // ── Config ────────────────────────────────────────────────
-  getConfig(): Observable<MetricsConfig> {
-    return this.http.get<MetricsConfig>(`${this.urlConfig}/config/`);
+  getConfig() {
+    return this.http.get<MetricsConfig>(`${this.urlConfig}/user/`);
   }
 
-  addEvent(event_name: string, label: string): Observable<MetricsConfig> {
-    const params = new HttpParams()
-      .set('event_name', event_name)
-      .set('label', label);
-    return this.http.post<MetricsConfig>(
-      `${this.urlConfig}/config/event/`,
-      null,
-      { params },
-    );
+  getAllConfigs() {
+    return this.http.get<MetricsConfig[]>(`${this.urlConfig}/`);
   }
 
-  updateEvent(
-    event_name: string,
-    label?: string,
-    is_active?: boolean,
-  ): Observable<MetricsConfig> {
-    let params = new HttpParams();
-    if (label !== undefined) params = params.set('label', label);
-    if (is_active !== undefined) params = params.set('is_active', is_active);
-
-    // Codificar el event_name para evitar problemas con caracteres especiales
-    const encodedEventName = encodeURIComponent(event_name);
-
-    return this.http.patch<MetricsConfig>(
-      `${this.urlConfig}/config/event/${encodedEventName}/`,
-      null,
-      { params },
-    );
+  getUsersWithoutConfig() {
+    return this.http.get<any[]>(`${this.urlConfig}/users/`);
   }
 
-  deleteEvent(event_name: string): Observable<void> {
-    // Codificar el event_name para evitar problemas con caracteres especiales
-    const encodedEventName = encodeURIComponent(event_name);
+  // Crea config con todos los eventos de una vez
+  createConfig(data: any): Observable<MetricsConfig> {
+    return this.http.post<MetricsConfig>(`${this.urlConfig}/`, {
+      data,
+    });
+  }
 
-    return this.http.delete<void>(
-      `${this.urlConfig}/config/event/${encodedEventName}/`,
-    );
+  // Sobreescribe el array de eventos completo
+  updateEvents(data: any): Observable<MetricsConfig> {
+    return this.http.patch<MetricsConfig>(`${this.urlConfig}/${data.id}/`, {
+      data,
+    });
+  }
+
+  deleteConfig(configId: number): Observable<void> {
+    return this.http.delete<void>(`${this.urlConfig}/${configId}/`);
   }
 }
