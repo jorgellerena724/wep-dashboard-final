@@ -24,10 +24,7 @@ import { NotificationService } from '../../../../shared/services/system/notifica
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  MetricEvent,
-  MetricsService,
-} from '../../../../shared/services/features/metrics.service';
+import { MetricsService } from '../../../../shared/services/features/metrics.service';
 import { SelectComponent } from '../../../../shared/components/app-select/app-select.component';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
@@ -72,19 +69,28 @@ export class CreateEditStatisticComponent implements DynamicComponent {
 
   constructor() {
     this.form = this.fb.group({
+      id: [0],
       user_id: [null, Validators.required],
       events: this.fb.array([]),
     });
+
+    this.isEdit = computed(() => (this.form?.get('id')?.value ?? 0) > 0);
 
     // Effect para cargar usuarios y datos iniciales
     effect(() => {
       const data = this.initialData();
       untracked(() => {
+        if (data?.id) {
+          this.form.patchValue({
+            id: data.id,
+            user_id: data.user?.id ?? data.user_id,
+          });
+        }
         this.loadUsers(data);
         if (this.isEdit() && data?.events) {
           this.initializeForEdit(data.events);
         } else {
-          this.addEventRow(); // una fila vacía por defecto en creación
+          this.addEventRow();
         }
       });
     });
@@ -109,25 +115,20 @@ export class CreateEditStatisticComponent implements DynamicComponent {
       .subscribe((usersWithout) => {
         let userOptions = usersWithout.map((u) => ({
           value: u.id,
-          label: u.client ?? u.email,
+          label: u.client,
         }));
 
         // En edición, agregar el usuario actual si no está en la lista
-        if (this.isEdit() && data?.user_id) {
+        if (this.isEdit() && data?.user) {
           const alreadyInList = userOptions.some(
-            (u) => u.value === data.user_id,
+            (u) => u.value === data.user.id,
           );
           if (!alreadyInList) {
             userOptions = [
-              {
-                value: data.user_id,
-                label: data.user?.client ?? data.user_email,
-              },
+              { value: data.user.id, label: data.user.client },
               ...userOptions,
             ];
           }
-          // Deshabilitar el campo usuario en edición
-          this.form.get('user_id')?.setValue(data.user.id);
         }
 
         this.users.set(userOptions);

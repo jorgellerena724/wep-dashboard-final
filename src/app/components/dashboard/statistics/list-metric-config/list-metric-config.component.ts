@@ -11,6 +11,7 @@ import {
   viewChild,
   TemplateRef,
   DestroyRef,
+  effect,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -48,8 +49,7 @@ import { buttonVariants } from '../../../../core/constants/button-variant.consta
   styleUrls: ['./list-metric-config.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListMetricConfigComponent implements OnInit, OnDestroy {
-  private platformId = inject(PLATFORM_ID);
+export class ListMetricConfigComponent {
   private cd = inject(ChangeDetectorRef);
   private metricsSrv = inject(MetricsService);
   private transloco = inject(TranslocoService);
@@ -57,7 +57,6 @@ export class ListMetricConfigComponent implements OnInit, OnDestroy {
   private notificationSrv = inject(NotificationService);
   private confirmDialogService = inject(ConfirmDialogService);
   private destroyRef = inject(DestroyRef);
-  private destroy$ = new Subject<void>();
 
   // Signals para el estado
   data = signal<MetricEvent[]>([]);
@@ -154,20 +153,15 @@ export class ListMetricConfigComponent implements OnInit, OnDestroy {
     ];
   });
 
-  ngOnInit(): void {
-    this.loadData();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  constructor() {
+    effect(() => this.loadData());
   }
 
   loadData(): void {
     this.loading.set(true);
     this.metricsSrv
       .getAllConfigs()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef)) // ← ya no necesita destroy$
       .subscribe({
         next: (configs) => {
           this.data.set(

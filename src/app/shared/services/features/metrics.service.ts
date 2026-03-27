@@ -87,16 +87,15 @@ export class MetricsService {
 
   // Crea config con todos los eventos de una vez
   createConfig(data: any): Observable<MetricsConfig> {
-    return this.http.post<MetricsConfig>(`${this.urlConfig}/`, {
-      data,
-    });
+    return this.http.post<MetricsConfig>(`${this.urlConfig}/`, data);
   }
 
   // Sobreescribe el array de eventos completo
   updateEvents(data: any): Observable<MetricsConfig> {
-    return this.http.patch<MetricsConfig>(`${this.urlConfig}/${data.id}/`, {
+    return this.http.patch<MetricsConfig>(
+      `${this.urlConfig}/${data.id}/`,
       data,
-    });
+    );
   }
 
   deleteConfig(configId: number): Observable<void> {
