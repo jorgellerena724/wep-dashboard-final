@@ -33,14 +33,19 @@ export interface MenuItem {
           'bg-gray-700 text-white': isOpen || isActive(),
         }"
       >
-        <div class="flex items-center justify-center w-6 h-6">
+        <div
+          class="flex items-center justify-center w-6 h-6"
+          [ngClass]="{
+            'w-full': sidebarCollapsed && !isMobileView,
+          }"
+        >
           <ng-container *ngComponentOutlet="getIcon(icon)" />
         </div>
         <span
-          class="ml-2 whitespace-nowrap transition-all duration-500 ease-in-out flex-1"
+          class="whitespace-nowrap transition-all duration-500 ease-in-out flex-1"
           [ngClass]="{
-            'opacity-0 w-0': sidebarCollapsed && !isMobileView,
-            'opacity-100 w-auto': !sidebarCollapsed || isMobileView,
+            'opacity-0 w-0 ml-0': sidebarCollapsed && !isMobileView,
+            'opacity-100 w-auto ml-2': !sidebarCollapsed || isMobileView,
           }"
         >
           {{ label | transloco }}
