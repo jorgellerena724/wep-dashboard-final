@@ -55,6 +55,11 @@ import {
   LucideGripHorizontal,
   LucideLoaderCircle,
   LucideEyeOff,
+  LucideRefreshCw,
+  LucideFilter,
+  LucideArrowUpDown,
+  LucideArrowUp,
+  LucideArrowDown,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -132,6 +137,12 @@ export const icons: Record<string, string> = {
   'loader-circle': 'loader-circle',
   eye: 'eye',
   'eye-off': 'eye-off',
+  // iconos de la tabla
+  'refresh-cw': 'refresh-cw',
+  filter: 'filter',
+  'arrow-up-down': 'arrow-up-down',
+  'arrow-up': 'arrow-up',
+  'arrow-down': 'arrow-down',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -195,6 +206,12 @@ export const lucideIconMap: Record<string, any> = {
   // iconos del login
   'loader-circle': LucideLoaderCircle,
   'eye-off': LucideEyeOff,
+  // iconos de la tabla
+  'refresh-cw': LucideRefreshCw,
+  filter: LucideFilter,
+  'arrow-up-down': LucideArrowUpDown,
+  'arrow-up': LucideArrowUp,
+  'arrow-down': LucideArrowDown,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */

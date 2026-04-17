@@ -11,14 +11,15 @@
           <button
             pButton
             [type]="'button'"
-            [icon]="action.icon"
             [pTooltip]="action.label"
             tooltipPosition="top"
             [class]="action.class"
             class="w-full sm:w-auto flex items-center justify-center p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
             (click)="action.onClick()"
             [disabled]="isHeaderActionDisabled(action) || false"
-          ></button>
+          >
+            <ng-container *ngComponentOutlet="getIcon(action.icon)" />
+          </button>
         }
       }
     </div>
@@ -30,22 +31,7 @@
       pTooltip="{{ 'table.tooltips.refresh' | transloco }}"
       tooltipPosition="top"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="27"
-        height="27"
-        fill="currentColor"
-        class="bi bi-arrow-clockwise"
-        viewBox="0 0 16 16"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-        />
-        <path
-          d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-        />
-      </svg>
+      <ng-container *ngComponentOutlet="getIcon('refresh-cw')" />
     </button>
   </div>
 
@@ -89,10 +75,9 @@
                       "
                       pTooltip="{{ 'table.tooltips.filter' | transloco }}"
                       tooltipPosition="top"
+                      class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 w-4 h-4"
                     >
-                      <i
-                        class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-                      ></i>
+                      <ng-container *ngComponentOutlet="getIcon('filter')" />
                     </button>
                   }
                 </div>
@@ -119,7 +104,7 @@
                       class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                       (click)="clearFilter(col.field)"
                     >
-                      <i class="pi pi-times"></i>
+                      <ng-container *ngComponentOutlet="getIcon('x')" />
                     </button>
                   }
                 </div>
@@ -147,20 +132,23 @@
               >
               </ng-container>
             } @else {
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 justify-center">
                 @for (action of rowActions(); track $index) {
                   @if (isRowActionVisible(action, rowData)) {
                     <button
-                      pButton
-                      [icon]="getRowActionIcon(action, rowData)"
                       [pTooltip]="getRowActionLabel(action, rowData)"
                       tooltipPosition="top"
                       (click)="action.onClick(rowData)"
-                      [class]="
-                        'p-button-text ' + getRowActionClass(action, rowData)
-                      "
+                      [class]="getRowActionClass(action, rowData)"
+                      class="p-1 border-0 bg-transparent"
                       [disabled]="isRowActionDisabled(action, rowData) || false"
-                    ></button>
+                    >
+                      <ng-container
+                        *ngComponentOutlet="
+                          getIcon(getRowActionIcon(action, rowData))
+                        "
+                      />
+                    </button>
                   }
                 }
               </div>
@@ -353,6 +341,28 @@
   }
   .rotate-on-hover:hover {
     animation: rotate 0.5s linear;
+  }
+
+  /* Estilos para botones de acciones de fila - más pequeños y profesionales */
+  :host ::ng-deep td button {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  :host ::ng-deep td button svg {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+  }
+
+  :host ::ng-deep td button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Icono de filtro en el header más pequeño */
+  :host ::ng-deep th button svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
   }
 
   /* Media Queries */

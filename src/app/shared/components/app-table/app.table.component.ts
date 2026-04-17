@@ -9,7 +9,7 @@ import {
   viewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
@@ -20,6 +20,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
 
 export interface Column {
   field: string;
@@ -63,10 +64,15 @@ export interface RowAction {
     TooltipModule,
     PaginatorModule,
     TranslocoModule,
+    NgComponentOutlet,
   ],
   templateUrl: './app-table.component.html',
 })
 export class TableComponent {
+  // Método para obtener iconos
+  readonly getIcon = getLucideIcon;
+  readonly icons = icons;
+
   private transloco = inject(TranslocoService);
   private themeService = inject(ThemeService);
   private fb = inject(FormBuilder);
