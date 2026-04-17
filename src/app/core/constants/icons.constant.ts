@@ -53,6 +53,8 @@ import {
   LucideUserRoundX,
   LucideUserPlus,
   LucideGripHorizontal,
+  LucideLoaderCircle,
+  LucideEyeOff,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -126,6 +128,10 @@ export const icons: Record<string, string> = {
   'grip-horizontal': 'grip-horizontal',
   users: 'users',
   bot: 'bot',
+  // iconos del login
+  'loader-circle': 'loader-circle',
+  eye: 'eye',
+  'eye-off': 'eye-off',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -186,6 +192,9 @@ export const lucideIconMap: Record<string, any> = {
   'user-round-x': LucideUserRoundX,
   'user-plus': LucideUserPlus,
   'grip-horizontal': LucideGripHorizontal,
+  // iconos del login
+  'loader-circle': LucideLoaderCircle,
+  'eye-off': LucideEyeOff,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */
