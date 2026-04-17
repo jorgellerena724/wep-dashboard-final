@@ -21,7 +21,7 @@
           <div
             class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-600 dark:border-black w-fit text-sm text-gray-500 dark:text-gray-400"
           >
-            <i class="pi pi-clock text-xs"></i>
+            <svg [lucideIcon]="getIcon('clock')" class="w-4 h-4"></svg>
             <span>
               {{ "components.statistics.server_time" | transloco }}:
               <span

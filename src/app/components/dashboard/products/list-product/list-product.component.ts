@@ -22,17 +22,21 @@ import {
   ModalConfig,
 } from '../../../../shared/services/system/modal.service';
 import { NotificationService } from '../../../../shared/services/system/notification.service';
-import { icons } from '../../../../core/constants/icons.constant';
+import {
+  icons,
+  getLucideIcon,
+} from '../../../../core/constants/icons.constant';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { CreateEditProductComponent } from '../create-edit-product/create-edit-product.component';
 import { ConfirmDialogService } from '../../../../shared/services/system/confirm-dialog.service';
 import { ProductService } from '../../../../shared/services/features/product.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-list-product',
-  imports: [TableComponent, ButtonModule, TranslocoModule],
+  imports: [TableComponent, ButtonModule, TranslocoModule, LucideDynamicIcon],
   templateUrl: './list-product.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -458,5 +462,9 @@ export class ListProductComponent {
     Object.values(videos).forEach((url) => {
       if (url.startsWith('blob:')) URL.revokeObjectURL(url);
     });
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

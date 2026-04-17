@@ -67,6 +67,12 @@ import {
   LucideCircleCheck,
   LucideCircleX,
   LucidePencilRuler,
+  LucideCopy,
+  LucideShare2,
+  LucidePlay,
+  LucideVideo,
+  LucideStar,
+  LucideClock,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -158,6 +164,12 @@ export const icons: Record<string, string> = {
   'circle-check': 'circle-check',
   'circle-x': 'circle-x',
   'pencil-ruler': 'pencil-ruler',
+  copy: 'copy',
+  'share-2': 'share-2',
+  play: 'play',
+  video: 'video',
+  star: 'star',
+  clock: 'clock',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -235,6 +247,12 @@ export const lucideIconMap: Record<string, any> = {
   'circle-check': LucideCircleCheck,
   'circle-x': LucideCircleX,
   'pencil-ruler': LucidePencilRuler,
+  copy: LucideCopy,
+  'share-2': LucideShare2,
+  play: LucidePlay,
+  video: LucideVideo,
+  star: LucideStar,
+  clock: LucideClock,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */

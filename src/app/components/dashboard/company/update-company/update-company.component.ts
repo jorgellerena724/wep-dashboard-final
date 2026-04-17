@@ -25,6 +25,8 @@ import { CompanyService } from '../../../../shared/services/features/company.ser
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-update-company',
@@ -36,6 +38,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     AppFileUploadComponent,
     TranslocoModule,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -270,5 +273,9 @@ export class UpdateCompanyComponent implements DynamicComponent {
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

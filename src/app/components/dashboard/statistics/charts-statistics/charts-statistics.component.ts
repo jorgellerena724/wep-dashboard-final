@@ -19,6 +19,9 @@ import {
   DayMetric,
   SummaryMetric,
 } from '../../../../shared/services/features/metrics.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
 
 const COLOR_PALETTE = [
   { bg: 'rgba(59, 130, 246, 0.2)', border: 'rgb(59, 130, 246)' },
@@ -49,7 +52,7 @@ function startOfMonth(d: Date): Date {
 @Component({
   selector: 'app-charts-statistics',
   standalone: true,
-  imports: [CommonModule, ChartModule, TranslocoModule],
+  imports: [CommonModule, ChartModule, TranslocoModule, LucideDynamicIcon],
   templateUrl: './charts-statistics.component.html',
   styleUrls: ['./charts-statistics.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -288,5 +291,9 @@ export class ChartsStatisticsComponent implements OnInit, OnDestroy {
   }
   getInputValue(e: Event): string {
     return (e.target as HTMLInputElement).value;
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

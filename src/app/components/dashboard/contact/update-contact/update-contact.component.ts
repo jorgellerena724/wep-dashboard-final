@@ -29,6 +29,8 @@ import { ButtonModule } from 'primeng/button';
 import { buttonVariants } from '../../../../core/constants/button-variant.constant';
 import { icons } from '../../../../core/constants/icons.constant';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 interface SocialNetwork {
   network: string;
@@ -47,6 +49,7 @@ interface SocialNetwork {
     TranslocoModule,
     TooltipModule,
     ButtonModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -515,5 +518,9 @@ export class UpdateContactComponent implements DynamicComponent {
     return activeControl.value
       ? buttonVariants.outline.gray
       : buttonVariants.outline.neutral;
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

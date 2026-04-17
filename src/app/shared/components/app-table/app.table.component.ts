@@ -297,13 +297,11 @@ export class TableComponent {
 
   // Métodos helper para iconos de Lucide
   isLucideIcon(icon: string): boolean {
-    // Si el icono no empieza con 'pi pi-', asumimos que es de Lucide
     return !icon?.startsWith('pi pi-');
   }
 
   getRowActionIconName(action: RowAction, rowData: any): string {
     const icon = this.getRowActionIcon(action, rowData);
-    // Remover el prefijo 'pi pi-' si existe
     return icon ? icon.replace('pi pi-', '') : '';
   }
 

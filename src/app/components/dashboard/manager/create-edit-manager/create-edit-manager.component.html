@@ -105,14 +105,17 @@
                 pTooltip="{{ 'image.delete' | transloco }}"
                 tooltipPosition="top"
               >
-                <i class="pi pi-trash text-lg"></i>
+                <svg [lucideIcon]="getIcon('trash-2')" class="w-5 h-5"></svg>
               </button>
             </div>
           </div>
           <!-- Info Message - Fijo en la parte inferior -->
           <div class="mt-auto pt-3">
             <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-              <i class="pi pi-info-circle mr-1"></i>
+              <svg
+                [lucideIcon]="getIcon('info')"
+                class="w-4 h-4 inline mr-1"
+              ></svg>
               {{ "image.info" | transloco }}
             </p>
           </div>
@@ -130,9 +133,10 @@
             "
             class="w-full h-full flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-white dark:bg-gray-800/50"
           >
-            <i
-              class="pi pi-image text-4xl text-gray-400 dark:text-gray-500 mb-3"
-            ></i>
+            <svg
+              [lucideIcon]="getIcon('images')"
+              class="w-12 h-12 text-gray-400 dark:text-gray-500 mb-3"
+            ></svg>
             <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
               <span class="block font-medium">{{
                 "image.nodata.title" | transloco

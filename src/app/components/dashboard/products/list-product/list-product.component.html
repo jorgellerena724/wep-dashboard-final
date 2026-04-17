@@ -40,91 +40,101 @@
         <div class="relative">
           <!-- Mostrar imagen si NO es video -->
           @if (!rowData.isVideo) {
-          <div>
-            @if (getImageUrl(rowData)) {
-            <img
-              [src]="getImageUrl(rowData)"
-              [alt]="rowData.firstFileTitle || 'Imagen del producto'"
-              class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
-              (error)="onImageError($event)"
-              loading="lazy"
-              [title]="rowData.firstFileTitle || ''"
-            />
-            } @if (!getImageUrl(rowData) && rowData.firstImagePath) {
-            <div
-              class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
-            >
-              <svg
-                class="w-8 h-8 text-gray-400 dark:text-gray-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
+            <div>
+              @if (getImageUrl(rowData)) {
+                <img
+                  [src]="getImageUrl(rowData)"
+                  [alt]="rowData.firstFileTitle || 'Imagen del producto'"
+                  class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
+                  (error)="onImageError($event)"
+                  loading="lazy"
+                  [title]="rowData.firstFileTitle || ''"
+                />
+              }
+              @if (!getImageUrl(rowData) && rowData.firstImagePath) {
+                <div
+                  class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    class="w-8 h-8 text-gray-400 dark:text-gray-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </div>
+              }
+              @if (!rowData.firstImagePath) {
+                <div
+                  class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    [lucideIcon]="getIcon('images')"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500"
+                  ></svg>
+                </div>
+              }
             </div>
-            } @if (!rowData.firstImagePath) {
-            <div
-              class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
-            >
-              <i
-                class="pi pi-image text-gray-400 dark:text-gray-500 text-xl"
-              ></i>
-            </div>
-            }
-          </div>
           }
 
           <!-- Mostrar miniatura de video si ES video -->
           @if (rowData.isVideo) {
-          <div>
-            @if (getVideoUrl(rowData)) {
-            <div class="relative">
-              <video
-                [src]="getVideoUrl(rowData)"
-                class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600"
-                muted
-                playsinline
-                disablePictureInPicture
-                [title]="rowData.firstFileTitle || ''"
-              ></video>
-              <div
-                class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
-              >
-                <i class="pi pi-play text-white text-xl"></i>
-              </div>
+            <div>
+              @if (getVideoUrl(rowData)) {
+                <div class="relative">
+                  <video
+                    [src]="getVideoUrl(rowData)"
+                    class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600"
+                    muted
+                    playsinline
+                    disablePictureInPicture
+                    [title]="rowData.firstFileTitle || ''"
+                  ></video>
+                  <div
+                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
+                  >
+                    <svg
+                      [lucideIcon]="getIcon('play')"
+                      class="w-5 h-5 text-white"
+                    ></svg>
+                  </div>
+                </div>
+              }
+              @if (!getVideoUrl(rowData) && rowData.firstImagePath) {
+                <div
+                  class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    [lucideIcon]="getIcon('video')"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500"
+                  ></svg>
+                </div>
+              }
+              @if (!rowData.firstImagePath) {
+                <div
+                  class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    [lucideIcon]="getIcon('video')"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500"
+                  ></svg>
+                </div>
+              }
             </div>
-            } @if (!getVideoUrl(rowData) && rowData.firstImagePath) {
-            <div
-              class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
-            >
-              <i
-                class="pi pi-video text-gray-400 dark:text-gray-500 text-xl"
-              ></i>
-            </div>
-            } @if (!rowData.firstImagePath) {
-            <div
-              class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-600"
-            >
-              <i
-                class="pi pi-video text-gray-400 dark:text-gray-500 text-xl"
-              ></i>
-            </div>
-            }
-          </div>
           }
 
           <!-- Badge que muestra la cantidad de archivos adicionales -->
           @if (rowData.files && rowData.files.length > 1) {
-          <div
-            class="absolute -top-2 -right-2 bg-gray-800 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
-            [title]="'Total de archivos: ' + rowData.files.length"
-          >
-            +{{ rowData.files.length - 1 }}
-          </div>
+            <div
+              class="absolute -top-2 -right-2 bg-gray-800 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold border-2 border-white dark:border-gray-800"
+              [title]="'Total de archivos: ' + rowData.files.length"
+            >
+              +{{ rowData.files.length - 1 }}
+            </div>
           }
         </div>
       </div>
