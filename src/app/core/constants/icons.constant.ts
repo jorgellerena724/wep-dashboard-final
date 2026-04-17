@@ -41,6 +41,10 @@ import {
   LucideCpu,
   LucideSliders,
   LucideCircle,
+  LucideWarehouse,
+  LucideUserCheck,
+  LucideList,
+  LucideBookOpenCheck,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -98,6 +102,10 @@ export const icons: Record<string, string> = {
   robot: 'bot',
   cpu: 'cpu',
   sliders: 'sliders',
+  warehouse: 'warehouse',
+  'user-star': 'user-star',
+  list: 'list',
+  'book-open-check': 'book-open-check',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -145,6 +153,10 @@ export const lucideIconMap: Record<string, any> = {
   'chevron-left': LucideChevronLeft,
   'chevron-right': LucideChevronRight,
   circle: LucideCircle,
+  warehouse: LucideWarehouse,
+  'user-star': LucideUserCheck,
+  list: LucideList,
+  'book-open-check': LucideBookOpenCheck,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */

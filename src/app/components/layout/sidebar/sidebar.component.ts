@@ -174,7 +174,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
       },
       {
         label: 'sidebar.about',
-        icon: 'badge',
+        icon: 'warehouse',
         children: [
           {
             label: 'sidebar.company',
@@ -183,12 +183,12 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
           },
           {
             label: 'sidebar.manager-category',
-            icon: 'archive-x',
+            icon: 'list',
             route: ['/manager-category'],
           },
           {
             label: 'sidebar.manager',
-            icon: 'badge',
+            icon: 'user-star',
             route: ['/managers'],
           },
           {
@@ -204,7 +204,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
         children: [
           {
             label: 'sidebar.category',
-            icon: 'archive-x',
+            icon: 'list',
             route: ['/categories'],
           },
           {
@@ -216,11 +216,11 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
       },
       {
         label: 'sidebar.publications',
-        icon: 'book',
+        icon: 'book-open-check',
         children: [
           {
             label: 'sidebar.publications-category',
-            icon: 'archive-x',
+            icon: 'list',
             route: ['/publication-category'],
           },
           {
