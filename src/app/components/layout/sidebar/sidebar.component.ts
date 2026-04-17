@@ -148,7 +148,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
         children: [
           {
             label: 'sidebar.header_info',
-            icon: 'layout-grid',
+            icon: 'pencil-ruler',
             route: ['/header'],
           },
         ],

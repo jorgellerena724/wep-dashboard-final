@@ -66,6 +66,7 @@ import {
   LucideMaximize2,
   LucideCircleCheck,
   LucideCircleX,
+  LucidePencilRuler,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -156,6 +157,7 @@ export const icons: Record<string, string> = {
   'maximize-2': 'maximize-2',
   'circle-check': 'circle-check',
   'circle-x': 'circle-x',
+  'pencil-ruler': 'pencil-ruler',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -232,6 +234,7 @@ export const lucideIconMap: Record<string, any> = {
   'maximize-2': LucideMaximize2,
   'circle-check': LucideCircleCheck,
   'circle-x': LucideCircleX,
+  'pencil-ruler': LucidePencilRuler,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */
