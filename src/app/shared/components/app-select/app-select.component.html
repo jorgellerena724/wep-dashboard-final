@@ -32,18 +32,9 @@
       [class.rotate-180]="isOpen()"
     >
       <svg
+        [lucideIcon]="getIcon('chevron-down')"
         class="w-5 h-5 text-gray-800 dark:text-gray-800"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M19 9l-7 7-7-7"
-        />
-      </svg>
+      ></svg>
     </div>
   </div>
 
@@ -149,19 +140,7 @@
             [disabled]="currentPage() === 1"
             (click)="$event.stopPropagation(); previousPage()"
           >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <svg [lucideIcon]="getIcon('chevron-left')" class="w-4 h-4"></svg>
           </button>
           <span class="text-sm">
             {{ currentPage() }} de {{ totalPages() }}
@@ -171,19 +150,7 @@
             [disabled]="currentPage() === totalPages()"
             (click)="$event.stopPropagation(); nextPage()"
           >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <svg [lucideIcon]="getIcon('chevron-right')" class="w-4 h-4"></svg>
           </button>
         </div>
       }

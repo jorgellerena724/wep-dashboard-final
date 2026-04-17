@@ -9,13 +9,27 @@ import {
   NotificationService,
   Notification,
 } from '../../services/system/notification.service';
+import {
+  LucideCheckCircle,
+  LucideXCircle,
+  LucideInfo,
+  LucideAlertTriangle,
+  LucideX,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-notification',
   templateUrl: './app-notification.component.html',
   standalone: true,
-  imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush, // CRUCIAL para zoneless
+  imports: [
+    CommonModule,
+    LucideCheckCircle,
+    LucideXCircle,
+    LucideInfo,
+    LucideAlertTriangle,
+    LucideX,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationComponent {
   private notificationService = inject(NotificationService);
@@ -25,7 +39,7 @@ export class NotificationComponent {
 
   // Computed signal para notificaciones ordenadas (opcional)
   sortedNotifications = computed(
-    () => [...this.notifications()].reverse() // Mostrar las más recientes primero
+    () => [...this.notifications()].reverse(), // Mostrar las más recientes primero
   );
 
   removeNotification(notification: Notification): void {

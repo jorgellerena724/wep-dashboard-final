@@ -60,6 +60,12 @@ import {
   LucideArrowUpDown,
   LucideArrowUp,
   LucideArrowDown,
+  LucideTriangleAlert,
+  LucideUpload,
+  LucideMinimize2,
+  LucideMaximize2,
+  LucideCircleCheck,
+  LucideCircleX,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -143,6 +149,13 @@ export const icons: Record<string, string> = {
   'arrow-up-down': 'arrow-up-down',
   'arrow-up': 'arrow-up',
   'arrow-down': 'arrow-down',
+  // iconos de componentes shared
+  'triangle-alert': 'triangle-alert',
+  upload: 'upload',
+  'minimize-2': 'minimize-2',
+  'maximize-2': 'maximize-2',
+  'circle-check': 'circle-check',
+  'circle-x': 'circle-x',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -212,6 +225,13 @@ export const lucideIconMap: Record<string, any> = {
   'arrow-up-down': LucideArrowUpDown,
   'arrow-up': LucideArrowUp,
   'arrow-down': LucideArrowDown,
+  // iconos de componentes shared
+  'triangle-alert': LucideTriangleAlert,
+  upload: LucideUpload,
+  'minimize-2': LucideMinimize2,
+  'maximize-2': LucideMaximize2,
+  'circle-check': LucideCircleCheck,
+  'circle-x': LucideCircleX,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */

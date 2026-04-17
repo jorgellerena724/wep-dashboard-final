@@ -25,6 +25,8 @@ import {
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ThemeService } from '../../../core/services/theme.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 interface SelectOption {
   label: string;
@@ -35,7 +37,13 @@ interface SelectOption {
 @Component({
   selector: 'app-select',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, FloatLabelModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    FloatLabelModule,
+    LucideDynamicIcon,
+  ],
   templateUrl: './app-select.component.html',
   styleUrl: './app-select.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +56,8 @@ interface SelectOption {
   ],
 })
 export class SelectComponent implements ControlValueAccessor {
+  readonly getIcon = getLucideIcon;
+
   // Inputs usando signal inputs
   options = input<SelectOption[]>([]);
   multiple = input<boolean>(false);

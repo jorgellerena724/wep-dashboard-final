@@ -14,6 +14,8 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { FileUploadError } from '../../interfaces/fileUpload.interface';
 import { CommonModule } from '@angular/common';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-file-upload',
@@ -25,17 +27,20 @@ import { CommonModule } from '@angular/common';
     ImageModule,
     ButtonModule,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppFileUploadComponent {
+  readonly getIcon = getLucideIcon;
+
   // Inputs
   label = input<string>('Cargar archivo');
   accept = input<string>('image/*');
   maxFileSize = input<number>(2000000);
   fileUploadText = input<string>('Seleccionar archivo');
   fileRecommendation = input<string>(
-    'Formato recomendado: PNG o JPG, tamaño máximo 2MB'
+    'Formato recomendado: PNG o JPG, tamaño máximo 2MB',
   );
   multiple = input<boolean>(false);
   allowedExtensions = input<string[] | undefined>(undefined);
@@ -131,7 +136,7 @@ export class AppFileUploadComponent {
           const error: FileUploadError = {
             type: 'type',
             message: `Tipo de archivo no válido. Extensiones permitidas: ${allowedExts.join(
-              ', '
+              ', ',
             )}`,
             file: file,
           };
