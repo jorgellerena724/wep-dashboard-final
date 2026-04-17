@@ -16,16 +16,17 @@ import {
 } from '@angular/forms';
 import { NotificationService } from '../../../shared/services/system/notification.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { isPlatformBrowser, NgComponentOutlet } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  imports: [ReactiveFormsModule, TranslocoModule, NgComponentOutlet],
+  imports: [ReactiveFormsModule, TranslocoModule, LucideDynamicIcon],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

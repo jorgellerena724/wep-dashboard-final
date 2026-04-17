@@ -93,7 +93,10 @@
                   class="transition-transform duration-200"
                   [class.rotate-180]="languageMenuOpen()"
                 >
-                  <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+                  <svg
+                    [lucideIcon]="getIcon('chevron-down')"
+                    class="w-4 h-4"
+                  ></svg>
                 </div>
               </button>
             </div>
@@ -269,9 +272,12 @@
                   aria-label="Toggle password visibility"
                 >
                   @if (!showPassword()) {
-                    <ng-container *ngComponentOutlet="getIcon('eye')" />
+                    <svg [lucideIcon]="getIcon('eye')" class="w-5 h-5"></svg>
                   } @else {
-                    <ng-container *ngComponentOutlet="getIcon('eye-off')" />
+                    <svg
+                      [lucideIcon]="getIcon('eye-off')"
+                      class="w-5 h-5"
+                    ></svg>
                   }
                 </button>
               }
@@ -294,7 +300,10 @@
             >
               @if (isLoading()) {
                 <div class="animate-spin">
-                  <ng-container *ngComponentOutlet="getIcon('loader-circle')" />
+                  <svg
+                    [lucideIcon]="getIcon('loader-circle')"
+                    class="w-5 h-5"
+                  ></svg>
                 </div>
                 <span class="ml-2">{{ "login.loading" | transloco }}</span>
               } @else {

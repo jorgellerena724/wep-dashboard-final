@@ -15,11 +15,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import {
-  CommonModule,
-  isPlatformBrowser,
-  NgComponentOutlet,
-} from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { CollapsedService } from '../../../shared/services/system/collapsed.service';
 import { NavbarComponent } from '../navbar/navbar.component';
@@ -31,6 +27,7 @@ import {
 } from './sidebar-menu-item.component';
 import { TooltipModule } from 'primeng/tooltip';
 import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -41,7 +38,7 @@ import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
     TranslocoModule,
     SidebarMenuItemComponent,
     TooltipModule,
-    NgComponentOutlet,
+    LucideDynamicIcon,
   ],
   templateUrl: './sidebar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

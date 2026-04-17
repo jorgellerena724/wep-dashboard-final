@@ -31,7 +31,7 @@
           class="transition-transform duration-300"
           [class.rotate-180]="sidebarCollapsed() && !isMobileView()"
         >
-          <ng-container *ngComponentOutlet="getIcon('chevron-left')" />
+          <svg [lucideIcon]="getIcon('chevron-left')" class="w-5 h-5"></svg>
         </div>
       </div>
     }

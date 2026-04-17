@@ -14,10 +14,10 @@
           [attr.aria-expanded]="mobileMenuOpen()"
         >
           @if (!mobileMenuOpen()) {
-            <ng-container *ngComponentOutlet="getIcon('menu')" />
+            <svg [lucideIcon]="getIcon('menu')" class="w-6 h-6"></svg>
           }
           @if (mobileMenuOpen()) {
-            <ng-container *ngComponentOutlet="getIcon('x')" />
+            <svg [lucideIcon]="getIcon('x')" class="w-6 h-6"></svg>
           }
         </button>
       </div>
@@ -127,7 +127,10 @@
                   class="transition-transform duration-200"
                   [class.rotate-180]="languageMenuOpen()"
                 >
-                  <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+                  <svg
+                    [lucideIcon]="getIcon('chevron-down')"
+                    class="w-4 h-4"
+                  ></svg>
                 </div>
               </button>
             </div>
@@ -246,14 +249,17 @@
                 aria-haspopup="true"
               >
                 <!-- Icono principal de usuario -->
-                <ng-container *ngComponentOutlet="getIcon('user-cog')" />
+                <svg [lucideIcon]="getIcon('user-cog')" class="w-5 h-5"></svg>
 
                 <!-- Flecha que rota igual que en el selector de idioma -->
                 <div
                   class="transition-transform duration-200"
                   [class.rotate-180]="userMenuOpen()"
                 >
-                  <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+                  <svg
+                    [lucideIcon]="getIcon('chevron-down')"
+                    class="w-4 h-4"
+                  ></svg>
                 </div>
               </button>
             </div>
@@ -303,7 +309,7 @@
                   class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-300 hover:text-gray-800 transition-colors duration-200 border-b border-gray-300"
                   role="menuitem"
                 >
-                  <ng-container *ngComponentOutlet="getIcon('save')" />
+                  <svg [lucideIcon]="getIcon('save')" class="w-5 h-5"></svg>
                   <span class="ml-2">{{
                     "navbar.save_information" | transloco
                   }}</span>
@@ -316,9 +322,10 @@
                     class="flex items-center cursor-pointer px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-300 hover:text-gray-800 transition-colors duration-200 border-b border-gray-300"
                     role="menuitem"
                   >
-                    <ng-container
-                      *ngComponentOutlet="getIcon('database-backup')"
-                    />
+                    <svg
+                      [lucideIcon]="getIcon('database-backup')"
+                      class="w-5 h-5"
+                    ></svg>
                     <span class="ml-2">{{
                       "navbar.restore_information" | transloco
                     }}</span>
@@ -342,9 +349,10 @@
                   role="menuitem"
                 >
                   <div class="text-red-600">
-                    <ng-container
-                      *ngComponentOutlet="getIcon('arrow-left-from-line')"
-                    />
+                    <svg
+                      [lucideIcon]="getIcon('arrow-left-from-line')"
+                      class="w-5 h-5"
+                    ></svg>
                   </div>
                   <span class="ml-2">{{ "navbar.logout" | transloco }}</span>
                 </a>
@@ -387,7 +395,7 @@
       (click)="toggleMobileMenu()"
       class="text-gray-400 hover:text-white p-2 rounded-md hover:bg-gray-700 transition-colors"
     >
-      <ng-container *ngComponentOutlet="getIcon('x')" />
+      <svg [lucideIcon]="getIcon('x')" class="w-6 h-6"></svg>
     </button>
   </div>
 
@@ -402,7 +410,7 @@
           (click)="onNavItemClick(null)"
           class="border border-gray-600 flex items-center p-2 rounded-lg hover:bg-gray-700 hover:text-white w-full"
         >
-          <ng-container *ngComponentOutlet="getIcon('settings')" />
+          <svg [lucideIcon]="getIcon('settings')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap">{{
             "sidebar.admin" | transloco
           }}</span>
@@ -419,7 +427,7 @@
               isStatisticsSubmenuOpen() || isStatisticsRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('bar-chart')" />
+          <svg [lucideIcon]="getIcon('bar-chart')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.statistics" | transloco
           }}</span>
@@ -427,7 +435,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isStatisticsSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -444,7 +452,7 @@
               (click)="onNavItemClick('statistics')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('line-chart')" />
+              <svg [lucideIcon]="getIcon('line-chart')" class="w-4 h-4"></svg>
               <span class="ml-2">{{
                 "sidebar.statistics_charts" | transloco
               }}</span>
@@ -456,7 +464,7 @@
                 (click)="onNavItemClick('statistics')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <ng-container *ngComponentOutlet="getIcon('settings')" />
+                <svg [lucideIcon]="getIcon('settings')" class="w-4 h-4"></svg>
                 <span class="ml-2">{{
                   "sidebar.statistics_config" | transloco
                 }}</span>
@@ -476,7 +484,7 @@
               isHeaderSubmenuOpen() || isHeaderRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('grip-horizontal')" />
+          <svg [lucideIcon]="getIcon('grip-horizontal')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.header" | transloco
           }}</span>
@@ -484,7 +492,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isHeaderSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -501,7 +509,7 @@
               (click)="onNavItemClick('header')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('layout-grid')" />
+              <svg [lucideIcon]="getIcon('layout-grid')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.header_info" | transloco }}</span>
             </a>
           </div>
@@ -518,7 +526,7 @@
               isHomeSubmenuOpen() || isHomeRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('home')" />
+          <svg [lucideIcon]="getIcon('home')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.home" | transloco
           }}</span>
@@ -526,7 +534,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isHomeSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -543,7 +551,7 @@
               (click)="onNavItemClick('home')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('images')" />
+              <svg [lucideIcon]="getIcon('images')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.carousel" | transloco }}</span>
             </a>
             <a
@@ -552,7 +560,7 @@
               (click)="onNavItemClick('home')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('newspaper')" />
+              <svg [lucideIcon]="getIcon('newspaper')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.news" | transloco }}</span>
             </a>
           </div>
@@ -569,7 +577,7 @@
               isAboutSubmenuOpen() || isAboutRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('warehouse')" />
+          <svg [lucideIcon]="getIcon('warehouse')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.about" | transloco
           }}</span>
@@ -577,7 +585,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isAboutSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -594,7 +602,7 @@
               (click)="onNavItemClick('about')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('building')" />
+              <svg [lucideIcon]="getIcon('building')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.company" | transloco }}</span>
             </a>
 
@@ -604,7 +612,7 @@
               (click)="onNavItemClick('about')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('list')" />
+              <svg [lucideIcon]="getIcon('list')" class="w-4 h-4"></svg>
               <span class="ml-2">{{
                 "sidebar.manager-category" | transloco
               }}</span>
@@ -616,7 +624,7 @@
               (click)="onNavItemClick('about')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('user-star')" />
+              <svg [lucideIcon]="getIcon('user-star')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.manager" | transloco }}</span>
             </a>
 
@@ -626,7 +634,7 @@
               (click)="onNavItemClick('about')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('pen-square')" />
+              <svg [lucideIcon]="getIcon('pen-square')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.review" | transloco }}</span>
             </a>
           </div>
@@ -643,7 +651,7 @@
               isProductsSubmenuOpen() || isProductsRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('shopping-cart')" />
+          <svg [lucideIcon]="getIcon('shopping-cart')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.products" | transloco
           }}</span>
@@ -651,7 +659,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isProductsSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -668,7 +676,7 @@
               (click)="onNavItemClick('products')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('list')" />
+              <svg [lucideIcon]="getIcon('list')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.category" | transloco }}</span>
             </a>
 
@@ -678,7 +686,7 @@
               (click)="onNavItemClick('products')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('postcard')" />
+              <svg [lucideIcon]="getIcon('postcard')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.offers" | transloco }}</span>
             </a>
           </div>
@@ -695,7 +703,7 @@
               isPublicationsSubmenuOpen() || isPublicationsRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('book-open-check')" />
+          <svg [lucideIcon]="getIcon('book-open-check')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.publications" | transloco
           }}</span>
@@ -703,7 +711,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isPublicationsSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -720,7 +728,7 @@
               (click)="onNavItemClick('publications')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('list')" />
+              <svg [lucideIcon]="getIcon('list')" class="w-4 h-4"></svg>
               <span class="ml-2">{{
                 "sidebar.publications-category" | transloco
               }}</span>
@@ -731,7 +739,7 @@
               (click)="onNavItemClick('publications')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('postcard')" />
+              <svg [lucideIcon]="getIcon('postcard')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.publications" | transloco }}</span>
             </a>
           </div>
@@ -748,7 +756,7 @@
               isContactSubmenuOpen() || isContactRouteActive(),
           }"
         >
-          <ng-container *ngComponentOutlet="getIcon('headset')" />
+          <svg [lucideIcon]="getIcon('headset')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.contact" | transloco
           }}</span>
@@ -756,7 +764,7 @@
             class="transition-transform duration-300"
             [class.rotate-180]="isContactSubmenuOpen()"
           >
-            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </div>
         </div>
         <div
@@ -773,7 +781,7 @@
               (click)="onNavItemClick('contact')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <ng-container *ngComponentOutlet="getIcon('info')" />
+              <svg [lucideIcon]="getIcon('info')" class="w-4 h-4"></svg>
               <span class="ml-2">{{ "sidebar.info" | transloco }}</span>
             </a>
           </div>
@@ -791,7 +799,7 @@
                 isUsersSubmenuOpen() || isUsersRouteActive(),
             }"
           >
-            <ng-container *ngComponentOutlet="getIcon('users')" />
+            <svg [lucideIcon]="getIcon('users')" class="w-5 h-5"></svg>
             <span class="ml-2 whitespace-nowrap flex-1">{{
               "sidebar.users" | transloco
             }}</span>
@@ -799,7 +807,7 @@
               class="transition-transform duration-300"
               [class.rotate-180]="isUsersSubmenuOpen()"
             >
-              <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+              <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
             </div>
           </div>
           <div
@@ -816,7 +824,7 @@
                 (click)="onNavItemClick('users')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <ng-container *ngComponentOutlet="getIcon('user-cog')" />
+                <svg [lucideIcon]="getIcon('user-cog')" class="w-4 h-4"></svg>
                 <span class="ml-2">{{
                   "sidebar.users_manage" | transloco
                 }}</span>
@@ -837,7 +845,7 @@
                 isChatbotSubmenuOpen() || isChatbotRouteActive(),
             }"
           >
-            <ng-container *ngComponentOutlet="getIcon('bot')" />
+            <svg [lucideIcon]="getIcon('bot')" class="w-5 h-5"></svg>
             <span class="ml-2 whitespace-nowrap flex-1">{{
               "sidebar.chatbot" | transloco
             }}</span>
@@ -845,7 +853,7 @@
               class="transition-transform duration-300"
               [class.rotate-180]="isChatbotSubmenuOpen()"
             >
-              <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+              <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
             </div>
           </div>
           <div
@@ -862,7 +870,7 @@
                 (click)="onNavItemClick('chatbot')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <ng-container *ngComponentOutlet="getIcon('cpu')" />
+                <svg [lucideIcon]="getIcon('cpu')" class="w-4 h-4"></svg>
                 <span class="ml-2">{{
                   "sidebar.chatbot_models" | transloco
                 }}</span>
@@ -873,7 +881,7 @@
                 (click)="onNavItemClick('chatbot')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <ng-container *ngComponentOutlet="getIcon('sliders')" />
+                <svg [lucideIcon]="getIcon('sliders')" class="w-4 h-4"></svg>
                 <span class="ml-2">{{
                   "sidebar.chatbot_config" | transloco
                 }}</span>

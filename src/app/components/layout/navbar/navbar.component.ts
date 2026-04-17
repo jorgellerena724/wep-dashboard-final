@@ -19,11 +19,7 @@ import {
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
-import {
-  CommonModule,
-  isPlatformBrowser,
-  NgComponentOutlet,
-} from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -38,6 +34,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/app-confirm-d
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-navbar',
@@ -49,7 +46,7 @@ import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
     RouterLinkActive,
     TranslocoModule,
     ConfirmDialogComponent,
-    NgComponentOutlet,
+    LucideDynamicIcon,
   ],
   templateUrl: './navbar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

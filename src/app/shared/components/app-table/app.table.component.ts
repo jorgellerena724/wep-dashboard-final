@@ -9,7 +9,7 @@ import {
   viewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule, NgComponentOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TableModule, Table } from 'primeng/table';
@@ -20,7 +20,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 export interface Column {
   field: string;
@@ -64,14 +65,13 @@ export interface RowAction {
     TooltipModule,
     PaginatorModule,
     TranslocoModule,
-    NgComponentOutlet,
+    LucideDynamicIcon,
   ],
   templateUrl: './app-table.component.html',
 })
 export class TableComponent {
-  // Método para obtener iconos
+  // Método para obtener iconos de Lucide
   readonly getIcon = getLucideIcon;
-  readonly icons = icons;
 
   private transloco = inject(TranslocoService);
   private themeService = inject(ThemeService);
@@ -293,5 +293,21 @@ export class TableComponent {
     if (value === null || value === undefined) return '';
     const str = String(value);
     return str.length > limit ? str.slice(0, limit) + '…' : str;
+  }
+
+  // Métodos helper para iconos de Lucide
+  isLucideIcon(icon: string): boolean {
+    // Si el icono no empieza con 'pi pi-', asumimos que es de Lucide
+    return !icon?.startsWith('pi pi-');
+  }
+
+  getRowActionIconName(action: RowAction, rowData: any): string {
+    const icon = this.getRowActionIcon(action, rowData);
+    // Remover el prefijo 'pi pi-' si existe
+    return icon ? icon.replace('pi pi-', '') : '';
+  }
+
+  getHeaderActionIcon(action: TableAction): string {
+    return action.icon;
   }
 }
