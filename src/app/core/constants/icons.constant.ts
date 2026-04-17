@@ -45,6 +45,14 @@ import {
   LucideUserCheck,
   LucideList,
   LucideBookOpenCheck,
+  LucideSave,
+  LucideDatabaseBackup,
+  LucideLogOut,
+  LucideMenu,
+  LucideX,
+  LucideUserRoundX,
+  LucideUserPlus,
+  LucideGripHorizontal,
 } from '@lucide/angular';
 
 // Nombres semánticos → kebab (lo que usan tus listados)
@@ -106,6 +114,18 @@ export const icons: Record<string, string> = {
   'user-star': 'user-star',
   list: 'list',
   'book-open-check': 'book-open-check',
+  // iconos del navbar
+  save: 'save',
+  'database-backup': 'database-backup',
+  'arrow-left-from-line': 'log-out',
+  'log-out': 'log-out',
+  menu: 'menu',
+  x: 'x',
+  'user-round-exclamation': 'user-round-x',
+  'user-plus': 'user-plus',
+  'grip-horizontal': 'grip-horizontal',
+  users: 'users',
+  bot: 'bot',
 };
 
 // Kebab → componente Lucide (solo lo usa la tabla internamente)
@@ -157,6 +177,15 @@ export const lucideIconMap: Record<string, any> = {
   'user-star': LucideUserCheck,
   list: LucideList,
   'book-open-check': LucideBookOpenCheck,
+  // iconos del navbar
+  save: LucideSave,
+  'database-backup': LucideDatabaseBackup,
+  'log-out': LucideLogOut,
+  menu: LucideMenu,
+  x: LucideX,
+  'user-round-x': LucideUserRoundX,
+  'user-plus': LucideUserPlus,
+  'grip-horizontal': LucideGripHorizontal,
 };
 
 /** Resuelve un nombre semántico o kebab al componente Lucide */

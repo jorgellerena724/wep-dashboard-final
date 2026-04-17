@@ -9,6 +9,8 @@ import {
   input,
   ChangeDetectionStrategy,
   DestroyRef,
+  HostListener,
+  ElementRef,
 } from '@angular/core';
 import {
   RouterModule,
@@ -17,7 +19,11 @@ import {
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import {
+  CommonModule,
+  isPlatformBrowser,
+  NgComponentOutlet,
+} from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -31,6 +37,7 @@ import { NotificationService } from '../../../shared/services/system/notificatio
 import { ConfirmDialogComponent } from '../../../shared/components/app-confirm-dialog/app-confirm-dialog.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
+import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-navbar',
@@ -42,11 +49,15 @@ import { environment } from '../../../../environments/environment';
     RouterLinkActive,
     TranslocoModule,
     ConfirmDialogComponent,
+    NgComponentOutlet,
   ],
   templateUrl: './navbar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarComponent {
+  // Método para obtener iconos
+  readonly getIcon = getLucideIcon;
+  readonly icons = icons;
   // Inputs
   sessionClient = input<string>();
 
@@ -59,6 +70,7 @@ export class NavbarComponent {
   private platformId = inject(PLATFORM_ID);
   private transloco = inject(TranslocoService);
   private destroyRef = inject(DestroyRef);
+  private elementRef = inject(ElementRef);
 
   // ViewChild
   confirmDialog = viewChild.required<ConfirmDialogComponent>('confirmDialog');
@@ -431,6 +443,37 @@ export class NavbarComponent {
     this.userMenuOpen.update((v) => !v);
   }
 
+  toggleLanguageMenu() {
+    this.languageMenuOpen.update((v) => !v);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // Verificar si el clic fue en el botón o dropdown de idioma
+    const languageButton = target.closest('#language-menu');
+    const languageDropdown = target.closest(
+      '[role="menu"][aria-labelledby="language-menu"]',
+    );
+
+    // Verificar si el clic fue en el botón o dropdown de usuario
+    const userButton = target.closest('#user-menu');
+    const userDropdown = target.closest(
+      '[role="menu"][aria-labelledby="user-menu"]',
+    );
+
+    // Cerrar dropdown de idioma si el clic fue fuera de él
+    if (!languageButton && !languageDropdown && this.languageMenuOpen()) {
+      this.languageMenuOpen.set(false);
+    }
+
+    // Cerrar dropdown de usuario si el clic fue fuera de él
+    if (!userButton && !userDropdown && this.userMenuOpen()) {
+      this.userMenuOpen.set(false);
+    }
+  }
+
   private closeOtherSubmenus(except: string | null) {
     if (except !== 'home') this.isHomeSubmenuOpen.set(false);
     if (except !== 'about') this.isAboutSubmenuOpen.set(false);
@@ -530,10 +573,6 @@ export class NavbarComponent {
 
   logout() {
     this.authSrv.logout();
-  }
-
-  toggleLanguageMenu() {
-    this.languageMenuOpen.update((v) => !v);
   }
 
   private syncWithTransloco() {

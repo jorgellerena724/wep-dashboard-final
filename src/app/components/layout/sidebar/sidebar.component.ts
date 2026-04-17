@@ -147,7 +147,7 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
       },
       {
         label: 'sidebar.header',
-        icon: 'chevron-up',
+        icon: 'grip-horizontal',
         children: [
           {
             label: 'sidebar.header_info',

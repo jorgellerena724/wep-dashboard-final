@@ -46,7 +46,12 @@ export interface MenuItem {
           {{ label | transloco }}
         </span>
         @if ((!sidebarCollapsed || isMobileView) && children?.length) {
-          <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+          <div
+            class="transition-transform duration-300"
+            [class.rotate-180]="isOpen"
+          >
+            <ng-container *ngComponentOutlet="getIcon('chevron-down')" />
+          </div>
         }
       </div>
 

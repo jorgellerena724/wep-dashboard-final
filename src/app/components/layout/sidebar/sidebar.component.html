@@ -27,7 +27,12 @@
         "
         tooltipPosition="right"
       >
-        <ng-container *ngComponentOutlet="getIcon('chevron-left')" />
+        <div
+          class="transition-transform duration-300"
+          [class.rotate-180]="sidebarCollapsed() && !isMobileView()"
+        >
+          <ng-container *ngComponentOutlet="getIcon('chevron-left')" />
+        </div>
       </div>
     }
 
