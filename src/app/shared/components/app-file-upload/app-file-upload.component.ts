@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   effect,
   untracked,
+  inject,
 } from '@angular/core';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
@@ -16,6 +17,7 @@ import { FileUploadError } from '../../interfaces/fileUpload.interface';
 import { CommonModule } from '@angular/common';
 import { getLucideIcon } from '../../../core/constants/icons.constant';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { TranslocoService } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-file-upload',
@@ -33,6 +35,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class AppFileUploadComponent {
   readonly getIcon = getLucideIcon;
+  private transloco = inject(TranslocoService);
 
   // Inputs
   label = input<string>('Cargar archivo');
@@ -49,6 +52,7 @@ export class AppFileUploadComponent {
   fileSelected = output<File[]>();
   fileRemoved = output<void>();
   fileError = output<FileUploadError>();
+  fileWarning = output<FileUploadError>();
 
   // Signals para estado
   selectedFiles = signal<File[]>([]);
@@ -116,21 +120,7 @@ export class AppFileUploadComponent {
 
       // Validar cada archivo
       for (const file of files) {
-        if (file.size > this.maxFileSize()) {
-          const formattedMaxSize = this.formatFileSize(this.maxFileSize());
-          const formattedFileSize = this.formatFileSize(file.size);
-
-          const error: FileUploadError = {
-            type: 'size',
-            message: `El archivo es demasiado grande (${formattedFileSize}). Tamaño máximo: ${formattedMaxSize}`,
-            file: file,
-          };
-
-          this.fileError.emit(error);
-          event.files = [];
-          return;
-        }
-
+        // Validación de tipo de archivo (sigue siendo un error)
         if (!this.isFileTypeValid(file)) {
           const allowedExts = this.allowedExtensionsList();
           const error: FileUploadError = {
@@ -144,6 +134,24 @@ export class AppFileUploadComponent {
           this.fileError.emit(error);
           event.files = [];
           return;
+        }
+
+        // Validación de tamaño (ahora es un warning, no un error)
+        if (file.size > this.maxFileSize()) {
+          const formattedMaxSize = this.formatFileSize(this.maxFileSize());
+          const formattedFileSize = this.formatFileSize(file.size);
+
+          const warning: FileUploadError = {
+            type: 'size',
+            message: this.transloco
+              .translate('image.sizeWarning')
+              .replace('{fileSize}', formattedFileSize)
+              .replace('{maxSize}', formattedMaxSize),
+            file: file,
+          };
+
+          this.fileWarning.emit(warning);
+          // No retornamos aquí, permitimos continuar
         }
       }
 

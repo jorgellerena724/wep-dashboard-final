@@ -737,6 +737,10 @@ export class CreateEditProductComponent implements DynamicComponent {
     this.notificationSrv.addNotification(error.message, 'error');
   }
 
+  onFileWarning(warning: FileUploadError): void {
+    this.notificationSrv.addNotification(warning.message, 'warning');
+  }
+
   onVideoLoaded(event: Event, videoPlayer: HTMLVideoElement): void {
     videoPlayer.muted = true;
     videoPlayer.playsInline = true;
