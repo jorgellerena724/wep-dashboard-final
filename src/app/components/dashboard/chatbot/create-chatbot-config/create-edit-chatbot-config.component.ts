@@ -12,6 +12,7 @@ import {
 import {
   FormBuilder,
   FormGroup,
+  FormArray,
   Validators,
   ReactiveFormsModule,
   FormControl,
@@ -21,8 +22,14 @@ import { TextFieldComponent } from '../../../../shared/components/app-text-field
 import { NotificationService } from '../../../../shared/services/system/notification.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { SelectComponent } from '../../../../shared/components/app-select/app-select.component';
+import { ButtonModule } from 'primeng/button';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 import { UserService } from '../../../../shared/services/users/user.service';
+
+interface ProviderConfig {
+  provider: string;
+  api_key: string;
+}
 
 @Component({
   selector: 'app-create-edit-chatbot-config',
@@ -34,10 +41,11 @@ import { UserService } from '../../../../shared/services/users/user.service';
     TextFieldComponent,
     TranslocoModule,
     SelectComponent,
+    ButtonModule,
   ],
 })
 export class CreateEditChatbotConfigComponent implements DynamicComponent {
-  private transloco = inject(TranslocoService);
+  protected transloco = inject(TranslocoService);
   private fb = inject(FormBuilder);
   private chatbotConfigSrv = inject(ChatbotService);
   private userSrv = inject(UserService);
@@ -48,63 +56,55 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
   submitSuccess = output<void>();
   submitError = output<void>();
 
-  // Signals
-  models = signal<any[]>([]);
   users = signal<any[]>([]);
+  providers = signal<any[]>([]);
   isFormValid = signal(false);
-  configId = signal<number | null>(null); // Para edición
+  configId = signal<number | null>(null);
   isEditing = computed(() => this.configId() !== null);
 
-  // Computed
+  providerConfigs = signal<ProviderConfig[]>([]);
+  providersFormArray: FormArray<FormGroup> = new FormArray<FormGroup>([]);
+
   isSubmitting = signal<boolean>(false);
   isFormInvalid = computed(() => !this.isFormValid());
 
-  // Form
   form: FormGroup;
 
   constructor() {
     this.form = this.fb.group({
       user_id: ['', [Validators.required]],
-      api_key: ['', [Validators.minLength(20)]],
-      model_id: ['', [Validators.required]],
       prompt: ['', [Validators.required, Validators.minLength(10)]],
-      temperature: [
-        '',
-        [Validators.required, Validators.min(0.1), Validators.max(1.0)],
-      ],
+      temperature: [0.7, [Validators.required, Validators.min(0.1), Validators.max(1.0)]],
+      providers: this.providersFormArray,
     });
 
     effect(() => {
       const data = this.initialData();
       if (data) {
         untracked(() => {
-          // Mapear datos correctamente
-          const formData = {
+          this.form.patchValue({
             user_id: data.user_id || data.user?.id,
-            model_id: data.model_id || data.model?.id,
-            temperature: data.temperature,
             prompt: data.prompt || '',
-            api_key: '',
-          };
-
-          this.form.patchValue(formData);
+            temperature: data.temperature || 0.7,
+          });
           this.configId.set(data.id);
+          if (data.models && data.models.length > 0) {
+            this.loadProvidersFromData(data.models);
+          }
         });
       }
     });
 
     effect(() => {
-      this.fetchModels();
+      this.fetchProviders();
       this.fetchUsers();
     });
 
-    // Effect para emitir validez del formulario
     effect(() => {
       const isValid = this.isFormValid();
       this.formValid.emit(isValid);
     });
 
-    // Suscripción al estado del formulario
     this.form.statusChanges.subscribe(() => {
       this.isFormValid.set(this.form.valid);
     });
@@ -122,37 +122,34 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
           );
           resolve();
         },
-        error: (err) => {
+        error: () => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.users.error.load'),
             'error',
           );
-          reject(err);
+          reject();
         },
       });
     });
   }
 
-  async fetchModels(): Promise<void> {
+  async fetchProviders(): Promise<void> {
     return new Promise((resolve) => {
       this.chatbotConfigSrv.getModels().subscribe({
         next: (data) => {
-          this.models.set(
-            data.map((model: any) => ({
-              value: model.id,
-              label: `${model.name} (${this.formatTokenLimit(
-                model.daily_token_limit,
-              )}/día)`,
-              daily_token_limit: model.daily_token_limit, // Guardamos para referencia
-            })),
+          // Extraer providers únicos de los modelos
+          const uniqueProviders = [...new Set(data.map((m: any) => m.provider))];
+          this.providers.set(
+            uniqueProviders.map((provider: string) => ({
+              value: provider,
+              label: provider.toUpperCase(),
+            }))
           );
           resolve();
         },
-        error: (err) => {
+        error: () => {
           this.notificationSrv.addNotification(
-            this.transloco.translate(
-              'notifications.chatbot_config.error.loadModels',
-            ),
+            'Error al cargar providers',
             'error',
           );
         },
@@ -160,52 +157,106 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
     });
   }
 
-  formatTokenLimit(limit: number): string {
-    if (limit >= 1000000) {
-      return `${(limit / 1000000).toFixed(1)}M`;
-    } else if (limit >= 1000) {
-      return `${(limit / 1000).toFixed(0)}K`;
+  private loadProvidersFromData(modelsData: any[]): void {
+    this.providerConfigs.set([]);
+    this.providersFormArray.clear();
+
+    modelsData.forEach((model: any) => {
+      this.addProviderConfig(model.provider, '');
+    });
+  }
+
+  addProviderConfig(provider?: string, apiKey?: string): void {
+    // No permitir providers duplicados
+    const existingProviders = this.providerConfigs().map(p => p.provider.toLowerCase());
+    if (provider && existingProviders.includes(provider.toLowerCase())) {
+      return;
     }
-    return limit.toString();
+
+    const providerGroup = this.fb.group({
+      provider: [provider || '', Validators.required],
+      api_key: [apiKey || '', [Validators.required, Validators.minLength(20)]],
+    });
+
+    this.providersFormArray.push(providerGroup);
+    this.providerConfigs.update((configs) => [
+      ...configs,
+      { provider: provider || '', api_key: apiKey || '' },
+    ]);
+  }
+
+  removeProviderConfig(index: number): void {
+    this.providersFormArray.removeAt(index);
+    this.providerConfigs.update((configs) => {
+      const newConfigs = [...configs];
+      newConfigs.splice(index, 1);
+      return newConfigs;
+    });
+  }
+
+  getProviderControl(index: number, field: string): FormControl {
+    const providerGroup = this.providersFormArray.at(index) as FormGroup;
+    return providerGroup.get(field) as FormControl;
+  }
+
+  onProviderChange(index: number, event: any): void {
+    const provider = event?.value;
+    // Verificar que no esté duplicado
+    const otherProviders = this.providerConfigs()
+      .map((c, i) => i === index ? '' : c.provider)
+      .filter(p => p);
+    if (otherProviders.includes(provider)) {
+      this.notificationSrv.addNotification(
+        'Provider ya seleccionado',
+        'warning',
+      );
+      // Limpiar el campo
+      const group = this.providersFormArray.at(index) as FormGroup;
+      group.get('provider')?.setValue('');
+    }
+  }
+
+  private getProvidersData(): any[] {
+    const data: any[] = [];
+    for (let i = 0; i < this.providersFormArray.length; i++) {
+      const group = this.providersFormArray.at(i) as FormGroup;
+      data.push({
+        provider: group.get('provider')?.value,
+        api_key: group.get('api_key')?.value?.trim(),
+      });
+    }
+    return data;
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.providersFormArray.length === 0) {
       this.notificationSrv.addNotification(
-        this.transloco.translate(
-          'notifications.chatbot_config.error.formInvalid',
-        ),
+        'Formulario inválido. Agrega al menos un provider.',
         'warning',
       );
       this.submitError.emit();
       return;
     }
 
-    // Preparar payload
-    const payload: any = {
-      user_id: this.form.get('user_id')?.value,
-      model_id: this.form.get('model_id')?.value,
-      prompt: this.form.get('prompt')?.value.trim(),
-      temperature: this.form.get('temperature')?.value,
-    };
-
-    // Solo incluir api_key si no está vacío (y en creación siempre es requerido)
-    const apiKeyValue = this.form.get('api_key')?.value?.trim();
-    if (apiKeyValue) {
-      payload.api_key = apiKeyValue;
-    } else if (!this.isEditing()) {
-      // Si es creación y no hay API key, mostrar error
-      this.notificationSrv.addNotification(
-        this.transloco.translate(
-          'notifications.chatbot_config.error.apiKeyRequired',
-        ),
-        'error',
-      );
-      this.submitError.emit();
-      return;
+    for (let i = 0; i < this.providersFormArray.length; i++) {
+      const group = this.providersFormArray.at(i) as FormGroup;
+      if (group.get('api_key')?.value?.trim() === '') {
+        this.notificationSrv.addNotification(
+          'La API key es requerida para cada provider',
+          'error',
+        );
+        this.submitError.emit();
+        return;
+      }
     }
 
-    // Determinar si es creación o actualización
+    const payload = {
+      user_id: this.form.get('user_id')?.value,
+      models: this.getProvidersData(),
+      prompt: this.form.get('prompt')?.value?.trim(),
+      temperature: parseFloat(this.form.get('temperature')?.value) || 0.7,
+    };
+
     let request$;
     if (this.isEditing() && this.configId()) {
       request$ = this.chatbotConfigSrv.patch(payload, this.configId()!);
@@ -214,62 +265,25 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
     }
 
     request$.subscribe({
-      next: (response) => {
+      next: () => {
         this.notificationSrv.addNotification(
-          this.transloco.translate(
-            this.isEditing()
-              ? 'notifications.chatbot_config.success.updated'
-              : 'notifications.chatbot_config.success.created',
-          ),
+          this.isEditing()
+            ? 'Configuración actualizada'
+            : 'Configuración creada',
           'success',
         );
-
         this.submitSuccess.emit();
-
         if (this.initialData()?.onSave) {
           this.initialData().onSave();
         }
-
-        // Resetear formulario si no es edición
-        if (!this.isEditing()) {
-          this.form.reset({
-            temperature: 0.2,
-          });
-        }
       },
-      error: (error) => {
-        let errorMessage = this.transloco.translate(
+      error: () => {
+        this.notificationSrv.addNotification(
           this.isEditing()
-            ? 'notifications.chatbot_config.error.update'
-            : 'notifications.chatbot_config.error.create',
+            ? 'Error al actualizar'
+            : 'Error al crear',
+          'error',
         );
-
-        // Manejar errores específicos
-        if (error.status === 400) {
-          if (
-            error.error?.detail?.includes('already exists') ||
-            error.error?.detail?.includes('Ya existe')
-          ) {
-            errorMessage = this.transloco.translate(
-              'notifications.chatbot_config.error.userExists',
-            );
-          } else if (error.error?.detail?.includes('invalid API key')) {
-            errorMessage = this.transloco.translate(
-              'notifications.chatbot_config.error.invalidApiKey',
-            );
-          }
-        } else if (error.status === 409) {
-          errorMessage = this.transloco.translate(
-            'notifications.chatbot_config.error.userExists',
-          );
-        } else if (error.status === 404) {
-          errorMessage = this.transloco.translate(
-            'notifications.users.error.notFound',
-          );
-        }
-
-        this.notificationSrv.addNotification(errorMessage, 'error');
-
         this.isSubmitting.set(false);
         this.submitError.emit();
       },
