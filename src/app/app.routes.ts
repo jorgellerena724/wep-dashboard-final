@@ -24,8 +24,8 @@ export const routes: Routes = [
   {
     path: 'statistics-config',
     loadComponent: () =>
-      import('./components/dashboard/statistics/config-statistics/config-statistics.component').then(
-        (m) => m.ConfigStatisticsComponent,
+      import('./components/dashboard/statistics/list-metric-config/list-metric-config.component').then(
+        (m) => m.ListMetricConfigComponent,
       ),
     canActivate: [AuthGuard],
   },

@@ -138,9 +138,7 @@ export class ChartsStatisticsComponent implements OnInit, OnDestroy {
           this.summary.set(summary);
 
           // Derivar los eventos activos desde la config
-          const activeEvents: MetricEvent[] = (config.events ?? []).filter(
-            (e) => e.is_active,
-          );
+          const activeEvents: MetricEvent[] = config.events ?? [];
 
           this.events.set(activeEvents);
           this.buildCharts(range, activeEvents);
