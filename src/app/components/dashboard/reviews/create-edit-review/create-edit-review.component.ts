@@ -26,6 +26,9 @@ import { ReviewService } from '../../../../shared/services/features/review.servi
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-create-edit-review',
@@ -37,6 +40,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     AppFileUploadComponent,
     TranslocoModule,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -270,5 +274,9 @@ export class CreateEditReviewComponent implements DynamicComponent {
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

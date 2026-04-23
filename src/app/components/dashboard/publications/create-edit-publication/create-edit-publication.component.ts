@@ -28,6 +28,8 @@ import { SelectComponent } from '../../../../shared/components/app-select/app-se
 import { PublicationCategoryService } from '../../../../shared/services/features/publication-category.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-create-edit-publication',
@@ -40,6 +42,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     TranslocoModule,
     SelectComponent,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -78,12 +81,12 @@ export class CreateEditPublicationComponent implements DynamicComponent {
 
   documentIcon = computed(() => {
     const document = this.selectedDocument();
-    if (!document) return 'pi-file';
+    if (!document) return 'file';
 
     const fileName = document.name.toLowerCase();
-    if (fileName.endsWith('.pdf')) return 'pi-file-pdf';
-    if (fileName.endsWith('.zip')) return 'zip';
-    return 'pi-file';
+    if (fileName.endsWith('.pdf')) return 'file-text';
+    if (fileName.endsWith('.zip')) return 'archive';
+    return 'file';
   });
 
   documentIconColor = computed(() => {
@@ -346,5 +349,9 @@ export class CreateEditPublicationComponent implements DynamicComponent {
     this.selectedFile.set(null);
     this.selectedDocument.set(null);
     this.imageUrl.set(null);
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

@@ -26,11 +26,11 @@
             class="p-dialog-header-icon p-link p-button-icon-only p-button-rounded flex items-center justify-center"
             [attr.aria-label]="isExpanded() ? 'Contraer' : 'Expandir'"
           >
-            <span
-              [class]="
-                isExpanded() ? 'pi pi-window-minimize' : 'pi pi-window-maximize'
-              "
-            ></span>
+            @if (isExpanded()) {
+              <svg [lucideIcon]="getIcon('minimize-2')" class="w-4 h-4"></svg>
+            } @else {
+              <svg [lucideIcon]="getIcon('maximize-2')" class="w-4 h-4"></svg>
+            }
           </button>
         }
       </div>
@@ -59,7 +59,6 @@
           pButton
           (click)="onAccept()"
           label="Aceptar"
-          [loadingIcon]="'pi pi-spin pi-spinner text-white'"
           [ngStyle]="{
             '--p-button-loading-icon-color': '#ffffff',
             color: '#ffffff',
@@ -113,17 +112,9 @@
     background-color: #d1d5db !important;
   }
 
-  :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
-    font-size: 1rem;
-    color: #374151 !important;
-  }
-
-  :host ::ng-deep .custom-modal .p-dialog-header-icon span {
-    color: #374151 !important;
-  }
-
-  :host ::ng-deep .custom-modal .p-dialog-header-icon .pi {
-    font-size: 1rem;
+  :host ::ng-deep .custom-modal .p-dialog-header-icon svg {
+    width: 1rem;
+    height: 1rem;
     color: #374151 !important;
   }
 

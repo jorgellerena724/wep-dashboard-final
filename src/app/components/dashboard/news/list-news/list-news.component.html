@@ -36,7 +36,7 @@
             pTooltip="Subir"
             tooltipPosition="top"
           >
-            <i class="pi pi-chevron-up text-sm"></i>
+            <svg [lucideIcon]="getIcon('chevron-up')" class="w-4 h-4"></svg>
           </button>
           <!-- Botón Bajar -->
           <button
@@ -46,7 +46,7 @@
             pTooltip="Bajar"
             tooltipPosition="top"
           >
-            <i class="pi pi-chevron-down text-sm"></i>
+            <svg [lucideIcon]="getIcon('chevron-down')" class="w-4 h-4"></svg>
           </button>
         </div>
       </div>
@@ -57,68 +57,72 @@
       <div class="flex justify-center items-center">
         <div class="relative">
           <!-- Mostrar imagen si NO es archivo de video -->
-          @if (!rowData.photo?.toLowerCase().endsWith('.mp4')) {
-          <div>
-            @if (getImageUrl(rowData)) {
-            <img
-              [src]="getImageUrl(rowData)"
-              [alt]="rowData.name || 'Imagen'"
-              class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
-              (error)="onImageError($event)"
-              loading="lazy"
-            />
-            }
-            <!-- Placeholder cuando no hay imagen -->
-            @if (!getImageUrl(rowData)) {
-            <div
-              class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
-            >
-              <svg
-                class="w-8 h-8 text-gray-400 dark:text-gray-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
+          @if (!rowData.photo?.toLowerCase().endsWith(".mp4")) {
+            <div>
+              @if (getImageUrl(rowData)) {
+                <img
+                  [src]="getImageUrl(rowData)"
+                  [alt]="rowData.name || 'Imagen'"
+                  class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600 transition-transform duration-200 hover:scale-105"
+                  (error)="onImageError($event)"
+                  loading="lazy"
+                />
+              }
+              <!-- Placeholder cuando no hay imagen -->
+              @if (!getImageUrl(rowData)) {
+                <div
+                  class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    class="w-8 h-8 text-gray-400 dark:text-gray-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </div>
+              }
             </div>
-            }
-          </div>
           }
 
           <!-- Mostrar miniatura de video si ES archivo .mp4 -->
-          @if (rowData.photo?.toLowerCase().endsWith('.mp4')) {
-          <div>
-            @if (getVideoUrl(rowData)) {
-            <div class="relative">
-              <video
-                [src]="getVideoUrl(rowData)"
-                class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600"
-                muted
-                playsinline
-                disablePictureInPicture
-              ></video>
-              <div
-                class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
-              >
-                <i class="pi pi-play text-white text-xl"></i>
-              </div>
+          @if (rowData.photo?.toLowerCase().endsWith(".mp4")) {
+            <div>
+              @if (getVideoUrl(rowData)) {
+                <div class="relative">
+                  <video
+                    [src]="getVideoUrl(rowData)"
+                    class="w-16 h-16 object-cover rounded-lg shadow-md border border-gray-300 dark:border-gray-600"
+                    muted
+                    playsinline
+                    disablePictureInPicture
+                  ></video>
+                  <div
+                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
+                  >
+                    <svg
+                      [lucideIcon]="getIcon('play')"
+                      class="w-6 h-6 text-white"
+                    ></svg>
+                  </div>
+                </div>
+              }
+              <!-- Placeholder cuando no hay video -->
+              @if (!getVideoUrl(rowData)) {
+                <div
+                  class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
+                >
+                  <svg
+                    [lucideIcon]="getIcon('video')"
+                    class="w-6 h-6 text-gray-400 dark:text-gray-500"
+                  ></svg>
+                </div>
+              }
             </div>
-            }
-            <!-- Placeholder cuando no hay video -->
-            @if (!getVideoUrl(rowData)) {
-            <div
-              class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-gray-600"
-            >
-              <i
-                class="pi pi-video text-gray-400 dark:text-gray-500 text-xl"
-              ></i>
-            </div>
-            }
-          </div>
           }
         </div>
       </div>

@@ -29,6 +29,8 @@ import { ManagerCategoryService } from '../../../../shared/services/features/man
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap, map } from 'rxjs';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-create-edit-manager',
@@ -41,6 +43,7 @@ import { switchMap, map } from 'rxjs';
     TranslocoModule,
     SelectComponent,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -397,9 +400,9 @@ export class CreateEditManagerComponent implements DynamicComponent {
         switchMap((noCategoryLabel) =>
           this.categorySrv
             .get()
-            .pipe(map((data) => ({ noCategoryLabel, data })))
+            .pipe(map((data) => ({ noCategoryLabel, data }))),
         ),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: ({ noCategoryLabel, data }) => {
@@ -430,5 +433,9 @@ export class CreateEditManagerComponent implements DynamicComponent {
       ? 'components.managers.edit'
       : 'components.managers.create';
     return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

@@ -1471,6 +1471,7 @@
     "info": "You can change the image by selecting a new one.",
     "required": "• The image is required",
     "delete": "Delete",
+    "sizeWarning": "The file is large ({fileSize}). Recommended size: {maxSize}. If you accept, it will upload but may take longer. Accept to continue.",
     "nodata": {
       "title": "No image selected",
       "subtitle": "Select an image to preview"

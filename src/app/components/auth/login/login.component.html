@@ -24,102 +24,7 @@
               >
                 <!-- SVG de la bandera según idioma actual -->
                 <div class="w-6 h-6 mr-2">
-                  @if (currentLanguageCode() === 'es') {
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path
-                      fill="#c70318"
-                      d="M52.77,20H11.23a24,24,0,0,1,41.54,0Z"
-                    />
-                    <path fill="#c70318" d="M52.77,44a24,24,0,0,1-41.54,0Z" />
-                    <path
-                      fill="#ffc500"
-                      d="M56,32a23.73,23.73,0,0,1-3.23,12H11.23a23.91,23.91,0,0,1,0-24H52.77A23.73,23.73,0,0,1,56,32Z"
-                    />
-                  </svg>
-                  } @else {
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                    <path
-                      fill="#142359"
-                      d="M32,8V28.57H8.25a24,24,0,0,1,6.6-13.35,22.57,22.57,0,0,1,2.59-2.29A23.89,23.89,0,0,1,32,8Z"
-                    />
-                    <path
-                      fill="#bf2121"
-                      d="M48.79,14.86H32V8A23.94,23.94,0,0,1,48.79,14.86Z"
-                    />
-                    <path
-                      fill="#fff"
-                      d="M53.68,21.71H32V14.86H48.79A23.86,23.86,0,0,1,53.68,21.71Z"
-                    />
-                    <path
-                      fill="#bf2121"
-                      d="M55.75,28.57H32V21.71H53.68A23.43,23.43,0,0,1,55.75,28.57Z"
-                    />
-                    <path
-                      fill="#fff"
-                      d="M56,32a22.8,22.8,0,0,1-.25,3.43H8.25a23.65,23.65,0,0,1,0-6.86h47.5A22.8,22.8,0,0,1,56,32Z"
-                    />
-                    <path
-                      fill="#bf2121"
-                      d="M55.75,35.43a23.43,23.43,0,0,1-2.07,6.86H10.32a23.43,23.43,0,0,1-2.07-6.86Z"
-                    />
-                    <path
-                      fill="#bf2121"
-                      d="M48.79,49.14a24,24,0,0,1-33.58,0Z"
-                    />
-                    <path
-                      fill="#fff"
-                      d="M53.68,42.29a23.86,23.86,0,0,1-4.89,6.85H15.21a23.86,23.86,0,0,1-4.89-6.85Z"
-                    />
-                    <polygon
-                      fill="#fff"
-                      points="24.71 10.79 25.41 12.93 27.66 12.93 25.84 14.25 26.54 16.39 24.71 15.07 22.89 16.39 23.59 14.25 21.76 12.93 24.02 12.93 24.71 10.79"
-                    />
-                    <polygon
-                      fill="#fff"
-                      points="24.71 19.39 25.41 21.53 27.66 21.53 25.84 22.86 26.54 25 24.71 23.68 22.89 25 23.59 22.86 21.76 21.53 24.02 21.53 24.71 19.39"
-                    />
-                    <polygon
-                      fill="#fff"
-                      points="16.29 19.39 16.98 21.53 19.24 21.53 17.41 22.86 18.11 25 16.29 23.68 14.46 25 15.16 22.86 13.34 21.53 15.59 21.53 16.29 19.39"
-                    />
-                    <path
-                      fill="#fff"
-                      d="M17.41,14.25l.7,2.14-1.82-1.32-1.82,1.32.38-1.17a22.57,22.57,0,0,1,2.59-2.29h1.8Z"
-                    />
-                  </svg>
-                  }
-                </div>
-                <svg
-                  class="h-5 w-5 transition-transform duration-200"
-                  [class.rotate-180]="languageMenuOpen()"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            @if (languageMenuOpen()) {
-            <div
-              class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-gray-700 focus:outline-none border border-gray-700 z-50"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="language-menu-login"
-            >
-              <div class="py-2" role="none">
-                <button
-                  (click)="selectLanguage('es')"
-                  class="flex items-center w-full text-left px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  role="menuitem"
-                >
-                  <div class="mr-3 w-6 h-6">
+                  @if (currentLanguageCode() === "es") {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                       <path
                         fill="#c70318"
@@ -131,16 +36,7 @@
                         d="M56,32a23.73,23.73,0,0,1-3.23,12H11.23a23.91,23.91,0,0,1,0-24H52.77A23.73,23.73,0,0,1,56,32Z"
                       />
                     </svg>
-                  </div>
-                  {{ "language.es" | transloco }}
-                </button>
-
-                <button
-                  (click)="selectLanguage('en')"
-                  class="flex items-center w-full text-left px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
-                  role="menuitem"
-                >
-                  <div class="mr-3 w-6 h-6">
+                  } @else {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
                       <path
                         fill="#142359"
@@ -191,11 +87,119 @@
                         d="M17.41,14.25l.7,2.14-1.82-1.32-1.82,1.32.38-1.17a22.57,22.57,0,0,1,2.59-2.29h1.8Z"
                       />
                     </svg>
-                  </div>
-                  {{ "language.en" | transloco }}
-                </button>
-              </div>
+                  }
+                </div>
+                <div
+                  class="transition-transform duration-200"
+                  [class.rotate-180]="languageMenuOpen()"
+                >
+                  <svg
+                    [lucideIcon]="getIcon('chevron-down')"
+                    class="w-4 h-4"
+                  ></svg>
+                </div>
+              </button>
             </div>
+
+            @if (languageMenuOpen()) {
+              <div
+                class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-2xl bg-gray-800 ring-1 ring-gray-700 focus:outline-none border border-gray-700 z-50"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="language-menu-login"
+              >
+                <div class="py-2" role="none">
+                  <button
+                    (click)="selectLanguage('es')"
+                    class="flex items-center w-full text-left px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                    role="menuitem"
+                  >
+                    <div class="mr-3 w-6 h-6">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 64 64"
+                      >
+                        <path
+                          fill="#c70318"
+                          d="M52.77,20H11.23a24,24,0,0,1,41.54,0Z"
+                        />
+                        <path
+                          fill="#c70318"
+                          d="M52.77,44a24,24,0,0,1-41.54,0Z"
+                        />
+                        <path
+                          fill="#ffc500"
+                          d="M56,32a23.73,23.73,0,0,1-3.23,12H11.23a23.91,23.91,0,0,1,0-24H52.77A23.73,23.73,0,0,1,56,32Z"
+                        />
+                      </svg>
+                    </div>
+                    {{ "language.es" | transloco }}
+                  </button>
+
+                  <button
+                    (click)="selectLanguage('en')"
+                    class="flex items-center w-full text-left px-4 py-3 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-white transition-colors duration-200"
+                    role="menuitem"
+                  >
+                    <div class="mr-3 w-6 h-6">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 64 64"
+                      >
+                        <path
+                          fill="#142359"
+                          d="M32,8V28.57H8.25a24,24,0,0,1,6.6-13.35,22.57,22.57,0,0,1,2.59-2.29A23.89,23.89,0,0,1,32,8Z"
+                        />
+                        <path
+                          fill="#bf2121"
+                          d="M48.79,14.86H32V8A23.94,23.94,0,0,1,48.79,14.86Z"
+                        />
+                        <path
+                          fill="#fff"
+                          d="M53.68,21.71H32V14.86H48.79A23.86,23.86,0,0,1,53.68,21.71Z"
+                        />
+                        <path
+                          fill="#bf2121"
+                          d="M55.75,28.57H32V21.71H53.68A23.43,23.43,0,0,1,55.75,28.57Z"
+                        />
+                        <path
+                          fill="#fff"
+                          d="M56,32a22.8,22.8,0,0,1-.25,3.43H8.25a23.65,23.65,0,0,1,0-6.86h47.5A22.8,22.8,0,0,1,56,32Z"
+                        />
+                        <path
+                          fill="#bf2121"
+                          d="M55.75,35.43a23.43,23.43,0,0,1-2.07,6.86H10.32a23.43,23.43,0,0,1-2.07-6.86Z"
+                        />
+                        <path
+                          fill="#bf2121"
+                          d="M48.79,49.14a24,24,0,0,1-33.58,0Z"
+                        />
+                        <path
+                          fill="#fff"
+                          d="M53.68,42.29a23.86,23.86,0,0,1-4.89,6.85H15.21a23.86,23.86,0,0,1-4.89-6.85Z"
+                        />
+                        <polygon
+                          fill="#fff"
+                          points="24.71 10.79 25.41 12.93 27.66 12.93 25.84 14.25 26.54 16.39 24.71 15.07 22.89 16.39 23.59 14.25 21.76 12.93 24.02 12.93 24.71 10.79"
+                        />
+                        <polygon
+                          fill="#fff"
+                          points="24.71 19.39 25.41 21.53 27.66 21.53 25.84 22.86 26.54 25 24.71 23.68 22.89 25 23.59 22.86 21.76 21.53 24.02 21.53 24.71 19.39"
+                        />
+                        <polygon
+                          fill="#fff"
+                          points="16.29 19.39 16.98 21.53 19.24 21.53 17.41 22.86 18.11 25 16.29 23.68 14.46 25 15.16 22.86 13.34 21.53 15.59 21.53 16.29 19.39"
+                        />
+                        <path
+                          fill="#fff"
+                          d="M17.41,14.25l.7,2.14-1.82-1.32-1.82,1.32.38-1.17a22.57,22.57,0,0,1,2.59-2.29h1.8Z"
+                        />
+                      </svg>
+                    </div>
+                    {{ "language.en" | transloco }}
+                  </button>
+                </div>
+              </div>
             }
           </div>
         </div>
@@ -230,16 +234,21 @@
               class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
             />
 
-            @if ( loginForm.get('email')?.touched &&
-            loginForm.get('email')?.hasError('required') ) {
-            <div class="text-red-600 text-sm">
-              {{ "login.email.required" | transloco }}
-            </div>
-            } @if ( loginForm.get('email')?.touched &&
-            loginForm.get('email')?.hasError('email') ) {
-            <div class="text-red-600 text-sm">
-              {{ "login.email.invalid" | transloco }}
-            </div>
+            @if (
+              loginForm.get("email")?.touched &&
+              loginForm.get("email")?.hasError("required")
+            ) {
+              <div class="text-red-600 text-sm">
+                {{ "login.email.required" | transloco }}
+              </div>
+            }
+            @if (
+              loginForm.get("email")?.touched &&
+              loginForm.get("email")?.hasError("email")
+            ) {
+              <div class="text-red-600 text-sm">
+                {{ "login.email.invalid" | transloco }}
+              </div>
             }
           </div>
           <div class="w-full flex flex-col gap-2 mt-4">
@@ -254,58 +263,32 @@
                 placeholder="{{ 'login.password.placeholder' | transloco }}"
                 class="border rounded-lg px-4 py-2 text-sm w-full outline-none border-gray-500 bg-gray-900 text-white placeholder-gray-500"
               />
-              @if (loginForm.get('password')?.value) {
-              <button
-                type="button"
-                (click)="togglePasswordVisibility()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 border-none outline-none focus:outline-none transition-colors duration-200"
-                style="background: none"
-                aria-label="Toggle password visibility"
-              >
-                @if (!showPassword()) {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  class="bi bi-eye"
-                  viewBox="0 0 16 16"
+              @if (loginForm.get("password")?.value) {
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 border-none outline-none focus:outline-none transition-colors duration-200"
+                  style="background: none"
+                  aria-label="Toggle password visibility"
                 >
-                  <path
-                    d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"
-                  />
-                  <path
-                    d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"
-                  />
-                </svg>
-                } @else {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  class="bi bi-eye-slash"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"
-                  />
-                  <path
-                    d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"
-                  />
-                  <path
-                    d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"
-                  />
-                </svg>
-                }
-              </button>
+                  @if (!showPassword()) {
+                    <svg [lucideIcon]="getIcon('eye')" class="w-5 h-5"></svg>
+                  } @else {
+                    <svg
+                      [lucideIcon]="getIcon('eye-off')"
+                      class="w-5 h-5"
+                    ></svg>
+                  }
+                </button>
               }
             </div>
-            @if ( loginForm.get('password')?.touched &&
-            loginForm.get('password')?.hasError('required') ) {
-            <div class="text-red-600 text-sm">
-              {{ "login.password.required" | transloco }}
-            </div>
+            @if (
+              loginForm.get("password")?.touched &&
+              loginForm.get("password")?.hasError("required")
+            ) {
+              <div class="text-red-600 text-sm">
+                {{ "login.password.required" | transloco }}
+              </div>
             }
           </div>
 
@@ -316,25 +299,15 @@
               [disabled]="isLoading()"
             >
               @if (isLoading()) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-arrow-clockwise animate-spin"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-                />
-                <path
-                  d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-                />
-              </svg>
-              <span class="ml-2">{{ "login.loading" | transloco }}</span>
+                <div class="animate-spin">
+                  <svg
+                    [lucideIcon]="getIcon('loader-circle')"
+                    class="w-5 h-5"
+                  ></svg>
+                </div>
+                <span class="ml-2">{{ "login.loading" | transloco }}</span>
               } @else {
-              {{ "login.load" | transloco }}
+                {{ "login.load" | transloco }}
               }
             </button>
           </div>

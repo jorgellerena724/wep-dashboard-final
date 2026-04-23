@@ -11,14 +11,17 @@
           <button
             pButton
             [type]="'button'"
-            [icon]="action.icon"
             [pTooltip]="action.label"
             tooltipPosition="top"
             [class]="action.class"
-            class="w-full sm:w-auto flex items-center justify-center p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed"
+            class="w-full sm:w-auto flex items-center justify-center p-2 text-white rounded-lg transition-colors duration-300 hover:border-gray-700 border-gray-800 bg-gray-800 hover:bg-gray-700 mb-1 disabled:bg-neutral-900 disabled:text-gray-400 dark:disabled:bg-neutral-700 dark:disabled:text-gray-400 disabled:cursor-not-allowed header-action-btn"
             (click)="action.onClick()"
             [disabled]="isHeaderActionDisabled(action) || false"
-          ></button>
+          >
+            @if (isLucideIcon(action.icon)) {
+              <svg [lucideIcon]="getIcon(action.icon)" class="w-4 h-4"></svg>
+            }
+          </button>
         }
       }
     </div>
@@ -31,21 +34,9 @@
       tooltipPosition="top"
     >
       <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="27"
-        height="27"
-        fill="currentColor"
-        class="bi bi-arrow-clockwise"
-        viewBox="0 0 16 16"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-        />
-        <path
-          d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-        />
-      </svg>
+        [lucideIcon]="getIcon('refresh-cw')"
+        class="w-7 h-7 rotate-on-hover"
+      ></svg>
     </button>
   </div>
 
@@ -90,9 +81,16 @@
                       pTooltip="{{ 'table.tooltips.filter' | transloco }}"
                       tooltipPosition="top"
                     >
-                      <i
-                        class="pi pi-filter text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-                      ></i>
+                      <svg
+                        [lucideIcon]="getIcon('filter')"
+                        class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 w-4 h-4"
+                        [class.text-blue-600]="
+                          columnFiltersForm.get(col.field)?.value
+                        "
+                        [class.dark:text-blue-400]="
+                          columnFiltersForm.get(col.field)?.value
+                        "
+                      ></svg>
                     </button>
                   }
                 </div>
@@ -119,7 +117,7 @@
                       class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                       (click)="clearFilter(col.field)"
                     >
-                      <i class="pi pi-times"></i>
+                      <svg lucideX class="w-4 h-4"></svg>
                     </button>
                   }
                 </div>
@@ -152,15 +150,26 @@
                   @if (isRowActionVisible(action, rowData)) {
                     <button
                       pButton
-                      [icon]="getRowActionIcon(action, rowData)"
                       [pTooltip]="getRowActionLabel(action, rowData)"
                       tooltipPosition="top"
                       (click)="action.onClick(rowData)"
                       [class]="
-                        'p-button-text ' + getRowActionClass(action, rowData)
+                        'p-button-text table-action-btn ' +
+                        getRowActionClass(action, rowData)
                       "
                       [disabled]="isRowActionDisabled(action, rowData) || false"
-                    ></button>
+                    >
+                      @if (
+                        isLucideIcon(getRowActionIconName(action, rowData))
+                      ) {
+                        <svg
+                          [lucideIcon]="
+                            getIcon(getRowActionIconName(action, rowData))
+                          "
+                          class="w-4 h-4"
+                        ></svg>
+                      }
+                    </button>
                   }
                 }
               </div>
@@ -353,6 +362,54 @@
   }
   .rotate-on-hover:hover {
     animation: rotate 0.5s linear;
+  }
+
+  /* Estilos para botones de acciones de fila - más pequeños y profesionales */
+  :host ::ng-deep td button {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  :host ::ng-deep td button svg {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+  }
+
+  :host ::ng-deep td button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Icono de filtro en el header más pequeño */
+  :host ::ng-deep th button svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Table action button icon sizing */
+  :host ::ng-deep .table-action-btn svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    min-width: 1rem !important;
+    min-height: 1rem !important;
+  }
+
+  /* Ensure table action buttons have consistent sizing */
+  :host ::ng-deep .table-action-btn {
+    padding: 0.5rem !important;
+    min-width: 2rem !important;
+    min-height: 2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Header action button icon sizing */
+  :host ::ng-deep .header-action-btn svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    min-width: 1rem !important;
+    min-height: 1rem !important;
   }
 
   /* Media Queries */

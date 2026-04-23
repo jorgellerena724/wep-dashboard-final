@@ -20,11 +20,13 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-text-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideDynamicIcon],
   templateUrl: './app-text-field.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -36,6 +38,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ],
 })
 export class TextFieldComponent implements ControlValueAccessor {
+  readonly getIcon = getLucideIcon;
+
   // Inputs usando signal inputs
   id = input<string>('');
   formatCard = input<boolean>(false);

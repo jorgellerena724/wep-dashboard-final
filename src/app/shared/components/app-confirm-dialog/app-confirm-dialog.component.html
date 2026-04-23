@@ -7,7 +7,10 @@
 >
   <ng-template pTemplate="header">
     <div class="!flex !items-center !gap-2">
-      <i class="pi pi-exclamation-triangle !text-yellow-500 text-xl ml-5"></i>
+      <svg
+        [lucideIcon]="getIcon('triangle-alert')"
+        class="w-5 h-5 !text-yellow-500 ml-5"
+      ></svg>
       <h2 class="text-lg font-semibold text-gray-600 dark:!text-gray-300">
         {{ title() }}
       </h2>

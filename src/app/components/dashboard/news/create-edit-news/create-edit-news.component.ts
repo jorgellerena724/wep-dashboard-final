@@ -28,6 +28,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HomeData } from '../../../../shared/interfaces/home.interface';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-create-edit-news',
@@ -39,6 +41,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     AppFileUploadComponent,
     TranslocoModule,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -386,5 +389,9 @@ export class CreateEditNewsComponent implements DynamicComponent {
       ? 'components.news.edit'
       : 'components.news.create';
     return this.transloco.translate(`${prefix}.${suffix}`);
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

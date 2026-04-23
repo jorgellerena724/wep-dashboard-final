@@ -20,15 +20,20 @@ import { isPlatformBrowser } from '@angular/common';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
+import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  imports: [ReactiveFormsModule, TranslocoModule],
+  imports: [ReactiveFormsModule, TranslocoModule, LucideDynamicIcon],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
+  // Método para obtener iconos
+  readonly getIcon = getLucideIcon;
+  readonly icons = icons;
   // Servicios
   private transloco = inject(TranslocoService);
   private authService = inject(AuthService);
@@ -130,7 +135,7 @@ export class LoginComponent {
                 .subscribe((successMessage) => {
                   this.notificationSrv.addNotification(
                     successMessage,
-                    'success'
+                    'success',
                   );
                   this.router.navigate(['/admin']);
                 });
@@ -179,7 +184,7 @@ export class LoginComponent {
                 .selectTranslate(notificationMessage)
                 .pipe(takeUntilDestroyed(this.destroyRef))
                 .subscribe((msg) =>
-                  this.notificationSrv.addNotification(msg, 'error')
+                  this.notificationSrv.addNotification(msg, 'error'),
                 );
             }
           },
@@ -189,7 +194,7 @@ export class LoginComponent {
         .selectTranslate('notifications.login.error.invalidForm')
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((invalidFormMessage) =>
-          this.notificationSrv.addNotification(invalidFormMessage, 'error')
+          this.notificationSrv.addNotification(invalidFormMessage, 'error'),
         );
       this.loginForm.markAllAsTouched();
     }

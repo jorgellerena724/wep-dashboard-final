@@ -45,7 +45,7 @@
         (click)="addVariant()"
         class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
       >
-        <i class="pi pi-plus"></i>
+        <svg [lucideIcon]="getIcon('plus')" class="w-4 h-4"></svg>
         <span>{{ t("fields.variants.add") }}</span>
       </button>
     </div>
@@ -82,7 +82,7 @@
               [pTooltip]="t('fields.variants.deleteVariant')"
               tooltipPosition="top"
             >
-              <i class="pi pi-trash"></i>
+              <svg [lucideIcon]="getIcon('trash-2')" class="w-4 h-4"></svg>
             </button>
           </div>
         }
@@ -93,9 +93,10 @@
     @if (variants().length === 0) {
       <div class="p-4 bg-white dark:bg-white rounded-lg border border-black">
         <div class="text-center py-8">
-          <i
-            class="pi pi-list text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-          ></i>
+          <svg
+            [lucideIcon]="getIcon('list')"
+            class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-3 mx-auto"
+          ></svg>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ t("fields.variants.empty") }}
           </p>
@@ -127,6 +128,7 @@
       [fileRecommendation]="t('fields.image.recommendation')"
       (fileSelected)="onFileUploaded($event)"
       (fileError)="onFileError($event)"
+      (fileWarning)="onFileWarning($event)"
     ></app-file-upload>
 
     <div class="text-md text-gray-500">
@@ -162,7 +164,7 @@
               <div
                 class="absolute -top-2 -left-2 bg-gray-800 dark:bg-gray-700 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10 flex items-center gap-1"
               >
-                <i class="pi pi-star-fill"></i>
+                <svg [lucideIcon]="getIcon('star')" class="w-4 h-4"></svg>
               </div>
             }
             <!-- Preview -->
@@ -220,14 +222,17 @@
                     <div
                       class="absolute bottom-2 left-2 bg-black bg-opacity-70 rounded px-2 py-1"
                     >
-                      <i class="pi pi-play text-white text-sm"></i>
+                      <svg
+                        [lucideIcon]="getIcon('play')"
+                        class="w-4 h-4 text-white"
+                      ></svg>
                     </div>
                   </div>
                 }
                 <!-- Icono si no hay preview -->
                 @if (!productFile.previewUrl && !productFile.videoUrl) {
                   <div class="text-gray-400">
-                    <i class="pi pi-image text-2xl"></i>
+                    <svg [lucideIcon]="getIcon('images')" class="w-8 h-8"></svg>
                   </div>
                 }
               </div>
@@ -256,7 +261,7 @@
                 "
                 tooltipPosition="top"
               >
-                <i class="pi pi-chevron-up text-sm"></i>
+                <svg [lucideIcon]="getIcon('chevron-up')" class="w-4 h-4"></svg>
               </button>
               <button
                 type="button"
@@ -272,7 +277,10 @@
                 "
                 tooltipPosition="top"
               >
-                <i class="pi pi-chevron-down text-sm"></i>
+                <svg
+                  [lucideIcon]="getIcon('chevron-down')"
+                  class="w-4 h-4"
+                ></svg>
               </button>
             </div>
             <!-- Botón eliminar -->
@@ -283,7 +291,7 @@
               [pTooltip]="t('fields.image.deleteImage')"
               tooltipPosition="top"
             >
-              <i class="pi pi-trash"></i>
+              <svg [lucideIcon]="getIcon('trash-2')" class="w-4 h-4"></svg>
             </button>
           </div>
         }
@@ -294,9 +302,10 @@
     @if (productFiles().length === 0) {
       <div class="p-4 bg-white dark:bg-white rounded-lg border border-black">
         <div class="text-center py-8">
-          <i
-            class="pi pi-image text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-          ></i>
+          <svg
+            [lucideIcon]="getIcon('images')"
+            class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-3 mx-auto"
+          ></svg>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ "image.nodata.title" | transloco }}
           </p>

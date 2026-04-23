@@ -30,10 +30,18 @@ import { ConfirmDialogService } from '../../../../shared/services/system/confirm
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest } from 'rxjs';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-list-news',
-  imports: [TableComponent, ButtonModule, TranslocoModule, TooltipModule],
+  imports: [
+    TableComponent,
+    ButtonModule,
+    TranslocoModule,
+    TooltipModule,
+    LucideDynamicIcon,
+  ],
   templateUrl: './list-news.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -533,5 +541,9 @@ export class ListNewsComponent {
     Object.values(videos).forEach((url) => {
       if (url.startsWith('blob:')) URL.revokeObjectURL(url);
     });
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

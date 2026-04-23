@@ -32,6 +32,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TooltipModule } from 'primeng/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 interface ProductVariant {
   description: string;
@@ -59,6 +61,7 @@ interface ProductFile {
     SelectComponent,
     TranslocoModule,
     TooltipModule,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -734,6 +737,10 @@ export class CreateEditProductComponent implements DynamicComponent {
     this.notificationSrv.addNotification(error.message, 'error');
   }
 
+  onFileWarning(warning: FileUploadError): void {
+    this.notificationSrv.addNotification(warning.message, 'warning');
+  }
+
   onVideoLoaded(event: Event, videoPlayer: HTMLVideoElement): void {
     videoPlayer.muted = true;
     videoPlayer.playsInline = true;
@@ -796,5 +803,9 @@ export class CreateEditProductComponent implements DynamicComponent {
       this.variants.set([]);
       this.variantsFormArray.clear();
     }
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }

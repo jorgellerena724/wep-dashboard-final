@@ -20,6 +20,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 export interface Column {
   field: string;
@@ -63,10 +65,14 @@ export interface RowAction {
     TooltipModule,
     PaginatorModule,
     TranslocoModule,
+    LucideDynamicIcon,
   ],
   templateUrl: './app-table.component.html',
 })
 export class TableComponent {
+  // Método para obtener iconos de Lucide
+  readonly getIcon = getLucideIcon;
+
   private transloco = inject(TranslocoService);
   private themeService = inject(ThemeService);
   private fb = inject(FormBuilder);
@@ -287,5 +293,19 @@ export class TableComponent {
     if (value === null || value === undefined) return '';
     const str = String(value);
     return str.length > limit ? str.slice(0, limit) + '…' : str;
+  }
+
+  // Métodos helper para iconos de Lucide
+  isLucideIcon(icon: string): boolean {
+    return !icon?.startsWith('pi pi-');
+  }
+
+  getRowActionIconName(action: RowAction, rowData: any): string {
+    const icon = this.getRowActionIcon(action, rowData);
+    return icon ? icon.replace('pi pi-', '') : '';
+  }
+
+  getHeaderActionIcon(action: TableAction): string {
+    return action.icon;
   }
 }
