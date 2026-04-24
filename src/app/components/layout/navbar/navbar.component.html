@@ -247,9 +247,11 @@
                 id="user-menu"
                 [attr.aria-expanded]="userMenuOpen()"
                 aria-haspopup="true"
+                pTooltip="{{ 'navbar.user_menu' | transloco }}"
+                tooltipPosition="bottom"
               >
                 <!-- Icono principal de usuario -->
-                <svg [lucideIcon]="getIcon('user-cog')" class="w-5 h-5"></svg>
+                <svg [lucideIcon]="getIcon('user')" class="w-7 h-7"></svg>
 
                 <!-- Flecha que rota igual que en el selector de idioma -->
                 <div
@@ -686,7 +688,10 @@
               (click)="onNavItemClick('products')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <svg [lucideIcon]="getIcon('postcard')" class="w-4 h-4"></svg>
+              <svg
+                [lucideIcon]="getIcon('shopping-basket')"
+                class="w-4 h-4"
+              ></svg>
               <span class="ml-2">{{ "sidebar.offers" | transloco }}</span>
             </a>
           </div>
@@ -703,7 +708,7 @@
               isPublicationsSubmenuOpen() || isPublicationsRouteActive(),
           }"
         >
-          <svg [lucideIcon]="getIcon('book-open-check')" class="w-5 h-5"></svg>
+          <svg [lucideIcon]="getIcon('book-open-text')" class="w-5 h-5"></svg>
           <span class="ml-2 whitespace-nowrap flex-1">{{
             "sidebar.publications" | transloco
           }}</span>
@@ -739,8 +744,13 @@
               (click)="onNavItemClick('publications')"
               class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
             >
-              <svg [lucideIcon]="getIcon('postcard')" class="w-4 h-4"></svg>
-              <span class="ml-2">{{ "sidebar.publications" | transloco }}</span>
+              <svg
+                [lucideIcon]="getIcon('book-open-check')"
+                class="w-4 h-4"
+              ></svg>
+              <span class="ml-2">{{
+                "sidebar.manage-publications" | transloco
+              }}</span>
             </a>
           </div>
         </div>
@@ -870,7 +880,10 @@
                 (click)="onNavItemClick('chatbot')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <svg [lucideIcon]="getIcon('cpu')" class="w-4 h-4"></svg>
+                <svg
+                  [lucideIcon]="getIcon('brain-circuit')"
+                  class="w-4 h-4"
+                ></svg>
                 <span class="ml-2">{{
                   "sidebar.chatbot_models" | transloco
                 }}</span>
@@ -881,7 +894,7 @@
                 (click)="onNavItemClick('chatbot')"
                 class="border border-gray-700 flex items-center p-2 mb-1 rounded-lg hover:bg-gray-600 hover:text-white text-sm"
               >
-                <svg [lucideIcon]="getIcon('sliders')" class="w-4 h-4"></svg>
+                <svg [lucideIcon]="getIcon('settings')" class="w-4 h-4"></svg>
                 <span class="ml-2">{{
                   "sidebar.chatbot_config" | transloco
                 }}</span>
