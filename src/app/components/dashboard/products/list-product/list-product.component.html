@@ -94,14 +94,6 @@
                     disablePictureInPicture
                     [title]="rowData.firstFileTitle || ''"
                   ></video>
-                  <div
-                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg"
-                  >
-                    <svg
-                      [lucideIcon]="getIcon('play')"
-                      class="w-5 h-5 text-white"
-                    ></svg>
-                  </div>
                 </div>
               }
               @if (!getVideoUrl(rowData) && rowData.firstImagePath) {
