@@ -206,14 +206,14 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
           },
           {
             label: 'sidebar.offers',
-            icon: 'postcard',
+            icon: 'shopping-basket',
             route: ['/products'],
           },
         ],
       },
       {
         label: 'sidebar.publications',
-        icon: 'book-open-check',
+        icon: 'book-open-text',
         children: [
           {
             label: 'sidebar.publications-category',
@@ -221,8 +221,8 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
             route: ['/publication-category'],
           },
           {
-            label: 'sidebar.publications',
-            icon: 'postcard',
+            label: 'sidebar.manage-publications',
+            icon: 'book-open-check',
             route: ['/publications'],
           },
         ],
@@ -255,12 +255,12 @@ export class SidebarComponent implements OnInit, OnDestroy, OnChanges {
         children: [
           {
             label: 'sidebar.chatbot_models',
-            icon: 'cpu',
+            icon: 'brain-circuit',
             route: ['/chatbot-models'],
           },
           {
             label: 'sidebar.chatbot_config',
-            icon: 'sliders',
+            icon: 'settings',
             route: ['/chatbot-config'],
           },
         ],

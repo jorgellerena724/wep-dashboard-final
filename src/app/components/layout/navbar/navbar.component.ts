@@ -35,6 +35,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
 import { getLucideIcon, icons } from '../../../core/constants/icons.constant';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-navbar',
@@ -47,6 +48,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
     TranslocoModule,
     ConfirmDialogComponent,
     LucideDynamicIcon,
+    TooltipModule,
   ],
   templateUrl: './navbar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
