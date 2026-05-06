@@ -1,13 +1,13 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../system/config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BackupService {
-  private apiUrl = environment.api;
+  private config = inject(ConfigService);
 
   // Signals para estados
   public isDownloading = signal<boolean>(false);
@@ -21,7 +21,7 @@ export class BackupService {
   downloadBackup(): Observable<Blob> {
     this.isDownloading.set(true);
     return this.http
-      .get(`${this.apiUrl}backup/download`, {
+      .get(`${this.config.api}backup/download`, {
         responseType: 'blob',
       })
       .pipe(tap(() => this.isDownloading.set(false)));
@@ -36,7 +36,7 @@ export class BackupService {
 
     this.isRestoring.set(true);
     return this.http
-      .post(`${this.apiUrl}backup/restore`, formData)
+      .post(`${this.config.api}backup/restore`, formData)
       .pipe(tap(() => this.isRestoring.set(false)));
   }
 }

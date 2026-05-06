@@ -1,43 +1,42 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, of } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { Observable } from 'rxjs';
+import { ConfigService } from '../system/config.service';
 import { HomeData } from '../../interfaces/home.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
-  private apiUrl = environment.api;
-  private imgUrl = environment.api_img;
+  private config = inject(ConfigService);
 
   constructor(private http: HttpClient) {}
 
   get(): Observable<HomeData[]> {
     const timestamp = new Date().getTime();
     return this.http.get<HomeData[]>(
-      this.apiUrl + `product/?no-cache=${timestamp}`
+      this.config.api + `product/?no-cache=${timestamp}`,
     );
   }
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = `${this.imgUrl}${name}/?no-cache=${timestamp}`;
+    const url = `${this.config.api_img}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl + 'product/', data);
+    return this.http.post<any[]>(this.config.api + 'product/', data);
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}product/${id}`, formData);
+    return this.http.patch(`${this.config.api}product/${id}`, formData);
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}product/${id}`, {
+    return this.http.delete<any>(`${this.config.api}product/${id}`, {
       body: { id: id },
     });
   }

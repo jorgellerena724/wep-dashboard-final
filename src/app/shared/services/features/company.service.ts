@@ -1,49 +1,48 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../system/config.service';
 import { HomeData } from '../../interfaces/home.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CompanyService {
-  private apiUrl = environment.api;
-  private imgUrl = environment.api_img;
+  private config = inject(ConfigService);
 
   constructor(private http: HttpClient) {}
 
   get(): Observable<HomeData[]> {
     const timestamp = new Date().getTime();
     return this.http.get<HomeData[]>(
-      this.apiUrl + `company/?no-cache=${timestamp}`
+      this.config.api + `company/?no-cache=${timestamp}`,
     );
   }
 
   getImage(name: string): Observable<Blob> {
     const timestamp = new Date().getTime();
-    const url = `${this.imgUrl}${name}/?no-cache=${timestamp}`;
+    const url = `${this.config.api_img}${name}/?no-cache=${timestamp}`;
     return this.http.get(url, {
       responseType: 'blob',
     });
   }
 
   post(data: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl + 'company/', data);
+    return this.http.post<any[]>(this.config.api + 'company/', data);
   }
 
   patch(formData: FormData, id: number): Observable<any> {
-    return this.http.patch(`${this.apiUrl}company/${id}`, formData);
+    return this.http.patch(`${this.config.api}company/${id}`, formData);
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}company/${id}`, {
+    return this.http.delete<any>(`${this.config.api}company/${id}`, {
       body: { id: id },
     });
   }
 
   toggleStatus(id: number): Observable<any[]> {
-    return this.http.patch<any[]>(`${this.apiUrl}company/status/${id}`, {
+    return this.http.patch<any[]>(`${this.config.api}company/status/${id}`, {
       id: id,
     });
   }
