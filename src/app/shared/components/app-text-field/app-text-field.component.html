@@ -9,29 +9,68 @@
 
     <!-- Input normal (cuando no es textarea) -->
     @if (!isTextArea()) {
-      <input
-        #input
-        [id]="id()"
-        [maxlength]="maxLength() || (formatCard() ? 19 : null)"
-        (input)="formatCard() ? onCardInput($event) : null"
-        [min]="type() === 'number' && preventNegative() ? '0' : null"
-        (keypress)="
-          type() === 'number' || numbersOnly() ? numberValidation($event) : null
-        "
-        [type]="effectiveType()"
-        [formControl]="$any(actualControl())"
-        [placeholder]="placeholder() || label()"
-        (input)="onInput($event)"
-        autocomplete="new-password"
-        (blur)="onBlur()"
-        class="w-full px-2.5 pr-8 py-1.5 text-gray-900 bg-white border border-gray-800 dark:border-white rounded-md transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed placeholder:text-gray-400"
-        [ngClass]="{
-          'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500':
-            actualControl()?.invalid && actualControl()?.touched,
-          'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500 focus:border-green-500 dark:focus:border-green-500':
-            wasFixedError(),
-        }"
-      />
+      <div class="flex">
+        <!-- INPUT EN MODO BÚSQUEDA: no usa formControl para mostrar, solo muestra displayValue -->
+        @if (searchMode()) {
+          @let isDisabledSearch = actualControl()?.disabled || isDisabled();
+          <input
+            #input
+            [id]="id()"
+            [type]="'text'"
+            [value]="displayValue() || ''"
+            [placeholder]="placeholder() || label()"
+            [readOnly]="true"
+            [disabled]="isDisabledSearch"
+            (click)="!isDisabledSearch && searchButtonClick.emit()"
+            (blur)="onBlur()"
+            autocomplete="off"
+            class="w-full px-2.5 py-1.5 text-gray-900 dark:text-gray-200 bg-white dark:bg-[rgb(15,14,14)] border border-gray-800 dark:border-white rounded-l-md transition-colors placeholder:text-gray-400"
+            [ngClass]="{
+              'cursor-pointer': !isDisabledSearch,
+              'cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-400 dark:border-gray-600':
+                isDisabledSearch,
+              'border-red-500 dark:border-red-500':
+                actualControl()?.invalid && actualControl()?.touched && !isDisabledSearch,
+              'border-green-500 dark:border-green-500': wasFixedError() && !isDisabledSearch,
+            }"
+          />
+          <button
+            type="button"
+            (click)="searchButtonClick.emit()"
+            [disabled]="isDisabledSearch"
+            class="px-3 flex items-center justify-center shrink-0 bg-gray-800 hover:bg-gray-700 text-white border border-gray-800 rounded-r-md transition-colors duration-200 disabled:bg-gray-400 disabled:border-gray-400 disabled:cursor-not-allowed"
+            aria-label="Buscar"
+          >
+            <svg [lucideIcon]="getIcon('search')" class="w-4 h-4"></svg>
+          </button>
+        }
+
+        <!-- INPUT NORMAL: usa formControl como siempre -->
+        @if (!searchMode()) {
+          <input
+            #input
+            [id]="id()"
+            [maxlength]="maxLength() || (formatCard() ? 19 : null)"
+            [min]="type() === 'number' && preventNegative() ? '0' : null"
+            (keypress)="
+              type() === 'number' || numbersOnly() ? numberValidation($event) : null
+            "
+            [type]="effectiveType()"
+            [formControl]="$any(actualControl())"
+            [placeholder]="placeholder() || label()"
+            (input)="onInput($event)"
+            autocomplete="new-password"
+            (blur)="onBlur()"
+            class="w-full px-2.5 pr-8 py-1.5 text-gray-900 bg-white border border-gray-800 dark:border-white rounded-md transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed placeholder:text-gray-400"
+            [ngClass]="{
+              'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500':
+                actualControl()?.invalid && actualControl()?.touched,
+              'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500 focus:border-green-500 dark:focus:border-green-500':
+                wasFixedError(),
+            }"
+          />
+        }
+      </div>
     }
 
     <!-- Textarea (cuando isTextArea es true) -->
@@ -43,7 +82,7 @@
         [placeholder]="placeholder() || label()"
         (input)="onInput($event)"
         (blur)="onBlur()"
-        [attr.disabled]="disabled() ? true : null"
+        [attr.disabled]="isDisabled() ? true : null"
         class="w-full px-2 py-1 custom-scroll border border-gray-800 rounded-md outline-none bg-white transition-all duration-200 resize-none text-gray-900 dark:text-gray-900"
         [class]="isTextArea() ? textAreaHeight() : ''"
         [ngClass]="{
@@ -51,7 +90,10 @@
             actualControl()?.invalid && actualControl()?.touched,
           'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500 focus:border-green-500 dark:focus:border-green-500':
             wasFixedError(),
-          'disabled:bg-gray-300 disabled:cursor-not-allowed': disabled(),
+          'bg-gray-300 cursor-not-allowed text-gray-500':
+            actualControl()?.disabled || isDisabled(),
+          'disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500':
+            actualControl()?.disabled || isDisabled(),
         }"
       ></textarea>
     }
@@ -82,7 +124,7 @@
   @if (shouldShowError()) {
     <div class="mt-1 text-sm text-red-500 max-h-20 overflow-y-auto">
       <ul class="list-disc pl-4 space-y-1">
-        @for (error of getErrorMessages(); track error) {
+        @for (error of getErrorMessages(); track $index) {
           <li>{{ error }}</li>
         }
       </ul>

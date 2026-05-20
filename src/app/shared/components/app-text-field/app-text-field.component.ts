@@ -11,6 +11,8 @@ import {
   ChangeDetectionStrategy,
   DestroyRef,
   inject,
+  output,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -38,6 +40,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
   ],
 })
 export class TextFieldComponent implements ControlValueAccessor {
+  private cdr = inject(ChangeDetectorRef);
+
   readonly getIcon = getLucideIcon;
 
   // Inputs usando signal inputs
@@ -57,6 +61,9 @@ export class TextFieldComponent implements ControlValueAccessor {
   errorMessage = input<string>('');
   isTextArea = input<boolean>(false);
   textAreaHeight = input<string>('h-28');
+  searchMode = input<boolean>(false);
+  displayValue = input<string>('');
+  searchButtonClick = output<void>();
 
   // ViewChild para acceder a los elementos del DOM
   inputElement = viewChild<ElementRef<HTMLInputElement>>('input');
@@ -71,6 +78,13 @@ export class TextFieldComponent implements ControlValueAccessor {
 
   // ✅ Signal para trackear si ya nos suscribimos
   private subscribed = signal<boolean>(false);
+
+  displayLabel = computed(() => {
+    if (this.searchMode() && this.displayValue()) {
+      return this.displayValue();
+    }
+    return '';
+  });
 
   // Computed para combinar disabled input y estado interno
   isDisabled = computed(() => this.disabled() || this._disabledState());
@@ -384,5 +398,6 @@ export class TextFieldComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this._disabledState.set(isDisabled);
+    this.cdr.markForCheck();
   }
 }

@@ -13,6 +13,7 @@ import {
   ChangeDetectionStrategy,
   inject,
   DestroyRef,
+  OnDestroy,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -55,7 +56,7 @@ interface SelectOption {
     },
   ],
 })
-export class SelectComponent implements ControlValueAccessor {
+export class SelectComponent implements ControlValueAccessor, OnDestroy {
   readonly getIcon = getLucideIcon;
 
   // Inputs usando signal inputs
@@ -100,6 +101,9 @@ export class SelectComponent implements ControlValueAccessor {
   private errorTracker = signal<number>(0);
   hadError = signal<boolean>(false);
   private subscribed = signal<boolean>(false);
+
+  // Flag para prevenir emisiones después de destrucción
+  private destroyed = false;
 
   // Computed signals
   value = computed(() => this._value());
@@ -222,7 +226,13 @@ export class SelectComponent implements ControlValueAccessor {
   });
 
   regularOptions = computed(() => {
-    return this.paginatedOptions().filter((option) => !option.custom);
+    const opts = this.paginatedOptions().filter((option) => !option.custom);
+
+    if (!this.multiple()) {
+      return [{ label: '-- Sin selección --', value: null } as SelectOption, ...opts];
+    }
+
+    return opts;
   });
 
   totalPages = computed(() => {
@@ -274,7 +284,9 @@ export class SelectComponent implements ControlValueAccessor {
 
         // Establecer nuevo timer
         this.debounceTimer = setTimeout(() => {
-          this.search.emit(term);
+          if (!this.destroyed) {
+            this.search.emit(term);
+          }
         }, 300);
       }
     });
@@ -372,6 +384,7 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   isOptionDisabled(option: SelectOption): boolean {
+    if (option.value === null) return false;
     const validCombos = this.validCombinations();
     if (!validCombos || !this.multiple()) {
       return false;
@@ -432,6 +445,8 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   onCustomOptionClick() {
+    if (this.destroyed) return;
+    
     const term = this.searchTerm();
     const customOption: SelectOption = {
       label: term,
@@ -449,6 +464,8 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   onInputChange(event: Event) {
+    if (this.destroyed) return;
+    
     const previousSearch = this.searchTerm();
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
@@ -468,7 +485,7 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   onOptionClick(option: SelectOption) {
-    if (this.isDisabled()) return;
+    if (this.isDisabled() || this.destroyed) return;
 
     if (this.allowCustomEntries() && option.value === this.searchTerm()) {
       const customOption: SelectOption = {
@@ -495,6 +512,8 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   selectOption(option: SelectOption) {
+    if (this.destroyed) return;
+    
     if (this.multiple()) {
       this.toggleOption(option);
       return;
@@ -510,7 +529,7 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   toggleOption(option: SelectOption) {
-    if (this.isOptionDisabled(option)) return;
+    if (this.isOptionDisabled(option) || this.destroyed) return;
     if (!this.multiple()) return;
 
     let currentValue = this._value();
@@ -580,5 +599,12 @@ export class SelectComponent implements ControlValueAccessor {
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
   }
 }

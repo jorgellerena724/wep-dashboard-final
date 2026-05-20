@@ -160,7 +160,7 @@
   @if (shouldShowError()) {
     <div class="mt-1 text-sm text-red-500 max-h-20 overflow-y-auto">
       <ul class="list-disc pl-4 space-y-1">
-        @for (error of getErrorMessages(); track error) {
+        @for (error of getErrorMessages(); track $index) {
           <li>{{ error }}</li>
         }
       </ul>
