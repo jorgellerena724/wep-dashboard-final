@@ -14,7 +14,7 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import {
   provideHttpClient,
   withFetch,
