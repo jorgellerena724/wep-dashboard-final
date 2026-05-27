@@ -1440,7 +1440,10 @@
     "buttons": {
       "acept": "Aceptar",
       "cancel": "Cancelar"
-    }
+    },
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "formInvalid": "Compruebe los campos del formulario."
   },
   "image": {
     "loading": "Cargando archivo actual...",

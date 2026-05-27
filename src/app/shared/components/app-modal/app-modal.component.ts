@@ -18,7 +18,7 @@ import { DynamicComponent } from '../../interfaces/dynamic.interface';
 import { NotificationService } from '../../services/system/notification.service';
 import { Subscription } from 'rxjs';
 import { FormControl, FormGroup } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { getLucideIcon } from '../../../core/constants/icons.constant';
 import { LucideDynamicIcon } from '@lucide/angular';
 
@@ -26,7 +26,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
   selector: 'app-modal',
   templateUrl: './app-modal.component.html',
   standalone: true,
-  imports: [DialogModule, ButtonModule, CommonModule, LucideDynamicIcon],
+  imports: [DialogModule, ButtonModule, TranslocoModule, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {
@@ -35,6 +35,7 @@ export class ModalComponent {
   private notificationSrv = inject(NotificationService);
   private destroyRef = inject(DestroyRef);
   private modalSrv = inject(ModalService);
+  private transloco = inject(TranslocoService);
 
   // Usando viewChild signal - disponible después del render
   container = viewChild.required('dynamicContent', { read: ViewContainerRef });
@@ -126,6 +127,15 @@ export class ModalComponent {
   }
 
   closeModal() {
+    // Intentar llamar al handleCancel del componente hijo antes de cerrar
+    if (this.componentRef?.instance?.handleCancel) {
+      this.componentRef.instance.handleCancel();
+    } else {
+      this.doClose();
+    }
+  }
+
+  private doClose() {
     // Cerrar directamente sin mostrar transición de contraer
     this.visible.set(false);
     this.isProcessing.set(false);
@@ -175,7 +185,7 @@ export class ModalComponent {
 
       if (this.hasRealErrors(form)) {
         this.notificationSrv.addNotification(
-          'Compruebe los campos del formulario.',
+          this.transloco.translate('modal.formInvalid'),
           'warning',
         );
         return;

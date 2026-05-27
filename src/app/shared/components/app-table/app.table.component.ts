@@ -8,6 +8,8 @@ import {
   effect,
   viewChild,
   ChangeDetectionStrategy,
+  untracked,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,10 +20,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MenuModule } from 'primeng/menu';
 import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { getLucideIcon } from '../../../core/constants/icons.constant';
+import { debounceTime, Subject } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
 
 export interface Column {
   field: string;
@@ -31,6 +35,8 @@ export interface Column {
   filterPlaceholder?: string;
   width?: string;
   defaultSort?: true;
+  filterType?: 'text' | 'exact' | 'select';
+  filterOptions?: { label: string; value: any }[];
 }
 
 export interface TableAction {
@@ -51,6 +57,17 @@ export interface RowAction {
   isDisabled?: (rowData: any) => boolean;
 }
 
+export interface PageChangeEvent {
+  first: number;
+  rows: number;
+  page: number;
+  pageCount: number;
+}
+
+export interface FilterChangeEvent {
+  filters: { [key: string]: any };
+}
+
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -64,65 +81,73 @@ export interface RowAction {
     MenuModule,
     TooltipModule,
     PaginatorModule,
+    SelectModule,
     TranslocoModule,
     LucideDynamicIcon,
   ],
   templateUrl: './app-table.component.html',
 })
 export class TableComponent {
-  // Método para obtener iconos de Lucide
+  private fb = inject(FormBuilder);
+  private themeService = inject(ThemeService);
+  private cdr = inject(ChangeDetectorRef);
+  private transloco = inject(TranslocoService);
+
   readonly getIcon = getLucideIcon;
 
-  private transloco = inject(TranslocoService);
-  private themeService = inject(ThemeService);
-  private fb = inject(FormBuilder);
-
+  isDark = toSignal(this.themeService.darkMode$, { initialValue: false });
   private actionsHeaderLabel = toSignal(
     this.transloco.selectTranslate('table.actions'),
-    { initialValue: 'Actions' },
+    { initialValue: 'Acciones' },
   );
-  isDark = toSignal(this.themeService.darkMode$, { initialValue: false });
 
   // Inputs
   data = input<any[]>([]);
   columns = input<Column[]>([]);
   rowsPerPage = input<number>(10);
   loading = input<boolean>(false);
+  showActionRow = input<boolean>(true);
   customTemplates = input<{ [key: string]: any }>({});
   headerActions = input<TableAction[]>([]);
   rowActions = input<RowAction[]>([]);
+  hasShadow = input<boolean>(true);
   defaultSortField = input<string>('');
   defaultSortOrder = input<number>(1);
 
+  serverSide = input<boolean>(false);
+  totalRecords = input<number>(0);
+
+  // Outputs
   refresh = output<void>();
+  pageChange = output<PageChangeEvent>();
+  filterChange = output<FilterChangeEvent>();
 
   dt = viewChild<Table>('dt');
 
-  // State signals (isDark ya no está aquí porque es un toSignal arriba)
-  originalData = signal<any[]>([]);
+  // State signals
+  private originalData = signal<any[]>([]);
   filteredData = signal<any[]>([]);
   displayedData = signal<any[]>([]);
-  totalRecords = signal<number>(0);
+  localTotalRecords = signal<number>(0);
   first = signal<number>(0);
   showFilterInput = signal<{ [key: string]: boolean }>({});
 
-  columnFiltersForm: FormGroup;
+  columnFiltersForm!: FormGroup;
+
+  private filterSubject = new Subject<void>();
 
   // Computed signals
   columnsWithActions = computed<Column[]>(() => {
-    const rowActionsArray = this.rowActions();
     const columnsArray = this.columns();
-
-    // AHORA LEEMOS LA SIGNAL DE TRADUCCIÓN
-    // Al leer actionsHeaderLabel(), Angular crea una dependencia.
-    // Cuando Transloco termine de cargar, esta signal cambia y el computed se re-ejecuta solo.
+    const showAction = this.showActionRow();
+    const rowActionsArray = this.rowActions();
     const translatedHeader = this.actionsHeaderLabel();
 
-    if (rowActionsArray.length > 0) {
+    if (showAction && rowActionsArray.length > 0) {
       return [
         {
           field: 'actions',
-          header: translatedHeader || 'Actions', // Fallback seguro
+          header: translatedHeader || 'Acciones',
           width: '150px',
           defaultSort: true,
         },
@@ -132,38 +157,59 @@ export class TableComponent {
     return [...columnsArray];
   });
 
-  // ... Resto de computed signals ...
+  effectiveTotalRecords = computed(() => {
+    return this.serverSide() ? this.totalRecords() : this.localTotalRecords();
+  });
+
+  effectiveDisplayedData = computed(() => {
+    return this.serverSide() ? this.data() : this.displayedData();
+  });
+
+  activeFilters = computed(() => {
+    const form = this.columnFiltersForm;
+    if (!form) return {};
+
+    const active: { [key: string]: any } = {};
+    Object.keys(form.controls).forEach((field) => {
+      const value = form.get(field)?.value;
+      if (value !== null && value !== undefined && value !== '') {
+        active[field] = value;
+      }
+    });
+    return active;
+  });
 
   constructor() {
     this.columnFiltersForm = this.fb.group({});
 
-    // NOTA: He eliminado el effect del darkMode porque lo sustituí por toSignal arriba.
-    // Es mucho más limpio y "Zoneless friendly".
-
-    // Effect para actualizar datos
-    effect(() => {
-      const newData = this.data();
-      // Usamos untracked si no queremos que applyFilters cree dependencias circulares,
-      // aunque aquí está bien.
-      this.originalData.set([...newData]);
-      this.applyFilters();
+    this.filterSubject.pipe(debounceTime(300)).subscribe(() => {
+      if (this.serverSide()) {
+        this.emitFilterChange();
+      }
     });
 
-    // Effect para configurar filtros
+    effect(() => {
+      const newData = this.data();
+      untracked(() => {
+        this.originalData.set([...newData]);
+
+        if (!this.serverSide()) {
+          this.applyFilters();
+        }
+      });
+    });
+
     effect(() => {
       const cols = this.columns();
       this.setupColumnFilters(cols);
     });
 
-    // Effect para sort
     effect(() => {
       const sortField = this.defaultSortField();
       const sortOrder = this.defaultSortOrder();
       const tableRef = this.dt();
 
       if (sortField && tableRef) {
-        // setTimeout a veces es necesario para PrimeNG al inicio,
-        // pero intenta evitarlo si puedes. En zoneless a veces requestAnimationFrame es mejor.
         setTimeout(() => {
           tableRef.sortField = sortField;
           tableRef.sortOrder = sortOrder;
@@ -171,18 +217,23 @@ export class TableComponent {
         });
       }
     });
+
+    effect(() => {
+      const activeFilters = this.activeFilters();
+
+      if (!this.serverSide()) {
+        this.applyFilters();
+      }
+    });
   }
 
-  // ... El resto de tus métodos privados y públicos se mantienen igual ...
-
   private setupColumnFilters(cols: Column[]) {
-    // ... tu código ...
     const filterControls: any = {};
     const filterVisibility: { [key: string]: boolean } = {};
 
     cols.forEach((col) => {
       if (col.filter) {
-        filterControls[col.field] = [''];
+        filterControls[col.field] = [col.filterType === 'select' ? null : ''];
         filterVisibility[col.field] = false;
       }
     });
@@ -193,29 +244,57 @@ export class TableComponent {
     Object.keys(this.columnFiltersForm.controls).forEach((field) => {
       this.columnFiltersForm.get(field)?.valueChanges.subscribe(() => {
         this.first.set(0);
-        this.applyFilters();
+
+        if (this.serverSide()) {
+          this.filterSubject.next();
+        } else {
+          this.applyFilters();
+        }
+
+        this.cdr.markForCheck();
       });
     });
   }
 
+  private emitFilterChange() {
+    const filters: { [key: string]: any } = {};
+
+    Object.keys(this.columnFiltersForm.controls).forEach((field) => {
+      const value = this.columnFiltersForm.get(field)?.value;
+      if (value !== null && value !== undefined && value !== '') {
+        filters[field] = value;
+      }
+    });
+
+    this.filterChange.emit({ filters });
+  }
+
   private applyFilters() {
-    // ... tu código ...
     const original = this.originalData();
     let filtered = [...original];
 
     this.columns().forEach((col) => {
       if (col.filter && this.columnFiltersForm.get(col.field)?.value) {
-        const searchTerm = this.columnFiltersForm
-          .get(col.field)
-          ?.value.toLowerCase();
-        filtered = filtered.filter((item) =>
-          String(item[col.field]).toLowerCase().includes(searchTerm),
-        );
+        const filterValue = this.columnFiltersForm.get(col.field)?.value;
+
+        if (col.filterType === 'select') {
+          filtered = filtered.filter((item) => item[col.field] === filterValue);
+        } else if (col.filterType === 'exact') {
+          const searchTerm = String(filterValue).toLowerCase();
+          filtered = filtered.filter(
+            (item) => String(item[col.field]).toLowerCase() === searchTerm,
+          );
+        } else {
+          const searchTerm = String(filterValue).toLowerCase();
+          filtered = filtered.filter((item) =>
+            String(item[col.field]).toLowerCase().includes(searchTerm),
+          );
+        }
       }
     });
 
     this.filteredData.set(filtered);
-    this.totalRecords.set(filtered.length);
+    this.localTotalRecords.set(filtered.length);
     this.updateDisplayedData();
   }
 
@@ -227,50 +306,144 @@ export class TableComponent {
     this.displayedData.set(displayed);
   }
 
-  // ... Resto de métodos (clearFilter, toggleFilter, onPageChange, etc) ...
-  // Asegúrate de copiarlos tal cual los tenías
   clearFilter(field: string) {
-    if (this.columnFiltersForm.get(field)) {
-      this.columnFiltersForm.get(field)?.setValue('');
-    }
+    const column = this.columns().find((col) => col.field === field);
+    const value = column?.filterType === 'select' ? null : '';
+    this.columnFiltersForm.get(field)?.setValue(value);
+
     const visibility = this.showFilterInput();
     this.showFilterInput.set({ ...visibility, [field]: false });
+    this.cdr.markForCheck();
   }
 
   toggleFilter(field: string) {
     const visibility = this.showFilterInput();
     this.showFilterInput.set({ ...visibility, [field]: !visibility[field] });
+    this.cdr.markForCheck();
   }
 
   onPageChange(event: any) {
     this.first.set(event.first);
-    // ✨ FIX: Actualizar displayedData considerando el nuevo rows del evento
-    const filtered = this.filteredData();
-    const displayed = filtered.slice(event.first, event.first + event.rows);
-    this.displayedData.set(displayed);
+
+    if (this.serverSide()) {
+      this.pageChange.emit({
+        first: event.first,
+        rows: event.rows,
+        page: event.page,
+        pageCount: Math.ceil(this.totalRecords() / event.rows),
+      });
+    } else {
+      const filtered = this.filteredData();
+      const displayed = filtered.slice(event.first, event.first + event.rows);
+      this.displayedData.set(displayed);
+    }
+
+    this.cdr.markForCheck();
   }
 
   refreshData() {
     this.refresh.emit();
   }
 
+  isFirstPage(): boolean {
+    return this.first() === 0;
+  }
+
+  isLastPage(): boolean {
+    const total = this.effectiveTotalRecords();
+    return this.first() + this.rowsPerPage() >= total;
+  }
+
+  next() {
+    const total = this.serverSide() ? this.totalRecords() : this.filteredData().length;
+    let first = this.first() + this.rowsPerPage();
+
+    if (first >= total) {
+      first = total - this.rowsPerPage();
+    }
+
+    this.first.set(first);
+
+    if (this.serverSide()) {
+      const page = Math.floor(first / this.rowsPerPage());
+      this.pageChange.emit({
+        first: first,
+        rows: this.rowsPerPage(),
+        page: page,
+        pageCount: Math.ceil(total / this.rowsPerPage()),
+      });
+    } else {
+      this.updateDisplayedData();
+    }
+  }
+
+  prev() {
+    let first = this.first() - this.rowsPerPage();
+
+    if (first < 0) {
+      first = 0;
+    }
+
+    this.first.set(first);
+
+    if (this.serverSide()) {
+      const page = Math.floor(first / this.rowsPerPage());
+      this.pageChange.emit({
+        first: first,
+        rows: this.rowsPerPage(),
+        page: page,
+        pageCount: Math.ceil(this.totalRecords() / this.rowsPerPage()),
+      });
+    } else {
+      this.updateDisplayedData();
+    }
+  }
+
+  reset() {
+    this.first.set(0);
+
+    if (this.serverSide()) {
+      this.pageChange.emit({
+        first: 0,
+        rows: this.rowsPerPage(),
+        page: 0,
+        pageCount: Math.ceil(this.totalRecords() / this.rowsPerPage()),
+      });
+    } else {
+      this.updateDisplayedData();
+    }
+  }
+
   getRowActionLabel(action: RowAction, rowData: any): string {
-    return typeof action.label === 'function'
-      ? action.label(rowData)
-      : action.label;
+    return typeof action.label === 'function' ? action.label(rowData) : action.label;
   }
 
   getRowActionIcon(action: RowAction, rowData: any): string {
-    return typeof action.icon === 'function'
-      ? action.icon(rowData)
-      : action.icon;
+    const iconName = typeof action.icon === 'function' ? action.icon(rowData) : action.icon;
+    if (this.isLucideIcon(iconName)) {
+      return '';
+    }
+    return iconName;
+  }
+
+  getHeaderActionIcon(action: TableAction): string {
+    if (this.isLucideIcon(action.icon)) {
+      return '';
+    }
+    return action.icon;
+  }
+
+  isLucideIcon(iconName: string): boolean {
+    return !!iconName;
+  }
+
+  getRowActionIconName(action: RowAction, rowData: any): string {
+    return typeof action.icon === 'function' ? action.icon(rowData) : action.icon;
   }
 
   getRowActionClass(action: RowAction, rowData: any): string {
     if (!action.class) return '';
-    return typeof action.class === 'function'
-      ? action.class(rowData)
-      : action.class;
+    return typeof action.class === 'function' ? action.class(rowData) : action.class;
   }
 
   isHeaderActionDisabled(action: TableAction): boolean {
@@ -293,19 +466,5 @@ export class TableComponent {
     if (value === null || value === undefined) return '';
     const str = String(value);
     return str.length > limit ? str.slice(0, limit) + '…' : str;
-  }
-
-  // Métodos helper para iconos de Lucide
-  isLucideIcon(icon: string): boolean {
-    return !icon?.startsWith('pi pi-');
-  }
-
-  getRowActionIconName(action: RowAction, rowData: any): string {
-    const icon = this.getRowActionIcon(action, rowData);
-    return icon ? icon.replace('pi pi-', '') : '';
-  }
-
-  getHeaderActionIcon(action: TableAction): string {
-    return action.icon;
   }
 }

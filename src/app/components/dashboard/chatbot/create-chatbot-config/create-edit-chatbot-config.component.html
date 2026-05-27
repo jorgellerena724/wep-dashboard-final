@@ -49,7 +49,7 @@
       (click)="addProviderConfig()"
       class="flex items-center gap-2 px-3 py-2 text-sm text-white rounded-lg transition-colors bg-gray-800 hover:bg-gray-700"
     >
-      <i class="pi pi-plus"></i>
+      <svg [lucideIcon]="getIcon('plus')" class="w-4 h-4"></svg>
       <span>Agregar Proveedor</span>
     </button>
   </div>
@@ -87,7 +87,7 @@
             pTooltip="Eliminar proveedor"
             tooltipPosition="top"
           >
-            <i class="pi pi-trash"></i>
+            <svg [lucideIcon]="getIcon('trash-2')" class="w-4 h-4"></svg>
           </button>
         </div>
       }
@@ -97,9 +97,10 @@
   @if (providerConfigs().length === 0) {
     <div class="p-4 bg-white dark:bg-white rounded-lg border border-black mb-4">
       <div class="text-center py-8">
-        <i
-          class="pi pi-cog text-3xl text-gray-300 dark:text-gray-600 mb-3 block"
-        ></i>
+        <svg
+          [lucideIcon]="getIcon('settings')"
+          class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-3 block mx-auto"
+        ></svg>
         <p class="text-sm text-gray-500 dark:text-gray-400">
           Agrega al menos un proveedor
         </p>

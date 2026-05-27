@@ -25,6 +25,8 @@ import { SelectComponent } from '../../../../shared/components/app-select/app-se
 import { ButtonModule } from 'primeng/button';
 import { ChatbotService } from '../../../../shared/services/features/chatbot.service';
 import { UserService } from '../../../../shared/services/users/user.service';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../../core/constants/icons.constant';
 
 interface ProviderConfig {
   provider: string;
@@ -42,6 +44,7 @@ interface ProviderConfig {
     TranslocoModule,
     SelectComponent,
     ButtonModule,
+    LucideDynamicIcon,
   ],
 })
 export class CreateEditChatbotConfigComponent implements DynamicComponent {
@@ -292,5 +295,9 @@ export class CreateEditChatbotConfigComponent implements DynamicComponent {
 
   getFormControl(controlName: string): FormControl {
     return this.form.get(controlName) as FormControl;
+  }
+
+  getIcon(name: string): any {
+    return getLucideIcon(name);
   }
 }
