@@ -867,7 +867,8 @@
           },
           "rating": {
             "title": "Calificación",
-            "none": "Sin calificación"
+            "none": "Sin calificación",
+            "stars": "estrellas"
           },
           "description": {
             "title": "Descripción",
@@ -899,7 +900,8 @@
           },
           "rating": {
             "title": "Calificación",
-            "none": "Sin calificación"
+            "none": "Sin calificación",
+            "stars": "estrellas"
           },
           "description": {
             "title": "Descripción",

@@ -890,7 +890,8 @@
           },
           "rating": {
             "title": "Rating",
-            "none": "No rating"
+            "none": "No rating",
+            "stars": "stars"
           },
           "description": {
             "title": "Description",
@@ -922,7 +923,8 @@
           },
           "rating": {
             "title": "Rating",
-            "none": "No rating"
+            "none": "No rating",
+            "stars": "stars"
           },
           "description": {
             "title": "Description",
