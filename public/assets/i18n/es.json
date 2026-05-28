@@ -126,12 +126,14 @@
       "success": {
         "created": "Reseña registrada correctamente.",
         "updated": "Reseña actualizada correctamente.",
-        "deleted": "Reseña eliminada satisfactoriamente."
+        "deleted": "Reseña eliminada satisfactoriamente.",
+        "imported": "{{created}} reseñas importadas, {{skipped}} omitidas."
       },
       "error": {
         "create": "Error al registrar la reseña.",
         "update": "Error al actualizar la reseña.",
         "delete": "Error al eliminar la reseña.",
+        "import": "Error al importar las reseñas.",
         "load": "Error al cargar la información.",
         "loadImage": "Error al cargar imagen.",
         "formInvalid": "Compruebe los campos del formulario.",
@@ -849,6 +851,7 @@
         "table": {
           "name": "Nombre",
           "description": "Descripción",
+          "rating": "Calificación",
           "image": "Imagen"
         }
       },
@@ -861,6 +864,10 @@
             "minlength": "El nombre debe tener al menos 3 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres",
             "uniqueName": "Ya existe un directivo con este nombre en esta categoría"
+          },
+          "rating": {
+            "title": "Calificación",
+            "none": "Sin calificación"
           },
           "description": {
             "title": "Descripción",
@@ -889,6 +896,10 @@
             "minlength": "El nombre debe tener al menos 3 caracteres",
             "maxlength": "El nombre debe tener hasta 20 caracteres",
             "uniqueName": "Ya existe un directivo con este nombre en esta categoría"
+          },
+          "rating": {
+            "title": "Calificación",
+            "none": "Sin calificación"
           },
           "description": {
             "title": "Descripción",

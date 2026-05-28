@@ -125,12 +125,14 @@
       "success": {
         "created": "Review registered successfully.",
         "updated": "Review updated successfully.",
-        "deleted": "Review deleted successfully."
+        "deleted": "Review deleted successfully.",
+        "imported": "{{created}} reviews imported, {{skipped}} skipped."
       },
       "error": {
         "create": "Error registering review.",
         "update": "Error updating review.",
         "delete": "Error deleting review.",
+        "import": "Error importing reviews.",
         "load": "Error loading information.",
         "loadImage": "Error loading image.",
         "formInvalid": "Check the form fields.",
@@ -872,6 +874,7 @@
         "table": {
           "name": "Name",
           "description": "Description",
+          "rating": "Rating",
           "image": "Image"
         }
       },
@@ -884,6 +887,10 @@
             "minlength": "Name must be at least 3 characters",
             "maxlength": "Name must be up to 20 characters",
             "uniqueName": "A manager with this name already exists in this category"
+          },
+          "rating": {
+            "title": "Rating",
+            "none": "No rating"
           },
           "description": {
             "title": "Description",
@@ -912,6 +919,10 @@
             "minlength": "Name must be at least 3 characters",
             "maxlength": "Name must be up to 20 characters",
             "uniqueName": "A manager with this name already exists in this category"
+          },
+          "rating": {
+            "title": "Rating",
+            "none": "No rating"
           },
           "description": {
             "title": "Description",

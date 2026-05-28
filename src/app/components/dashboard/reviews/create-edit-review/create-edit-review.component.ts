@@ -64,6 +64,7 @@ export class CreateEditReviewComponent implements DynamicComponent {
   uploading = signal<boolean>(false);
   loadingImage = signal<boolean>(false);
   imageUrl = signal<string | null>(null);
+  hoverRating = signal<number | null>(null);
 
   // Formulario
   form: FormGroup;
@@ -80,6 +81,7 @@ export class CreateEditReviewComponent implements DynamicComponent {
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
       image: ['', this.isEdit() ? null : Validators.required],
+      star_rating: [null],
     });
 
     // Effect para inicializar datos
@@ -191,6 +193,11 @@ export class CreateEditReviewComponent implements DynamicComponent {
       formData.append('photo', file, file.name);
     }
 
+    const starRating = this.form.get('star_rating')?.value;
+    if (starRating !== null && starRating !== undefined && starRating !== '') {
+      formData.append('star_rating', starRating.toString());
+    }
+
     this.uploading.set(true);
 
     const subscription$ = this.isEdit()
@@ -278,5 +285,47 @@ export class CreateEditReviewComponent implements DynamicComponent {
 
   getIcon(name: string): any {
     return getLucideIcon(name);
+  }
+
+  setRating(rating: number): void {
+    const control = this.form.get('star_rating');
+    if (control) {
+      // Toggle: si el mismo valor, limpiar
+      if (control.value === rating) {
+        control.setValue(null);
+      } else {
+        control.setValue(rating);
+      }
+      this.form.markAsDirty();
+    }
+  }
+
+  onStarMouseMove(event: MouseEvent, starIndex: number): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const isHalf = x < rect.width / 2;
+    this.hoverRating.set(isHalf ? starIndex - 0.5 : starIndex);
+  }
+
+  onStarMouseLeave(): void {
+    this.hoverRating.set(null);
+  }
+
+  onStarClick(event: MouseEvent, starIndex: number): void {
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const isHalf = x < rect.width / 2;
+    const value = isHalf ? starIndex - 0.5 : starIndex;
+    this.setRating(value);
+  }
+
+  /** Devuelve el estado de relleno de cada estrella: 'full' | 'half' | 'empty' */
+  getStarFill(starIndex: number): 'full' | 'half' | 'empty' {
+    const rating = this.hoverRating() ?? this.form.get('star_rating')?.value ?? 0;
+    if (rating >= starIndex) return 'full';
+    if (rating >= starIndex - 0.5) return 'half';
+    return 'empty';
   }
 }

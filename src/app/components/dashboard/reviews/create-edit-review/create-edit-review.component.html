@@ -11,6 +11,70 @@
     ></app-text-field>
   </div>
   <hr class="border-gray-500 my-1 border-opacity-10" />
+  <!-- Calificación por Estrellas (soporta medias estrellas: 0.5, 1, 1.5 ... 5) -->
+  <div class="mb-4">
+    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+      {{ t('fields.rating.title') }}
+    </label>
+    <div
+      class="flex items-center gap-1.5 py-1"
+      (mouseleave)="onStarMouseLeave()"
+    >
+      @for (star of [1, 2, 3, 4, 5]; track star) {
+        <button
+          type="button"
+          (mousemove)="onStarMouseMove($event, star)"
+          (click)="onStarClick($event, star)"
+          class="focus:outline-none transition-transform duration-150 hover:scale-125 cursor-pointer bg-transparent border-none p-0 relative"
+          [title]="(hoverRating() ?? form.get('star_rating')?.value ?? 0) + ' estrellas'"
+        >
+          <!-- SVG con defs para media estrella -->
+          <svg
+            class="w-8 h-8"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <clipPath [id]="'half-clip-' + star">
+                <rect x="0" y="0" width="10" height="20" />
+              </clipPath>
+            </defs>
+
+            <!-- Estrella de fondo (vacía / gris) -->
+            <path
+              class="transition-colors duration-150"
+              [attr.fill]="getStarFill(star) === 'empty' ? 'currentColor' : '#d1d5db'"
+              [class.text-gray-300]="getStarFill(star) === 'empty'"
+              [class.dark:fill-gray-600]="getStarFill(star) === 'empty'"
+              fill="#d1d5db"
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+            />
+
+            <!-- Estrella completa o media (ámbar) encima -->
+            @if (getStarFill(star) === 'full') {
+              <path
+                fill="#f59e0b"
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+              />
+            }
+            @if (getStarFill(star) === 'half') {
+              <path
+                fill="#f59e0b"
+                [attr.clip-path]="'url(#half-clip-' + star + ')'"
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+              />
+            }
+          </svg>
+        </button>
+      }
+      <span class="text-sm font-semibold ml-2 text-gray-500 dark:text-gray-400">
+        {{ form.get('star_rating')?.value != null
+            ? (form.get('star_rating')?.value + ' / 5')
+            : t('fields.rating.none') }}
+      </span>
+    </div>
+  </div>
+  <hr class="border-gray-500 my-1 border-opacity-10" />
   <app-text-field
     id="description"
     [label]="t('fields.description.title')"

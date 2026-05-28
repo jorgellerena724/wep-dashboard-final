@@ -6,4 +6,5 @@ export interface HomeData {
   photo: string;
   status: boolean;
   order?: number;
+  star_rating?: number | null;
 }

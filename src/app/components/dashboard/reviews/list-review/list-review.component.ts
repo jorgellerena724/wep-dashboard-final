@@ -45,8 +45,9 @@ export class ListReviewComponent {
   private confirmDialogService = inject(ConfirmDialogService);
   private destroyRef = inject(DestroyRef);
 
-  // ViewChild signal
+  // ViewChild signals
   imageTemplate = viewChild<TemplateRef<any>>('imageTemplate');
+  ratingTemplate = viewChild<TemplateRef<any>>('ratingTemplate');
 
   // Signals para el estado
   data = signal<HomeData[]>([]);
@@ -56,9 +57,11 @@ export class ListReviewComponent {
   // Computed signal para templates personalizados
   customTemplates = computed<{ [key: string]: any }>(() => {
     const imgTemplate = this.imageTemplate();
+    const ratingTpl = this.ratingTemplate();
     const templates: { [key: string]: any } = {};
 
     if (imgTemplate) templates['image'] = imgTemplate;
+    if (ratingTpl) templates['star_rating'] = ratingTpl;
 
     return templates;
   });
@@ -76,6 +79,10 @@ export class ListReviewComponent {
     this.transloco.selectTranslate('components.reviews.list.table.image'),
     { initialValue: '' },
   );
+  private ratingTranslation = toSignal(
+    this.transloco.selectTranslate('components.reviews.list.table.rating'),
+    { initialValue: 'Calificación' },
+  );
 
   // Computed signals para traducciones reactivas
   columns = computed<Column[]>(() => {
@@ -91,6 +98,12 @@ export class ListReviewComponent {
         header: this.descriptionTranslation(),
         sortable: true,
         filter: true,
+      },
+      {
+        field: 'star_rating',
+        header: this.ratingTranslation(),
+        sortable: true,
+        width: '160px',
       },
       {
         field: 'image',
@@ -312,6 +325,18 @@ export class ListReviewComponent {
 
   onImageError(event: any): void {
     event.target.style.display = 'none';
+  }
+
+  getStarsArray(rating: number | null | undefined): number[] {
+    const val = rating ?? 0;
+    const full = Math.floor(val);
+    const hasHalf = val - full >= 0.25 && val - full < 0.75;
+    const empty = 5 - full - (hasHalf ? 1 : 0);
+    return [
+      ...Array(full).fill(1),
+      ...(hasHalf ? [0.5] : []),
+      ...Array(empty).fill(0),
+    ];
   }
 
   private cleanupBlobUrls(): void {
