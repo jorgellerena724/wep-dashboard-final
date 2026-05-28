@@ -9,30 +9,30 @@ import {
   NotificationService,
   Notification,
 } from '../../services/system/notification.service';
-import {
-  LucideCheckCircle,
-  LucideXCircle,
-  LucideInfo,
-  LucideAlertTriangle,
-  LucideX,
-} from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-notification',
   templateUrl: './app-notification.component.html',
   standalone: true,
-  imports: [
-    CommonModule,
-    LucideCheckCircle,
-    LucideXCircle,
-    LucideInfo,
-    LucideAlertTriangle,
-    LucideX,
-  ],
+  imports: [CommonModule, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationComponent {
   private notificationService = inject(NotificationService);
+  protected getIcon = getLucideIcon;
+
+  private readonly iconMap: Record<string, string> = {
+    success: 'check',
+    error: 'circle-x',
+    info: 'info',
+    warning: 'triangle-alert',
+  };
+
+  getNotificationIcon(type: string): string {
+    return this.iconMap[type] || 'info';
+  }
 
   // Usar la señal directamente del servicio
   notifications = this.notificationService.notifications;

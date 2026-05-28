@@ -1,9 +1,8 @@
 <div
-  class="card border bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] dark:border-gray-200 rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.2),_0_0_40px_rgba(0,0,0,0.15),_0_0_60px_rgba(0,0,0,0.1),_0_0_80px_rgba(0,0,0,0.05)] border-gray-600"
+  class="card border bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] dark:border-gray-200 rounded-lg border-gray-600"
+  [class.shadow-[0_0_20px_rgba(0,0,0,0.2),_0_0_40px_rgba(0,0,0,0.15),_0_0_60px_rgba(0,0,0,0.1),_0_0_80px_rgba(0,0,0,0.05)]]="hasShadow()"
 >
-  <div
-    class="flex items-center justify-between p-2 border-b border-gray-600 dark:border-gray-200"
-  >
+  <div class="flex items-center justify-between p-2 border-b border-gray-600 dark:border-gray-200">
     <!-- Contenedor para los botones de acción a la izquierda -->
     <div class="flex items-center gap-2">
       @for (action of headerActions(); track action.label) {
@@ -33,20 +32,17 @@
       pTooltip="{{ 'table.tooltips.refresh' | transloco }}"
       tooltipPosition="top"
     >
-      <svg
-        [lucideIcon]="getIcon('refresh-cw')"
-        class="w-7 h-7 rotate-on-hover"
-      ></svg>
+      <svg [lucideIcon]="getIcon('refresh-cw')" class="w-7 h-7 rotate-on-hover"></svg>
     </button>
   </div>
 
   <p-table
     #dt
-    [value]="displayedData()"
+    [value]="effectiveDisplayedData()"
     [columns]="columnsWithActions()"
-    styleClass="p-datatable-sm "
+    styleClass="p-datatable-sm"
     [resizableColumns]="true"
-    responsiveLayout="scroll "
+    responsiveLayout="scroll"
     class="w-full"
     [stripedRows]="true"
   >
@@ -54,11 +50,11 @@
       <tr>
         @for (col of columnsWithActions(); track col.field) {
           <th
-            [pSortableColumn]="
-              col.field !== 'actions' && col.sortable ? col.field : undefined
-            "
-            [width]="col.width"
-            class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b-1 border-r border-b-gray-700 border-r-gray-700 dark:border-b-gray-200 dark:border-b-1 dark:border-r-gray-700"
+            [pSortableColumn]="col.field !== 'actions' && col.sortable ? col.field : undefined"
+            [style.width]="col.width || 'auto'"
+            [style.min-width]="col.field === 'actions' ? '150px' : '100px'"
+            [style.max-width]="col.width || 'none'"
+            class="px-6 bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] py-3 text-left text-xs font-bold text-gray-800 dark:text-gray-300 uppercase tracking-wider border-b border-r border-gray-600 dark:border-b-gray-200 dark:border-r-gray-700"
           >
             <div class="flex items-center justify-between gap-2">
               <span>{{ col.header }}</span>
@@ -75,21 +71,15 @@
                   @if (col.filter) {
                     <button
                       type="button"
-                      (click)="
-                        $event.stopPropagation(); toggleFilter(col.field)
-                      "
+                      (click)="$event.stopPropagation(); toggleFilter(col.field)"
                       pTooltip="{{ 'table.tooltips.filter' | transloco }}"
                       tooltipPosition="top"
                     >
                       <svg
                         [lucideIcon]="getIcon('filter')"
                         class="text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 w-4 h-4"
-                        [class.text-blue-600]="
-                          columnFiltersForm.get(col.field)?.value
-                        "
-                        [class.dark:text-blue-400]="
-                          columnFiltersForm.get(col.field)?.value
-                        "
+                        [class.text-blue-600]="columnFiltersForm.get(col.field)?.value"
+                        [class.dark:text-blue-400]="columnFiltersForm.get(col.field)?.value"
                       ></svg>
                     </button>
                   }
@@ -97,27 +87,38 @@
               }
             </div>
             @if (col.filter && showFilterInput()[col.field]) {
-              <div
-                class="mt-2"
-                [formGroup]="columnFiltersForm"
-                (click)="$event.stopPropagation()"
-              >
+              <div class="mt-2" [formGroup]="columnFiltersForm" (click)="$event.stopPropagation()">
                 <div class="relative">
-                  <input
-                    type="text"
-                    [formControlName]="col.field"
-                    class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] w-full px-3 py-2 text-sm rounded-md border border-gray-800 dark:border-gray-300"
-                    [placeholder]="
-                      col.filterPlaceholder || ('table.search' | transloco)
-                    "
-                  />
-                  @if (columnFiltersForm.get(col.field)?.value) {
+                  @if (col.filterType !== "select") {
+                    <input
+                      type="text"
+                      [formControlName]="col.field"
+                      class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] w-full px-3 py-2 text-sm rounded-md border border-gray-800 dark:border-gray-300"
+                      [placeholder]="col.filterPlaceholder || ('table.search' | transloco)"
+                    />
+                  }
+                  @if (col.filterType === "select") {
+                    <div class="w-22">
+                      <p-select
+                        [formControlName]="col.field"
+                        [options]="col.filterOptions || []"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="A/D"
+                        [showClear]="true"
+                        styleClass="small-dropdown w-full"
+                        [appendTo]="'body'"
+                        panelStyleClass="small-dropdown-panel"
+                      ></p-select>
+                    </div>
+                  }
+                  @if (columnFiltersForm.get(col.field)?.value && col.filterType !== "select") {
                     <button
                       type="button"
                       class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
                       (click)="clearFilter(col.field)"
                     >
-                      <svg lucideX class="w-4 h-4"></svg>
+                      <svg [lucideIcon]="getIcon('close')" class="w-4 h-4"></svg>
                     </button>
                   }
                 </div>
@@ -129,12 +130,13 @@
     </ng-template>
 
     <ng-template pTemplate="body" let-rowData>
-      <tr
-        class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200"
-      >
+      <tr class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)] hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors duration-200">
         @for (col of columnsWithActions(); track col.field) {
           <td
-            class="px-6 py-0 whitespace-nowrap text-sm text-neutral-800 dark:text-white border-b border-r border-gray-400 border-r-gray-400 dark:border-gray-600 dark:border-r-gray-700"
+            class="px-4 py-1.5 text-sm text-neutral-800 dark:text-white border-b border-r border-gray-400 dark:border-gray-600 dark:border-r-gray-700"
+            [style.max-width]="col.width || '300px'"
+            [style.overflow]="'hidden'"
+            [style.text-overflow]="'ellipsis'"
           >
             @if (col.field !== "actions") {
               <ng-container
@@ -153,19 +155,12 @@
                       [pTooltip]="getRowActionLabel(action, rowData)"
                       tooltipPosition="top"
                       (click)="action.onClick(rowData)"
-                      [class]="
-                        'p-button-text table-action-btn ' +
-                        getRowActionClass(action, rowData)
-                      "
+                      [class]="'p-button-text table-action-btn ' + getRowActionClass(action, rowData)"
                       [disabled]="isRowActionDisabled(action, rowData) || false"
                     >
-                      @if (
-                        isLucideIcon(getRowActionIconName(action, rowData))
-                      ) {
+                      @if (isLucideIcon(getRowActionIconName(action, rowData))) {
                         <svg
-                          [lucideIcon]="
-                            getIcon(getRowActionIconName(action, rowData))
-                          "
+                          [lucideIcon]="getIcon(getRowActionIconName(action, rowData))"
                           class="w-4 h-4"
                         ></svg>
                       }
@@ -197,15 +192,11 @@
   <div class="p-2 w-full paginator-container">
     <p-paginator
       [rows]="rowsPerPage()"
-      [totalRecords]="totalRecords()"
+      [totalRecords]="effectiveTotalRecords()"
       [first]="first()"
       (onPageChange)="onPageChange($event)"
-      [rowsPerPageOptions]="[7, 10, 15, 25]"
-      currentPageReportTemplate="{{
-        'table.pagination.first' | transloco
-      }} {first} {{ 'table.pagination.second' | transloco }} {last} {{
-        'table.pagination.third' | transloco
-      }} {totalRecords} {{ 'table.pagination.fourth' | transloco }}"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      currentPageReportTemplate="{{ 'table.pagination.first' | transloco }} {first} {{ 'table.pagination.second' | transloco }} {last} {{ 'table.pagination.third' | transloco }} {totalRecords} {{ 'table.pagination.fourth' | transloco }}"
       [showCurrentPageReport]="true"
       class="bg-[rgb(232,232,232)] dark:bg-[rgb(15,14,14)]"
       [dropdownAppendTo]="'body'"
@@ -213,7 +204,6 @@
   </div>
 </div>
 <style>
-  /* Inputs y Labels (Estilos generales HTML) - No necesitan ng-deep si están en tu template directo */
   input:focus,
   label:focus {
     outline: 1px solid #1f2937;
@@ -226,9 +216,17 @@
     font-weight: normal !important;
   }
 
-  /* --- PRIMENG OVERRIDES (Usamos ::ng-deep) --- */
+  :host ::ng-deep .p-datatable-table {
+    table-layout: auto !important;
+    width: 100%;
+  }
+  :host ::ng-deep .p-datatable th,
+  :host ::ng-deep .p-datatable td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-  /* Contenedor del Paginator */
   :host ::ng-deep .p-paginator {
     min-height: 100px;
     display: flex;
@@ -241,43 +239,34 @@
     border-radius: var(--p-paginator-border-radius);
     gap: var(--p-paginator-gap);
   }
-
   :host ::ng-deep .dark .p-paginator {
     background: #18181b;
   }
-
-  /* Botón de página SELECCIONADA - Gris suave */
   :host ::ng-deep .p-paginator-page.p-paginator-page-selected {
-    background: #d1d5db !important; /* Gris suave en lugar de gris oscuro */
+    background: #d1d5db !important;
     pointer-events: none;
-    color: #374151 !important; /* Texto oscuro para contraste */
+    color: #374151 !important;
   }
-
   :host ::ng-deep .dark .p-paginator-page.p-paginator-page-selected {
-    background: #4b5563 !important; /* Gris suave para modo oscuro */
+    background: #4b5563 !important;
     color: white !important;
   }
-
-  /* Hover en botones - Gris más suave */
   :host ::ng-deep .p-paginator-page:hover,
   :host ::ng-deep .p-paginator-next:hover,
   :host ::ng-deep .p-paginator-last:hover,
   :host ::ng-deep .p-paginator-first:hover,
   :host ::ng-deep .p-paginator-prev:hover {
-    background: #e5e7eb !important; /* Gris más claro y suave */
+    background: #e5e7eb !important;
     color: #374151 !important;
   }
-
   :host ::ng-deep .dark .p-paginator-page:hover,
   :host ::ng-deep .dark .p-paginator-next:hover,
   :host ::ng-deep .dark .p-paginator-last:hover,
   :host ::ng-deep .dark .p-paginator-first:hover,
   :host ::ng-deep .dark .p-paginator-prev:hover {
-    background: #374151 !important; /* Gris menos fuerte para modo oscuro */
+    background: #374151 !important;
     color: #e5e7eb !important;
   }
-
-  /* Color de texto base de los botones */
   :host ::ng-deep .p-paginator-page,
   :host ::ng-deep .p-paginator-next,
   :host ::ng-deep .p-paginator-last,
@@ -286,7 +275,6 @@
   :host ::ng-deep .p-paginator-current {
     color: #343b46;
   }
-
   :host ::ng-deep .dark .p-paginator-page,
   :host ::ng-deep .dark .p-paginator-next,
   :host ::ng-deep .dark .p-paginator-last,
@@ -295,106 +283,103 @@
   :host ::ng-deep .dark .p-paginator-current {
     color: #d1d5db;
   }
-
-  /* Iconos */
   :host ::ng-deep .p-icon {
     color: #343b46;
   }
   :host ::ng-deep .dark .p-icon {
     color: #d1d5db;
   }
-
-  /* Dropdown de opciones (Select) - Opción seleccionada gris suave */
-  :host ::ng-deep .p-select-option.p-select-option-selected,
-  :host ::ng-deep .p-select-option.p-highlight,
-  :host ::ng-deep .p-select-option.p-focus {
-    background: #d1d5db !important; /* Gris suave */
-    color: #374151 !important; /* Texto oscuro */
+  :host ::ng-deep .p-select-option.p-select-option-selected {
+    background: #d1d5db !important;
+    color: #374151 !important;
   }
-  :host ::ng-deep .dark .p-select-option.p-select-option-selected,
-  :host ::ng-deep .dark .p-select-option.p-highlight,
-  :host ::ng-deep .dark .p-select-option.p-focus {
-    background: #4b5563 !important; /* Gris suave para modo oscuro */
+  :host ::ng-deep .dark .p-select-option.p-select-option-selected {
+    background: #4b5563 !important;
     color: white !important;
   }
-  /* Hover del dropdown - Gris más suave */
   :host ::ng-deep .p-select-option:hover {
-    background: #e5e7eb !important; /* Gris más claro y suave */
+    background: #e5e7eb !important;
     color: #374151 !important;
   }
   :host ::ng-deep .dark .p-select-option:hover {
-    background: #374151 !important; /* Gris menos fuerte */
+    background: #374151 !important;
     color: #e5e7eb !important;
   }
-
-  /* Asegurar que no haya colores primarios (verde) en el dropdown */
   :host ::ng-deep .p-select-overlay .p-select-option {
     background: transparent !important;
   }
-  :host
-    ::ng-deep
-    .p-select-overlay
-    .p-select-option:not(:hover):not(.p-select-option-selected):not(
-      .p-highlight
-    ):not(.p-focus) {
+  :host ::ng-deep .p-select-overlay .p-select-option:not(:hover):not(.p-select-option-selected):not(.p-highlight):not(.p-focus) {
     background: transparent !important;
     color: #374151 !important;
   }
-  :host
-    ::ng-deep
-    .dark
-    .p-select-overlay
-    .p-select-option:not(:hover):not(.p-select-option-selected):not(
-      .p-highlight
-    ):not(.p-focus) {
+  :host ::ng-deep .dark .p-select-overlay .p-select-option:not(:hover):not(.p-select-option-selected):not(.p-highlight):not(.p-focus) {
     background: transparent !important;
     color: #e5e7eb !important;
   }
 
-  /* Animación custom */
   @keyframes rotate {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
   .rotate-on-hover:hover {
     animation: rotate 0.5s linear;
   }
 
-  /* Estilos para botones de acciones de fila - más pequeños y profesionales */
+  :host ::ng-deep .small-dropdown {
+    width: 100% !important;
+    max-width: 200px;
+  }
+  :host ::ng-deep .small-dropdown .p-dropdown {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 30px;
+  }
+  :host ::ng-deep .small-dropdown .p-dropdown-label {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.8125rem !important;
+    line-height: 1.2 !important;
+  }
+  :host ::ng-deep .small-dropdown .p-dropdown-trigger {
+    width: 1.5rem !important;
+  }
+  :host ::ng-deep .small-dropdown-panel .p-dropdown-items .p-dropdown-item {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.8125rem !important;
+    line-height: 1.2 !important;
+  }
+  :host ::ng-deep .small-dropdown-panel {
+    min-width: 150px !important;
+    max-width: 200px !important;
+    width: auto !important;
+  }
+  :host ::ng-deep .small-dropdown .p-dropdown-panel {
+    min-width: 150px !important;
+    max-width: 200px !important;
+    width: auto !important;
+  }
+
   :host ::ng-deep td button {
     outline: none !important;
     box-shadow: none !important;
   }
-
   :host ::ng-deep td button svg {
     width: 1.125rem !important;
     height: 1.125rem !important;
   }
-
   :host ::ng-deep td button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
-
-  /* Icono de filtro en el header más pequeño */
   :host ::ng-deep th button svg {
     width: 0.875rem !important;
     height: 0.875rem !important;
   }
-
-  /* Table action button icon sizing */
   :host ::ng-deep .table-action-btn svg {
     width: 1rem !important;
     height: 1rem !important;
     min-width: 1rem !important;
     min-height: 1rem !important;
   }
-
-  /* Ensure table action buttons have consistent sizing */
   :host ::ng-deep .table-action-btn {
     padding: 0.5rem !important;
     min-width: 2rem !important;
@@ -403,8 +388,6 @@
     align-items: center !important;
     justify-content: center !important;
   }
-
-  /* Header action button icon sizing */
   :host ::ng-deep .header-action-btn svg {
     width: 1rem !important;
     height: 1rem !important;
@@ -412,7 +395,6 @@
     min-height: 1rem !important;
   }
 
-  /* Media Queries */
   @media (max-width: 660px) {
     :host ::ng-deep .p-paginator {
       min-height: 200px;

@@ -1464,7 +1464,10 @@
     "buttons": {
       "acept": "Accept",
       "cancel": "Cancel"
-    }
+    },
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "formInvalid": "Check the form fields."
   },
   "image": {
     "loading": "Loading current image...",

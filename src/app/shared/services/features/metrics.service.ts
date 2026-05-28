@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { ConfigService } from '../system/config.service';
 
 export interface MetricEvent {
   event_name: string;
@@ -36,8 +36,10 @@ export interface SummaryMetric {
 @Injectable({ providedIn: 'root' })
 export class MetricsService {
   private http = inject(HttpClient);
-  private urlMetrics = `${environment.api}metrics`;
-  private urlConfig = `${environment.api}metrics-config`;
+  private config = inject(ConfigService);
+
+  private urlMetrics = `${this.config.api}metrics`;
+  private urlConfig = `${this.config.api}metrics-config`;
 
   // ── Métricas ──────────────────────────────────────────────
   getToday() {

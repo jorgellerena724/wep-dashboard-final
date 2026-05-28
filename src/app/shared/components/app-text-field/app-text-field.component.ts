@@ -22,8 +22,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { getLucideIcon } from '../../../core/constants/icons.constant';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { getLucideIcon } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-text-field',
@@ -41,8 +41,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class TextFieldComponent implements ControlValueAccessor {
   private cdr = inject(ChangeDetectorRef);
-
-  readonly getIcon = getLucideIcon;
 
   // Inputs usando signal inputs
   id = input<string>('');
@@ -64,6 +62,7 @@ export class TextFieldComponent implements ControlValueAccessor {
   searchMode = input<boolean>(false);
   displayValue = input<string>('');
   searchButtonClick = output<void>();
+  protected readonly getIcon = getLucideIcon;
 
   // ViewChild para acceder a los elementos del DOM
   inputElement = viewChild<ElementRef<HTMLInputElement>>('input');
@@ -76,7 +75,12 @@ export class TextFieldComponent implements ControlValueAccessor {
   hadError = signal<boolean>(false);
   private errorTracker = signal<number>(0);
 
-  // ✅ Signal para trackear si ya nos suscribimos
+  displayLabel = computed(() => {
+    if (this.searchMode() && this.displayValue()) {
+      return this.displayValue();
+    }
+    return '';
+  });
   private subscribed = signal<boolean>(false);
 
   displayLabel = computed(() => {
@@ -106,7 +110,6 @@ export class TextFieldComponent implements ControlValueAccessor {
   });
 
   shouldShowError = computed(() => {
-    // Forzar recalculo cuando cambie errorTracker
     this.errorTracker();
 
     const ctrl = this.actualControl();
@@ -143,9 +146,7 @@ export class TextFieldComponent implements ControlValueAccessor {
     };
 
     return Object.keys(ctrl.errors).map((errorKey) => {
-      return (
-        customErrors[errorKey] || defaultMessages[errorKey] || 'Campo inválido'
-      );
+      return customErrors[errorKey] || defaultMessages[errorKey] || 'Campo inválido';
     });
   });
 
@@ -173,45 +174,33 @@ export class TextFieldComponent implements ControlValueAccessor {
       }
     });
 
-    // ✅ Effect mejorado para manejar suscripciones sin duplicados
+    // Effect para manejar suscripciones sin duplicados
     effect(() => {
       const ctrl = this.actualControl();
 
-      // Si no hay control o ya nos suscribimos, salir
       if (!ctrl) {
         this.subscribed.set(false);
         return;
       }
 
-      // Si ya nos suscribimos a este control, no hacerlo de nuevo
       if (this.subscribed()) return;
 
-      // Verificar estado inicial
       if (ctrl.invalid && ctrl.touched) {
         this.hadError.set(true);
       }
 
-      // ✅ Suscribirse a cambios de estado UNA SOLA VEZ
-      ctrl.statusChanges
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => {
-          // Actualizar el tracker para forzar recalculo de computed signals
-          this.errorTracker.update((v) => v + 1);
+      ctrl.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.errorTracker.update((v) => v + 1);
 
-          // Actualizar hadError cuando el campo tiene errores y fue tocado
-          if (ctrl.invalid && ctrl.touched) {
-            this.hadError.set(true);
-          }
-        });
+        if (ctrl.invalid && ctrl.touched) {
+          this.hadError.set(true);
+        }
+      });
 
-      // ✅ Suscribirse también a valueChanges para detectar cuando se marca como touched
-      ctrl.valueChanges
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe(() => {
-          this.errorTracker.update((v) => v + 1);
-        });
+      ctrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.errorTracker.update((v) => v + 1);
+      });
 
-      // Marcar como suscrito
       this.subscribed.set(true);
     });
   }
@@ -225,25 +214,28 @@ export class TextFieldComponent implements ControlValueAccessor {
       'ArrowLeft',
       'ArrowRight',
       'Delete',
-      '.',
     ];
 
-    // Permitir punto y coma si allowDecimals está activado
-    if (this.allowDecimals()) {
+    if (this.numbersOnly()) {
+      const isNumber = /^\d$/.test(event.key);
+      if (!isNumber && !allowedKeys.includes(event.key)) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    if (this.allowDecimals() || this.type() === 'number') {
       allowedKeys.push('.');
     }
 
     const isDecimal = event.key === '.' || event.key === ',';
     const isNumber = !isNaN(Number(event.key));
 
-    // Verificar si es una tecla permitida
     if (allowedKeys.includes(event.key)) {
-      // Manejar separadores decimales
       if (isDecimal) {
         const input = event.target as HTMLInputElement;
         const currentValue = input.value;
 
-        // Verificar si ya existe un separador decimal
         const hasDecimalSeparator =
           currentValue.includes('.') || currentValue.includes(',');
 
@@ -254,34 +246,18 @@ export class TextFieldComponent implements ControlValueAccessor {
       return;
     }
 
-    // Permitir números
     if (isNumber) {
       return;
     }
 
-    // Permitir punto decimal en teclado numérico
-    if (event.key === 'Decimal') {
-      const input = event.target as HTMLInputElement;
-      const currentValue = input.value;
-
-      if (!currentValue.includes('.') && !currentValue.includes(',')) {
-        return;
-      }
-      event.preventDefault();
-      return;
-    }
-
-    // Bloquear cualquier otra tecla
     event.preventDefault();
   }
 
   onBlur(): void {
     this.onTouched();
 
-    // Actualizar errorTracker para forzar recalculo
     this.errorTracker.update((v) => v + 1);
 
-    // Actualizar hadError si hay un error después de tocar el campo
     const ctrl = this.actualControl();
     if (ctrl?.invalid && ctrl?.touched) {
       this.hadError.set(true);
@@ -292,12 +268,10 @@ export class TextFieldComponent implements ControlValueAccessor {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/[^0-9]/g, '');
 
-    // Limitar a 16 dígitos
     if (value.length > 16) {
       value = value.substring(0, 16);
     }
 
-    // Formatear con guiones
     let formatted = '';
     for (let i = 0; i < value.length; i++) {
       if (i > 0 && i % 4 === 0) {
@@ -306,7 +280,6 @@ export class TextFieldComponent implements ControlValueAccessor {
       formatted += value[i];
     }
 
-    // Actualizar valor en el input y modelo
     input.value = formatted;
     this.onChange(formatted);
   }
@@ -316,16 +289,13 @@ export class TextFieldComponent implements ControlValueAccessor {
     let newValue = input.value;
 
     if (this.allowDecimals()) {
-      // Reemplazar comas por puntos para consistencia interna
       newValue = newValue.replace(/,/g, '.');
 
-      // Permitir solo un punto decimal
       const parts = newValue.split('.');
       if (parts.length > 2) {
         newValue = parts[0] + '.' + parts.slice(1).join('');
       }
 
-      // Limitar decimales a 2 dígitos
       if (parts.length > 1 && parts[1].length > 2) {
         newValue = parts[0] + '.' + parts[1].substring(0, 2);
       }
@@ -362,6 +332,10 @@ export class TextFieldComponent implements ControlValueAccessor {
   writeValue(value: any): void {
     let processedValue = value;
 
+    if (this.allowDecimals() && value) {
+      processedValue = String(value).replace(/,/g, '.');
+    }
+
     if (this.numbersOnly() && value) {
       processedValue = value.toString().replace(/[^0-9]/g, '');
     }
@@ -369,10 +343,6 @@ export class TextFieldComponent implements ControlValueAccessor {
     const maxLen = this.maxLength();
     if (maxLen && processedValue?.length > maxLen) {
       processedValue = processedValue.substring(0, maxLen);
-    }
-
-    if (this.allowDecimals() && value) {
-      processedValue = String(value).replace(/,/g, '.');
     }
 
     if (this.formatCard() && processedValue) {

@@ -9,10 +9,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, Subscription } from 'rxjs';
 import { catchError, filter, map, distinctUntilChanged } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { ConfigService } from '../../shared/services/system/config.service';
 import { isPlatformBrowser } from '@angular/common';
 import { NotificationService } from '../../shared/services/system/notification.service';
-import { TranslocoService } from '@jsverse/transloco'; // ---> AÑADIDO: Importar TranslocoService
+import { TranslocoService } from '@jsverse/transloco';
 
 interface User {
   id: string;
@@ -31,6 +31,7 @@ interface LoginResponse {
   providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
+  private config = inject(ConfigService);
   private redirectExecuted = false;
   private initialNavigationChecked = new BehaviorSubject<boolean>(false);
   public initialNavigationChecked$ =
@@ -58,7 +59,7 @@ export class AuthService implements OnDestroy {
     private http: HttpClient,
     private router: Router,
     private notificationSrv: NotificationService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
   ) {
     this.loadInitialState();
     this.setupNavigationTracking();
@@ -71,8 +72,8 @@ export class AuthService implements OnDestroy {
         .pipe(
           filter((event) => event instanceof NavigationEnd),
           distinctUntilChanged(
-            (a, b) => (a as NavigationEnd).url === (b as NavigationEnd).url
-          )
+            (a, b) => (a as NavigationEnd).url === (b as NavigationEnd).url,
+          ),
         )
         .subscribe((event: NavigationEnd) => {
           if (
@@ -258,7 +259,7 @@ export class AuthService implements OnDestroy {
         atob(base64)
           .split('')
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .join(''),
       );
       const fullUser = JSON.parse(jsonPayload);
       const exp = fullUser.exp * 1000;
@@ -314,7 +315,7 @@ export class AuthService implements OnDestroy {
       if (!this.isLoggingOut && this.user) {
         // MODIFICADO: Usar la clave de traducción para la advertencia de inactividad
         const warningMessage = this.transloco.translate(
-          'notifications.session.inactivityWarning'
+          'notifications.session.inactivityWarning',
         );
         this.notificationSrv.addNotification(warningMessage, 'warning');
       }
@@ -338,7 +339,7 @@ export class AuthService implements OnDestroy {
     formData.append('password', password);
 
     return this.http
-      .post<LoginResponse>(`${environment.api_security}sign-in/`, formData)
+      .post<LoginResponse>(`${this.config.api_security}sign-in/`, formData)
       .pipe(
         map((response: LoginResponse) => {
           if (response?.access_token) {
@@ -361,7 +362,7 @@ export class AuthService implements OnDestroy {
         catchError((errorResponse: HttpErrorResponse) => {
           console.error('Error en login:', errorResponse);
           return throwError(() => errorResponse);
-        })
+        }),
       );
   }
 
@@ -386,7 +387,7 @@ export class AuthService implements OnDestroy {
     if (showNotification) {
       // MODIFICADO: Usar la clave de traducción para el cierre de sesión
       const logoutMessage = this.transloco.translate(
-        'notifications.session.logoutSuccess'
+        'notifications.session.logoutSuccess',
       );
       this.notificationSrv.addNotification(logoutMessage, 'success');
     }

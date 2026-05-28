@@ -66,6 +66,10 @@ export class ListChatbotConfigComponent {
     this.transloco.selectTranslate('components.chatbot_config.list.table.model'),
     { initialValue: '' }
   );
+  private providerTranslation = toSignal(
+    this.transloco.selectTranslate('components.chatbot_config.list.table.provider'),
+    { initialValue: '' }
+  );
   private tokensRemainingTranslation = toSignal(
     this.transloco.selectTranslate('components.chatbot_config.list.table.tokens_remaining'),
     { initialValue: '' }
@@ -87,6 +91,12 @@ export class ListChatbotConfigComponent {
       {
         field: 'model_name',
         header: this.modelNameTranslation(),
+        sortable: true,
+        filter: true,
+      },
+      {
+        field: 'provider',
+        header: this.providerTranslation(),
         sortable: true,
         filter: true,
       },
@@ -192,17 +202,24 @@ export class ListChatbotConfigComponent {
           const active = this.activeStatus().trim();
           const inactive = this.inactiveStatus().trim();
 
-          const processedData = data.map((item: any) => ({
-            ...item,
-            user_name: item.user.full_name,
-            model_name: item.model.name,
-            statusToShow: item.status ? active : inactive,
-          }));
+          const processedData = data.map((item: any) => {
+            const models = item.models || [];
+            const providersList = models.map((m: any) => m.provider).join(', ');
+            const totalTokens = models.reduce((sum: number, m: any) => sum + (m.tokens_remaining || 0), 0);
+            return {
+              ...item,
+              user_name: item.user?.full_name,
+              provider: providersList || 'N/A',
+              tokens_remaining: totalTokens,
+              tokens_limit: models.reduce((sum: number, m: any) => sum + (m.tokens_limit || 0), 0),
+              statusToShow: item.status ? active : inactive,
+            };
+          });
 
           this.data.set(processedData);
           this.loading.set(false);
         },
-        error: (error) => {
+        error: () => {
           this.notificationSrv.addNotification(
             this.transloco.translate('notifications.chatbot_config.error.load'),
             'error'
@@ -308,11 +325,9 @@ export class ListChatbotConfigComponent {
   toggleStatus(data: any): void {
     const currentData = this.data();
     const newStatus = !data.status;
-    const formData = new FormData();
-    formData.append('status', String(newStatus));
 
     this.srv
-      .patch(formData, data.user_id) // Usar user_id
+      .patch({ status: newStatus }, data.user_id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
