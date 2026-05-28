@@ -300,12 +300,18 @@ export class CreateEditReviewComponent implements DynamicComponent {
     }
   }
 
-  onStarMouseMove(event: MouseEvent, starIndex: number): void {
+  private calculateRatingFromEvent(event: MouseEvent, starIndex: number): number {
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     const x = event.clientX - rect.left;
-    const isHalf = x < rect.width / 2;
-    this.hoverRating.set(isHalf ? starIndex - 0.5 : starIndex);
+    const ratio = Math.max(0, Math.min(1, x / rect.width));
+    const rawVal = starIndex - 1 + ratio;
+    return Math.max(0.1, Math.min(5.0, Math.round(rawVal * 10) / 10));
+  }
+
+  onStarMouseMove(event: MouseEvent, starIndex: number): void {
+    const value = this.calculateRatingFromEvent(event, starIndex);
+    this.hoverRating.set(value);
   }
 
   onStarMouseLeave(): void {
@@ -313,19 +319,20 @@ export class CreateEditReviewComponent implements DynamicComponent {
   }
 
   onStarClick(event: MouseEvent, starIndex: number): void {
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const isHalf = x < rect.width / 2;
-    const value = isHalf ? starIndex - 0.5 : starIndex;
+    const value = this.calculateRatingFromEvent(event, starIndex);
     this.setRating(value);
   }
 
-  /** Devuelve el estado de relleno de cada estrella: 'full' | 'half' | 'empty' */
-  getStarFill(starIndex: number): 'full' | 'half' | 'empty' {
+  /** Devuelve el ancho de relleno de la estrella de 0 a 20 según la puntuación decimal */
+  getStarWidth(starIndex: number): number {
     const rating = this.hoverRating() ?? this.form.get('star_rating')?.value ?? 0;
-    if (rating >= starIndex) return 'full';
-    if (rating >= starIndex - 0.5) return 'half';
-    return 'empty';
+    if (rating >= starIndex) {
+      return 20;
+    }
+    if (rating <= starIndex - 1) {
+      return 0;
+    }
+    const fraction = rating - (starIndex - 1);
+    return fraction * 20;
   }
 }
