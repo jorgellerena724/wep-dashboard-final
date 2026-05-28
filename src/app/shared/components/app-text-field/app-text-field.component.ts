@@ -83,13 +83,6 @@ export class TextFieldComponent implements ControlValueAccessor {
   });
   private subscribed = signal<boolean>(false);
 
-  displayLabel = computed(() => {
-    if (this.searchMode() && this.displayValue()) {
-      return this.displayValue();
-    }
-    return '';
-  });
-
   // Computed para combinar disabled input y estado interno
   isDisabled = computed(() => this.disabled() || this._disabledState());
 
