@@ -72,15 +72,15 @@ export class CreateEditReviewComponent implements DynamicComponent {
   // Computed para detectar modo
   isEdit = computed(() => !!this.initialData()?.id);
 
-  // Computed para validación
-  isFormInvalid = computed(() => this.form.invalid || this.uploading());
+  // Signal para estado de validación
+  isFormInvalid = signal<boolean>(false);
 
   constructor() {
     this.form = this.fb.group({
       id: [''],
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(3)]],
-      image: ['', this.isEdit() ? null : Validators.required],
+      image: ['', Validators.required],
       star_rating: [null],
     });
 
@@ -94,10 +94,21 @@ export class CreateEditReviewComponent implements DynamicComponent {
       }
     });
 
-    // Effect para emitir validez del formulario
+    // Effect para emitir validez del formulario y estado de carga
     effect(() => {
-      this.formValid.emit(this.form.valid);
+      const isValid = this.form.valid;
+      this.formValid.emit(isValid);
+      this.isFormInvalid.set(!isValid || this.uploading());
     });
+
+    // Suscripción a cambios del formulario
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const isValid = this.form.valid;
+        this.formValid.emit(isValid);
+        this.isFormInvalid.set(!isValid || this.uploading());
+      });
   }
 
   t(suffix: string): string {
@@ -110,6 +121,18 @@ export class CreateEditReviewComponent implements DynamicComponent {
   private initializeForm(data: any): void {
     this.form.patchValue(data);
     this.id.set(data.id || 0);
+
+    // En modo edición la imagen no es obligatoria ya que puede conservarse la existente en el servidor
+    const isEditMode = !!data.id;
+    const imageControl = this.form.get('image');
+    if (imageControl) {
+      if (isEditMode) {
+        imageControl.clearValidators();
+      } else {
+        imageControl.setValidators([Validators.required]);
+      }
+      imageControl.updateValueAndValidity();
+    }
 
     if (data.photo) {
       this.loadCurrentImage();
@@ -144,7 +167,7 @@ export class CreateEditReviewComponent implements DynamicComponent {
     reader.onloadend = () => {
       this.imageUrl.set(reader.result as string);
     };
-    reader.readAsDataURL(new Blob([blob]));
+    reader.readAsDataURL(blob);
   }
 
   private setFallbackImage(): void {
