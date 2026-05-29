@@ -10,7 +10,6 @@ RUN npm install -g pnpm@latest
 COPY package.json pnpm-lock.yaml .npmrc ecosystem.config.js ./
 
 # 2. Instalar dependencias con pnpm (frozen lockfile para CI/reproducibilidad)
-RUN pnpm approve-builds --all || true
 RUN pnpm install --frozen-lockfile
 
 # 3. Copiar todo el código fuente
@@ -32,7 +31,6 @@ COPY --from=builder /app/ecosystem.config.js ./
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
 
 # Instalar SOLO dependencias de producción con pnpm
-RUN pnpm approve-builds --all || true
 RUN pnpm install --prod --frozen-lockfile
 
 # Copiar el build de Angular
