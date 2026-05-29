@@ -3,33 +3,35 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 1. Copiar archivos de dependencias
-COPY package*.json ./
-COPY ecosystem.config.js ./
+# Instalar pnpm globalmente (misma versión que usas localmente: 11.3.0)
+RUN npm install -g pnpm@11.3.0
 
-# 2. Instalar dependencias
-RUN npm install
+# 1. Copiar archivos de dependencias (incluye pnpm-lock.yaml)
+COPY package.json pnpm-lock.yaml .npmrc ecosystem.config.js ./
 
-# 3. Copiar todo
+# 2. Instalar dependencias con pnpm (frozen lockfile para CI/reproducibilidad)
+RUN pnpm install --frozen-lockfile
+
+# 3. Copiar todo el código fuente
 COPY . .
 
-# 4. Build de Angular (¡esto funciona bien!)
-RUN npm run build
+# 4. Build de Angular con pnpm
+RUN pnpm run build
 
 # Etapa de producción
 FROM node:20-alpine
 
-# Instalar PM2
-RUN npm install -g pm2@latest
+# Instalar PM2 y pnpm (necesario para ejecutar scripts de producción si usas pnpm start)
+RUN npm install -g pm2@latest pnpm@11.3.0
 
 WORKDIR /app
 
 # Copiar solo lo esencial
 COPY --from=builder /app/ecosystem.config.js ./
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
 
-# Instalar SOLO dependencias de producción (sin problemas de sincronización)
-RUN npm install --production --no-audit
+# Instalar SOLO dependencias de producción con pnpm
+RUN pnpm install --prod --frozen-lockfile
 
 # Copiar el build de Angular
 COPY --from=builder /app/dist ./dist
@@ -40,4 +42,5 @@ RUN mkdir -p logs
 EXPOSE 4004
 ENV NODE_ENV=production
 
-CMD ["pm2-runtime", "ecosystem.config.js"]
+# Usar pnpm para ejecutar el comando start (que definimos en package.json)
+CMD ["pnpm", "start"]
