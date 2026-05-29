@@ -10,7 +10,7 @@ RUN npm install -g pnpm@11.3.0
 COPY package.json pnpm-lock.yaml .npmrc ecosystem.config.js ./
 
 # 2. Instalar dependencias con pnpm (frozen lockfile para CI/reproducibilidad)
-RUN pnpm install --frozen-lockfile --allow-build=@parcel/watcher,esbuild,lmdb,msgpackr-extract
+RUN pnpm install --frozen-lockfile
 
 # 3. Copiar todo el código fuente
 COPY . .
