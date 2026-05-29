@@ -3,8 +3,8 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# Instalar pnpm globalmente (misma versión que usas localmente: 11.3.0)
-RUN npm install -g pnpm@11.3.0
+# Instalar pnpm globalmente
+RUN npm install -g pnpm@latest
 
 # 1. Copiar archivos de dependencias (incluye pnpm-lock.yaml)
 COPY package.json pnpm-lock.yaml .npmrc ecosystem.config.js ./
@@ -19,10 +19,10 @@ COPY . .
 RUN pnpm run build
 
 # Etapa de producción
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Instalar PM2 y pnpm (necesario para ejecutar scripts de producción si usas pnpm start)
-RUN npm install -g pm2@latest pnpm@11.3.0
+RUN npm install -g pm2@latest pnpm@latest
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ COPY --from=builder /app/ecosystem.config.js ./
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
 
 # Instalar SOLO dependencias de producción con pnpm
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --approve-builds=all
 
 # Copiar el build de Angular
 COPY --from=builder /app/dist ./dist
