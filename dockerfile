@@ -6,8 +6,8 @@ WORKDIR /app
 # Instalar pnpm globalmente
 RUN npm install -g pnpm@latest
 
-# 1. Copiar archivos de dependencias (incluye pnpm-lock.yaml)
-COPY package.json pnpm-lock.yaml .npmrc ecosystem.config.js ./
+# 1. Copiar archivos de dependencias
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ecosystem.config.js ./
 
 # 2. Instalar dependencias con pnpm (frozen lockfile para CI/reproducibilidad)
 RUN pnpm install --frozen-lockfile
@@ -27,8 +27,7 @@ RUN npm install -g pm2@latest pnpm@latest
 WORKDIR /app
 
 # Copiar solo lo esencial
-COPY --from=builder /app/ecosystem.config.js ./
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/.npmrc ./
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/ecosystem.config.js ./
 
 # Instalar SOLO dependencias de producción con pnpm
 RUN pnpm install --prod --frozen-lockfile
