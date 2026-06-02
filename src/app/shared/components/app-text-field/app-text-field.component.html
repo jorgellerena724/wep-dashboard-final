@@ -1,7 +1,9 @@
 <div class="relative mb-4">
   <div class="relative">
     <!-- Texto estático encima del campo -->
-    <div class="text-black text-sm mb-1 mt-3 dark:text-[rgb(209,213,219)] font-bold">
+    <div
+      class="text-black text-sm mb-1 mt-3 dark:text-[rgb(209,213,219)] font-bold"
+    >
       {{ label() || placeholder() }}
     </div>
 
@@ -26,9 +28,14 @@
             class="w-full px-2.5 py-1.5 text-gray-900 bg-white dark:bg-[rgb(15,14,14)] border border-gray-800 dark:border-white rounded-l-md transition-colors placeholder:text-gray-400"
             [ngClass]="{
               'cursor-pointer': !isDisabledSearch,
-              'cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-400 dark:border-gray-600': isDisabledSearch,
-              'border-red-500 dark:border-red-500': actualControl()?.invalid && actualControl()?.touched && !isDisabledSearch,
-              'border-green-500 dark:border-green-500': wasFixedError() && !isDisabledSearch,
+              'cursor-not-allowed bg-gray-300 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-400 dark:border-gray-600':
+                isDisabledSearch,
+              'border-red-500 dark:border-red-500':
+                actualControl()?.invalid &&
+                actualControl()?.touched &&
+                !isDisabledSearch,
+              'border-green-500 dark:border-green-500':
+                wasFixedError() && !isDisabledSearch,
             }"
           />
           <button
@@ -50,7 +57,11 @@
             [id]="id()"
             [maxlength]="maxLength() || (formatCard() ? 19 : null)"
             [min]="type() === 'number' && preventNegative() ? '0' : null"
-            (keypress)="type() === 'number' || numbersOnly() ? numberValidation($event) : null"
+            (keypress)="
+              type() === 'number' || numbersOnly()
+                ? numberValidation($event)
+                : null
+            "
             [type]="effectiveType()"
             [formControl]="$any(actualControl())"
             [placeholder]="placeholder() || label()"
@@ -59,33 +70,47 @@
             (blur)="onBlur()"
             [class]="
               'w-full px-2.5 py-1.5 text-gray-900 bg-white dark:bg-[rgb(15,14,14)] border border-gray-800 dark:border-white rounded-md transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed placeholder:text-gray-400 ' +
-              (type() === 'password' && actualControl()?.value?.length > 0 ? 'pr-8' : 'pr-2.5') +
+              (type() === 'password' && actualControl()?.value?.length > 0
+                ? 'pr-8'
+                : 'pr-2.5') +
               (shouldShowError() ? ' border-red-500 dark:border-red-500' : '') +
               (wasFixedError() ? ' border-green-500 dark:border-green-500' : '')
             "
             [ngClass]="{
-              'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500': actualControl()?.invalid && actualControl()?.touched,
-              'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500 focus:border-green-500 dark:focus:border-green-500': wasFixedError(),
+              'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500 focus:border-red-500 dark:focus:border-red-500':
+                actualControl()?.invalid && actualControl()?.touched,
+              'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500 focus:border-green-500 dark:focus:border-green-500':
+                wasFixedError(),
             }"
           />
-
-          @if (type() === 'password' && actualControl()?.value?.length > 0) {
-            <button
-              type="button"
-              (click)="togglePasswordVisibility()"
-              [disabled]="actualControl()?.disabled"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Toggle password visibility"
-            >
-              @if (showPassword()) {
-                <svg [lucideIcon]="getIcon('eye-off')" class="text-base leading-none w-4 h-4"></svg>
-              } @else {
-                <svg [lucideIcon]="getIcon('eye')" class="text-base leading-none w-4 h-4"></svg>
-              }
-            </button>
-          }
         }
       </div>
+
+      @if (
+        type() === "password" &&
+        actualControl()?.value?.length > 0 &&
+        !isTextArea()
+      ) {
+        <button
+          type="button"
+          (click)="togglePasswordVisibility()"
+          [disabled]="actualControl()?.disabled"
+          class="absolute right-3 bottom-[11px] text-gray-500 hover:text-gray-700 focus:outline-none z-10"
+          aria-label="Toggle password visibility"
+        >
+          @if (showPassword()) {
+            <svg
+              [lucideIcon]="getIcon('eye-off')"
+              class="text-base leading-none w-4 h-4"
+            ></svg>
+          } @else {
+            <svg
+              [lucideIcon]="getIcon('eye')"
+              class="text-base leading-none w-4 h-4"
+            ></svg>
+          }
+        </button>
+      }
     }
 
     <!-- Textarea -->
@@ -101,28 +126,16 @@
         class="w-full px-2 py-1 custom-scroll border border-gray-800 rounded-md outline-none bg-white transition-all duration-200 resize-none text-gray-900 dark:text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400"
         [class]="isTextArea() ? textAreaHeight() : ''"
         [ngClass]="{
-          'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500': actualControl()?.invalid && actualControl()?.touched,
-          'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500': wasFixedError(),
-          'bg-gray-300 cursor-not-allowed text-gray-500': actualControl()?.disabled || isDisabled(),
-          'disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500': actualControl()?.disabled || isDisabled(),
+          'border-red-500 dark:border-red-500 focus:ring-red-500 dark:focus:ring-red-500':
+            actualControl()?.invalid && actualControl()?.touched,
+          'border-green-500 dark:border-green-500 focus:ring-green-500 dark:focus:ring-green-500':
+            wasFixedError(),
+          'bg-gray-300 cursor-not-allowed text-gray-500':
+            actualControl()?.disabled || isDisabled(),
+          'disabled:bg-gray-300 disabled:cursor-not-allowed disabled:text-gray-500':
+            actualControl()?.disabled || isDisabled(),
         }"
       ></textarea>
-    }
-
-    @if (type() === 'password' && actualControl()?.value?.length > 0 && !isTextArea()) {
-      <button
-        type="button"
-        (click)="togglePasswordVisibility()"
-        [disabled]="actualControl()?.disabled"
-        class="absolute right-3 top-1/2 transform text-gray-500 hover:text-gray-700 focus:outline-none z-10"
-        aria-label="Toggle password visibility"
-      >
-        @if (showPassword()) {
-          <svg [lucideIcon]="getIcon('eye-off')" class="text-base leading-none w-4 h-4"></svg>
-        } @else {
-          <svg [lucideIcon]="getIcon('eye')" class="text-base leading-none w-4 h-4"></svg>
-        }
-      </button>
     }
   </div>
 
