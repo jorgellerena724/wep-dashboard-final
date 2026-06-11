@@ -6,7 +6,6 @@
     "ng": "ng",
     "start": "node dist/wep-dashboard/server/server.mjs",
     "build": "ng build --configuration production --optimization=true --source-map=false  --output-hashing=all --aot",
-    "build:breeze": "ng build --configuration breeze --optimization=true --source-map=false  --output-hashing=all --aot",
     "build:deploy": "ng build --configuration deploy --optimization=true --source-map=false  --output-hashing=all --aot",
     "build:staging": "ng build --configuration staging --optimization=true --source-map=false  --output-hashing=all --aot",
     "watch": "ng build --watch --configuration development",
